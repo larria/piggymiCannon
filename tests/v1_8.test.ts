@@ -18,7 +18,7 @@ test('45 to 60 degree solid and thin platforms climb without pixel or lookahead 
 });
 test('extreme slopes, tall isolated walls and broken platforms remain blocked',()=>{
  for(const angle of [65,70,80]){const g=flat();g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450-(x-200)*Math.tan(angle*Math.PI/180),640);g.land.rebuild();g.active.x=200;g.active.y=g.ground(200)-18;assert.equal(g.move(1,.1),false,`${angle}`);}
- for(const gap of [false,true]){const g=flat();g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)if(!gap||x<225||x>255)g.land.column(x,x>225?420:450,640);g.land.rebuild();g.active.x=200;g.active.y=432;for(let i=0;i<30;i++)g.move(1,.04);assert.ok(g.active.x<225);}
+ for(const gap of [false,true]){const g=flat();g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)if(!gap||x<225||x>255)g.land.column(x,x>225?420:450,640);g.land.rebuild();g.active.x=200;g.active.y=432;for(let i=0;i<30;i++)g.move(1,.04);if(gap)assert.ok(g.active.x>225);else assert.ok(g.active.x<225);}
 });
 test('initial four items stay empty after use; full slots reject crates without healing or overwrite',()=>{
  const g=flat(),t=g.active;g.useItem('double');assert.equal(t.items.double,0);

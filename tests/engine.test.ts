@@ -42,8 +42,8 @@ test('each weapon finishes its flight and produces its advertised projectile pat
     assert.ok(g.fire(),w.name);
     if(w.id==='triple'||w.id==='airstrike') assert.equal(g.projectiles.length,3);
     if(w.id==='cluster') {run(g,3,x=>x.projectiles.some(p=>p.sub));assert.ok(g.projectiles.some(p=>p.sub));}
-    run(g,18,x=>x.phase==='handoff'||x.phase==='ended');
-    assert.ok(['handoff','ended'].includes(g.phase),`${w.id} did not settle: ${g.phase}`);
+    run(g,18,x=>x.phase==='aiming'||x.phase==='ended');
+    assert.ok(['aiming','ended'].includes(g.phase),`${w.id} did not settle: ${g.phase}`);
     assert.equal(g.projectiles.length,0,w.id);
   }
 });
@@ -67,11 +67,8 @@ test('burn damage credits the fire owner and lasts only its intended rounds',()=
   g.nextTurn();assert.equal(g.active.hp,136);assert.equal(g.tanks[0].damage,14);
   for(let i=0;i<5;i++) g.nextTurn();assert.equal(g.fires.length,0);
 });
-test('hotseat requires explicit handoff and timers/pause do not skip it',()=>{
-  const g=ready({mode:'hotseat',timer:30});g.nextTurn();assert.equal(g.phase,'handoff');
-  const timer=g.clock;run(g,35);assert.equal(g.clock,timer);assert.equal(g.current,1);
-  g.acceptHandoff();assert.equal(g.humanTurn,true);g.paused=true;run(g,60);assert.equal(g.clock,timer);
-  g.paused=false;run(g,31,x=>x.phase==='handoff');assert.equal(g.phase,'handoff');assert.equal(g.current,0);
+test('hotseat changes actors without a blocking handoff and pause preserves the timer',()=>{
+ const g=ready({mode:'hotseat',timer:30});g.nextTurn();assert.equal(g.phase,'aiming');assert.equal(g.current,1);assert.equal(g.humanTurn,true);const timer=g.clock;g.paused=true;run(g,60);assert.equal(g.clock,timer);g.paused=false;run(g,31,x=>x.current===0);assert.equal(g.current,0);assert.equal(g.phase,'aiming');
 });
 test('wind changes impact and lower gravity extends flight',()=>{
   const g=ready();g.wind=-20;const left=g.predict(48,58);g.wind=20;const right=g.predict(48,58);

@@ -28,11 +28,11 @@ test('all nine golden missiles lock independently across the spread and continue
  assert.equal(g.projectiles.length,9);g.projectiles.forEach((p,i)=>assert.ok(p.lockAge>ages[i]));
  assert.equal(g.drainEvents().filter(e=>e.type==='lock').length,9);
 });
-test('classic guidance has no IFF and can acquire the shooter or a dead nearby tank',()=>{
+test('guidance honors self-damage settings and excludes dead tanks',()=>{
  for(const dead of [false,true]){
- const g=flatGame('missile'),t=g.active,p=g.launch(t,'missile-special');if(dead)t.hp=0;
+ const g=flatGame('missile'),t=g.active,p=g.launch(t,'missile-special');g.config.selfDamage=true;if(dead)t.hp=0;
  Object.assign(p,{x:t.x+65,y:t.y-40,vx:80,vy:80,age:.5});g.projectiles=[p];g.phase='flying';g.update(.01);
- assert.equal(p.lockTarget,t.id);assert.ok(p.homing);
+ assert.equal(p.lockTarget,dead?null:t.id);assert.equal(p.homing,!dead);
  }
 });
 test('triple laser and twin electric rings weave around one carrier path instead of spreading apart',()=>{
@@ -76,7 +76,7 @@ test('poison ticks twenty percent only after the victim own action and stops at 
  const sea=flatGame('sea');sea.active.poisoned=true;sea.active.hp=sea.active.maxHP*.5+3;sea.nextTurn();assert.ok(sea.tanks[0].hp<sea.tanks[0].maxHP*.5);assert.ok(sea.tanks[0].poisoned);
 });
 test('fire and gas damage by simulated seconds and pause during handoff and supply animation',()=>{
- const g=flatGame('bowl','water');g.enemy.x=g.active.x+35;
+ const g=flatGame('bowl','water');g.config.selfDamage=true;g.enemy.x=g.active.x+35;
  g.fires=[{x:g.active.x,y:450,radius:65,turns:6,owner:1,weapon:'bowl-special',clock:0}];const hp=g.tanks.map(t=>t.hp);
  for(let i=0;i<53;i++)g.update(.04);assert.equal(g.active.hp,hp[0]-2);assert.equal(g.enemy.hp,hp[1]-8);
  const before=g.tanks.map(t=>t.hp);g.phase='handoff';for(let i=0;i<53;i++)g.update(.04);assert.deepEqual(g.tanks.map(t=>t.hp),before);
@@ -107,8 +107,8 @@ test('random selection gives dragon ten percent and regular tanks equal chances'
 test('each owned ordinary and special shot resolves without locking the turn',()=>{
  for(const v of VEHICLES)for(const id of [v.normal,v.special]){
   const g=game(v.id);g.selectWeapon(id);g.active.power=58;assert.ok(g.fire(),id);
-  for(let i=0;i<2800&&!['handoff','ended'].includes(g.phase);i++)g.update(1/120);
-  assert.ok(['handoff','ended'].includes(g.phase),`${id}: ${g.phase}`);
+  for(let i=0;i<2800&&!['aiming','ended'].includes(g.phase);i++)g.update(1/120);
+  assert.ok(['aiming','ended'].includes(g.phase),`${id}: ${g.phase}`);
  }
 });
 test('poison stops at red health; purple water freezes movement; mines are actual traps',()=>{

@@ -54,10 +54,10 @@ test('isolated 8-12 pixel ledges and reasonable staircases do not trap the tread
  const stairs=walkingCourse(x=>450-Math.max(0,Math.floor((x-220)/12))*6);for(let i=0;i<30;i++)assert.ok(stairs.move(1,.04));
  const rounded=walkingCourse(x=>450-Math.max(0,Math.min(12,x-225)));for(let i=0;i<30;i++)assert.ok(rounded.move(1,.04));
 });
-test('large vertical ledges, sustained steep ramps and collapsed bridge gaps remain blocked',()=>{
+test('upward ledges and steep ramps remain blocked, collapsed edges allow descent',()=>{
  for(const angle of [65,70,80]){const g=walkingCourse(x=>450-(x-200)*Math.tan(angle*Math.PI/180));const from=g.active.x;assert.equal(g.move(1,.1),false);assert.equal(g.active.x,from);}
  const wall=walkingCourse(x=>450-(x>225?20:0));for(let i=0;i<20;i++)wall.move(1,.1);assert.ok(wall.active.x<225);
- const gap=walkingCourse(x=>x>225&&x<255?640:450);for(let i=0;i<20;i++)gap.move(1,.1);assert.ok(gap.active.x<225);
+ const gap=walkingCourse(x=>x>225&&x<255?640:450);for(let i=0;i<20;i++)gap.move(1,.1);assert.ok(gap.active.x>225);assert.ok(gap.active.fallVelocity>0);
 });
 test('walking on a lower sky floor never snaps up to an overhead island',()=>{
  const g=walkingCourse(()=>510);for(let x=100;x<=400;x++)g.land.column(x,250,290);g.land.rebuild();g.active.y=492;
@@ -139,7 +139,7 @@ test('supply animation pauses the turn clock and drops on reachable stable groun
 });
 test('supplies top up double fire and grant rare homing ammunition',()=>{
   const g=ready(),t=g.active;assert.equal(t.items.double,1);assert.equal(t.ammo.homing,0);
-  g.crates.push({x:t.x,y:t.y,type:'double'},{x:t.x,y:t.y,type:'homing'});run(g,0.03);
+  t.items.boost=0;g.crates.push({x:t.x,y:t.y,type:'double'},{x:t.x,y:t.y,type:'homing'});run(g,0.03);
   assert.equal(t.items.double,1);assert.equal(t.ammo.homing,1);
   g.nextTurn();g.nextTurn();assert.ok(g.useItem('double'));g.fire();assert.equal(g.projectiles.length,2);assert.equal(t.items.double,0);
 });
@@ -149,11 +149,11 @@ test('the rare homing shell acquires a nearby enemy during its descent',()=>{
   g.projectiles=[p];g.phase='flying';g.update(0.04);assert.equal(p.homing,true);
   run(g,2);assert.ok(target.hp<150);
 });
-test('terrain tilt leaves world-space aiming unchanged and impact reactions stay distinct',()=>{
+test('terrain tilt rotates body-relative aiming and impact reactions stay distinct',()=>{
   const g=ready(),t=g.active;t.x=260;t.y=g.support(t.x,g.ground(t.x))-18;
   const slope=g.tankSlope(t);assert.ok(Math.abs(slope)>0.01);
   const muzzle=g.muzzle(t,45),pivot={x:t.x+Math.sin(slope)*13,y:t.y-Math.cos(slope)*13};
-  assert.ok(Math.abs((muzzle.x-pivot.x)-(pivot.y-muzzle.y))<0.001);
+  const a=g.aim(t,45);assert.ok(Math.abs(muzzle.x-pivot.x-a.x*31)<0.001);assert.ok(Math.abs(muzzle.y-pivot.y-a.y*31)<0.001);
   g.damage(t,10,1,false,'direct');assert.equal(t.reaction?.kind,'direct');
   g.damage(t,1,1,false,'graze');assert.equal(t.reaction?.kind,'graze');
   g.damage(t,10,1,true,'fall');assert.equal(t.reaction?.kind,'fall');
