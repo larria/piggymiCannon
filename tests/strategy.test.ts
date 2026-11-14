@@ -34,6 +34,44 @@ test('tanks cannot climb steep slopes or cross a narrow pit with a large movemen
   for(let i=0;i<20;i++) pit.move(1,0.25);
   assert.ok(pit.active.x<567);
 });
+
+const walkingCourse=(height:(x:number)=>number)=>{
+ const g=ready();g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,height(x),640);g.land.rebuild();g.active.x=200;g.active.y=g.ground(200)-18;return g;
+};
+test('smooth reasonable slopes climb in both directions, including quantized 35-degree ground',()=>{
+ for(const angle of [15,25,30,35])for(const direction of [-1,1]){
+  const grade=Math.tan(angle*Math.PI/180),g=walkingCourse(x=>450-direction*(x-200)*grade);
+  for(let i=0;i<30;i++){assert.ok(g.move(direction,.04),`${angle} degrees, ${direction}, step ${i}`);g.update(.01);assert.equal(g.active.fallVelocity,0);}
+  assert.ok(Math.abs(g.active.x-200)>70);assert.ok(g.active.y<432);assert.ok(g.active.fuel<100);
+ }
+});
+test('isolated 8-12 pixel ledges and reasonable staircases do not trap the treads',()=>{
+ for(const height of [8,12])for(const direction of [-1,1]){
+  const g=walkingCourse(x=>450-(direction*(x-230)>0?height:0));
+  if(direction<0){g.active.x=260;g.active.y=g.ground(260)-18;}
+  const from=g.active.x;for(let i=0;i<30;i++)assert.ok(g.move(direction,.04));assert.ok(Math.abs(g.active.x-from)>70);
+ }
+ const stairs=walkingCourse(x=>450-Math.max(0,Math.floor((x-220)/12))*6);for(let i=0;i<30;i++)assert.ok(stairs.move(1,.04));
+ const rounded=walkingCourse(x=>450-Math.max(0,Math.min(12,x-225)));for(let i=0;i<30;i++)assert.ok(rounded.move(1,.04));
+});
+test('large vertical ledges, sustained steep ramps and collapsed bridge gaps remain blocked',()=>{
+ for(const angle of [40,45,55]){const g=walkingCourse(x=>450-(x-200)*Math.tan(angle*Math.PI/180));const from=g.active.x;assert.equal(g.move(1,.1),false);assert.equal(g.active.x,from);}
+ const wall=walkingCourse(x=>450-(x>225?20:0));for(let i=0;i<20;i++)wall.move(1,.1);assert.ok(wall.active.x<225);
+ const gap=walkingCourse(x=>x>225&&x<255?640:450);for(let i=0;i<20;i++)gap.move(1,.1);assert.ok(gap.active.x<225);
+});
+test('walking on a lower sky floor never snaps up to an overhead island',()=>{
+ const g=walkingCourse(()=>510);for(let x=100;x<=400;x++)g.land.column(x,250,290);g.land.rebuild();g.active.y=492;
+ for(let i=0;i<20;i++)assert.ok(g.move(1,.04));assert.equal(g.active.y,492);
+});
+
+test('descending valid slopes and small steps stays grounded even with large movement frames',()=>{
+ for(const direction of [-1,1]){
+  const g=walkingCourse(x=>450+direction*(x-200)*Math.tan(35*Math.PI/180));
+  for(let i=0;i<8;i++){assert.ok(g.move(direction,.25));assert.equal(g.active.fallVelocity,0);g.update(.01);}
+  assert.ok(g.active.y>432);assert.equal(g.active.hp,150);
+ }
+ const step=walkingCourse(x=>450+(x>230?12:0));for(let i=0;i<30;i++){assert.ok(step.move(1,.04));assert.equal(step.active.fallVelocity,0);}
+});
 test('all weapons separate blast damage from excavation and dig more on a ground hit',()=>{
   const profiles=new Set<string>();
   for(const w of WEAPONS) {

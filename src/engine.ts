@@ -5,6 +5,7 @@ import {rollWeather} from './weather';
 
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
+export const MAX_CLIMB_ANGLE=35,MAX_STEP_HEIGHT=12;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
 export interface Config { mode:'ai'|'hotseat'; difficulty:Difficulty; map:MapId; timer:number; seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;vehicle0?:VehicleChoice;vehicle1?:VehicleChoice }
 export interface Tank {
@@ -78,17 +79,49 @@ export class Game {
   }
   tankSlope(t:Tank) {
     if(t.fallVelocity>0) return 0;
-    const left=this.ground(t.x-14,t.y-22),right=this.ground(t.x+14,t.y-22);
+    const left=this.walkSurface(t.x-14,t.y+18),right=this.walkSurface(t.x+14,t.y+18);
     return clamp(Math.atan2(right-left,28),-0.61,0.61);
+  }
+  private walkSurface(x:number,foot:number) {
+    // Find the actual top of this connected platform, even when the probe starts inside a small step.
+    // Starting near the feet keeps a lower sky platform distinct from the island above it.
+    const at=Math.round(x); // Ground/support use this same column; floor-vs-round created false one-pixel falls.
+    let y=this.ground(at,foot-MAX_STEP_HEIGHT-2);
+    while(y>0&&this.land.solid(at,y-1))y--;
+    return y;
+  }
+  private walkSupport(x:number,foot:number) {
+    return [-16,-8,0,8,16].map(dx=>this.walkSurface(x+dx,foot)).sort((a,b)=>a-b)[2];
+  }
+  private reasonableSlope(x:number,foot:number,direction:number) {
+    const heights=Array.from({length:13},(_,i)=>this.walkSurface(x+direction*i*2,foot));
+    if(heights.some(y=>y>=WATER_Y-10))return false;
+    if(heights.slice(1).some((y,i)=>Math.abs(y-heights[i])>MAX_STEP_HEIGHT))return false;
+    if(Math.max(...heights)-Math.min(...heights)<=MAX_STEP_HEIGHT)return true;
+    const limit=Math.tan(MAX_CLIMB_ANGLE*Math.PI/180);
+    // Check both a half-tread and full-tread run. One isolated ledge may be stepped over;
+    // repeated stairs and smooth ramps must still obey the sustained 35-degree grade.
+    for(const end of [6,12]){
+      let steps=0;
+      for(let i=1;i<=end;i++){
+        const jump=Math.abs(heights[i]-heights[i-1]);
+        if(jump>MAX_STEP_HEIGHT)return false;
+        if(jump>3)steps+=heights[i]-heights[i-1];
+      }
+      const rise=heights[end]-heights[0],allowed=end*2*limit+1;
+      if(Math.abs(rise)<=allowed)continue;
+      if(Math.abs(steps)>MAX_STEP_HEIGHT||Math.abs(rise-steps)>allowed)return false;
+    }
+    return true;
   }
   traversable(t:Tank,x:number) {
     if(x<32||x>WORLD_W-32) return null;
-    let previous=t.y+18;const steps=Math.max(1,Math.ceil(Math.abs(x-t.x)/2));
+    let previous=t.y+18;const direction=x>=t.x?1:-1,steps=Math.max(1,Math.ceil(Math.abs(x-t.x)/2));
     for(let i=1;i<=steps;i++) {
-      const at=t.x+(x-t.x)*i/steps,level=this.support(at,previous);
-      if(level>=WATER_Y-10||Math.abs(level-previous)>7) return null;
-      const left=this.ground(at-10,previous-40),right=this.ground(at+10,previous-40);
-      if(Math.abs(right-left)/20>Math.tan(35*Math.PI/180)) return null;
+      const at=t.x+(x-t.x)*i/steps,level=this.walkSupport(at,previous);
+      const center=this.walkSurface(at,previous);
+      if(level>=WATER_Y-10||Math.abs(level-previous)>MAX_STEP_HEIGHT||Math.abs(center-level)>MAX_STEP_HEIGHT)return null;
+      if(!this.reasonableSlope(at,level,direction))return null;
       previous=level;
     }
     return previous;
@@ -172,9 +205,9 @@ export class Game {
     t.fuel-=cost;t.x=x;
     this.movingUntil[t.id]=this.elapsed+0.15;
     this.heardX[t.id]=Math.round(t.x/90)*90;
-    const drop=previous-18-t.y;
-    if(drop<12) t.y=previous-18;
-    else { t.fallStart=t.y; t.fallVelocity=Math.max(1,t.fallVelocity); }
+    // Every substep already has valid ground. Follow it instead of briefly entering
+    // free fall when a fast frame travels down a legitimate slope or small stair.
+    t.y=previous-18;
     this.collectCrates();this.triggerMines(t);return true;
   }
   face(direction:number) { if(this.humanTurn) this.active.direction=direction; }

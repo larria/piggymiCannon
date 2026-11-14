@@ -32,6 +32,8 @@ const paths: Record<string,string> = {
   mountain:'<path d="m2 20 7-15 5 9 3-5 5 11H2ZM6 11l3 2 3-2"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
   close:'<path d="m5 5 14 14M19 5 5 19"/>',
+  skip:'<path d="m5 4 12 8-12 8V4Zm14 0v16"/>',
+  exit:'<path d="M10 3H3v18h7m0-9h12m-4-4 4 4-4 4"/>',
   chevron:'<path d="m6 9 6 6 6-6"/>',
   check:'<path d="m5 12 4 4L19 6"/>',
   pig:'<path d="m4 7-1-5 6 3m11 2 1-5-6 3"/><ellipse cx="12" cy="13" rx="10" ry="9"/><ellipse cx="12" cy="16" rx="5" ry="3"/><path d="M9 10h.01M15 10h.01M10 16h.01M14 16h.01"/>',

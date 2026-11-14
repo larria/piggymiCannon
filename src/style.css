@@ -71,3 +71,54 @@ dialog.projectile-dialog{width:min(960px,calc(100vw - 48px));max-width:960px}.pr
 .weather-choice{display:block;margin:8px 0 12px;cursor:pointer}.weather-choice>input{position:absolute;opacity:0;pointer-events:none}.weather-choice>span{display:flex;align-items:center;gap:8px;min-height:40px;padding:8px 12px;border:1px solid #dce3cf;border-radius:8px;background:#f4f5ed;color:#718365;font-size:12px}.weather-choice .icon{width:16px;height:16px}.weather-choice small{font-size:10px;margin-left:auto;color:#819075}.weather-choice>input:checked+span{background:#e7efde;border-color:#92ab78;color:#506a42}.weather-choice>input:focus-visible+span{outline:2px solid #7c965f;outline-offset:2px}
 .shell-swatch{width:40px;height:28px}.switch-icon{min-width:40px}.shell-gallery article{min-height:80px;padding:4px 8px}.shell-card-art{width:72px;height:38px}
 @media(min-width:701px){.combat-mode.drawer-open .arsenal{bottom:238px}}
+/* v1.5: instruments stay compact; the landscape is the main surface. */
+.compact-dashboard,.combat-mode .compact-dashboard{grid-template-columns:104px minmax(0,1fr) 156px;gap:12px;padding:8px 12px;margin-top:6px;min-height:0;border-radius:10px}
+.compact-dashboard .dash-angle{position:relative;height:112px;justify-content:center}
+.compact-dashboard .angle-instrument{width:94px;height:94px;margin:0;min-height:0}
+.compact-dashboard .angle-caption{position:absolute;right:0;bottom:-2px;left:auto;margin:0}
+.compact-dashboard #face-button{width:44px;height:44px;min-height:44px;padding:0;justify-content:center;border-radius:8px}
+.compact-dashboard #face-button .icon{width:17px;height:17px}.compact-dashboard .angle-instrument-name{font-size:9px;bottom:5px}
+.compact-dashboard .dash-toolbar{height:44px;gap:12px;margin-bottom:4px}
+.compact-dashboard .dash-toolbar .weapon-switcher{flex:none;gap:6px;max-width:none}
+.compact-dashboard .dash-toolbar .weapon-switcher>button{position:relative;width:64px;max-width:64px;min-width:64px;height:44px;min-height:44px;flex:none;padding:0;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.compact-dashboard .weapon-switcher button::after{content:attr(data-slot);position:absolute;right:5px;top:2px;font-size:9px;color:#81916c}
+.compact-dashboard .switch-icon{min-width:40px}.compact-dashboard .quick-items{margin-left:auto;gap:4px}
+.compact-dashboard .quick-items button{width:44px;height:44px;padding:5px;display:grid;place-items:center}.compact-dashboard .quick-items .icon{width:20px;height:20px}
+.compact-dashboard .quick-items small{font-size:9px}.compact-dashboard .wait-readout{font-size:0;border-left:1px solid #dfe5d6;padding-left:12px;gap:0;min-width:56px}
+.compact-dashboard .wait-readout strong{font-size:18px}
+.compact-dashboard .meter-row{height:14px;gap:8px;margin:2px 0}.compact-dashboard .meter-label{width:20px;min-width:20px;font-size:0}
+.compact-dashboard .meter-label .icon{width:15px;height:15px}.compact-dashboard .meter-track{height:11px;border-radius:4px}
+.compact-dashboard .force-meter{height:32px;margin:6px 0}.compact-dashboard .force-meter .meter-track{height:32px}
+.compact-dashboard .meter-track>span:first-child{top:1px;bottom:1px}.compact-dashboard .meter-value{width:40px;font-size:10px}.compact-dashboard .meter-value b{font-size:12px}
+.compact-dashboard .dash-actions,.combat-mode .compact-dashboard .dash-actions{display:grid;grid-template-columns:44px 44px 60px;grid-template-rows:44px 44px;gap:4px;padding:0;grid-column:auto;align-items:stretch}
+.compact-dashboard .dash-actions .move-buttons,.compact-dashboard .dash-utility{display:contents}
+.compact-dashboard .move-buttons button{width:44px;height:44px;min-height:44px;padding:0;border-radius:8px}.compact-dashboard .move-buttons .icon{width:20px;height:20px}
+.compact-dashboard #move-left{grid-column:1;grid-row:1}.compact-dashboard #move-right{grid-column:2;grid-row:1}
+.compact-dashboard .fire-button{grid-column:3;grid-row:1/3;width:60px;height:auto;min-height:0;padding:0;display:grid;place-items:center;border-radius:9px}
+.compact-dashboard .fire-button>.icon{width:27px;height:27px}.compact-dashboard .fire-button.charging{background:linear-gradient(0deg,#e9b16f 0%,#e9b16f var(--charge),#e29d68 var(--charge),#e29d68 100%)}
+.compact-dashboard .dash-utility button{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;display:grid;place-items:center;background:#f0f3e7;border:1px solid #dce3ce;border-radius:8px}
+.compact-dashboard .dash-utility .icon{width:18px;height:18px}.compact-dashboard #skip-button{grid-column:1;grid-row:2}.compact-dashboard #exit-match{grid-column:2;grid-row:2}
+.compact-dashboard .dash-toolbar .weapon-switcher button>span:last-of-type,.compact-dashboard .weapon-switcher em,.compact-dashboard .quick-items button>span,.compact-dashboard .angle-caption>span,.compact-dashboard #face-button>span,.compact-dashboard .dashboard-note,.compact-dashboard #energy-value,.compact-dashboard .fire-button>span,.compact-dashboard .fire-button>small,.compact-dashboard #fire-note,.compact-dashboard .meter-help,.compact-dashboard .move-buttons button>span,.compact-dashboard .move-buttons kbd,.compact-dashboard .wait-readout>span{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.compact-dashboard .meter-label{cursor:help}.battle-live-message{position:absolute;bottom:12px;left:16px;z-index:3;max-width:calc(50% - 110px);font-size:10px;color:#eff3df;background:#52674670;padding:5px 8px;border-radius:5px;pointer-events:none}
+.combat-mode .scoreboard{height:56px;min-height:56px;max-height:56px;padding:4px 16px;gap:12px}
+.combat-mode .avatar{width:48px;height:48px}.combat-mode .player-info{width:184px}.combat-mode .player-name{font-size:12px;line-height:18px}
+.combat-mode .health-line{margin-top:3px}.combat-mode .health-track{height:4px}.combat-mode .hp-value{font-size:10px}.combat-mode .player-role{font-size:8px}
+.combat-mode .status-line,.combat-mode .versus small{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.combat-mode .versus>span{font-size:16px}.combat-mode .stage-top{top:8px;left:14px;right:14px;gap:6px}
+.combat-mode .stage-button,.combat-mode .inventory-toggle{width:36px;min-width:36px;height:36px;padding:0;display:grid;place-items:center;border-radius:7px}
+.combat-mode .stage-button .icon{width:17px;height:17px}.combat-mode .inventory-toggle>span{display:none}
+.combat-mode .map-chip,.combat-mode .wind-chip{font-size:10px;padding:8px;gap:6px}.combat-mode .map-chip .icon,.combat-mode .wind-chip .icon{width:14px;height:14px}
+.combat-mode .turn-indicator{top:12px;left:50%;transform:translateX(-50%);font-size:10px;padding:6px 8px}
+.combat-mode .timer{top:16px;left:calc(50% + 140px);right:auto;font-size:13px}.combat-mode .timer .icon{width:14px;height:14px}
+.combat-mode .stage-bottom{bottom:9px;right:12px;left:auto}.combat-mode .stage-bottom>span:first-child,.combat-mode #gravity-note,.combat-mode .stage-bottom>span>.icon{display:none}
+.combat-mode .stage-bottom .version-button{font-size:9px;min-height:24px;padding:3px 7px}
+.minimap-panel{top:auto;right:auto;left:50%;bottom:12px;transform:translateX(-50%);width:174px;padding:4px;background:#f9f8ecda;border:1px solid #dfe6d3;border-radius:8px;backdrop-filter:none}
+.minimap-panel canvas{width:100%;height:60px;border-radius:4px}.minimap-header{position:absolute;top:4px;left:4px;right:4px;height:28px;pointer-events:none}
+.minimap-header button{pointer-events:auto;min-height:28px;height:28px;padding:4px;background:#faf9eee8;border-radius:5px;justify-content:center}
+.minimap-header #minimap-toggle{width:40px;gap:3px}.minimap-header #minimap-follow{width:28px;margin-left:auto}.minimap-header .icon{width:15px;height:15px}
+.minimap-header #minimap-toggle .icon:last-child{width:9px}.minimap-panel.collapsed{width:92px;height:34px}.minimap-panel.collapsed .minimap-header .icon:first-child{transform:none}
+.combat-mode.drawer-open .arsenal{top:68px;bottom:154px}
+.control-hint{position:fixed;z-index:1000;max-width:min(270px,calc(100vw - 16px));padding:12px 14px;border:1px solid #cbd7bf;border-radius:10px;background:#fbfaf2;color:#56684a;box-shadow:0 5px 18px #263c2e1c;pointer-events:none;display:flex;flex-direction:column;gap:5px}
+.control-hint[hidden]{display:none}.control-hint strong{font-size:13px;font-weight:600}.control-hint span{font-size:11px;line-height:1.65;color:#7a866a}.control-hint span:empty{display:none}
+@media(min-width:701px) and (max-width:1050px){.compact-dashboard,.combat-mode .compact-dashboard{grid-template-columns:90px minmax(0,1fr) 156px;gap:8px;padding:8px}.compact-dashboard .angle-instrument{width:84px;height:84px}.compact-dashboard .dash-toolbar{gap:8px}.compact-dashboard .dash-toolbar .weapon-switcher>button{width:54px;min-width:54px;max-width:54px}.compact-dashboard .wait-readout{padding-left:8px;min-width:46px}.combat-mode .turn-indicator{left:16px;top:51px;transform:none}.combat-mode .timer{left:auto;right:16px;top:53px}}
+@media(max-width:700px){.compact-dashboard,.combat-mode .compact-dashboard{grid-template-columns:80px minmax(0,1fr);gap:8px;padding:8px;min-height:0}.compact-dashboard .dash-angle{height:88px}.compact-dashboard .angle-instrument{width:76px;height:76px}.compact-dashboard .dash-toolbar{gap:6px;flex-wrap:nowrap}.compact-dashboard .dash-toolbar .weapon-switcher>button{width:44px;min-width:44px;max-width:44px}.compact-dashboard .quick-items{gap:2px}.compact-dashboard .quick-items button{width:32px;height:40px}.compact-dashboard .wait-readout{display:none}.compact-dashboard .dash-actions{grid-column:1/3;grid-template-columns:44px 44px minmax(44px,1fr) 44px 44px;grid-template-rows:44px}.compact-dashboard #move-left{grid-column:1;grid-row:1}.compact-dashboard #move-right{grid-column:2;grid-row:1}.compact-dashboard #fire-button{grid-column:3;grid-row:1;width:auto;min-height:44px}.compact-dashboard #skip-button{grid-column:4;grid-row:1}.compact-dashboard #exit-match{grid-column:5;grid-row:1}.combat-mode .player-info{width:105px}.combat-mode .avatar{width:44px;height:44px}.combat-mode .scoreboard{height:52px;min-height:52px;padding:4px 8px}.combat-mode .player-name{font-size:9px}.combat-mode .stage-button,.combat-mode .inventory-toggle{width:30px;min-width:30px;height:30px}.combat-mode .stage-top{left:8px;right:8px;gap:4px}.combat-mode .turn-indicator{top:44px;left:8px;transform:none;font-size:8px}.combat-mode .timer{top:45px;right:8px;left:auto}.minimap-panel{width:138px}.minimap-panel canvas{height:48px}.battle-live-message{font-size:8px;left:8px;max-width:calc(50% - 80px)}}

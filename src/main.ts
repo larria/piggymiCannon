@@ -1,5 +1,6 @@
 import './style.css';
-import { Game, WORLD_W, WORLD_H, clamp, type Config } from './engine';
+import { Game, WORLD_W, clamp, type Config } from './engine';
+import {TERRAIN_H} from './terrain';
 import { Renderer } from './renderer';
 import { AudioManager } from './audio';
 import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type WeaponId } from './catalog';
@@ -12,6 +13,7 @@ import {vehicleIcon,paintProjectilePreviews} from './vehicle-art';
 import {WEAPON_REFERENCE,HISTORICAL_GUIDE} from './weapon-reference';
 import {DashboardView} from './dashboard';
 import {guideMarkup} from './guide';
+import {installControlHints} from './control-hints';
 const APP_VERSION=__APP_VERSION__;
 
 const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
@@ -95,6 +97,26 @@ $('#app').innerHTML=`
   <div id="pwa-update" class="pwa-update hidden"><span>新版本已就绪</span><button id="apply-update">更新游戏</button></div>
   <dialog id="dialog"><div class="dialog-shell"><button id="close-dialog" class="dialog-close icon-button" aria-label="关闭">${icon('close')}</button><div id="dialog-content"></div></div></dialog>
 `;
+// Keep the combat chrome on one row and give the action cluster its own compact grid.
+$('.dash-actions').prepend($('.move-buttons'));
+$('.dashboard').classList.add('compact-dashboard');
+const logButton=$('#log-button');logButton.classList.add('stage-button');logButton.innerHTML=icon('book');logButton.title='战斗记录';$('#pause-button').before(logButton);
+const message=$('.caption-main');message.classList.add('battle-live-message');$('.battle-stage').append(message);$('.battle-caption').remove();
+$('#skip-button').innerHTML=icon('skip');$('#skip-button').setAttribute('aria-label','跳过回合');
+$('#exit-match').innerHTML=icon('exit');$('#exit-match').setAttribute('aria-label','退出对局');
+$('#exit-match').title='结束当前对局，回到演习场';
+$('#inventory-toggle').dataset.helpDescription='查看当前坦克的武器、战术道具和炮弹图鉴';
+$('#pause-button').dataset.helpDescription='轻点暂停或继续，暂停时也可重新部署';
+$('#face-button').dataset.helpName='切换炮口朝向';$('#face-button').dataset.helpDescription='轻点切换左右朝向；后退不会改变炮口方向';
+$('#minimap-toggle').innerHTML=icon('mountain')+icon('chevron');$('#minimap-toggle').dataset.helpName='小地图';$('#minimap-toggle').dataset.helpDescription='轻点折叠或展开；点击地图查看地形';
+$('#minimap-follow').innerHTML=icon('target');$('#minimap-follow').dataset.helpName='跟随镜头';$('#minimap-follow').dataset.helpDescription='恢复坦克、炮弹与空投的自动镜头跟随';
+$('#stage-version-button').dataset.helpName='检查游戏更新';$('#stage-version-button').dataset.helpDescription='联网检查新版本，对局不会被强制中断';
+$('#stage-version-button').textContent=`v${APP_VERSION}`;
+$('.energy-meter .meter-label').innerHTML=icon('heart');$('.energy-meter .meter-label').dataset.helpName='生命能量';
+$('.force-meter .meter-label').innerHTML=icon('bolt');$('.force-meter .meter-label').dataset.helpName='发射力度';
+$('.mobility-meter .meter-label').innerHTML=icon('transfer');$('.mobility-meter .meter-label').dataset.helpName='移动力';
+$('.wait-readout').dataset.helpName='行动等待';$('.wait-readout').dataset.helpDescription='特殊武器会增加等待；等待影响再次行动的先后';
+installControlHints(()=>{if(!game.paused)audio.unlock();audio.play('aim');});
 const renderer=new Renderer($('#battlefield'),game);
 const dashboard=new DashboardView($('#angle-dial'),$('#minimap'));
 
@@ -135,7 +157,7 @@ function updateUI() {
   const shownWeapon=human?game.selected:t.selectedWeapon;
   const weaponSignature=`${t.vehicleId}|${game.current}|${shownWeapon}|${t.ammo.homing}`;
   if(weaponSignature!==lastWeapons) {
-    pair.forEach((id,i)=>{const w=weaponById(id),button=$<HTMLButtonElement>(['#weapon-normal','#weapon-special','#weapon-bonus'][i]);button.dataset.weapon=id;button.innerHTML=`<span class="switch-icon" style="color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span><small>${i===0?'普通 · F3':i===1?'特殊 · F4':'空投 · 稀有'}</small><strong>${w.name}</strong></span>${i===1?`<em>等待 +${w.extraDelay??140}</em>`:''}`;button.classList.toggle('selected',shownWeapon===id);button.setAttribute('aria-pressed',String(shownWeapon===id));button.setAttribute('aria-label',`${i===0?'普通武器':i===1?'特殊武器':'空投武器'}：${w.name}`);});
+    pair.forEach((id,i)=>{const w=weaponById(id),button=$<HTMLButtonElement>(['#weapon-normal','#weapon-special','#weapon-bonus'][i]);button.dataset.weapon=id;button.dataset.slot=String(i+1);button.dataset.helpDescription=w.description;button.innerHTML=`<span class="switch-icon" style="color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span><small>${i===0?'普通 · F3':i===1?'特殊 · F4':'空投 · 稀有'}</small><strong>${w.name}</strong></span>${i===1?`<em>等待 +${w.extraDelay??140}</em>`:''}`;button.classList.toggle('selected',shownWeapon===id);button.setAttribute('aria-pressed',String(shownWeapon===id));button.setAttribute('aria-label',`${i===0?'普通武器':i===1?'特殊武器':'空投武器'}：${w.name}`);});
     $('#weapon-bonus').classList.toggle('hidden',t.ammo.homing<=0);lastWeapons=weaponSignature;paintProjectilePreviews($('#weapon-switcher'));
   }
   ['#weapon-normal','#weapon-special','#weapon-bonus'].forEach((selector,i)=>{$<HTMLButtonElement>(selector).disabled=!human||(t.ammo[pair[i]]??0)<=0;});
@@ -143,7 +165,7 @@ function updateUI() {
   $('#instrument-tank').textContent=v?.name??'炮术演习';$('#angle-limits').textContent=`${t.minAngle}–${t.maxAngle}°`;
   $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=String((v?.waiting??560)+(weaponById(shownWeapon).extraDelay??0));$('#previous-power').style.left=`${t.lastPower}%`;
   const quick=['repair','shield','fuel','boost'] as ItemId[];const quickSignature=quick.map(id=>`${id}:${t.items[id]}:${game.itemUnavailable(id)}`).join('|');
-  if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,i)=>{const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id);return `<button data-item="${id}" ${reason?'disabled':''} title="${item.name} · F${9+i}${reason?' · '+reason:''}" aria-label="快捷使用${item.name}">${icon(item.icon)}<span>${["维修","护盾","燃料","强化"][i]}</span><small>${t.items[id]}</small></button>`;}).join('');}
+  if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,i)=>{const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id);return `<button data-item="${id}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+i}${reason?' · '+reason:''}" aria-label="快捷使用${item.name}">${icon(item.icon)}<span>${["维修","护盾","燃料","强化"][i]}</span><small>${t.items[id]}</small></button>`;}).join('');}
   $('#pwa-update').classList.toggle('hidden',!pendingUpdate||(!lobby&&game.phase!=='ended'));
   $('.battle-stage').classList.toggle('started',!lobby);
   $('#move-left').setAttribute('aria-label',`后退，向${t.direction===1?'左':'右'}移动，长按持续移动`);
@@ -162,6 +184,7 @@ function updateUI() {
     const statuses=[tank.reaction?.kind==='direct'?'哭泣中':tank.reaction?.kind==='graze'?'擦伤':tank.reaction?.kind==='fall'?'摔得晕乎乎':tank.hp>0&&tank.hp<tank.maxHP/3?'喘气中':'',tank.shield?`护盾 ${tank.shield}`:'',tank.frozen?`冻结 ${tank.frozen}`:'',tank.boost?'火力强化':'',tank.doubleShot?'双发装填':'',tank.poisoned?'中毒':'',tank.immobile?`冰冻 ${tank.immobile}`:''].filter(Boolean);
     $(`#status-${i}`).textContent=tank.hp<=0?'暂别战场':(tank.vehicleId?vehicleById(tank.vehicleId).name+' · ':'')+(statuses.join(' · ')||'状态良好');
     if(game.fog&&i!==game.viewer&&game.phase!=='ended') {$(`#hp-${i}`).innerHTML='? <small>/ ${tank.maxHP}</small>';$(`#hp-bar-${i}`).style.width='100%';$(`#hp-bar-${i}`).classList.remove('critical');$(`#status-${i}`).textContent='浓雾中 · 位置未知';}
+    const portrait=$<HTMLButtonElement>(`.${i===0?'pink':'green'} .portrait-button`);portrait.dataset.helpName=tank.name;portrait.dataset.helpDescription=`${$(`#status-${i}`).textContent} · 生命 ${$(`#hp-${i}`).textContent}`;
   });
   $('#map-label').textContent=MAPS.find(m=>m.id===config.map)!.name+(game.fog?' · 浓雾':'')+(game.snow?' · 飘雪':'');
   $('#map-code').textContent=String(MAPS.findIndex(m=>m.id===config.map)+1).padStart(2,'0');
@@ -169,6 +192,7 @@ function updateUI() {
   $('#gravity-note').textContent=config.map==='moon'?'重力 0.63 g':'重力 1.0 g';
   $('#field-note').textContent=game.phase==='supply'?'空投受风影响 · 计时暂停':game.teleporting?'点击 230 米内的地面传送':game.selected==='airstrike'?'点击战场指定空袭落点':config.map==='coast'?'薄桥易断 · 挖地可击落对手':config.map==='moon'?'多层浮岛 · 打掉支撑，坠落取胜':'高地掩护 · 中央断崖不可跨越';
   if(game.fireLine) $('#field-note').textContent+=' · 火线穿越伤害 +50%';
+  $('#minimap-toggle').dataset.helpDescription=`${$('#field-note').textContent} · ${$('#gravity-note').textContent}。轻点折叠或展开，点击地图定位视野。`;
   $('#lobby-overlay').classList.toggle('hidden',!lobby);
   $('#turn-indicator').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff');
   $('#timer').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff'||config.timer===0);
@@ -336,7 +360,7 @@ $('#exit-match').addEventListener('click',()=>showDialog('exit'));
 function toggleMinimap(){const collapsed=$('#minimap-panel').classList.toggle('collapsed');$('#minimap-toggle').setAttribute('aria-expanded',String(!collapsed));$('#minimap-toggle').setAttribute('aria-label',collapsed?'展开小地图':'折叠小地图');}
 $('#minimap-toggle').addEventListener('click',toggleMinimap);
 $('#minimap-follow').addEventListener('click',()=>renderer.follow());
-$('#minimap').addEventListener('pointerdown',e=>{const r=$('#minimap').getBoundingClientRect();renderer.focusAt((e.clientY-r.top)/r.height*WORLD_H);});
+$('#minimap').addEventListener('pointerdown',e=>{const r=$('#minimap').getBoundingClientRect();renderer.focusAt((e.clientY-r.top)/r.height*TERRAIN_H);});
 $('#inventory-toggle').addEventListener('click',()=>{if(immersive) setDrawer(!drawerOpen);else {setImmersive(true);setDrawer(true);}});
 $('#arsenal-close').addEventListener('click',()=>setDrawer(false));
 $('#inventory-backdrop').addEventListener('click',()=>setDrawer(false));
@@ -497,7 +521,7 @@ async function checkForUpdate() {
     else if(newer) toast(`发现 v${latest.version}，正在准备更新；准备好后会提示。`);
     else toast(`当前已是最新版本 v${APP_VERSION}。`);
   } catch {toast(navigator.onLine?'暂时无法检查更新，请稍后再试。':`当前离线，正在使用 v${APP_VERSION}，联网后可检查更新。`);}
-  finally {checkingVersion=false;buttons.forEach(b=>{b.disabled=false;b.textContent=`v${APP_VERSION} · 检查更新`;});}
+  finally {checkingVersion=false;buttons.forEach(b=>{b.disabled=false;b.textContent=b.id==='stage-version-button'?`v${APP_VERSION}`:`v${APP_VERSION} · 检查更新`;});}
 }
 $('#version-button').addEventListener('click',checkForUpdate);
 $('#stage-version-button').addEventListener('click',checkForUpdate);
