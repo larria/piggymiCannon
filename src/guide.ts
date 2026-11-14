@@ -1,0 +1,18 @@
+import {icon} from './icons';
+
+export function guideMarkup(){return `
+  <span class="eyebrow">炮手口袋手册</span><h2>走好一步，打好一炮</h2>
+  <p class="dialog-intro">摧毁敌人，或挖掉脚下的支撑让它坠落，都能取胜。每种坦克有自己的生命、角度、移动力和武器。</p>
+  <div class="guide-grid">
+    <article><span class="guide-number">01</span><h3>移动与角度</h3><p>长按下方箭头后退、前进，方向相对炮口。拖动圆形角度盘，上半圈调整抬角，左右切换朝向；也可拖动战场瞄准。每次自己的回合恢复全部移动力，超过 35° 的坡面和断桥不能开过。</p></article>
+    <article><span class="guide-number">02</span><h3>看仪表，按住蓄力</h3><p>按住力度条或开火键，从 10% 蓄力到 100%，松手发射。白线记录你上次的力度，不显示预测弹道。发射键拖动不会改角度；另一只手仍可用角度盘瞄准。暂停、取消手势和切换窗口会取消蓄力。</p></article>
+    <article><span class="guide-number">03</span><h3>两种武器，直接切换</h3><p>仪表盘上直接选普通或特殊武器，特殊武器会增加行动等待。等待少的坦克可能更早再次行动。老土大铅弹挖地强，小红豆伤害集中；追魂弹末段会锁定范围内的敌人。武器说明在军火库查看。</p></article>
+    <article><span class="guide-number">04</span><h3>借风，留心脚下</h3><p>落叶和飘雪显示风向，风会推动炮弹和空投。炮弹打中地形时比直接命中挖得更大；薄桥与浮岛可挖穿。坠落超过 48 米会受伤，掉到水里出局。浓雾中看不见敌人，火线让穿过的炮弹威力 +50%。</p></article>
+  </div>
+  <div class="guide-callout">${icon('shield')}<div><strong>四个道具快捷位，其他道具在军火库</strong><p>维修、护盾、燃料、强化直接点选；每回合限用一件，还需战术点、库存和冷却。初始 2 战术点，每次自己的回合恢复 1 点，上限 4。维修恢复约 23% 最大生命并解毒，护盾为约 27%；强化第 2 回合、传送第 3 回合解锁。</p></div></div>
+  <div class="guide-small">
+    <p>空投每 5 个行动回合出现，移动靠近拾取；降落动画暂停计时。可得到回血、双发和稀有追踪弹。第 21 轮进入决胜时刻，每次行动损失最大生命的 8%。</p>
+    <p>键盘：←→ / A D 移动，↑↓ / W S 调角度，空格蓄力、松开发射；F3 / F4 切换武器，F5 跳过，F9–F12 使用四个快捷道具，Tab 折叠小地图，Ctrl+C 恢复镜头跟随，Esc 暂停。iPad 点小地图可查看地形，点「跟随」恢复镜头。</p>
+    <p>默认 AI 为新兵，难度在开局面板选择。所有难度均有误差，王牌也保留失手概率。双人热座需下一位队长确认接手。13 种经典坦克名称与核心效果参照公开资料，数值按本 Web 版地图与节奏平衡。</p>
+  </div>
+  <button class="button button-dark dialog-primary" data-action="close">明白了，去练练 ${icon('arrow')}</button>`;}

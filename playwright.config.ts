@@ -9,7 +9,7 @@ export default defineConfig({
     channel:'chrome',
     headless:true,
     baseURL:'http://localhost:4177/piggymiCannon/',
-    viewport:{width:1024,height:768},
+    viewport:{width:1194,height:834},
     isMobile:true,
     hasTouch:true,
     serviceWorkers:'allow',

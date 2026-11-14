@@ -21,7 +21,7 @@ export default defineConfig(({mode}) => ({
       id: './',
       name: '咪猪头的疯狂坦克',
       short_name: '咪猪头坦克',
-      description: '咪猪头与大猪头爸爸的炮术对决。二维可破坏地形、13 种武器、AI 与双人热座。',
+      description: '咪猪头与大猪头爸爸的炮术对决。13 种经典坦克、26 种武器、可破坏地形、AI 与双人热座。',
       lang: 'zh-CN',
       start_url: './',
       scope: './',

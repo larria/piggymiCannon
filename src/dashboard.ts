@@ -1,0 +1,27 @@
+import type {Game,Tank} from './engine';
+import {WORLD_W,WORLD_H} from './engine';
+export class DashboardView {
+  private terrain=document.createElement('canvas');private revision=-1;private previousGame:Game|null=null;
+  constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;}
+  draw(game:Game,t:Tank,offset:number,viewHeight:number){
+    const c=this.dial.getContext('2d')!;c.clearRect(0,0,260,260);c.save();c.scale(2,2);
+    c.fillStyle='#f6f4e9';c.strokeStyle='#ccd5bd';c.lineWidth=2;c.beginPath();c.arc(65,65,58,0,7);c.fill();c.stroke();
+    c.save();c.translate(65,65);c.scale(t.direction,1);
+    const polar=(angle:number,r:number)=>({x:Math.cos(angle*Math.PI/180)*r,y:-Math.sin(angle*Math.PI/180)*r});
+    c.fillStyle='#dce7c955';c.beginPath();c.moveTo(0,0);c.arc(0,0,52,-t.maxAngle*Math.PI/180,-t.minAngle*Math.PI/180);c.closePath();c.fill();
+    for(let a=0;a<=180;a+=15){const p=polar(a,50),q=polar(a,54);c.strokeStyle='#d7dccd';c.lineWidth=1;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(q.x,q.y);c.stroke();}
+    c.strokeStyle='#bec8b2';c.lineWidth=1;c.beginPath();c.moveTo(-53,0);c.lineTo(53,0);c.stroke();
+    const slope=game.tankSlope(t)*t.direction;c.strokeStyle='#baa27a';c.lineWidth=1.5;c.beginPath();c.moveTo(-47*Math.cos(slope),-47*Math.sin(slope));c.lineTo(47*Math.cos(slope),47*Math.sin(slope));c.stroke();
+    for(const a of [t.minAngle,t.maxAngle]){const p=polar(a,52);c.strokeStyle='#c7b58e';c.setLineDash([3,4]);c.beginPath();c.moveTo(0,0);c.lineTo(p.x,p.y);c.stroke();}c.setLineDash([]);
+    const p=polar(t.angle,50);c.strokeStyle='#718c5a';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(p.x,p.y);c.stroke();c.fillStyle='#e8a26a';c.beginPath();c.arc(p.x,p.y,3,0,7);c.fill();c.restore();
+    c.fillStyle='#8da273';c.beginPath();c.arc(65,65,5,0,7);c.fill();c.fillStyle='#597347';c.font='600 19px "Manrope",sans-serif';c.textAlign='center';c.fillText(`${Math.round(t.angle)}°`,65,96);c.restore();
+    const m=this.map.getContext('2d')!,base=this.terrain.getContext('2d')!;
+    if(this.previousGame!==game||this.revision!==game.land.revision){base.fillStyle=game.config.map==='moon'?'#454b61':'#e0e7d8';base.fillRect(0,0,300,168);base.fillStyle=game.config.map==='moon'?'#8d95a8':game.config.map==='coast'?'#aa9a7f':'#80946b';
+      for(let x=0;x<WORLD_W;x+=8)for(let y=0;y<WORLD_H;y+=8)if(game.land.solid(x,y))base.fillRect(x/WORLD_W*300,y/640*168,2.5,2.5);
+      base.fillStyle='#acc5c5';base.fillRect(0,579/640*168,300,168-579/640*168);this.previousGame=game;this.revision=game.land.revision;}
+    m.drawImage(this.terrain,0,0);m.strokeStyle='#f9f2d7b0';m.lineWidth=2;m.strokeRect(2,offset/640*168,296,viewHeight/640*168);
+    if(game.fireLine){m.strokeStyle='#f5ae70';m.beginPath();m.moveTo(game.fireLine.x/WORLD_W*300,15);m.lineTo(game.fireLine.x/WORLD_W*300,145);m.stroke();}
+    for(const tank of game.tanks)if(tank.hp>0&&(!game.fog||tank.id===game.viewer)){m.fillStyle=tank.id===0?'#e89076':'#ebd28c';m.strokeStyle='#f8f5e3';m.lineWidth=1;m.beginPath();m.arc(tank.x/WORLD_W*300,tank.y/640*168,4,0,7);m.fill();m.stroke();}
+    for(const crate of game.crates)if(!game.fog||Math.abs(crate.x-game.tanks[game.viewer].x)<230){m.fillStyle='#e6ba75';m.fillRect(crate.x/WORLD_W*300-2,crate.y/640*168-2,5,5);}
+  }
+}

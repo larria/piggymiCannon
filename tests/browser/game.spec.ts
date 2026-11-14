@@ -8,6 +8,8 @@ async function start(page:any,hotseat=false,map='valley',seed=52,timer='0') {
   await page.addInitScript((value:number)=>{Date.now=()=>value;},seed);
   await page.goto('./');
   await page.getByRole('button',{name:'进入战场',exact:true}).click();
+  await page.locator('[data-choice="bowl"]').click();
+  await page.locator('[data-owner="1"]').click();await page.locator('[data-choice="bowl"]').click();
   if(hotseat) await page.locator('.mode-choices .choice-card').nth(1).click();
   if(map!=='valley') await page.locator(`input[name="map"][value="${map}"]`).locator('..').click();
   await page.locator('#turn-timer').selectOption(timer);
@@ -19,14 +21,14 @@ test('iPad landscape uses the full viewport and relative movement preserves aim'
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await start(page);
   const bounds=await page.locator('#battlefield').boundingBox();
-  expect(bounds!.width).toBeGreaterThan(980);expect(bounds!.height).toBeGreaterThan(480);
+  expect(bounds!.width).toBeGreaterThan(1150);expect(bounds!.height).toBeGreaterThan(450);
   await expect(page.locator('#fire-button')).toBeEnabled();
   const button=await page.locator('#move-left').boundingBox();
   await page.mouse.move(button!.x+button!.width/2,button!.y+button!.height/2);
   await page.mouse.down();await page.waitForTimeout(350);await page.mouse.up();
   await expect.poll(async()=>Number(await page.locator('#fuel-value').textContent())).toBeLessThan(100);
   await expect(page.locator('#face-button span')).toHaveText('朝右');
-  await page.screenshot({path:'QA/ipad-pwa-landscape.png'});
+  await page.screenshot({path:'QA/v1.3-small-ipad-landscape.png'});
   expect(errors).toEqual([]);
 });
 
@@ -34,7 +36,7 @@ test('dragging aims; hold-and-release fires exactly once and the AI returns the 
   await start(page);
   const pad=await page.locator('#aim-pad').boundingBox();
   const x=pad!.x+pad!.width/2,y=pad!.y+pad!.height/2;
-  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-55,y-30,{steps:6});await page.mouse.up();
+  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-30,y-65,{steps:6});await page.mouse.up();
   await expect(page.locator('#face-button span')).toHaveText('朝左');
   await expect.poll(async()=>Number(await page.locator('#angle-value').textContent())).toBeGreaterThan(55);
   await page.locator('#face-button').click();
@@ -47,7 +49,7 @@ test('dragging aims; hold-and-release fires exactly once and the AI returns the 
   await expect(page.locator('#round-text')).toHaveText('第 02 轮',{timeout:25_000});
   await expect(page.locator('#turn-text')).toHaveText('轮到咪猪头了');
   await page.locator('#log-button').click();
-  await expect(page.locator('.battle-log')).toContainText('咪猪头发射了标准榴弹');
+  await expect(page.locator('.battle-log')).toContainText('咪猪头发射了巨石');
   await expect(page.locator('.battle-log')).toContainText('大猪头爸爸发射了');
 });
 
@@ -55,9 +57,10 @@ test('the army drawer selects weapons, and hotseat requires an explicit handoff'
   await start(page,true);
   await page.locator('#inventory-toggle').click();
   await expect(page.locator('.arsenal')).toBeVisible();
-  await page.getByRole('button',{name:'重磅炸弹，3 发',exact:true}).click();
+  await page.locator('#weapons-tab').click();
+  await expect(page.getByRole('button',{name:'火石，无限弹药',exact:true})).toBeVisible();
   await page.locator('#arsenal-close').click();
-  await expect(page.locator('#fire-note')).toContainText('重磅炸弹');
+  await page.locator('#weapon-special').click();await expect(page.locator('#fire-note')).toContainText('火石');
   const fire=await page.locator('#fire-button').boundingBox();
   await page.mouse.move(fire!.x+fire!.width/2,fire!.y+fire!.height/2);await page.mouse.down();
   await page.waitForTimeout(350);await page.mouse.up();
@@ -84,13 +87,13 @@ test('PWA installs its worker and reloads with icons and audio while offline',as
 test('item buttons enforce energy, unlocks and conditions instead of offering free effects',async({page})=>{
   await start(page);
   await page.locator('#inventory-toggle').click();await page.locator('#items-tab').click();
-  await expect(page.locator('[data-item="repair"]')).toBeDisabled();
-  await expect(page.locator('[data-item="fuel"]')).toBeDisabled();
-  await expect(page.locator('[data-item="teleport"]')).toBeDisabled();
-  await expect(page.locator('[data-item="boost"]')).toBeDisabled();
-  await page.locator('[data-item="shield"]').click();
-  await expect(page.locator('#status-0')).toContainText('护盾 40');
-  await expect(page.locator('[data-item="shield"]')).toBeDisabled();
+  await expect(page.locator('.arsenal [data-item="repair"]')).toBeDisabled();
+  await expect(page.locator('.arsenal [data-item="fuel"]')).toBeDisabled();
+  await expect(page.locator('.arsenal [data-item="teleport"]')).toBeDisabled();
+  await expect(page.locator('.arsenal [data-item="boost"]')).toBeDisabled();
+  await page.locator('.arsenal [data-item="shield"]').click();
+  await expect(page.locator('#status-0')).toContainText('护盾');
+  await expect(page.locator('.arsenal [data-item="shield"]')).toBeDisabled();
   await expect(page.locator('.weapon-detail')).toContainText('战术点 0 / 4');
 });
 test('clickable version checks fetch the live version and keep the battle running',async({page})=>{
@@ -108,9 +111,9 @@ test('clickable version checks fetch the live version and keep the battle runnin
 test('new bridge and sky maps render their destructible platforms in full screen',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await start(page,true,'coast');await expect(page.locator('#map-label')).toHaveText('独木桥');
-  await page.screenshot({path:'QA/v1.2-bridge.png'});
+  await page.screenshot({path:'QA/v1.3-bridge.png'});
   await page.goto('./');await start(page,true,'moon');await expect(page.locator('#map-label')).toHaveText('天空之城');
-  await page.screenshot({path:'QA/v1.2-sky-city.png'});expect(errors).toEqual([]);
+  await page.screenshot({path:'QA/v1.3-sky-city.png'});expect(errors).toEqual([]);
 });
 test('fog hides enemy information throughout the AI turn and uses the supplied avatars',async({page})=>{
   const seed=Array.from({length:300},(_,i)=>i+1).find(value=>rollWeather(makeRng(value)).fog)!;
@@ -119,10 +122,13 @@ test('fog hides enemy information throughout the AI turn and uses the supplied a
   await expect(page.locator('#hp-1')).toContainText('?');
   await expect(page.locator('.pink .avatar img')).toHaveAttribute('src',/icon-192.png/);
   await expect(page.locator('.green .avatar img')).toHaveAttribute('src',/dad-avatar.png/);
-  await page.screenshot({path:'QA/v1.2-fog.png'});
+  await page.screenshot({path:'QA/v1.3-fog.png'});
   await page.locator('#fire-button').click();
   await expect(page.locator('#turn-text')).toHaveText('大猪头爸爸正在瞄准…',{timeout:10_000});
   await expect(page.locator('#hp-1')).toContainText('?');
+  await expect(page.locator('#energy-value')).toHaveText('950 / 950');
+  await expect(page.locator('#instrument-tank')).toHaveText('大碗');
+  for(const id of ['repair','shield','fuel','boost']) await expect(page.locator(`#quick-items [data-item="${id}"]`)).toBeDisabled();
 });
 test('movement and charge create audio, and pausing cancels the charge without firing',async({page})=>{
   await page.addInitScript(()=>{
@@ -154,7 +160,7 @@ test('airdrop follows its own stage and preserves the full turn clock',async({pa
   }
   await expect(page.locator('#turn-text')).toContainText('补给正在空降',{timeout:12_000});
   await expect(page.locator('#timer span')).toHaveText('45');await page.waitForTimeout(500);
-  await expect(page.locator('#timer span')).toHaveText('45');await page.screenshot({path:'QA/v1.2-airdrop.png'});
+  await expect(page.locator('#timer span')).toHaveText('45');await page.screenshot({path:'QA/v1.3-airdrop.png'});
   await expect(page.locator('.handoff')).toBeVisible({timeout:10_000});
   await expect(page.locator('#timer span')).toHaveText('45');
 });
@@ -167,8 +173,87 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await expect(page.locator('#timer span')).toHaveText(clock!);
   const saying=await page.locator('#portrait-saying').textContent();await page.locator('#portrait-art').click();
   await expect(page.locator('#portrait-saying')).not.toHaveText(saying!);await expect(page.locator('.portrait-heart')).toBeVisible();
-  await page.screenshot({path:'QA/v1.2-portrait-preview.png'});
+  await page.screenshot({path:'QA/v1.3-portrait-preview.png'});
   await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
   await page.locator('.green .portrait-button').click();
   await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/dad.png/);
+});
+test('tank selection is remembered and two weapons switch directly without a dialog',async({page})=>{
+ await start(page);
+ await page.locator('#pause-button').click();await page.getByRole('button',{name:'重新部署',exact:true}).click();
+ await page.locator('[data-owner="0"]').click();await page.locator('[data-choice="cannon"]').click();
+ await expect(page.locator('#vehicle-preview')).toContainText('小红豆');
+ await page.getByRole('button',{name:'开始新对局',exact:true}).click();
+ await expect(page.locator('#hp-0')).toContainText('920');await expect(page.locator('#angle')).toHaveAttribute('max','45');
+ await page.locator('#weapon-special').click();await expect(page.locator('#fire-note')).toContainText('小红豆');
+ await expect(page.locator('#dialog')).not.toBeVisible();await expect(page.locator('.arsenal')).not.toBeVisible();
+ await page.locator('#weapon-normal').click();await expect(page.locator('#fire-note')).toContainText('大铅弹');
+ await page.reload();await page.getByRole('button',{name:'进入战场',exact:true}).click();
+ await expect(page.locator('[data-choice="cannon"]')).toHaveClass(/selected/);await expect(page.locator('#vehicle-preview')).toContainText('老土');
+ await page.screenshot({path:'QA/v1.3-tank-selection.png'});
+});
+test('enabled action controls all acknowledge clicks with sound',async({page})=>{
+ await page.addInitScript(()=>{(window as any).clickSounds=0;const original=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){if((this as HTMLAudioElement).src.includes('sfx_click'))(window as any).clickSounds++;return original.call(this);};});
+ await start(page);
+ let count=await page.evaluate(()=>(window as any).clickSounds);
+ for(const selector of ['#weapon-special','#weapon-normal','#inventory-toggle','#weapons-tab','#items-tab','#arsenal-close','#face-button','#stage-version-button']){
+   await page.locator(selector).click();const current=await page.evaluate(()=>(window as any).clickSounds);expect(current).toBeGreaterThan(count);count=current;
+ }
+});
+test('追魂弹 produces its own lock sound and persists the tracking event in the battle log',async({page})=>{
+ await page.addInitScript(()=>{(window as any).toneStarts=[];const original=AudioParam.prototype.setValueAtTime;AudioParam.prototype.setValueAtTime=function(value:number,time:number){(window as any).toneStarts.push(value);return original.call(this,value,time);};});
+ await start(page,true);
+ await page.locator('#pause-button').click();await page.getByRole('button',{name:'重新部署',exact:true}).click();
+ await page.locator('[data-owner="0"]').click();await page.locator('[data-choice="missile"]').click();
+ await page.getByRole('button',{name:'开始新对局',exact:true}).click();await page.locator('#weapon-special').click();
+ const fire=await page.locator('#fire-button').boundingBox();await page.mouse.move(fire!.x+fire!.width/2,fire!.y+fire!.height/2);await page.mouse.down();await page.waitForTimeout(1070);await page.mouse.up();
+ await expect(page.locator('.handoff')).toBeVisible({timeout:15_000});await page.getByRole('button',{name:'我准备好了',exact:true}).click();await page.locator('#log-button').click();
+ await expect(page.locator('.battle-log')).toContainText('追魂弹锁定目标');
+ const tones=await page.evaluate(()=>(window as any).toneStarts);expect(tones.some((value:number)=>Math.abs(value-776)<1)).toBe(true);
+});
+
+test('small iPad Pro dashboard fits both 11-inch viewports with useful touch targets',async({page})=>{
+  for(const width of [1194,1210]){
+    await page.setViewportSize({width,height:834});await start(page,true);
+    await page.waitForTimeout(2900);
+    const deck=await page.locator('.dashboard').boundingBox(),field=await page.locator('#battlefield').boundingBox();
+    expect(deck!.y+deck!.height).toBeLessThanOrEqual(834);expect(deck!.height).toBeLessThan(240);
+    expect(field!.width).toBeGreaterThan(width-30);expect(field!.height).toBeGreaterThan(450);
+    for(const id of ['#move-left','#move-right','#weapon-normal','#weapon-special','#quick-items [data-item="shield"]','#skip-button','#exit-match']){
+      const box=await page.locator(id).boundingBox();expect(box!.height,id).toBeGreaterThanOrEqual(44);
+    }
+    const overflowing=await page.locator('.dashboard').evaluate(el=>el.scrollWidth>el.clientWidth||el.scrollHeight>el.clientHeight);
+    expect(overflowing).toBe(false);
+    const minimap=await page.locator('#minimap-panel').boundingBox();expect(minimap!.x).toBeGreaterThan(width*.8);
+    await page.screenshot({path:`QA/v1.3-ipad-pro-11-${width}x834.png`});
+  }
+});
+
+test('force meter charges without drag aiming, saves the shot power and minimap can fold',async({page})=>{
+  await start(page,true);
+  await page.locator('#minimap-toggle').click();await expect(page.locator('#minimap')).toBeHidden();
+  await expect(page.locator('#minimap-toggle')).toHaveAttribute('aria-expanded','false');
+  await page.keyboard.press('Tab');await expect(page.locator('#minimap')).toBeVisible();
+  await page.locator('#minimap').click({position:{x:60,y:15}});await page.locator('#minimap-follow').click();
+  const bar=await page.locator('#power-meter').boundingBox(),angle=await page.locator('#angle-value').textContent();
+  await page.mouse.move(bar!.x+30,bar!.y+bar!.height/2);await page.mouse.down();await page.waitForTimeout(700);
+  await expect.poll(async()=>Number(await page.locator('#power-value').textContent())).toBeGreaterThan(30);
+  await page.mouse.move(bar!.x+200,bar!.y-80,{steps:5});await expect(page.locator('#angle-value')).toHaveText(angle!);
+  await page.mouse.up();
+  const marker=await page.locator('#previous-power').evaluate(el=>parseFloat(el.style.left));expect(marker).toBeGreaterThan(30);expect(marker).toBeLessThan(70);
+  await expect(page.locator('.handoff')).toBeVisible({timeout:15_000});
+});
+
+test('two touch pointers can aim on the dial while holding the force meter',async({page,context})=>{
+  await start(page);
+  const dial=await page.locator('#aim-pad').boundingBox(),bar=await page.locator('#power-meter').boundingBox();
+  const session=await context.newCDPSession(page);
+  const power={id:1,x:bar!.x+100,y:bar!.y+bar!.height/2},aim={id:2,x:dial!.x+dial!.width/2+25,y:dial!.y+25};
+  await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[power]});await page.waitForTimeout(400);
+  await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[power,aim]});
+  await expect.poll(async()=>Number(await page.locator('#angle-value').textContent())).toBeGreaterThan(50);
+  await expect(page.locator('#fire-title')).toHaveText('蓄力中');
+  await session.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});
+  await expect(page.locator('#fire-title')).toHaveText('开火');await expect(page.locator('#fire-button')).toBeEnabled();
+  await page.locator('#log-button').click();await expect(page.locator('.battle-log')).not.toContainText('发射了');
 });

@@ -1,4 +1,5 @@
 const asset=(name:string)=>`${import.meta.env.BASE_URL}audio/${name}`;
+import {weaponById,type WeaponId} from './catalog';
 export class AudioManager {
   music=new Audio(asset('bgm-sunny-30s.mp3'));
   enabled=false;volume=0.65;unlocked=false;
@@ -6,12 +7,13 @@ export class AudioManager {
   private master:GainNode|null=null;
   private charge:{oscillators:OscillatorNode[];gain:GainNode}|null=null;
   private movement:{oscillator:OscillatorNode;noise:AudioBufferSourceNode;gain:GainNode;pan:StereoPannerNode}|null=null;
+  private tracking:{oscillator:OscillatorNode;gain:GainNode;pan:StereoPannerNode}|null=null;private lastLock=-10;
   constructor() {this.music.loop=true;this.music.volume=this.volume*0.55;}
   unlock() {this.unlocked=true;if(this.enabled) this.start();}
-  setEnabled(enabled:boolean) {this.enabled=enabled;if(enabled&&this.unlocked) this.start();else {this.music.pause();this.stopCharge();this.stopMovement();}}
+  setEnabled(enabled:boolean) {this.enabled=enabled;if(enabled&&this.unlocked) this.start();else {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();}}
   private start() {void this.music.play().catch(()=>{});}
   setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.volume*0.55;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.volume,this.context.currentTime,0.02);}
-  pause(paused:boolean) {if(paused) {this.music.pause();this.stopCharge();this.stopMovement();}else if(this.enabled&&this.unlocked) this.start();}
+  pause(paused:boolean) {if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();}else if(this.enabled&&this.unlocked) this.start();}
   private graph() {
     if(!this.context) {
       this.context=new AudioContext();this.master=this.context.createGain();this.master.gain.value=this.volume;
@@ -70,7 +72,17 @@ export class AudioManager {
     m.oscillator.stop(this.context.currentTime+0.05);m.noise.stop(this.context.currentTime+0.05);
     m.oscillator.onended=()=>{m.oscillator.disconnect();m.noise.disconnect();m.gain.disconnect();m.pan.disconnect();};
   }
-  play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land',sourceX?:number,viewerX=0) {
+  updateTracking(active:boolean,weapon?:WeaponId,x=0,viewerX=0) {
+    if(!active||!this.enabled||!this.unlocked) {this.stopTracking();return;}
+    try {const {c,output}=this.graph();if(!this.tracking){const oscillator=c.createOscillator(),gain=c.createGain(),pan=c.createStereoPanner();oscillator.type='sine';oscillator.connect(gain);gain.connect(pan);pan.connect(output);gain.gain.value=.08;oscillator.start();this.tracking={oscillator,gain,pan};}
+      const signature=weapon?weaponById(weapon).sound??27:27;
+      this.tracking.oscillator.frequency.setTargetAtTime(430+signature*11+Math.sin(c.currentTime*14)*80,c.currentTime,.02);
+      this.tracking.gain.gain.setTargetAtTime(.045+(Math.sin(c.currentTime*15)+1)*.035,c.currentTime,.02);
+      this.tracking.pan.pan.setTargetAtTime(Math.max(-1,Math.min(1,(x-viewerX)/600)),c.currentTime,.04);
+    }catch{this.stopTracking();}
+  }
+  stopTracking(){if(!this.tracking||!this.context)return;const t=this.tracking;this.tracking=null;t.gain.gain.setTargetAtTime(.0001,this.context.currentTime,.02);t.oscillator.stop(this.context.currentTime+.07);t.oscillator.onended=()=>{t.oscillator.disconnect();t.gain.disconnect();t.pan.disconnect();};}
+  play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim',sourceX?:number,viewerX=0,weapon?:WeaponId) {
     if(!this.enabled||!this.unlocked) return;
     if(type==='click'||type==='win') {
       const audio=new Audio(asset(type==='win'?'sfx_celebrate.mp3':'sfx_click.mp3'));audio.volume=this.volume*0.95;void audio.play().catch(()=>{});return;
@@ -92,6 +104,25 @@ export class AudioManager {
         gain.gain.setValueAtTime(level,now);gain.gain.exponentialRampToValueAtTime(0.001,now+duration);
         source.connect(filter);filter.connect(gain);gain.connect(output);source.start();source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
       };
+      if(type==='aim') {tone(740,600,.055,.09,'triangle');return;}
+      if(type==='lock') {if(now-this.lastLock<.1)return;this.lastLock=now;const index=weapon?weaponById(weapon).sound??27:27;tone(650+index*9,1150+index*9,.18,.22);tone(980+index*7,1400+index*7,.13,.11);return;}
+      if((type==='shot'||type==='explosion')&&weapon) {
+        const w=weaponById(weapon),i=w.sound??27,pitch=85+i*13,waves:OscillatorType[]=['sine','triangle','sawtooth','square'];
+        const wave=waves[i%4],duration=.15+(i%6)*.027;
+        if(type==='shot') {
+          if(w.effect==='beam'||w.effect==='helix'||w.effect==='orbital') {tone(240+i*17,900+i*23,duration+.11,.22,wave);tone(620+i*11,190+i*9,.17,.13);}
+          else if(w.effect==='homing'||weapon==='homing') {noise(.34,.45,2500+i*40);tone(180+i*9,620+i*14,.32,.17,'sawtooth');}
+          else if(w.effect==='mine') {tone(380+i*8,170+i*6,.11,.28,'square');noise(.13,.4,1900+i*17);}
+          else if(w.effect==='poison'||w.effect==='gas'||w.effect==='freeze') {tone(390+i*12,180+i*9,.26,.28,'sine');noise(.14,.32,2100+i*32);}
+          else {noise(duration,.5,1800+i*67);tone(pitch*1.8,pitch*.5,duration,.34,wave);}
+        } else {
+          if(w.effect==='beam'||w.effect==='helix'||w.effect==='orbital') {tone(850+i*19,100+i*7,.42,.3,'sawtooth');noise(.39,.63,2600+i*41);}
+          else if(w.effect==='gas'||w.effect==='poison'||w.effect==='freeze') {tone(340+i*11,100+i*3,.5,.29,'sine');noise(.46,.68,1400+i*33);}
+          else {const size=w.radius/80;noise(.3+size*.4,.58+size*.35,1400+i*53);tone(pitch,30+i*2,.38+size*.3,.32+size*.25,wave);}
+          tone(420+i*17,200+i*9,.1+duration*.3,.06,'triangle');
+        }
+        return;
+      }
       if(type==='item') {tone(530,920,0.3,0.24);tone(790,1350,0.32,0.12);}
       else if(type==='crate-land') {noise(0.28,0.55,1600);tone(140,55,0.25,0.38,'triangle');}
       else if(type==='shot') {noise(0.22,0.65,2600);tone(190,65,0.19,0.4,'triangle');}

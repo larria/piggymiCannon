@@ -1,8 +1,9 @@
-export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing';
+import {VEHICLE_WEAPONS,type VehicleId,type WeaponEffect} from './vehicles';
+export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
 export type MapId = 'valley' | 'coast' | 'moon';
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'expert';
-export interface Weapon { id: WeaponId; name: string; english: string; description: string; damage: number; radius: number; digRadius:number; digDepth:number; ammo: number; color: string; icon: string; tag: string }
+export interface Weapon { id: WeaponId; name: string; english: string; description: string; damage: number; radius: number; digRadius:number; digDepth:number; ammo: number; color: string; icon: string; tag: string;effect?:WeaponEffect;shots?:number;spread?:number;speed?:number;gravity?:number;sound?:number;shape?:string;extraDelay?:number;referenceDamage?:number }
 export const WEAPONS: Weapon[] = [
   { id:'shell', name:'标准榴弹', english:'Classic shell', description:'可靠的抛物线弹道。无限弹药，爆炸会留下弹坑。', damage:42, radius:40, digRadius:32, digDepth:30, ammo:Infinity, color:'#72866d', icon:'shell', tag:'无限弹药' },
   { id:'heavy', name:'重磅炸弹', english:'Heavy bomb', description:'更大的爆炸范围和伤害。也要小心自己的脚下。', damage:68, radius:65, digRadius:57, digDepth:55, ammo:3, color:'#ce8051', icon:'bomb', tag:'大范围' },
@@ -19,8 +20,8 @@ export const WEAPONS: Weapon[] = [
   { id:'homing', name:'猎星追踪弹', english:'Homing shell', description:'仅从空投获得。下降到地面附近后，会追踪 140 米内的敌人；地形仍可阻挡它。', damage:62,radius:29,digRadius:20,digDepth:20,ammo:0,color:'#be9159',icon:'target',tag:'稀有空投' },
 ];
 export const ITEMS: { id:ItemId; name:string; description:string; count:number; icon:string;cost:number;cooldown:number;unlock:number }[] = [
-  { id:'repair', name:'维修包', description:'生命不高于 115 时恢复 35。消耗 2 战术点，冷却 2 个自己的回合。', count:2, icon:'plus',cost:2,cooldown:2,unlock:1 },
-  { id:'shield', name:'能量护盾', description:'没有护盾时增加 40 护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
+  { id:'repair', name:'维修包', description:'生命不高于最大值的 77% 时恢复约 23% 生命并解毒。消耗 2 战术点，冷却 2 个自己的回合。', count:2, icon:'plus',cost:2,cooldown:2,unlock:1 },
+  { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
   { id:'boost', name:'火力强化', description:'本回合攻击伤害 +50%，不能储存到下一回合。消耗 3 战术点，第 2 回合解锁。', count:1, icon:'bolt',cost:3,cooldown:3,unlock:2 },
   { id:'teleport', name:'战术转移', description:'第 3 个自己的回合解锁，消耗 3 战术点。传送到 230 米内的稳定平台，不能在坠落中使用。', count:1, icon:'transfer',cost:3,cooldown:4,unlock:3 },
@@ -32,13 +33,15 @@ export const MAPS: { id:MapId; name:string; sub:string; color:string }[] = [
   { id:'coast', name:'独木桥', sub:'薄桥易断 · 挖地击落', color:'#c58b6c' },
   { id:'moon', name:'天空之城', sub:'多层浮岛 · 低重力争夺', color:'#8584a6' },
 ];
-export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:number; preview:number;missChance:number }[] = [
-  { id:'easy', name:'新兵', sub:'默认推荐 · 完整弹道，瞄准误差较大', error:115, preview:8,missChance:0.5 },
-  { id:'normal', name:'老兵', sub:'温和挑战 · 部分弹道，偶尔使用特殊武器', error:75, preview:1.6,missChance:0.32 },
-  { id:'hard', name:'精英', sub:'懂得移动与道具，仍有明显射击误差', error:42, preview:0.85,missChance:0.22 },
-  { id:'expert', name:'王牌', sub:'擅长破坏地形，也会失手，绝非发发必中', error:26, preview:0,missChance:0.16 },
+export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:number;missChance:number }[] = [
+  { id:'easy', name:'新兵', sub:'默认推荐 · 瞄准误差较大，适合练习', error:115,missChance:0.5 },
+  { id:'normal', name:'老兵', sub:'温和挑战 · 偶尔使用特殊武器', error:75,missChance:0.32 },
+  { id:'hard', name:'精英', sub:'懂得移动与道具，仍有明显射击误差', error:42,missChance:0.22 },
+  { id:'expert', name:'王牌', sub:'擅长破坏地形，也会失手，绝非发发必中', error:26,missChance:0.16 },
 ];
-export const weaponById = (id:WeaponId) => WEAPONS.find(w=>w.id===id)!;
+export const ALL_WEAPONS=[...WEAPONS,...VEHICLE_WEAPONS];
+const weaponTable=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,w])) as Record<WeaponId,Weapon>;
+export const weaponById = (id:WeaponId) => weaponTable[id];
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
 export const excavation = (id:WeaponId,direct:boolean) => {
   const w=weaponById(id);return {radius:w.digRadius*(direct?0.6:1.35),depth:w.digDepth*(direct?0.65:1.5)};
@@ -46,6 +49,6 @@ export const excavation = (id:WeaponId,direct:boolean) => {
 export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number) {
   const d=DIFFICULTIES.find(d=>d.id===difficulty)!,w=weaponById(weapon);
   const miss=rng()<d.missChance;
-  const offset=miss?(rng()<0.5?-1:1)*(Math.max(w.radius+45,w.digRadius*1.35+40)+rng()*65):(rng()-0.5)*d.error*2;
+  const offset=miss?(rng()<0.5?-1:1)*(Math.max(w.radius+45,w.digRadius*1.35+40,w.effect==='homing'||weapon==='homing'?185:0)+rng()*65):(rng()-0.5)*d.error*2;
   return {miss,offset};
 }
