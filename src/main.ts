@@ -498,6 +498,7 @@ function frame(now:number) {
     if(event.type==='shot') audio.play(event.transfer?'transfer':'shot',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='explosion') audio.play('explosion',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='weather')toast(event.message);
+    if(event.type==='poison')audio.play('item',event.x,game.tanks[game.viewer].x);
     if(event.type==='win') audio.play('win');
     if(event.type==='crate') audio.play('item',event.x,game.tanks[game.viewer].x);
     if(event.type==='item') audio.play('item',event.x,game.tanks[game.viewer].x);

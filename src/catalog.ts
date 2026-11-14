@@ -22,7 +22,7 @@ export const WEAPONS: Weapon[] = [
 WEAPONS.forEach((w,i)=>{w.shape=w.id;w.sound=27+i;});
 export const TURN_ITEMS:ItemId[]=['double','teleport','boost','repair'];
 export const ITEMS: { id:ItemId; name:string; description:string; count:number; icon:string;cost:number;cooldown:number;unlock:number }[] = [
-  { id:'repair', name:'补给', description:'恢复约 23% 最大生命并解毒，不超过生命上限。每个自己的回合补齐一件，每回合最多使用一件道具。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
+  { id:'repair', name:'补给', description:'恢复约 23% 最大生命，不超过生命上限；回血不会解除毒箭状态，毒伤直到 30% 红血临界线才停止。每个自己的回合补齐一件，每回合最多使用一件道具。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
   { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每个自己的回合补齐一件，每回合最多使用一件道具。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },

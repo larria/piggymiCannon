@@ -200,6 +200,7 @@ export class Renderer {
     ctx.save();ctx.translate(t.x,t.y);ctx.rotate(slope);ctx.scale(t.direction,1);
     ctx.fillStyle='#34413028';ctx.beginPath();ctx.ellipse(0,17,33,7,0,0,Math.PI*2);ctx.fill();
     if(t.shield>0) {ctx.fillStyle='#b4e4e515';ctx.strokeStyle='#c5eef0a0';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-9,40,42,0,0,Math.PI*2);ctx.fill();ctx.stroke();}
+    if(t.poisoned){ctx.fillStyle='#91af6c24';ctx.beginPath();ctx.ellipse(0,-17,36,34,0,0,7);ctx.fill();ctx.strokeStyle='#9bbd7980';ctx.lineWidth=1.5;for(let i=0;i<6;i++){const p=(this.time*.8+i/6)%1;ctx.beginPath();ctx.arc(Math.sin(i*5.1)*28,-3-p*43,2+p*2,0,7);ctx.stroke();}}
     // Treads, with real wheel spacing and two tiny sprockets.
     ctx.fillStyle='#405045';rr(ctx,-29,4,58,19,10);ctx.fill();ctx.strokeStyle='#748069';ctx.lineWidth=2;rr(ctx,-26,7,52,13,7);ctx.stroke();
     for(let x=-20;x<=20;x+=10) {ctx.fillStyle='#83907a';ctx.beginPath();ctx.arc(x,13,4.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#435246';ctx.beginPath();ctx.arc(x,13,1.5,0,Math.PI*2);ctx.fill();}
@@ -230,6 +231,12 @@ export class Renderer {
     if(t.reaction?.kind==='direct'&&!celebrating)ctx.translate(Math.sin(this.time*28)*3.5,Math.sin(this.time*17)*2);
     if(t.reaction?.kind==='graze'&&!celebrating)ctx.rotate(-.13+Math.sin(this.time*12)*.06);
     if(raging)ctx.translate(Math.sin(this.time*24)*2.2,Math.sin(this.time*12)*2);
+    // Head, torso and arms share this transform, so the whole pig jumps as one.
+    if(celebrating){
+      ctx.strokeStyle='#e5a18d';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-10,3);ctx.lineTo(-13,10);ctx.moveTo(4,3);ctx.lineTo(9,10);ctx.stroke();
+      ctx.fillStyle='#e8aa96';ctx.beginPath();ctx.ellipse(-3,-5,12,12,0,0,7);ctx.fill();ctx.fillStyle='#f2bda6';ctx.beginPath();ctx.ellipse(-3,-4,7,8,0,0,7);ctx.fill();
+      ctx.fillStyle='#ac7161';rr(ctx,-17,8,8,4,2);ctx.fill();rr(ctx,5,8,8,4,2);ctx.fill();
+    }
     if(celebrating||breathing.active||raging){ctx.strokeStyle='#ecaf98';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-11,-11);ctx.lineTo(-26,celebrating?-37-Math.sin(this.time*6)*7:breathing.active?-5:-27);ctx.moveTo(7,-10);ctx.lineTo(25,celebrating?-39+Math.sin(this.time*6)*7:breathing.active?-15:-26);ctx.stroke();}
     ctx.fillStyle='#e3a895';ctx.beginPath();ctx.moveTo(-16,-24);ctx.lineTo(-20,-36);ctx.quadraticCurveTo(-11,-39,-8,-29);ctx.fill();
     ctx.beginPath();ctx.moveTo(7,-29);ctx.lineTo(16,-37);ctx.quadraticCurveTo(20,-28,13,-23);ctx.fill();
@@ -269,6 +276,7 @@ export class Renderer {
     if(celebrating)victoryConfetti(ctx,t,this.time);
     // Names stay upright even when the tank turns around.
     ctx.save();ctx.translate(t.x,t.y);
+    ctx.save();ctx.translate(0,celebrating?-26:0);
     const active=g.current===t.id&&g.phase!=='lobby'&&g.phase!=='ended';
     if(active) {
       const bob=Math.sin(this.time*3)*2;
@@ -278,6 +286,8 @@ export class Renderer {
     const labelWidth=Math.max(58,ctx.measureText(label).width+20);
     ctx.fillStyle='#fbf8ecdd';rr(ctx,-labelWidth/2,-70,labelWidth,21,10);ctx.fill();ctx.fillStyle='#4f5d49';ctx.fillText(label,0,-55);
     ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-44,46,3,1.5);ctx.fill();ctx.fillStyle=body;rr(ctx,-23,-44,46*t.hp/t.maxHP,3,1.5);ctx.fill();
+    if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,32,-68,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.fillText('中毒',49,-56);}
+    ctx.restore();
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}
     if(t.boost) {ctx.fillStyle='#f5cc83';ctx.font='bold 17px sans-serif';ctx.fillText('↑',34,-29);}
     ctx.restore();

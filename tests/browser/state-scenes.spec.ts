@@ -7,12 +7,12 @@ const version=JSON.parse(readFileSync(root+'/package.json','utf8')).version;
 // Test-only bundle of the actual app, exposing state for deterministic visual QA.
 // The production build contains no state hooks; normal game.spec tests exercise its PWA.
 const bundle=build({stdin:{contents:readFileSync(root+'/src/main.ts','utf8')+"\nObject.defineProperty(window,'__qa',{get:()=>({game,renderer,audio,updateUI})});",resolveDir:root+'/src',loader:'ts'},bundle:true,write:false,format:'esm',define:{'import.meta.env.BASE_URL':'"/piggymiCannon/"',__APP_VERSION__:JSON.stringify(version)},plugins:[{name:'qa-only',setup(b){b.onResolve({filter:/virtual:pwa-register/},()=>({path:'pwa',namespace:'qa'}));b.onLoad({filter:/.*/,namespace:'qa'},()=>({contents:'export const registerSW=()=>()=>{};'}));b.onLoad({filter:/\.css$/},()=>({contents:'',loader:'js'}));}}]}).then(r=>r.outputFiles[0].text);
-async function boot(page:any,combat=true,map="factory"){
+async function boot(page:any,combat=true,map="factory",vehicle0="cannon",vehicle1="sea"){
  await page.route('**/assets/index-*.js',async(route:any)=>route.fulfill({contentType:'text/javascript',body:await bundle}));
  await page.goto('./');
  if(!combat)return;
- await page.getByRole('button',{name:'进入战场',exact:true}).click();await page.locator('[data-choice="cannon"]').click();
- await page.locator('[data-owner="1"]').click();await page.locator('[data-choice="sea"]').click();
+ await page.getByRole('button',{name:'进入战场',exact:true}).click();await page.locator(`[data-choice="${vehicle0}"]`).click();
+ await page.locator('[data-owner="1"]').click();await page.locator(`[data-choice="${vehicle1}"]`).click();
  await page.locator('.mode-choices .choice-card').nth(1).click();await page.locator(`input[name="map"][value="${map}"]`).locator('..').click();
  await page.locator('#turn-timer').selectOption('0');await page.getByRole('button',{name:'开始对局',exact:true}).click();
 }
@@ -29,7 +29,7 @@ test('music and effects switches operate and persist independently in both direc
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('piggy-settings')!))).toMatchObject({soundEnabled:false,musicEnabled:true});
  const mutedPlays=await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx_click')).length);
  await page.locator('#sound-button').click();expect(await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx_click')).length)).toBe(mutedPlays);
- await page.screenshot({path:'QA/v1.7-independent-audio-ipad.png'});await page.reload();await page.locator('#sound-button').click();
+ await page.screenshot({path:'QA/v1.7.1-independent-audio-ipad.png'});await page.reload();await page.locator('#sound-button').click();
  await expect(page.locator('#effects-toggle')).toHaveAttribute('aria-checked','false');await expect(page.locator('#music-toggle')).toHaveAttribute('aria-checked','true');
 });
 test('fog keeps true enemy health and thirty-percent breathing is distinct from sea rage',async({page})=>{
@@ -38,9 +38,9 @@ test('fog keeps true enemy health and thirty-percent breathing is distinct from 
  expect(await page.locator('#hp-bar-1').evaluate(el=>parseFloat(el.style.width))).toBeCloseTo(431/880*100,2);
  await expect.poll(()=>page.locator('#hp-bar-1').evaluate(el=>el.getBoundingClientRect().width/el.parentElement!.getBoundingClientRect().width)).toBeCloseTo(431/880,2);
  await expect(page.locator('#hp-bar-0')).toHaveClass(/critical/);await expect(page.locator('#hp-bar-1')).not.toHaveClass(/critical/);
- await page.screenshot({path:'QA/v1.7-fog-true-health-ipad.png'});
+ await page.screenshot({path:'QA/v1.7.1-fog-true-health-ipad.png'});
  await page.evaluate(()=>(window as any).__qa.game.fog=false);await expect(page.locator('#status-0')).toContainText('喘气中');await expect(page.locator('#status-1')).toContainText('发怒');await expect(page.locator('#status-1')).not.toContainText('喘气');
- await page.screenshot({path:'QA/v1.7-breathing-and-rage-ipad.png'});
+ await page.screenshot({path:'QA/v1.7.1-breathing-and-rage-ipad.png'});
 });
 test('victory and prone crying animate before and around the result card on both small iPads',async({page})=>{
  for(const width of [1194,1210]){
@@ -50,14 +50,14 @@ test('victory and prone crying animate before and around the result card on both
   const a=await page.locator('#battlefield').evaluate((c:any)=>c.toDataURL());await page.waitForTimeout(350);
   const b=await page.locator('#battlefield').evaluate((c:any)=>c.toDataURL());expect(a).not.toBe(b);
   expect(await page.evaluate(()=>(window as any).__qa.game.enemy.outOfBounds)).toBe(false);
-  await page.screenshot({path:`QA/v1.7-victory-crying-${width}x834.png`});
-  await expect(page.locator('.result')).toBeVisible({timeout:5000});await page.screenshot({path:`QA/v1.7-result-card-${width}x834.png`});
+  await page.screenshot({path:`QA/v1.7.1-victory-crying-${width}x834.png`});
+  await expect(page.locator('.result')).toBeVisible({timeout:5000});await page.screenshot({path:`QA/v1.7.1-result-card-${width}x834.png`});
  }
 });
 test('a killed unsupported loser settles off-map and does not leave a wreck or a crying pig in water',async({page})=>{
  await boot(page,true,'coast');await page.evaluate(()=>{const g=(window as any).__qa.game;g.crater(g.enemy.x,400,180,250);g.damage(g.enemy,9999,0);});
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.enemy.outOfBounds)).toBe(true);
- await page.screenshot({path:'QA/v1.7-defeat-off-map-ipad.png'});
+ await page.screenshot({path:'QA/v1.7.1-defeat-off-map-ipad.png'});
 });
 test('transfer uses the force meter and moves to its landing position without damaging the enemy',async({page})=>{
  await boot(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.wind=0;g.active.angle=35;});
@@ -69,5 +69,82 @@ test('transfer uses the force meter and moves to its landing position without da
 });
 test('direct graze and fall expressions stay visibly different with enlarged motions',async({page})=>{
  await boot(page);
- for(const reaction of ['direct','graze','fall']){await page.evaluate(kind=>{(window as any).__qa.game.tanks[0].reaction={kind,remaining:20};},reaction);await page.waitForTimeout(200);await page.screenshot({path:`QA/v1.7-reaction-${reaction}-ipad.png`});}
+ for(const reaction of ['direct','graze','fall']){await page.evaluate(kind=>{(window as any).__qa.game.tanks[0].reaction={kind,remaining:20};},reaction);await page.waitForTimeout(200);await page.screenshot({path:`QA/v1.7.1-reaction-${reaction}-ipad.png`});}
+});
+
+test('a real arrow applies poison and each victim action visibly ticks to the red limit',async({page})=>{
+ for(const width of [1194,1210]){
+  await page.setViewportSize({width,height:834});await boot(page,true,'factory','crossbow','cannon');
+  await page.evaluate(()=>{const g=(window as any).__qa.game;g.fog=false;g.fireLine=null;g.wind=0;
+   g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();
+   g.tanks.forEach((t:any,i:number)=>{t.x=905+i*200;t.y=432;});
+   g.crates=[40,80,120].map(x=>({x,y:436,type:'ammo'}));
+  });
+  await page.locator('#weapon-special').click();
+  await page.evaluate(()=>{const g=(window as any).__qa.game;g.setAim(15,35);g.fire();});
+  await expect(page.locator('#hp-1')).toHaveText('820 / 920');
+  expect(await page.evaluate(()=>(window as any).__qa.game.tanks[1].poisoned)).toBe(true);
+  const capture=async(hp:number,name:string)=>{
+   await expect(page.locator('#hp-1')).toHaveText(`${hp} / 920`);
+   await expect.poll(()=>page.locator('#hp-bar-1').evaluate(el=>el.getBoundingClientRect().width/el.parentElement!.getBoundingClientRect().width)).toBeCloseTo(hp/920,2);
+   await expect(page.locator('.handoff')).toBeVisible();await page.getByRole('button',{name:'我准备好了',exact:true}).click();
+   await expect(page.locator('#game-overlay')).toBeHidden();
+   if(name==='stopped')await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.texts.some((text:any)=>text.tankId===1&&text.text.startsWith('毒伤')))).toBe(false);
+   await page.screenshot({path:`QA/v1.7.1-poison-${name}-${width}x834.png`});
+  };
+  await capture(820,'applied');
+  const readyVictim=async()=>{
+   for(let action=0;action<6;action++){
+    if(await page.locator('.handoff').isVisible())await page.getByRole('button',{name:'我准备好了',exact:true}).click();
+    const state=await page.evaluate(()=>{const g=(window as any).__qa.game;return {current:g.current,phase:g.phase};});
+    if(state.current===1&&state.phase==='aiming')return;
+    if(state.phase!=='aiming'){await expect(page.locator('.handoff')).toBeVisible();continue;}
+    await page.locator('#skip-button').click();await expect(page.locator('.handoff')).toBeVisible();
+   }
+   throw new Error('Victim did not receive an action');
+  };
+  for(const [i,hp]of [636,452,276].entries()){
+   await readyVictim();await page.locator('#skip-button').click();await expect(page.locator('.handoff')).toBeVisible();
+   const effect=await page.evaluate(()=>{const g=(window as any).__qa.game;return {hp:g.tanks[1].hp,poisoned:g.tanks[1].poisoned,texts:g.texts.map((t:any)=>t.text),log:g.log};});
+   expect(effect.hp).toBe(hp);expect(effect.poisoned).toBe(hp>276);
+   expect(effect.texts).toContain(`毒伤 −${i===2?176:184}`);expect(effect.log.some((s:string)=>s.includes(`生命 ${hp}/920`))).toBe(true);
+   await capture(hp,`tick-${i+1}`);
+  }
+  await expect(page.locator('#hp-bar-1')).toHaveClass(/critical/);await readyVictim();await page.locator('#skip-button').click();
+  await expect(page.locator('#hp-1')).toHaveText('276 / 920');
+  await capture(276,'stopped');
+ }
+});
+
+test('celebration keeps a continuous head torso and legs at both jump peaks',async({page})=>{
+ for(const width of [1194,1210]){
+  await page.setViewportSize({width,height:834});await boot(page);
+  await page.evaluate(()=>{const g=(window as any).__qa.game;g.damage(g.enemy,9999,0);});await expect(page.locator('#hp-1')).toHaveText('0 / 880');
+  await expect.poll(()=>page.locator('#hp-bar-1').evaluate(el=>el.getBoundingClientRect().width)).toBeLessThan(.5);
+  await page.evaluate(()=>(window as any).__qa.game.paused=true);
+  for(const [i,time]of [Math.PI/12,Math.PI/4].entries()){
+   const connected=await page.evaluate(time=>{
+    const q=(window as any).__qa,r=q.renderer,t=q.game.tanks[0];r.time=time;r.draw(0);
+    const scale=r.ratio,w=Math.round(100*scale),h=Math.round(110*scale);
+    const data=r.ctx.getImageData(Math.round((t.x-50)*scale),Math.round((t.y-r.offsetY-80)*scale),w,h).data;
+    const skin=new Uint8Array(w*h),seen=new Uint32Array(w*h);
+    for(let p=0;p<w*h;p++){const o=p*4,[red,green,blue]=[data[o],data[o+1],data[o+2]];skin[p]=Number(red>185&&green>125&&blue>95&&red-green>25&&green-blue>5);}
+    let largest={area:0,height:0},component=0;
+    for(let p=0;p<w*h;p++)if(skin[p]&&!seen[p]){
+     const queue=[p];seen[p]=++component;let min=h,max=0;
+     for(let j=0;j<queue.length;j++){const at=queue[j],x=at%w,y=Math.floor(at/w);min=Math.min(min,y);max=Math.max(max,y);
+      for(const next of [x>0?at-1:-1,x<w-1?at+1:-1,y>0?at-w:-1,y<h-1?at+w:-1])if(next>=0&&skin[next]&&!seen[next]){seen[next]=component;queue.push(next);}}
+     if(queue.length>largest.area)largest={area:queue.length,height:max-min+1};
+    }
+    // The helmet has a different color. Check the cheek and belly themselves,
+    // rather than expecting the helmet to be part of a skin-colored component.
+    const tilt=Math.sin(time*6)*.13,jump=Math.abs(Math.sin(time*6))*15;
+    const at=(x:number,y:number)=>Math.round((80+x*Math.sin(tilt)+y*Math.cos(tilt)-jump)*scale)*w+Math.round((50+x*Math.cos(tilt)-y*Math.sin(tilt))*scale);
+    const cheek=seen[at(-3,-20)],belly=seen[at(-3,-3)];
+    return {area:largest.area/(scale*scale),headAndBodyConnected:cheek>0&&cheek===belly};
+   },time);
+   await page.screenshot({path:`QA/v1.7.1-celebration-connected-peak-${i+1}-${width}x834.png`});
+   expect(connected.area).toBeGreaterThan(600);expect(connected.headAndBodyConnected).toBe(true);
+  }
+ }
 });

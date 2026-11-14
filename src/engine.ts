@@ -1,5 +1,6 @@
 import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
 import {isRaging,redHealthLimit} from './health';
+import {pointHitsTank} from './tank-hitbox';
 import {resolveVehicle,vehicleById,type VehicleId,type VehicleChoice} from './vehicles';
 import { Terrain, WORLD_W, WORLD_H, WATER_Y, TERRAIN_H } from './terrain';
 import {rollWeather} from './weather';
@@ -25,10 +26,10 @@ export interface Tank {
 export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
 export interface Blast { x:number;y:number;radius:number;life:number;maxLife:number;color:string }
-export interface FloatingText { x:number;y:number;text:string;color:string;life:number }
+export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
 export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing';falling?:boolean;vy?:number;vx?:number }
-export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
+export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
 export interface Mine {x:number;y:number;owner:number;weapon:WeaponId;boost:number}
 export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;clock?:number}
 export const clamp = (v:number,min:number,max:number) => Math.min(max,Math.max(min,v));
@@ -229,7 +230,7 @@ export class Game {
     const wait=TURN_ITEMS.includes(id)?0:t.itemReadyTurn[id]-t.turnsTaken;
     if(wait>0) return `冷却还剩 ${wait} 回合`;
     if(t.tactics<i.cost) return `需要 ${i.cost} 战术点`;
-    if(id==='repair'&&t.hp>=t.maxHP&&!t.poisoned) return '生命已满，无需补给';
+    if(id==='repair'&&t.hp>=t.maxHP) return '生命已满，无需补给';
     if(id==='shield'&&t.shield>0) return '已有护盾，不能叠加';
     if(id==='fuel'&&t.fuel>45) return '燃料需不高于 45';
     if(id==='boost'&&t.boost) return '火力已强化';
@@ -248,7 +249,7 @@ export class Game {
     if(this.itemUnavailable(id,ai)) return false;
     const t=this.active;
     if(id==='teleport') {this.teleporting=!this.teleporting;return true;}
-    if(id==='repair') {const gain=Math.round(t.maxHP*35/150);t.hp=Math.min(t.maxHP,t.hp+gain);t.poisoned=false;this.float(t.x,t.y-42,`+${gain}`,'#548166');}
+    if(id==='repair') {const gain=Math.round(t.maxHP*35/150);t.hp=Math.min(t.maxHP,t.hp+gain);this.float(t.x,t.y-42,`+${gain}`,'#548166');}
     if(id==='shield') t.shield=Math.round(t.maxHP*40/150);
     if(id==='fuel') t.fuel=Math.min(100,t.fuel+55);
     if(id==='boost') t.boost=true;
@@ -315,7 +316,7 @@ export class Game {
   }
   private projectileHit(p:Projectile) {
     if(p.age<0.09) return undefined;
-    return this.tanks.find(t=>t.hp>0 && Math.hypot(p.x-t.x,p.y-(t.y-3))<22);
+    return this.tanks.find(t=>t.hp>0&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
   }
   private stepProjectile(p:Projectile,dt:number):boolean {
     if(p.delay>0) {p.delay-=dt;if(p.delay<=0&&p.echo) this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon);return false;}
@@ -412,13 +413,16 @@ export class Game {
     this.crater(p.x,p.y,dig.radius,dig.depth);
     for(const t of this.tanks) {
       const distance=Math.hypot(t.x-p.x,t.y-p.y);
-      if(distance>radius+26) continue;
+      if(directTarget!==t.id&&distance>radius+26) continue;
       if(p.weapon==='emp') {t.shield=0;t.fuel=Math.max(0,t.fuel-35);this.float(t.x,t.y-65,'脉冲','#ac88bc');}
       if(p.weapon==='ice') {t.frozen=2;this.float(t.x,t.y-65,'冻结 ×2','#79aebe');}
       const mineScale=w.effect==='mine'?(!p.mineArmed?1/3:t.vehicleId==='mine'?.5:1):1;
-      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*(distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)));
+      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*(directTarget===t.id||distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)));
       this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze');
-      if(w.effect==='poison'&&directTarget===t.id&&t.hp>redHealthLimit(t)) {t.poisoned=true;t.poisonOwner=p.owner;}
+      if(w.effect==='poison'&&damage>0&&t.hp>redHealthLimit(t)) {
+        const fresh=!t.poisoned;t.poisoned=true;t.poisonOwner=p.owner;
+        if(fresh){this.float(t.x,t.y-95,'中毒','#6c994b',t.id);this.emit('poison',`${t.name}中了毒箭，自己的行动结束时结算毒伤。`,undefined,t.x,p.weapon);}
+      }
       if(w.effect==='freeze'&&t.id!==p.owner&&damage>0)t.immobile=1;
     }
     if(p.weapon==='napalm') this.fires.push({x:p.x,y:p.y,radius:60,turns:3,owner:p.owner});
@@ -441,16 +445,21 @@ export class Game {
       this.explode({...this.launch(this.tanks[m.owner],m.weapon),x:m.x,y:m.y,boost:m.boost,mineArmed:true},t.id);
     }
   }
-  damage(t:Tank,amount:number,owner:number,ignoreShield=false,reaction:'direct'|'graze'|'fall'='graze') {
+  damage(t:Tank,amount:number,owner:number,ignoreShield=false,reaction:'direct'|'graze'|'fall'='graze',status?:'poison') {
     if(t.hp<=0) return;
     const absorbed=ignoreShield?0:Math.min(t.shield,amount);
     t.shield-=absorbed;const actual=Math.min(t.hp,amount-absorbed);t.hp-=actual;
+    if(t.hp<=redHealthLimit(t))t.poisoned=false;
     if(amount>0) t.reaction={kind:actual>0?reaction:'graze',remaining:reaction==='direct'?1.4:reaction==='fall'?1.2:0.7};
     if(owner!==t.id&&actual>0) this.tanks[owner].damage+=actual;
     if(absorbed) this.float(t.x+16,t.y-43,`护盾 −${absorbed}`,'#75a7af');
-    if(actual) { this.float(t.x,t.y-25,`−${actual}`,'#db674b');this.emit('hit',this.fog?`${t.name}的方向传来受击声。`:`${t.name}受到 ${actual} 点伤害。`,actual,t.x); }
+    if(actual&&status==='poison'){
+      this.texts=this.texts.filter(text=>text.tankId!==t.id);
+      this.float(t.x,t.y-95,`毒伤 −${actual}`,'#6c994b',t.id);this.burst(t.x,t.y-18,12,'#91af6c');
+      this.emit('poison',`${t.name}毒伤 −${actual}，生命 ${t.hp}/${t.maxHP}${t.poisoned?'':'，到达红血临界线，中毒解除'}。`,actual,t.x,'crossbow-special');
+    }else if(actual){this.float(t.x,t.y-25,`−${actual}`,'#db674b',t.id);this.emit('hit',this.fog?`${t.name}的方向传来受击声。`:`${t.name}受到 ${actual} 点伤害。`,actual,t.x);}
   }
-  private float(x:number,y:number,text:string,color:string) { this.texts.push({x,y,text,color,life:1.8}); }
+  private float(x:number,y:number,text:string,color:string,tankId?:number) {this.texts.push({x,y,text,color,life:1.8,tankId});}
   burst(x:number,y:number,count:number,color:string) {
     for(let i=0;i<count;i++) {
       const a=this.rng()*Math.PI*2,speed=30+this.rng()*170,life=0.35+this.rng()*0.6;
@@ -501,7 +510,7 @@ export class Game {
     // Poison settles once after the victim's own completed action and cannot kill.
     if(previous.poisoned&&previous.hp>0){
       const floor=redHealthLimit(previous),loss=Math.min(Math.ceil(previous.maxHP*.2),Math.max(0,previous.hp-floor));
-      if(loss)this.damage(previous,loss,previous.poisonOwner??1-previous.id,true);
+      if(loss)this.damage(previous,loss,previous.poisonOwner??1-previous.id,true,'graze','poison');
       if(previous.hp<=floor)previous.poisoned=false;
     }
     if(!previous.delayCommitted)previous.lastDelay=this.delayFor(previous);
@@ -571,7 +580,7 @@ export class Game {
       p.vy+=this.gravity*(weapon==='sniper'?0.27:weaponById(weapon).gravity??1)*dt;
       p.x+=p.vx*dt;p.y+=p.vy*dt;
       if(i%6===0) points.push({x:p.x,y:p.y});
-      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&Math.hypot(p.x-t.x,p.y-(t.y-3))<22);
+      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
       if(p.x<0||p.x>WORLD_W||p.y>WORLD_H||this.land.solid(p.x,p.y)||direct) break;
     }
     return {x:p.x,y:p.y,points,direct};
@@ -581,7 +590,7 @@ export class Game {
     const enemyX=this.fog?this.heardX[e.id]:e.x,enemyY=this.fog?this.ground(enemyX)-18:e.y;
     const level=DIFFICULTIES.findIndex(d=>d.id===difficulty);
     if(level>=2) {
-      const candidates:ItemId[]=[...(t.hp<=t.maxHP*.7||t.poisoned?['repair' as ItemId]:[]),...(this.rng()>0.6?['boost' as ItemId]:[]),...(this.rng()>.8?['double' as ItemId]:[])];
+      const candidates:ItemId[]=[...(t.hp<=t.maxHP*.7?['repair' as ItemId]:[]),...(this.rng()>0.6?['boost' as ItemId]:[]),...(this.rng()>.8?['double' as ItemId]:[])];
       const item=candidates.find(id=>!this.itemUnavailable(id,true));if(item) this.useItem(item,true);
       const danger=this.fires.some(f=>Math.abs(f.x-t.x)<f.radius);
       if(danger||this.ground(t.x)>525) {for(let i=0;i<35;i++) this.move(t.x>640?-1:1,1/60,true);}

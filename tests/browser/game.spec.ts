@@ -28,7 +28,7 @@ test('iPad landscape uses the full viewport and left movement turns toward the l
   await page.mouse.down();await page.waitForTimeout(350);await page.mouse.up();
   await expect.poll(async()=>Number(await page.locator('#fuel-value').textContent())).toBeLessThan(100);
   await expect(page.locator('#face-button span')).toHaveText('朝左');
-  await page.screenshot({path:'QA/v1.7-small-ipad-landscape.png'});
+  await page.screenshot({path:'QA/v1.7.1-small-ipad-landscape.png'});
   expect(errors).toEqual([]);
 });
 
@@ -107,9 +107,9 @@ test('clickable version checks fetch the live version and keep the battle runnin
 test('new bridge and sky maps render their destructible platforms in full screen',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await start(page,true,'coast');await expect(page.locator('#map-label')).toHaveText('独木桥');
-  await page.screenshot({path:'QA/v1.7-bridge.png'});
+  await page.screenshot({path:'QA/v1.7.1-bridge.png'});
   await page.goto('./');await start(page,true,'moon');await expect(page.locator('#map-label')).toHaveText('天空之城');
-  await page.screenshot({path:'QA/v1.7-sky-city.png'});expect(errors).toEqual([]);
+  await page.screenshot({path:'QA/v1.7.1-sky-city.png'});expect(errors).toEqual([]);
 });
 test('fog hides enemy information for two actions then clears and uses the supplied avatars',async({page})=>{
   const seed=Array.from({length:300},(_,i)=>i+1).find(value=>rollWeather(makeRng(value)).fog)!;
@@ -118,7 +118,7 @@ test('fog hides enemy information for two actions then clears and uses the suppl
   await expect(page.locator('#hp-1')).toHaveText('950 / 950');
   await expect(page.locator('.pink .avatar img')).toHaveAttribute('src',/icon-192.png/);
   await expect(page.locator('.green .avatar img')).toHaveAttribute('src',/dad-avatar.png/);
-  await page.screenshot({path:'QA/v1.7-fog.png'});
+  await page.screenshot({path:'QA/v1.7.1-fog.png'});
   await page.locator('#fire-button').click();
   await expect(page.locator('#turn-text')).toHaveText('大猪头爸爸正在瞄准…',{timeout:10_000});
   await expect(page.locator('#hp-1')).toHaveText('950 / 950');
@@ -159,7 +159,7 @@ test('airdrop follows its own stage and preserves the full turn clock',async({pa
   }
   await expect(page.locator('#turn-text')).toContainText('补给正在空降',{timeout:12_000});
   await expect(page.locator('#timer span')).toHaveText('45');await page.waitForTimeout(500);
-  await expect(page.locator('#timer span')).toHaveText('45');await page.screenshot({path:'QA/v1.7-airdrop.png'});
+  await expect(page.locator('#timer span')).toHaveText('45');await page.screenshot({path:'QA/v1.7.1-airdrop.png'});
   await expect(page.locator('.handoff')).toBeVisible({timeout:10_000});
   await expect(page.locator('#timer span')).toHaveText('45');
 });
@@ -172,7 +172,7 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await expect(page.locator('#timer span')).toHaveText(clock!);
   const saying=await page.locator('#portrait-saying').textContent();await page.locator('#portrait-art').click();
   await expect(page.locator('#portrait-saying')).not.toHaveText(saying!);await expect(page.locator('.portrait-heart')).toBeVisible();
-  await page.screenshot({path:'QA/v1.7-portrait-preview.png'});
+  await page.screenshot({path:'QA/v1.7.1-portrait-preview.png'});
   await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
   await page.locator('.green .portrait-button').click();
   await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/dad.png/);
@@ -189,7 +189,7 @@ test('tank selection is remembered and two weapons switch directly without a dia
  await page.locator('#weapon-normal').click();await expect(page.locator('#fire-note')).toContainText('大铅弹');
  await page.reload();await page.getByRole('button',{name:'进入战场',exact:true}).click();
  await expect(page.locator('[data-choice="cannon"]')).toHaveClass(/selected/);await expect(page.locator('#vehicle-preview')).toContainText('老土');
- await page.screenshot({path:'QA/v1.7-tank-selection.png'});
+ await page.screenshot({path:'QA/v1.7.1-tank-selection.png'});
 });
 test('enabled action controls all acknowledge clicks with sound',async({page})=>{
  await page.addInitScript(()=>{(window as any).clickSounds=0;const original=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){if((this as HTMLAudioElement).src.includes('sfx_click'))(window as any).clickSounds++;return original.call(this);};});
@@ -226,7 +226,7 @@ test('small iPad Pro dashboard fits both 11-inch viewports with useful touch tar
     expect(overflowing).toBe(false);
     const minimap=await page.locator('#minimap-panel').boundingBox();expect(Math.abs(minimap!.x+minimap!.width/2-(field!.x+field!.width/2))).toBeLessThan(1);
     expect(minimap!.y).toBeGreaterThan(field!.y+field!.height*.8);expect(minimap!.y+minimap!.height).toBeLessThan(field!.y+field!.height);
-    await page.screenshot({path:`QA/v1.7-ipad-pro-11-${width}x834.png`});
+    await page.screenshot({path:`QA/v1.7.1-ipad-pro-11-${width}x834.png`});
   }
 });
 
@@ -272,7 +272,7 @@ test('the shell atlas renders twenty-seven genuinely distinct projectiles on the
   expect(new Set(pixels.map(p=>p.color)).size).toBe(27);expect(new Set(pixels.map(p=>p.image)).size).toBe(27);expect(pixels.every(p=>p.body>12)).toBe(true);
   const close=await page.locator('.projectile-dialog .dialog-primary').boundingBox();expect(close!.y+close!.height).toBeLessThanOrEqual(814);
   const timer=await page.locator('#timer span').textContent();await page.waitForTimeout(400);await expect(page.locator('#timer span')).toHaveText(timer!);
-  await page.screenshot({path:'QA/v1.7-projectile-atlas-ipad-pro-11.png'});
+  await page.screenshot({path:'QA/v1.7.1-projectile-atlas-ipad-pro-11.png'});
   await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
 });
 
@@ -280,7 +280,7 @@ test('real snowfall is selectable at setup and remains visible in the battlefiel
   await start(page);await page.locator('#pause-button').click();await page.getByRole('button',{name:'重新部署',exact:true}).click();
   await page.locator('[data-owner="0"]').click();await page.locator('[data-choice="water"]').click();
   await page.locator('.weather-choice').click();await expect(page.locator('input[name="snow"]')).toBeChecked();
-  await page.screenshot({path:'QA/v1.7-snow-setup-ipad-pro-11.png'});
+  await page.screenshot({path:'QA/v1.7.1-snow-setup-ipad-pro-11.png'});
   await page.getByRole('button',{name:'开始新对局',exact:true}).click();await expect(page.locator('#map-label')).toContainText('飘雪');
   await expect(page.locator('#status-0')).toContainText('水鬼');await expect(page.locator('#fire-button')).toBeEnabled();
 });
@@ -290,7 +290,7 @@ test('holding icon controls explains them without switching or using an item',as
  const hold=async(selector:string)=>{const r=await page.locator(selector).boundingBox();await page.mouse.move(r!.x+r!.width/2,r!.y+r!.height/2);await page.mouse.down();await page.waitForTimeout(500);await expect(page.locator('#control-hint')).toBeVisible();};
  await hold('#quick-items [data-item="repair"]');await expect(page.locator('#control-hint')).toContainText('生命已满');await page.mouse.up();
  await hold('#weapon-normal');await expect(page.locator('#control-hint')).toContainText('巨石');await page.mouse.up();await expect(page.locator('#weapon-special')).toHaveAttribute('aria-pressed','true');
- await hold('#quick-items [data-item="double"]');await expect(page.locator('#control-hint')).toContainText('双发');await page.screenshot({path:'QA/v1.7-control-hint-ipad-pro-11.png'});
+ await hold('#quick-items [data-item="double"]');await expect(page.locator('#control-hint')).toContainText('双发');await page.screenshot({path:'QA/v1.7.1-control-hint-ipad-pro-11.png'});
  const button=await page.locator('#quick-items [data-item="double"]').boundingBox();await page.mouse.move(button!.x+button!.width/2+12,button!.y+button!.height/2);await page.mouse.up();
  await expect(page.locator('#status-0')).not.toContainText('双发');await page.locator('#quick-items [data-item="double"]').click();await expect(page.locator('#status-0')).toContainText('双发');
 });
@@ -307,11 +307,11 @@ test('six map previews fit the small iPad and disclose sourced facts versus Web 
   const previews=await page.locator('canvas[data-map-preview]').evaluateAll((canvases:any[])=>canvases.map(c=>c.toDataURL()));
   expect(new Set(previews).size).toBe(6);
   const close=await page.getByRole('button',{name:'开始对局',exact:true}).boundingBox();expect(close!.y+close!.height).toBeLessThanOrEqual(814);
-  await page.screenshot({path:`QA/v1.7-map-selection-${width}x834.png`});
+  await page.screenshot({path:`QA/v1.7.1-map-selection-${width}x834.png`});
   await page.locator('input[name="map"][value="temple"]').locator('..').click();await page.locator('.map-notes summary').click();
   await expect(page.locator('#map-choice-note')).toContainText('用户确认');await expect(page.locator('#map-choice-note')).toContainText('本作重绘');
   await page.locator('input[name="map"][value="egypt"]').locator('..').click();await expect(page.locator('#map-choice-note')).toContainText('未取得原版地形细节');
-  await page.screenshot({path:`QA/v1.7-map-evidence-${width}x834.png`});
+  await page.screenshot({path:`QA/v1.7.1-map-evidence-${width}x834.png`});
  }
 });
 
@@ -322,7 +322,7 @@ test('classic factory temple and Egypt render with compact HUD and centered mini
   await expect(page.locator('#map-label')).toHaveText(name);await expect(page.locator('#fire-button')).toBeEnabled();
   const field=await page.locator('#battlefield').boundingBox(),mini=await page.locator('#minimap-panel').boundingBox();
   expect(field!.height).toBeGreaterThan(600);expect(Math.abs(mini!.x+mini!.width/2-width/2)).toBeLessThan(1);
-  await page.screenshot({path:`QA/v1.7-${id}-${width}x834.png`});
+  await page.screenshot({path:`QA/v1.7.1-${id}-${width}x834.png`});
  }
  expect(errors).toEqual([]);
 });
