@@ -2,18 +2,21 @@ const asset=(name:string)=>`${import.meta.env.BASE_URL}audio/${name}`;
 import {weaponById,type WeaponId} from './catalog';
 export class AudioManager {
   music=new Audio(asset('bgm-sunny-30s.mp3'));
-  enabled=false;volume=0.65;unlocked=false;
+  soundEnabled=false;musicEnabled=false;volume=0.65;unlocked=false;
+  private paused=false;
+  private playingEffects=new Set<HTMLAudioElement>();
   private context:AudioContext|null=null;
   private master:GainNode|null=null;
   private charge:{oscillators:OscillatorNode[];gain:GainNode}|null=null;
   private movement:{oscillator:OscillatorNode;noise:AudioBufferSourceNode;gain:GainNode;pan:StereoPannerNode}|null=null;
   private tracking:{oscillator:OscillatorNode;gain:GainNode;pan:StereoPannerNode}|null=null;private lastLock=-10;
   constructor() {this.music.loop=true;this.music.volume=this.volume*0.55;}
-  unlock() {this.unlocked=true;if(this.enabled) this.start();}
-  setEnabled(enabled:boolean) {this.enabled=enabled;if(enabled&&this.unlocked) this.start();else {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();}}
+  unlock() {this.unlocked=true;if(this.musicEnabled&&!this.paused) this.start();}
+  setMusicEnabled(enabled:boolean) {this.musicEnabled=enabled;if(enabled&&this.unlocked&&!this.paused)this.start();else this.music.pause();}
+  setSoundEnabled(enabled:boolean) {this.soundEnabled=enabled;if(this.master&&this.context)this.master.gain.setTargetAtTime(enabled?this.volume:0,this.context.currentTime,.02);if(!enabled){this.stopCharge();this.stopMovement();this.stopTracking();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();}}
   private start() {void this.music.play().catch(()=>{});}
-  setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.volume*0.55;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.volume,this.context.currentTime,0.02);}
-  pause(paused:boolean) {if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();}else if(this.enabled&&this.unlocked) this.start();}
+  setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.volume*0.55;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
+  pause(paused:boolean) {this.paused=paused;if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();}else if(this.musicEnabled&&this.unlocked) this.start();}
   private graph() {
     if(!this.context) {
       this.context=new AudioContext();this.master=this.context.createGain();this.master.gain.value=this.volume;
@@ -24,7 +27,7 @@ export class AudioManager {
     return {c:this.context,output:this.master!};
   }
   startCharge() {
-    if(!this.enabled||!this.unlocked||this.charge) return;
+    if(!this.soundEnabled||!this.unlocked||this.charge) return;
     try {
       const {c,output}=this.graph(),gain=c.createGain(),now=c.currentTime;
       gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(0.12,now+0.07);gain.connect(output);
@@ -50,7 +53,7 @@ export class AudioManager {
     for(const oscillator of oscillators) {oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};oscillator.stop(now+0.06);}
   }
   updateMovement(active:boolean,sourceX=0,viewerX=0) {
-    if(!active||!this.enabled||!this.unlocked) {this.stopMovement();return;}
+    if(!active||!this.soundEnabled||!this.unlocked) {this.stopMovement();return;}
     try {
       const {c,output}=this.graph();
       if(!this.movement) {
@@ -73,7 +76,7 @@ export class AudioManager {
     m.oscillator.onended=()=>{m.oscillator.disconnect();m.noise.disconnect();m.gain.disconnect();m.pan.disconnect();};
   }
   updateTracking(active:boolean,weapon?:WeaponId,x=0,viewerX=0) {
-    if(!active||!this.enabled||!this.unlocked) {this.stopTracking();return;}
+    if(!active||!this.soundEnabled||!this.unlocked) {this.stopTracking();return;}
     try {const {c,output}=this.graph();if(!this.tracking){const oscillator=c.createOscillator(),gain=c.createGain(),pan=c.createStereoPanner();oscillator.type='sine';oscillator.connect(gain);gain.connect(pan);pan.connect(output);gain.gain.value=.08;oscillator.start();this.tracking={oscillator,gain,pan};}
       const signature=weapon?weaponById(weapon).sound??27:27;
       this.tracking.oscillator.frequency.setTargetAtTime(430+signature*11+Math.sin(c.currentTime*14)*80,c.currentTime,.02);
@@ -82,10 +85,10 @@ export class AudioManager {
     }catch{this.stopTracking();}
   }
   stopTracking(){if(!this.tracking||!this.context)return;const t=this.tracking;this.tracking=null;t.gain.gain.setTargetAtTime(.0001,this.context.currentTime,.02);t.oscillator.stop(this.context.currentTime+.07);t.oscillator.onended=()=>{t.oscillator.disconnect();t.gain.disconnect();t.pan.disconnect();};}
-  play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim',sourceX?:number,viewerX=0,weapon?:WeaponId) {
-    if(!this.enabled||!this.unlocked) return;
+  play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer',sourceX?:number,viewerX=0,weapon?:WeaponId) {
+    if(!this.soundEnabled||!this.unlocked) return;
     if(type==='click'||type==='win') {
-      const audio=new Audio(asset(type==='win'?'sfx_celebrate.mp3':'sfx_click.mp3'));audio.volume=this.volume*0.95;void audio.play().catch(()=>{});return;
+      const audio=new Audio(asset(type==='win'?'sfx_celebrate.mp3':'sfx_click.mp3'));audio.volume=this.volume*0.95;this.playingEffects.add(audio);audio.onended=()=>this.playingEffects.delete(audio);void audio.play().catch(()=>this.playingEffects.delete(audio));return;
     }
     try {
       const graph=this.graph(),c=graph.c,now=c.currentTime;let output:AudioNode=graph.output;
@@ -105,6 +108,7 @@ export class AudioManager {
         source.connect(filter);filter.connect(gain);gain.connect(output);source.start();source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
       };
       if(type==='aim') {tone(740,600,.055,.09,'triangle');return;}
+      if(type==='transfer'){tone(260,1500,.45,.24,'sine');tone(780,260,.3,.16,'triangle');noise(.18,.25,2600);return;}
       if(type==='lock') {if(now-this.lastLock<.1)return;this.lastLock=now;const index=weapon?weaponById(weapon).sound??27:27;tone(650+index*9,1150+index*9,.18,.22);tone(980+index*7,1400+index*7,.13,.11);return;}
       if((type==='shot'||type==='explosion')&&weapon) {
         const w=weaponById(weapon),i=w.sound??27,pitch=85+i*13,waves:OscillatorType[]=['sine','triangle','sawtooth','square'];

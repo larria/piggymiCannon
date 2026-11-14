@@ -20,18 +20,19 @@ export const WEAPONS: Weapon[] = [
   { id:'homing', name:'猎星追踪弹', english:'Homing shell', description:'仅从空投获得。下降到地面附近后，会追踪 140 米内的敌人；地形仍可阻挡它。', damage:62,radius:29,digRadius:20,digDepth:20,ammo:0,color:'#be9159',icon:'target',tag:'稀有空投' },
 ];
 WEAPONS.forEach((w,i)=>{w.shape=w.id;w.sound=27+i;});
+export const TURN_ITEMS:ItemId[]=['double','teleport','boost','repair'];
 export const ITEMS: { id:ItemId; name:string; description:string; count:number; icon:string;cost:number;cooldown:number;unlock:number }[] = [
-  { id:'repair', name:'维修包', description:'生命不高于最大值的 77% 时恢复约 23% 生命并解毒。消耗 2 战术点，冷却 2 个自己的回合。', count:2, icon:'plus',cost:2,cooldown:2,unlock:1 },
+  { id:'repair', name:'补给', description:'恢复约 23% 最大生命并解毒，不超过生命上限。每个自己的回合补齐一件，每回合最多使用一件道具。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
-  { id:'boost', name:'火力强化', description:'本回合攻击伤害 +50%，不能储存到下一回合。消耗 3 战术点，第 2 回合解锁。', count:1, icon:'bolt',cost:3,cooldown:3,unlock:2 },
-  { id:'teleport', name:'战术转移', description:'第 3 个自己的回合解锁，消耗 3 战术点。传送到 230 米内的稳定平台，不能在坠落中使用。', count:1, icon:'transfer',cost:3,cooldown:4,unlock:3 },
+  { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每个自己的回合补齐一件，每回合最多使用一件道具。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
+  { id:'teleport', name:'转移弹', description:'装填后按角度与力度发射，坦克传送到炮弹实际落点，不造成伤害。落点在场外、水中或敌人身上则转移失败。每回合一件。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
   { id:'wind', name:'定风装置', description:'风速至少 1.5 m/s 时将本回合风力归零。消耗 2 战术点，冷却 2 回合。', count:1, icon:'wind',cost:2,cooldown:2,unlock:1 },
-  {id:'double',name:'双发装填',description:'仅从空投获得，本次攻击追加一轮齐射。消耗 3 战术点，限本回合，冷却 4 回合。',count:0,icon:'triple',cost:3,cooldown:4,unlock:1},
+  {id:'double',name:'双发',description:'本次攻击追加一轮齐射，只算一次行动。每个自己的回合补齐一件，每回合最多使用一件道具。',count:1,icon:'triple',cost:0,cooldown:0,unlock:1},
 ];
 export const MAPS: { id:MapId; name:string; sub:string; color:string;description:string }[] = [
   { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75',description:'本作原创峡谷，高地与断崖构成攻防。' },
-  { id:'coast', name:'独木桥', sub:'薄桥易断 · 挖地击落', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；桥宽、厚度与比例为本作重绘。' },
+  { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；本作加厚桥面，老土单发普通弹落地不能直接挖穿，连续挖掘仍可击落。桥宽、厚度与比例为本作配置。' },
   { id:'moon', name:'天空之城', sub:'厚雪浮岛 · 多次挖穿', color:'#91aab6',description:'2003 年游侠攻略描述厚雪平台难以打穿。本作采用厚雪多层浮岛；布局、坐标及低重力是 Web 配置。' },
   { id:'factory', name:'钢铁工厂', sub:'永久底板 · Z 形钢梁',color:'#8f9998',description:'依据游侠《疯狂坦克II制胜宝典》：不会被打掉下去，Z 形地形提供直射机会。底板永久不破，钢梁可破；尺寸与连接布局为本作重绘，仍可能摔伤。' },
   { id:'temple', name:'神圣殿堂', sub:'薄轨与安全节点 · 易碎',color:'#bba883',description:'依据用户确认的薄轨道及不可破节点，并参照游侠攻略“中央殿堂和下方永久半圆，其余地面很薄”。下层薄轨间隔设永久节点，中央节点带半圆承托；其余平台易碎。节点位置和比例为本作重绘。' },

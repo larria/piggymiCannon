@@ -48,7 +48,7 @@ test('attack, item, movement and aiming time accumulate waiting; pauses and flig
  run(g,3);assert.equal(g.delayFor(t,'cannon-normal'),710);assert.equal(g.delayFor(t,'cannon-special'),810);
  const time=t.actionTime;g.paused=true;run(g,3);g.paused=false;assert.equal(t.actionTime,time);
  assert.ok(g.move(-1,.1));assert.ok(g.delayFor(t,'cannon-normal')>710);
- assert.ok(g.useItem('shield'));assert.equal(t.itemDelay,200);
+ assert.ok(g.useItem('boost'));assert.equal(t.itemDelay,200);
  assert.ok(g.fire());const delay=t.lastDelay;run(g,.2);assert.equal(t.actionTime,time);assert.equal(t.lastDelay,delay);
 });
 

@@ -53,24 +53,14 @@ test('craters remove terrain permanently, cause fall damage, and water is lethal
   run(g,2);assert.ok(t.hp<150);assert.equal(t.y,g.support(t.x,t.y+18)-18);
   g.crater(t.x,WATER_Y-2,100);run(g,4);assert.equal(t.hp,0);assert.equal(g.phase,'ended');assert.equal(g.winner,1);
 });
-test('shields absorb damage, repair caps at maximum, and only one item per turn is allowed',()=>{
-  const g=ready(),t=g.active;
-  assert.ok(g.useItem('shield'));assert.equal(t.shield,40);
-  g.damage(t,25,1);assert.equal(t.hp,150);assert.equal(t.shield,15);
-  g.damage(t,35,1);assert.equal(t.hp,130);assert.equal(t.shield,0);
-  assert.equal(g.useItem('repair'),false);
-  g.nextTurn();g.nextTurn();assert.equal(g.useItem('repair'),false);
-  g.nextTurn();g.nextTurn();t.hp=110;assert.ok(g.useItem('repair'));assert.equal(t.hp,145);assert.equal(t.items.repair,1);
+test('shields still absorb damage and replenished supply respects the one-item limit',()=>{
+ const g=ready(),t=g.active;t.items.shield=1;assert.ok(g.useItem('shield'));g.damage(t,25,1);assert.equal(t.hp,150);assert.equal(t.shield,15);
+ g.damage(t,35,1);assert.equal(t.hp,130);assert.equal(t.shield,0);assert.equal(g.useItem('repair'),false);
+ g.nextTurn();g.nextTurn();assert.ok(g.useItem('repair'));assert.equal(t.hp,150);assert.equal(t.items.repair,0);
 });
-test('teleport validates its range and never consumes the item on invalid targets',()=>{
-  const g=ready(),t=g.active;for(let i=0;i<4;i++) g.nextTurn();assert.ok(g.useItem('teleport'));
-  assert.equal(g.teleport(t.x+400),false);assert.equal(t.items.teleport,1);
-  assert.ok(g.teleport(t.x+10));assert.equal(t.items.teleport,0);assert.equal(t.itemUsed,true);assert.equal(g.teleporting,false);
-});
-test('a pending teleport cannot be combined with another item in the same turn',()=>{
-  const g=ready();for(let i=0;i<4;i++) g.nextTurn();g.useItem('teleport');assert.ok(g.teleporting);
-  assert.ok(g.useItem('shield'));assert.equal(g.teleporting,false);
-  assert.equal(g.teleport(g.active.x+60),false);assert.equal(g.active.items.teleport,1);
+test('arming a transfer can be cancelled by another item without spending the transfer shell',()=>{
+ const g=ready();assert.ok(g.useItem('teleport'));assert.ok(g.teleporting);assert.ok(g.useItem('double'));
+ assert.equal(g.teleporting,false);assert.equal(g.active.items.teleport,1);assert.equal(g.active.itemUsed,true);
 });
 test('burn damage credits the fire owner and lasts only its intended rounds',()=>{
   const g=ready();g.fires.push({x:g.enemy.x,radius:60,turns:3,owner:0});
@@ -100,7 +90,7 @@ test('AI at every difficulty plans legal shots and hands the turn back',()=>{
 });
 test('supply crates can be collected and turn-41 sudden death damages the active tank',()=>{
   const g=ready(),t=g.active;g.crates.push({x:t.x,y:t.y,type:'medical'});t.hp=90;
-  run(g,0.05);assert.equal(g.crates.length,0);assert.equal(t.hp,112);assert.equal(t.items.repair,2);
+  run(g,0.05);assert.equal(g.crates.length,0);assert.equal(t.hp,112);assert.equal(t.items.repair,1);
   g.turn=39;g.nextTurn();assert.equal(g.turn,40);assert.equal(g.active.hp,138);
 });
 test('a seeded automated match reaches a valid winner without deadlocking',()=>{

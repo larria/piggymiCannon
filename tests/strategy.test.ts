@@ -11,12 +11,12 @@ const run=(g:Game,seconds:number)=>{for(let i=0;i<seconds*120;i++) g.update(1/12
 
 test('bridge and sky terrains have real empty space below solid platforms',()=>{
   const bridge=ready({map:'coast'}),sky=ready({map:'moon'});
-  assert.ok(bridge.land.solid(175,bridge.ground(175)+10));assert.equal(bridge.land.solid(175,500),false);
+  assert.ok(bridge.land.solid(175,bridge.ground(175)+10));assert.equal(bridge.land.solid(175,570),false);
   assert.ok(sky.ground(630)<250);assert.equal(sky.land.solid(630,380),false);
   assert.ok(sky.ground(630,380)>400);assert.ok(sky.land.solid(630,460));
 });
 test('excavating a bridge foundation drops a full-health enemy for a win',()=>{
-  const g=ready({map:'coast'}),enemy=g.enemy;g.crater(enemy.x,g.ground(enemy.x)+20,65,90);
+  const g=ready({map:'coast'}),enemy=g.enemy;g.crater(enemy.x,g.ground(enemy.x)+20,65,180);
   run(g,4);assert.equal(enemy.hp,0);assert.equal(g.phase,'ended');assert.equal(g.winner,0);
 });
 test('a falling tank can land on a lower sky island without snapping to an upper floor',()=>{
@@ -83,16 +83,10 @@ test('all weapons separate blast damage from excavation and dig more on a ground
   assert.ok(excavation('drill',false).depth>excavation('shell',false).depth);
   assert.ok(excavation('emp',false).depth<excavation('shell',false).depth);
 });
-test('item stock, tactical energy, cooldown, turn unlocks and thresholds all enforce restrictions',()=>{
-  const g=ready(),t=g.active;
-  assert.match(g.itemUnavailable('teleport')!,/第 3/);assert.equal(g.useItem('teleport'),false);
-  assert.equal(g.useItem('repair'),false);assert.equal(g.useItem('fuel'),false);
-  assert.ok(g.useItem('shield'));assert.equal(t.tactics,0);assert.equal(t.items.shield,0);
-  g.nextTurn();g.nextTurn();t.items.shield=1;t.shield=0;
-  assert.match(g.itemUnavailable('shield')!,/冷却/);assert.equal(g.useItem('shield'),false);
-  assert.match(g.itemUnavailable('repair')!,/战术点/);
-  g.nextTurn();g.nextTurn();t.hp=100;assert.ok(g.useItem('repair'));assert.equal(t.hp,135);
-  assert.equal(t.tactics,0);assert.equal(g.useItem('fuel'),false);
+test('the four turn items share one use and refill independently at each own action',()=>{
+ const g=ready(),t=g.active;assert.equal(g.itemUnavailable('teleport'),null);assert.equal(g.itemUnavailable('boost'),null);
+ assert.ok(g.useItem('boost'));assert.equal(g.useItem('double'),false);assert.equal(g.useItem('teleport'),false);
+ g.nextTurn();assert.equal(t.items.boost,0);g.nextTurn();assert.equal(t.items.boost,1);assert.ok(g.useItem('double'));
 });
 test('turn-scoped firepower cannot be stockpiled by skipping a turn',()=>{
   const g=ready();g.nextTurn();g.nextTurn();assert.ok(g.useItem('boost'));g.skipTurn();assert.equal(g.tanks[0].boost,false);
@@ -114,9 +108,9 @@ test('version checks compare semantic version numbers instead of cached strings'
   assert.equal(compareVersions('1.10.0','1.9.8'),1);assert.equal(compareVersions('1.1.0','1.1.0'),0);
   assert.equal(compareVersions('1.0.9','1.1.0'),-1);assert.throws(()=>compareVersions('unknown','1.1.0'));
 });
-test('breathing begins strictly below one third health and visibly changes pose over time',()=>{
+test('breathing uses thirty-percent health and visibly changes pose over time',()=>{
   assert.equal(breathingPose(50,1).active,false);assert.equal(breathingPose(0,1).active,false);
-  const a=breathingPose(49,0),b=breathingPose(49,0.4);
+  const a=breathingPose(45,0),b=breathingPose(45,0.4);
   assert.equal(a.active,true);assert.notEqual(a.bob,b.bob);assert.notEqual(a.mouth,b.mouth);
 });
 test('fog and fire lines are independently rolled with one in thirty probability',()=>{
@@ -143,8 +137,8 @@ test('supply animation pauses the turn clock and drops on reachable stable groun
     assert.ok(g.log.some(line=>line.includes('已落地')));
   }
 });
-test('rare supplies grant double fire and homing ammunition without free initial stock',()=>{
-  const g=ready(),t=g.active;assert.equal(t.items.double,0);assert.equal(t.ammo.homing,0);
+test('supplies top up double fire and grant rare homing ammunition',()=>{
+  const g=ready(),t=g.active;assert.equal(t.items.double,1);assert.equal(t.ammo.homing,0);
   g.crates.push({x:t.x,y:t.y,type:'double'},{x:t.x,y:t.y,type:'homing'});run(g,0.03);
   assert.equal(t.items.double,1);assert.equal(t.ammo.homing,1);
   g.nextTurn();g.nextTurn();assert.ok(g.useItem('double'));g.fire();assert.equal(g.projectiles.length,2);assert.equal(t.items.double,0);

@@ -9,7 +9,7 @@ export const WEAPON_REFERENCE:Partial<Record<WeaponId,WeaponReference>>={
  'bowl-normal':reference(1,'一枚大石头，直接爆破'),
  'bowl-special':reference(1,'一枚火石，落地燃烧、火焰向地面扩散，按秒造成伤害；雪会灭火'),
  'crossbow-normal':reference(1,'一支高伤、小范围箭'),
- 'crossbow-special':reference(1,'一支毒箭，行动交接时毒伤；耐毒机体减伤，海怪半血停止，其余红血停止'),
+ 'crossbow-special':reference(1,'一支毒箭，使未红血的正中目标中毒',undefined,'旧版耐毒／停止阈值有差异；当前按用户要求每次目标自己的行动扣最大生命20%，止于30%红血，不宣称这是各服统一原版公式'),
  'cannon-normal':reference(1,'大铅弹／铅球／黑玉，伤害低、地形破坏强'),
  'cannon-special':reference(1,'小红豆／红玉，直接伤害高、地形破坏小'),
  'beetle-normal':reference(1,'单发爆破弹'),

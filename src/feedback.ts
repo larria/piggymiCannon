@@ -1,5 +1,6 @@
-export function breathingPose(hp:number,time:number) {
-  if(hp<=0||hp>=50) return {active:false,bob:0,scale:1,mouth:0,puff:0};
-  const cycle=time*3.6;
-  return {active:true,bob:Math.sin(cycle)*2.1,scale:1+Math.sin(cycle)*0.045,mouth:1.2+(Math.sin(cycle)+1)*1.4,puff:(time*0.85)%1};
+import {isRedHealth} from './health';
+export function breathingPose(hp:number,time:number,maxHP=150,vehicleId?:string|null) {
+  if(vehicleId==='sea'||!isRedHealth({hp,maxHP})) return {active:false,bob:0,scale:1,mouth:0,puff:0,lean:0};
+  const cycle=time*5.2;
+  return {active:true,bob:Math.sin(cycle)*5.5,scale:1+Math.sin(cycle)*.12,mouth:3+(Math.sin(cycle)+1)*2.2,puff:(time*1.3)%1,lean:Math.sin(cycle)*.09};
 }

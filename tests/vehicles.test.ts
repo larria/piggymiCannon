@@ -69,9 +69,11 @@ test('hovering tanks do not trigger ground mines, while a direct mine hit still 
  stepped.explode({...stepped.launch(stepped.enemy,'mine-special'),x:stepped.active.x,y:stepped.active.y,mineArmed:true},0);
  assert.ok(stepped.active.hp<direct.active.hp);
 });
-test('both poison victims tick at every handoff, resistance halves damage, sea poison stops at half health',()=>{
- const g=flatGame('crossbow','duke');g.tanks.forEach(t=>t.poisoned=true);const before=g.tanks.map(t=>t.hp);g.nextTurn();g.tanks.forEach((t,i)=>assert.equal(t.hp,before[i]-20));
- const sea=flatGame('sea');sea.active.poisoned=true;sea.active.hp=sea.active.maxHP*.5+3;sea.nextTurn();assert.equal(sea.tanks[0].hp,440);sea.nextTurn();assert.equal(sea.tanks[0].hp,440);
+test('poison ticks twenty percent only after the victim own action and stops at thirty percent',()=>{
+ const g=flatGame('crossbow','duke');g.tanks.forEach(t=>t.poisoned=true);const before=g.tanks.map(t=>t.hp);
+ g.nextTurn();assert.equal(g.tanks[0].hp,before[0]-Math.ceil(g.tanks[0].maxHP*.2));assert.equal(g.tanks[1].hp,before[1]);
+ g.nextTurn();assert.equal(g.tanks[1].hp,before[1]-Math.ceil(g.tanks[1].maxHP*.2));
+ const sea=flatGame('sea');sea.active.poisoned=true;sea.active.hp=sea.active.maxHP*.5+3;sea.nextTurn();assert.ok(sea.tanks[0].hp<sea.tanks[0].maxHP*.5);assert.ok(sea.tanks[0].poisoned);
 });
 test('fire and gas damage by simulated seconds and pause during handoff and supply animation',()=>{
  const g=flatGame('bowl','water');g.enemy.x=g.active.x+35;
@@ -116,7 +118,7 @@ test('poison stops at red health; purple water freezes movement; mines are actua
 });
 test('special attack delay affects initiative and sea rage scales damage without unlimited stacking',()=>{
  const g=game('sea'),v=vehicleById('sea');g.active.hp=400;assert.equal(g.launch(g.active,v.special).boost,1.5);g.active.boost=true;assert.equal(g.launch(g.active,v.special).boost,2.25);
- g.active.boost=false;g.active.hp=g.active.maxHP*.5;const shell=g.launch(g.active,v.normal);assert.equal(shell.boost,1.5);assert.equal(shell.digBoost,1.15);assert.ok(shell.rage);
+ g.active.boost=false;g.active.hp=g.active.maxHP*.5-1;const shell=g.launch(g.active,v.normal);assert.equal(shell.boost,1.5);assert.equal(shell.digBoost,1.15);assert.ok(shell.rage);
  const regular=game('cannon'),special=game('cannon');regular.selectWeapon('cannon-normal');special.selectWeapon('cannon-special');regular.fire();special.fire();assert.ok(special.active.lastDelay>regular.active.lastDelay);
 });
 test('all homing weapon intentional misses are outside the acquisition radius',()=>{
