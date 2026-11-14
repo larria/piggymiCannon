@@ -10,7 +10,7 @@ test('the classic roster has twelve ordinary tanks, hidden dragon and twenty-six
 });
 
 const flatGame=(id:any='cannon',other:any='cannon')=>{
- const g=game(id,other);g.land.mask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach(t=>t.y=432);g.wind=0;return g;
+ const g=game(id,other);g.land.mask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=175+i*930;t.y=432;});g.wind=0;return g;
 };
 test('all twenty-six guns match the historical shot counts and all thirty-nine visuals have unique colors and shapes',()=>{
  assert.equal(Object.keys(WEAPON_REFERENCE).length,26);
@@ -56,7 +56,7 @@ test('purple water immobilizes a damaged enemy for exactly one own action, inclu
   const g=flatGame('water'),e=g.enemy;
   g.explode({...g.launch(g.active,'water-special'),x:e.x+offset,y:e.y},offset===0?e.id:undefined);
   assert.equal(e.immobile,1);g.nextTurn();g.acceptHandoff();assert.equal(g.current,e.id);
-  assert.equal(g.move(-1,.1),false);assert.ok(g.fire());g.projectiles=[];g.nextTurn();assert.equal(e.immobile,0);
+  assert.equal(g.move(-1,.1),false);for(let i=0;i<120&&g.active.fallVelocity;i++)g.update(1/120);assert.ok(g.fire());g.projectiles=[];g.nextTurn();assert.equal(e.immobile,0);
   while(g.current!==e.id)g.nextTurn();g.acceptHandoff();assert.ok(g.move(-1,.1));
  }
  const self=flatGame('water');self.explode({...self.launch(self.active,'water-special'),x:self.active.x,y:self.active.y},0);assert.equal(self.active.immobile,0);

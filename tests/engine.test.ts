@@ -89,8 +89,8 @@ test('AI at every difficulty plans legal shots and hands the turn back',()=>{
   }
 });
 test('supply crates can be collected and turn-41 sudden death damages the active tank',()=>{
-  const g=ready(),t=g.active;g.crates.push({x:t.x,y:t.y,type:'medical'});t.hp=90;
-  run(g,0.05);assert.equal(g.crates.length,0);assert.equal(t.hp,112);assert.equal(t.items.repair,1);
+  const g=ready(),t=g.active;t.items.repair=0;g.crates.push({x:t.x,y:t.y,type:'medical'});t.hp=90;
+  run(g,0.05);assert.equal(g.crates.length,0);assert.equal(t.hp,90);assert.equal(t.items.repair,1);
   g.turn=39;g.nextTurn();assert.equal(g.turn,40);assert.equal(g.active.hp,138);
 });
 test('a seeded automated match reaches a valid winner without deadlocking',()=>{

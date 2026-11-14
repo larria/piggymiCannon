@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+const webkit=process.env.PIGGY_TEST_BROWSER==='webkit';
 
 export default defineConfig({
   testDir: './tests/browser',
@@ -6,7 +7,7 @@ export default defineConfig({
   workers:1,
   timeout:40_000,
   use:{
-    channel:'chrome',
+    browserName:webkit?'webkit':'chromium',channel:webkit?undefined:'chrome',
     headless:true,
     baseURL:'http://localhost:4177/piggymiCannon/',
     viewport:{width:1194,height:834},

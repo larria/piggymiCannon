@@ -13,8 +13,8 @@ export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:stri
     case 'bowl-special':poly([[-21,-2],[-7,-10],[-10,-3],[3,-6],[10,0],[3,8],[-9,6],[-6,2]]);oval(2,0,5,5);shine(2,-1);break;
     case 'crossbow-normal':line([[-19,0],[9,0]],color,3);poly([[15,0],[6,-5],[7,0],[6,5]]);line([[-13,0],[-18,-5]],color);break;
     case 'crossbow-special':line([[-17,0],[8,0]],color,3);poly([[14,0],[3,-6],[5,0],[3,6]]);poly([[-11,0],[-19,-5],[-15,0],[-19,5]]);oval(-8,5,2,3);break;
-    case 'cannon-normal':oval(0,0,10,10);ring(0,0,7,color,2);shine(-4,-4);break;
-    case 'cannon-special':oval(0,0,4.5,3);ring(0,0,7+Math.sin(time*12)*.5,color,1.5);break;
+    case 'cannon-normal':oval(0,0,10,10);shine(-4,-4);break;
+    case 'cannon-special':oval(0,0,6,6);shine(-2,-2);break;
     case 'beetle-normal':poly([[-7,-5],[-3,-9],[5,-8],[8,-3],[6,4],[4,4],[4,8],[-4,8],[-4,4],[-7,3]]);c.fillStyle='#373a38';c.fillRect(-4,-2,3,3);c.fillRect(2,-2,3,3);c.fillRect(-2,4,4,2);break;
     case 'beetle-special':poly([[12,0],[4,-5],[-8,-5],[-4,-9],[-12,-6],[-9,0],[-12,6],[-4,9],[-8,5],[4,5]]);line([[-5,-3],[-5,3]],'#fff1d9');break;
     case 'duke-normal':line([[-17,0],[14,0]],color,2);c.strokeStyle=color;c.lineWidth=3;c.beginPath();for(let x=-13;x<11;x+=.5)c.lineTo(x,Math.sin(x*1.5)*4);c.stroke();oval(13,0,3,5);break;

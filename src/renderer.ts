@@ -1,5 +1,5 @@
 import { Game, WORLD_W, WORLD_H, WATER_Y, clamp, makeRng, type Tank } from './engine';
-import { weaponById } from './catalog';
+import { weaponById,weaponHasTrail } from './catalog';
 import { breathingPose } from './feedback';
 import {isRaging} from './health';
 import {defeatedPig,victoryConfetti} from './result-art';
@@ -324,14 +324,14 @@ export class Renderer {
       if(crate.falling) {ctx.strokeStyle='#f6f1dfaa';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(crate.x-14,crate.y-10);ctx.lineTo(crate.x-27,crate.y-48);ctx.moveTo(crate.x+14,crate.y-10);ctx.lineTo(crate.x+27,crate.y-48);ctx.stroke();ctx.fillStyle='#ead9b8cc';ctx.beginPath();ctx.ellipse(crate.x,crate.y-48,36,20,0,Math.PI,Math.PI*2);ctx.fill();}
       ctx.fillStyle='#b29469';rr(ctx,crate.x-14,crate.y-10,28,25,3);ctx.fill();ctx.strokeStyle='#ead7aa';ctx.lineWidth=2;ctx.stroke();
       ctx.fillStyle='#e9d9b5';ctx.fillRect(crate.x-2,crate.y-10,4,25);
-      if(crate.type==='double'||crate.type==='homing') {ctx.fillStyle=crate.type==='double'?'#e7c081':'#acc4d0';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(crate.type==='double'?'×2':'◎',crate.x,crate.y+9);}
+      if(['double','homing','transfer','boost'].includes(crate.type)) {ctx.fillStyle=crate.type==='double'?'#e7c081':'#acc4d0';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(crate.type==='double'?'×2':crate.type==='transfer'?'⇄':crate.type==='boost'?'↑':'◎',crate.x,crate.y+9);}
       if(crate.type==='medical') {ctx.fillStyle='#a47158';ctx.fillRect(crate.x-7,crate.y-2,14,4);ctx.fillRect(crate.x-2,crate.y-7,4,14);}
     }
     g.tanks.filter(t=>!g.fog||t.id===g.viewer).forEach(t=>this.tank(t));
     for(const p of g.projectiles) {
       if(p.delay>0||!this.visibleAt(p.x)) continue;
       ctx.strokeStyle=weaponById(p.weapon).color+'90';ctx.lineWidth=p.weapon==='sniper'?2:3;
-      ctx.beginPath();p.trail.forEach((q,i)=>{if(i===0) ctx.moveTo(q.x,q.y);else ctx.lineTo(q.x,q.y);});ctx.stroke();
+      if(weaponHasTrail(p.weapon)){ctx.beginPath();p.trail.forEach((q,i)=>{if(i===0) ctx.moveTo(q.x,q.y);else ctx.lineTo(q.x,q.y);});ctx.stroke();}
       ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(p.vy,p.vx));
       const weapon=weaponById(p.weapon);projectileArt(ctx,p.transfer?'transfer':weapon.shape??p.weapon,p.transfer?'#63adbd':weapon.color,this.time+p.phase,4-p.penetrations);
       if(p.fireBoosted||p.homing||p.rage) {ctx.strokeStyle=p.fireBoosted||p.rage?'#ffcc76':'#bddce3';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,11,0,Math.PI*2);ctx.stroke();}ctx.restore();

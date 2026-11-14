@@ -26,7 +26,7 @@ test('a falling tank can land on a lower sky island without snapping to an upper
 });
 test('tanks cannot climb steep slopes or cross a narrow pit with a large movement step',()=>{
   const g=ready();g.land=new Terrain();g.terrain=g.land.surface;
-  for(let x=0;x<=1280;x++) g.land.column(x,x<200?420:420-(x-200)*1.3,640);
+  for(let x=0;x<=1280;x++) g.land.column(x,x<200?420:420-(x-200)*2.5,640);
   g.land.rebuild();g.active.x=196;g.active.y=402;
   assert.equal(g.move(1,0.1),false);assert.equal(g.active.x,196);
   const pit=ready({map:'coast'});pit.active.x=540;pit.active.y=pit.ground(540)-18;
@@ -55,7 +55,7 @@ test('isolated 8-12 pixel ledges and reasonable staircases do not trap the tread
  const rounded=walkingCourse(x=>450-Math.max(0,Math.min(12,x-225)));for(let i=0;i<30;i++)assert.ok(rounded.move(1,.04));
 });
 test('large vertical ledges, sustained steep ramps and collapsed bridge gaps remain blocked',()=>{
- for(const angle of [40,45,55]){const g=walkingCourse(x=>450-(x-200)*Math.tan(angle*Math.PI/180));const from=g.active.x;assert.equal(g.move(1,.1),false);assert.equal(g.active.x,from);}
+ for(const angle of [65,70,80]){const g=walkingCourse(x=>450-(x-200)*Math.tan(angle*Math.PI/180));const from=g.active.x;assert.equal(g.move(1,.1),false);assert.equal(g.active.x,from);}
  const wall=walkingCourse(x=>450-(x>225?20:0));for(let i=0;i<20;i++)wall.move(1,.1);assert.ok(wall.active.x<225);
  const gap=walkingCourse(x=>x>225&&x<255?640:450);for(let i=0;i<20;i++)gap.move(1,.1);assert.ok(gap.active.x<225);
 });
@@ -83,10 +83,10 @@ test('all weapons separate blast damage from excavation and dig more on a ground
   assert.ok(excavation('drill',false).depth>excavation('shell',false).depth);
   assert.ok(excavation('emp',false).depth<excavation('shell',false).depth);
 });
-test('the four turn items share one use and refill independently at each own action',()=>{
+test('four starting items share one use and stay depleted across own actions',()=>{
  const g=ready(),t=g.active;assert.equal(g.itemUnavailable('teleport'),null);assert.equal(g.itemUnavailable('boost'),null);
  assert.ok(g.useItem('boost'));assert.equal(g.useItem('double'),false);assert.equal(g.useItem('teleport'),false);
- g.nextTurn();assert.equal(t.items.boost,0);g.nextTurn();assert.equal(t.items.boost,1);assert.ok(g.useItem('double'));
+ g.nextTurn();assert.equal(t.items.boost,0);g.nextTurn();assert.equal(t.items.boost,0);assert.ok(g.useItem('double'));
 });
 test('turn-scoped firepower cannot be stockpiled by skipping a turn',()=>{
   const g=ready();g.nextTurn();g.nextTurn();assert.ok(g.useItem('boost'));g.skipTurn();assert.equal(g.tanks[0].boost,false);
@@ -120,7 +120,7 @@ test('fog and fire lines are independently rolled with one in thirty probability
   const g=ready({fog:true,fireLine:true});assert.ok(g.fog&&g.fireLine);
 });
 test('fire-line crossing boosts a shell only once even if it crosses back',()=>{
-  const g=ready({fireLine:true});g.fireLine={x:230,top:0,bottom:570};g.active.angle=5;g.active.power=50;g.fire();
+  const g=ready({fireLine:true});g.active.x=175;g.active.y=g.ground(175)-18;g.fireLine={x:230,top:0,bottom:570};g.active.angle=5;g.active.power=50;g.fire();
   for(let i=0;i<80&&!g.projectiles[0]?.fireBoosted;i++) g.update(1/120);
   const p=g.projectiles[0];assert.ok(p?.fireBoosted);assert.equal(p.boost,1.5);
   p.x=231;p.vx=-80;g.update(0.04);assert.equal(p.boost,1.5);

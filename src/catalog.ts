@@ -22,13 +22,13 @@ export const WEAPONS: Weapon[] = [
 WEAPONS.forEach((w,i)=>{w.shape=w.id;w.sound=27+i;});
 export const TURN_ITEMS:ItemId[]=['double','teleport','boost','repair'];
 export const ITEMS: { id:ItemId; name:string; description:string; count:number; icon:string;cost:number;cooldown:number;unlock:number }[] = [
-  { id:'repair', name:'补给', description:'恢复约 23% 最大生命，不超过生命上限；回血不会解除毒箭状态，毒伤直到 30% 红血临界线才停止。每个自己的回合补齐一件，每回合最多使用一件道具。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
+  { id:'repair', name:'补给', description:'恢复约 23% 最大生命，不超过生命上限；回血不会解除毒箭状态，毒伤直到 30% 红血临界线才停止。每局开局携带一件，用掉不会自动恢复；对应补给可填空槽，每回合最多使用一件道具。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
-  { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每个自己的回合补齐一件，每回合最多使用一件道具。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
-  { id:'teleport', name:'转移弹', description:'装填后按角度与力度发射，坦克传送到炮弹实际落点，不造成伤害。落点在场外、水中或敌人身上则转移失败。每回合一件。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
+  { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每局开局携带一件，用掉不会自动恢复；对应补给可填空槽，每回合最多使用一件道具。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
+  { id:'teleport', name:'转移弹', description:'装填后按角度与力度发射，坦克传送到炮弹实际落点，不造成伤害。落点在场外、水中或敌人身上则转移失败。每局携带一件，用掉不会自动恢复；每回合最多使用一件道具。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
   { id:'wind', name:'定风装置', description:'风速至少 1.5 m/s 时将本回合风力归零。消耗 2 战术点，冷却 2 回合。', count:1, icon:'wind',cost:2,cooldown:2,unlock:1 },
-  {id:'double',name:'双发',description:'本次攻击追加一轮齐射，只算一次行动。每个自己的回合补齐一件，每回合最多使用一件道具。',count:1,icon:'triple',cost:0,cooldown:0,unlock:1},
+  {id:'double',name:'双发',description:'本次攻击追加一轮齐射，只算一次行动。每局开局携带一件，用掉不会自动恢复；对应补给可填空槽，每回合最多使用一件道具。',count:1,icon:'triple',cost:0,cooldown:0,unlock:1},
 ];
 export const MAPS: { id:MapId; name:string; sub:string; color:string;description:string }[] = [
   { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75',description:'本作原创峡谷，高地与断崖构成攻防。' },
@@ -47,9 +47,11 @@ export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:numbe
 export const ALL_WEAPONS=[...WEAPONS,...VEHICLE_WEAPONS];
 const weaponTable=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,w])) as Record<WeaponId,Weapon>;
 export const weaponById = (id:WeaponId) => weaponTable[id];
+export const weaponHasTrail=(id:WeaponId)=>id!=='cannon-normal'&&id!=='cannon-special';
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
 export const excavation = (id:WeaponId,direct:boolean) => {
-  const w=weaponById(id);return {radius:w.digRadius*(direct?0.6:1.35),depth:w.digDepth*(direct?0.65:1.5)};
+  const w=weaponById(id),full=id==='ion-special'||!direct;
+  return {radius:w.digRadius*(full?1.35:.6),depth:w.digDepth*(full?1.5:.65)};
 };
 export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number) {
   const d=DIFFICULTIES.find(d=>d.id===difficulty)!,w=weaponById(weapon);

@@ -1,4 +1,4 @@
-import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
+import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById, weaponHasTrail, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
 import {isRaging,redHealthLimit} from './health';
 import {pointHitsTank} from './tank-hitbox';
 import {resolveVehicle,vehicleById,type VehicleId,type VehicleChoice} from './vehicles';
@@ -8,7 +8,7 @@ import {buildClassicMap} from './classic-maps';
 
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
-export const MAX_CLIMB_ANGLE=35,MAX_STEP_HEIGHT=12;
+export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
 export const SHOT_WIND_GAIN=3;
 export const BRIDGE_THICKNESS=130;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
@@ -21,14 +21,14 @@ export interface Tank {
   tactics:number; turnsTaken:number; itemReadyTurn:Record<ItemId,number>;
   doubleShot:boolean;reaction:{kind:'direct'|'graze'|'fall';remaining:number}|null;
   vehicleId:VehicleId|null;maxHP:number;minAngle:number;maxAngle:number;moveSpeed:number;moveDistance:number;nextActionAt:number;lastDelay:number;poisoned:boolean;immobile:number;
-  selectedWeapon:WeaponId;lastPower:number;poisonOwner?:number;actionTime:number;movedThisTurn:number;itemDelay:number;delayCommitted:boolean;outOfBounds:boolean;
+  selectedWeapon:WeaponId;lastPower:number|null;poisonOwner?:number;actionTime:number;movedThisTurn:number;itemDelay:number;delayCommitted:boolean;outOfBounds:boolean;
 }
-export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean }
+export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean;aimOffsetX?:number;aimOffsetY?:number }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
 export interface Blast { x:number;y:number;radius:number;life:number;maxLife:number;color:string }
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
-export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing';falling?:boolean;vy?:number;vx?:number }
+export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
 export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
 export interface Mine {x:number;y:number;owner:number;weapon:WeaponId;boost:number}
 export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;clock?:number}
@@ -65,6 +65,7 @@ export class Game {
     if(this.config.fireLine??weather.fireLine) this.fireLine={x:450+this.rng()*380,top:50,bottom:550};
     this.generateTerrain();
     this.tanks=[this.createTank(0,175),this.createTank(1,1105)];
+    this.placeStartingTanks();this.heardX=this.tanks.map(t=>Math.round(t.x/90)*90);
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.targetX=this.tanks[1].x;
   }
@@ -77,8 +78,7 @@ export class Game {
   get viewer() {return this.config.mode==='ai'?0:this.current;}
   ground(x:number,fromY=0) { return this.land.below(x,fromY); }
   support(x:number,footY:number) {
-    const levels=[-16,-8,0,8,16].map(dx=>this.ground(x+dx,footY-8)).sort((a,b)=>a-b);
-    return levels[2];
+    return this.walkSupport(x,footY);
   }
   stablePlatform(x:number) {
     const levels=[-20,-10,0,10,20].map(dx=>this.ground(x+dx));
@@ -86,8 +86,9 @@ export class Game {
   }
   tankSlope(t:Tank) {
     if(t.fallVelocity>0) return 0;
-    const left=this.walkSurface(t.x-14,t.y+18),right=this.walkSurface(t.x+14,t.y+18);
-    return clamp(Math.atan2(right-left,28),-0.61,0.61);
+    const levels=this.walkLevels(t.x,t.y+18);
+    const limit=MAX_CLIMB_ANGLE*Math.PI/180;
+    return clamp(Math.atan2(levels[4]-levels[0],32),-limit,limit);
   }
   private walkSurface(x:number,foot:number) {
     // Find the actual top of this connected platform, even when the probe starts inside a small step.
@@ -97,17 +98,22 @@ export class Game {
     while(y>0&&this.land.solid(at,y-1))y--;
     return y;
   }
+  private walkLevels(x:number,foot:number) {
+    const center=this.walkSurface(x,foot),leftNear=this.walkSurface(x-8,center),rightNear=this.walkSurface(x+8,center);
+    return [this.walkSurface(x-16,leftNear),leftNear,center,rightNear,this.walkSurface(x+16,rightNear)];
+  }
   private walkSupport(x:number,foot:number) {
-    return [-16,-8,0,8,16].map(dx=>this.walkSurface(x+dx,foot)).sort((a,b)=>a-b)[2];
+    return this.walkLevels(x,foot).sort((a,b)=>a-b)[2];
   }
   private reasonableSlope(x:number,foot:number,direction:number) {
-    const heights=Array.from({length:13},(_,i)=>this.walkSurface(x+direction*i*2,foot));
+    const heights:number[]=[];let probe=foot;
+    for(let i=0;i<13;i++){probe=this.walkSurface(x+direction*i*2,probe);heights.push(probe);}
     if(heights.some(y=>y>=WATER_Y-10))return false;
     if(heights.slice(1).some((y,i)=>Math.abs(y-heights[i])>MAX_STEP_HEIGHT))return false;
     if(Math.max(...heights)-Math.min(...heights)<=MAX_STEP_HEIGHT)return true;
     const limit=Math.tan(MAX_CLIMB_ANGLE*Math.PI/180);
     // Check both a half-tread and full-tread run. One isolated ledge may be stepped over;
-    // repeated stairs and smooth ramps must still obey the sustained 35-degree grade.
+    // Sequential probes preserve thin sloped platforms; sustained ramps remain capped.
     for(const end of [6,12]){
       let steps=0;
       for(let i=1;i<=end;i++){
@@ -142,7 +148,25 @@ export class Game {
       ammo,
       items:Object.fromEntries(ITEMS.map(i=>[i.id,TURN_ITEMS.includes(i.id)?1:0])) as Record<ItemId,number>,
       frozen:0,boost:false,itemUsed:false,fallVelocity:0,fallStart:0,shots:0,damage:0,tactics:2,turnsTaken:0,
-      itemReadyTurn:Object.fromEntries(ITEMS.map(i=>[i.id,0])) as Record<ItemId,number>,doubleShot:false,reaction:null,vehicleId,maxHP:v?.hp??150,minAngle:v?.minAngle??5,maxAngle:v?.maxAngle??175,moveSpeed:v?v.movement*1.35:70,moveDistance:v?v.movement*3:100/0.33,nextActionAt:0,lastDelay:v?.waiting??560,poisoned:false,immobile:0,selectedWeapon:v?.normal??'shell',lastPower:68,actionTime:0,movedThisTurn:0,itemDelay:0,delayCommitted:false,outOfBounds:false};
+      itemReadyTurn:Object.fromEntries(ITEMS.map(i=>[i.id,0])) as Record<ItemId,number>,doubleShot:false,reaction:null,vehicleId,maxHP:v?.hp??150,minAngle:v?.minAngle??5,maxAngle:v?.maxAngle??175,moveSpeed:v?v.movement*1.35:70,moveDistance:v?v.movement*3:100/0.33,nextActionAt:0,lastDelay:v?.waiting??560,poisoned:false,immobile:0,selectedWeapon:v?.normal??'shell',lastPower:null,actionTime:0,movedThisTurn:0,itemDelay:0,delayCommitted:false,outOfBounds:false};
+  }
+  private placeStartingTanks(){
+    const both:number[]=[],one:number[]=[];
+    for(let x=60;x<=WORLD_W-60;x+=8){
+      if(!this.stablePlatform(x)||this.ground(x)>WATER_Y-40)continue;
+      const probe={...this.tanks[0],x,y:this.ground(x)-18};
+      const left=this.traversable(probe,x-60)!==null,right=this.traversable(probe,x+60)!==null;
+      if(left||right)one.push(x);if(left&&right)both.push(x);
+    }
+    const pool=both.length>=4?both:one,close=this.rng()<.22;
+    let pair:number[]|null=null;
+    for(let attempt=0;attempt<80&&!pair;attempt++){
+      const first=pool[Math.floor(this.rng()*pool.length)];
+      const options=pool.filter(x=>Math.abs(x-first)>=120&&(close?Math.abs(x-first)<=280:Math.abs(x-first)>=320));
+      if(options.length)pair=[first,options[Math.floor(this.rng()*options.length)]].sort((a,b)=>a-b);
+    }
+    if(!pair&&pool.length>=2){const first=pool[0],last=pool[pool.length-1];if(last-first>=120)pair=[first,last];}
+    if(pair)this.tanks.forEach((t,i)=>{t.x=pair![i];t.y=this.ground(t.x)-18;t.direction=i===0?1:-1;});
   }
   private generateTerrain() {
     const phase=this.rng()*2;
@@ -152,8 +176,7 @@ export class Game {
         if(x<90||x>1190) this.land.column(x,394,TERRAIN_H);
         else {
           const top=398+Math.sin(x/115)*4;
-          const landing=(x<285||x>995);
-          this.land.column(x,top,top+BRIDGE_THICKNESS);
+              this.land.column(x,top,top+BRIDGE_THICKNESS);
         }
       } else if(this.config.map==='moon') {
         if(x>=70&&x<=410) {const top=355+Math.sin(x/92+phase)*12;this.land.column(x,top,top+140);}
@@ -303,6 +326,14 @@ export class Game {
     else if(id==='triple') this.projectiles=[-5,0,5].map(d=>this.launch(t,id,t.angle+d));
     else if(id==='airstrike') this.projectiles=[-38,0,38].map(d=>({...this.launch(t,id),x:clamp(this.targetX+d,20,WORLD_W-20),y:-40-Math.abs(d),vx:0,vy:190}));
     else this.projectiles=[this.launch(t,id)];
+    if(!transfer&&(t.vehicleId==='multi'||t.vehicleId==='dragon')){
+      const count=this.projectiles.length;
+      this.projectiles.forEach((p,i)=>{
+        const rank=(i-(count-1)/2)/Math.max(1,(count-1)/2),speed=1+rank*.025;
+        p.vx*=speed;p.vy*=speed;
+        if(spec.effect==='homing'){p.aimOffsetX=rank*20;p.aimOffsetY=Math.sin(i*2.4)*12;}
+      });
+    }
     if(!transfer&&spec.homingMode==='volley') {
       const volley=++this.volleySequence,impact=this.predict(t.angle,t.power,id,12,t);
       this.volleyTargets.set(volley,{x:impact.x,y:impact.y,target:null});
@@ -342,10 +373,11 @@ export class Game {
       }
       const target=p.lockTarget===null?null:this.tanks[p.lockTarget];
       if(target) {
-        const dx=target.x-p.x,dy=target.y-p.y,speed=Math.max(250,Math.hypot(p.vx,p.vy)),angle=Math.atan2(dy,dx),blend=Math.min(1,dt*5);
+        const aimX=target.x+(p.aimOffsetX??0),aimY=target.y+(p.aimOffsetY??0);
+        const dx=aimX-p.x,dy=aimY-p.y,speed=Math.max(250,Math.hypot(p.vx,p.vy)),angle=Math.atan2(dy,dx),blend=Math.min(1,dt*5);
         p.vx+=(Math.cos(angle)*speed-p.vx)*blend;p.vy+=(Math.sin(angle)*speed-p.vy)*blend;
         if(!p.homing) this.emit('lock',`${spec.name}锁定目标，开始追踪。`,undefined,p.x,p.weapon);
-        p.homing=true;p.lockX=target.x;p.lockY=target.y;p.lockAge+=dt;
+        p.homing=true;p.lockX=aimX;p.lockY=aimY;p.lockAge+=dt;
       }
     }
     p.vy+=g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
@@ -356,7 +388,7 @@ export class Game {
     if(!p.transfer&&this.fireLine&&!p.fireBoosted&&(oldX-this.fireLine.x)*(p.x-this.fireLine.x)<=0&&p.y>=this.fireLine.top&&p.y<=this.fireLine.bottom) {
       p.boost*=1.5;p.fireBoosted=true;this.burst(p.x,p.y,10,'#f5a956');
     }
-    p.trail.push({x:p.x,y:p.y});if(p.trail.length>40) p.trail.shift();
+    if(weaponHasTrail(p.weapon)){p.trail.push({x:p.x,y:p.y});if(p.trail.length>40)p.trail.shift();}
     if(p.weapon==='cluster'&&!p.sub&&p.vy>=0) {
       for(let i=-2;i<=2;i++) this.projectiles.push({...p,vx:p.vx*0.75+i*76,vy:40+Math.abs(i)*16,sub:true,age:0,trail:[]});
       this.burst(p.x,p.y,16,'#e0c384');return true;
@@ -374,7 +406,7 @@ export class Game {
         this.burst(p.x,p.y,8,spec.color);return true;
       }
       if(effect==='orbital'&&!p.sub) {
-        this.crater(p.x,p.y,12,8);this.burst(p.x,p.y,12,'#b8cfea');
+        this.excavateImpact(p,12,8,hitTank?.id);this.burst(p.x,p.y,12,'#b8cfea');
         this.projectiles.push({...p,x:p.x,y:-50,vx:0,vy:680,sub:true,trail:[],age:0,delay:0.3});return true;
       }
       if(p.weapon==='drill'&&!hitTank) {
@@ -401,6 +433,17 @@ export class Game {
     for(const c of this.crates) c.y=this.ground(c.x,c.y-5)-14;
     this.crates=this.crates.filter(c=>c.y<WATER_Y-14);
   }
+  private excavateImpact(p:Projectile,radius:number,depth:number,directTarget?:number){
+    if(radius<=0||depth<=0)return;
+    let x=p.x,y=p.y;
+    if(directTarget!==undefined){
+      const target=this.tanks[directTarget],foot=target.y+18,surface=this.support(target.x,foot);
+      if(surface<WATER_Y&&Math.abs(surface-foot)<=28){
+        x=clamp(p.x,target.x-16,target.x+16);y=surface;
+      }
+    }
+    this.crater(x,y,radius,depth);
+  }
   private explode(p:Projectile,directTarget?:number) {
     const direct=directTarget!==undefined;
     const w=weaponById(p.weapon), radius=w.radius;
@@ -410,7 +453,7 @@ export class Game {
     this.shake=Math.min(10,radius/10);
     const dig=excavation(p.weapon,direct);
     dig.radius*=p.digBoost;dig.depth*=p.digBoost;
-    this.crater(p.x,p.y,dig.radius,dig.depth);
+    this.excavateImpact(p,dig.radius,dig.depth,directTarget);
     for(const t of this.tanks) {
       const distance=Math.hypot(t.x-p.x,t.y-p.y);
       if(directTarget!==t.id&&distance>radius+26) continue;
@@ -485,20 +528,24 @@ export class Game {
     this.crates=this.crates.filter(c=>{
       const t=this.active;
       if(c.falling||Math.abs(c.x-t.x)>28||Math.abs(c.y-t.y)>40) return true;
-      if(c.type==='medical') { t.hp=Math.min(t.maxHP,t.hp+Math.round(t.maxHP*22/150));t.items.repair=1;this.float(t.x,t.y-40,'维修补给','#56866b'); }
-      else if(c.type==='double') {t.items.double=1;this.float(t.x,t.y-40,'双发补齐','#ad9261');}
-      else if(c.type==='homing') {t.ammo.homing=Math.min(3,t.ammo.homing+1);this.float(t.x,t.y-40,'猎星追踪弹 +1','#b58d55');}
-      else {
-        const id=t.vehicleId?'homing':WEAPONS[1+Math.floor(this.rng()*(WEAPONS.length-1))].id;
-        t.ammo[id]=Math.min(weaponById(id).ammo+2,t.ammo[id]+2);t.items.fuel=Math.min(2,t.items.fuel+1);this.float(t.x,t.y-40,`${weaponById(id).name} +2`,'#a18c56');
+      const item=c.type==='medical'?'repair':c.type==='double'?'double':c.type==='transfer'?'teleport':c.type==='boost'?'boost':null;
+      let name:string;
+      if(item){
+        if(t.items[item]>0)return true;
+        t.items[item]=1;name=itemById(item).name;
+      }else{
+        if(t.ammo.homing>0)return true;
+        t.ammo.homing=1;name='猎星追踪弹';
       }
-      this.emit('crate',`${t.name}拾取了${c.type==='medical'?'医疗':c.type==='double'?'双发':c.type==='homing'?'稀有追踪弹':'弹药'}补给。`,undefined,t.x);return false;
+      this.float(t.x,t.y-40,`${name} +1`,'#ad9261');
+      this.emit('crate',`${t.name}拾取了${name}补给。`,undefined,t.x);return false;
     });
   }
   private checkWin() {
     if(this.tanks.every(t=>t.hp>0)) return false;
     this.phase='ended';
     this.resultAge=0;
+    this.tanks.forEach(t=>t.lastPower=null);
     this.fog=false;this.fogTurnsRemaining=0;
     this.winner=this.tanks.every(t=>t.hp<=0)?null:this.tanks[0].hp>0?0:1;
     this.emit('win',this.winner===null?'两位队长打成了平局！':`${this.tanks[this.winner].name}赢得了这场对决！`);
@@ -525,7 +572,6 @@ export class Game {
     this.active.selectedWeapon=this.selected;
     this.active.actionTime=0;this.active.movedThisTurn=0;this.active.itemDelay=0;this.active.delayCommitted=false;
     this.active.fuel=this.active.vehicleId?100:Math.min(100,this.active.fuel+18);this.active.itemUsed=false;
-    for(const item of TURN_ITEMS)this.active.items[item]=1;
     this.active.turnsTaken++;if(this.active.turnsTaken>1) this.active.tactics=Math.min(4,this.active.tactics+1);
     // Status counts decrement after the affected unit has had its full turn.
     if(previous.frozen>0) previous.frozen--;
@@ -551,7 +597,7 @@ export class Game {
         const drift=this.wind*2.5*(time/0.35-(1-Math.exp(-0.35*time))/0.35**2);
         const start=desired-drift,landing=this.predictSupply(start);
         if(start<32||start>WORLD_W-32||!landing||landing.x<40||landing.x>WORLD_W-40||!this.stablePlatform(landing.x)||this.traversable(human,landing.x)===null||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45)) continue;
-        const roll=this.rng(),type=roll<0.35?'medical':roll<0.6?'double':roll<0.8?'ammo':'homing';
+        const roll=this.rng(),type=roll<.3?'medical':roll<.5?'double':roll<.65?'transfer':roll<.8?'boost':'homing';
         this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0});
         this.emit('crate','补给空降中，回合计时暂停。');break;
       }

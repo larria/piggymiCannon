@@ -19,12 +19,12 @@ test('both tanks have exactly four distinct one-count starting items',()=>{
  const g=ready({vehicle0:'sea',vehicle1:'crossbow'});
  for(const t of g.tanks){assert.deepEqual(Object.keys(t.items).filter(id=>t.items[id as keyof typeof t.items]>0).sort(),[...TURN_ITEMS].sort());for(const id of TURN_ITEMS)assert.equal(t.items[id],1);}
  assert.ok(g.useItem('double'));assert.equal(g.active.items.double,0);assert.equal(g.useItem('boost'),false);
- g.nextTurn();assert.equal(g.tanks[0].items.double,0);g.nextTurn();assert.equal(g.tanks[0].items.double,1);
+ g.nextTurn();assert.equal(g.tanks[0].items.double,0);g.nextTurn();assert.equal(g.tanks[0].items.double,0);
  assert.equal(g.active.itemUsed,false);assert.equal(g.itemUnavailable('boost'),null);
 });
 test('a transfer shell follows real flight, consumes one item and moves beyond the old click range',()=>{
  const g=ready({map:'factory',vehicle0:'cannon',vehicle1:'bowl'}),t=g.active;
- g.wind=0;t.angle=35;t.power=50;const start=t.x,hp=g.enemy.hp,ammo=t.ammo['cannon-special'];g.selectWeapon('cannon-special');
+ g.wind=0;t.x=175;t.y=g.ground(175)-18;g.enemy.x=1105;g.enemy.y=g.ground(1105)-18;t.angle=35;t.power=50;const start=t.x,hp=g.enemy.hp,ammo=t.ammo['cannon-special'];g.selectWeapon('cannon-special');
  assert.ok(g.useItem('teleport'));assert.equal(t.items.teleport,1);assert.ok(g.fire());
  assert.equal(g.projectiles.length,1);const p=g.projectiles[0];assert.ok(p.transfer);assert.equal(t.items.teleport,0);assert.equal(t.ammo['cannon-special'],ammo);
  assert.equal(g.fire(),false);assert.equal(g.useItem('double'),false);

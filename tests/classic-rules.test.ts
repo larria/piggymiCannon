@@ -72,7 +72,7 @@ test('holding left or right keeps that direction across frames without oscillati
 test('wind noticeably shifts impacts and prediction follows actual projectile flight',()=>{
  const impacts:number[]=[];
  for(const wind of [-13,13]){
-  const g=ready();g.wind=wind;g.active.angle=65;g.active.power=60;
+  const g=ready();g.active.x=175;g.active.y=g.ground(175)-18;g.enemy.x=1105;g.enemy.y=g.ground(1105)-18;g.wind=wind;g.active.angle=65;g.active.power=60;
   const prediction=g.predict(65,60),p=g.launch(g.active,'shell');g.fire();run(g,12,x=>x.projectiles.length===0);
   const explosion=g.drainEvents().find(e=>e.type==='explosion');assert.ok(explosion?.x!==undefined);
   assert.ok(Math.abs(explosion.x-prediction.x)<12,`${wind}: actual ${explosion.x}, predicted ${prediction.x}`);

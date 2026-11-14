@@ -6,6 +6,8 @@ import { AudioManager } from './audio';
 import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type WeaponId } from './catalog';
 import { icon } from './icons';
 import { chargePower } from './interaction';
+import {installMobileGestureGuards} from './mobile-gestures';
+import {chooseResultPosition} from './result-layout';
 import { registerSW } from 'virtual:pwa-register';
 import { compareVersions } from './version';
 import {VEHICLES,VEHICLE_WEAPONS,vehicleById,validChoice,type VehicleChoice} from './vehicles';
@@ -88,9 +90,9 @@ $('#app').innerHTML=`
             <div class="meter-row energy-meter"><span class="meter-label">${icon('fuel')}能量</span><div class="meter-track"><span id="energy-fill"></span></div><span id="energy-value" class="meter-value">920 / 920</span></div>
             <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="按住力度条蓄力，松开发射"><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><span class="meter-help">按住力度条 / SPACE · 松开发射</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="10" max="100" value="68"/></div>
             <div class="meter-row mobility-meter"><span class="meter-label">${icon('transfer')}移动力</span><div class="meter-track"><span id="mobility-fill"></span></div><span class="meter-value"><b id="fuel-value">100</b>%</span><div class="move-buttons"><button id="move-left" aria-label="后退">${icon('left')}<span>后退</span><kbd>A</kbd></button><button id="move-right" aria-label="前进"><kbd>D</kbd><span>前进</span>${icon('right')}</button></div></div><div class="dashboard-note"><span id="move-note">本回合可移动</span><span id="meter-hint">白线为上次力度 · ↑↓ 调角度</span></div>
-          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="按住蓄力，松手发射">${icon('target')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
+          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="按住蓄力，松手提前发射，蓄满自动发射">${icon('target')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
         </section>
-        <div class="keyboard-hints"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>W</kbd><kbd>S</kbd> 角度</span><span><kbd>SPACE</kbd> 蓄力 · 松开发射</span><span class="touch-help">拖动角度盘瞄准 · 按住力度条 · 松手开火</span><span class="hint-last">每一发，都有一点可能。</span></div>
+        <div class="keyboard-hints"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>W</kbd><kbd>S</kbd> 角度</span><span><kbd>SPACE</kbd> 蓄力 · 满力自动发射</span><span class="touch-help">拖动角度盘瞄准 · 长按力度条 · 蓄满自动开火</span><span class="hint-last">每一发，都有一点可能。</span></div>
       </section>
       <button id="inventory-backdrop" class="inventory-backdrop" aria-label="关闭军火库" tabindex="-1"></button><aside class="arsenal" aria-label="武器和道具"><div class="arsenal-heading"><div><span class="eyebrow">有备而来</span><h2>战术背包<span id="tank-pack-label"></span></h2></div><span class="arsenal-symbol">${icon('shell')}</span><button id="arsenal-close" class="icon-button arsenal-close" aria-label="关闭军火库">${icon('close')}</button></div><div class="arsenal-tabs" role="tablist" aria-label="军火库类别"><button id="weapons-tab" class="selected" role="tab" aria-selected="true">坦克武器 <span>2</span></button><button id="items-tab" role="tab" aria-selected="false">道具 <span>4</span></button></div><div class="inventory-grid" id="inventory-grid" role="tabpanel" aria-label="武器清单"></div><div id="weapon-detail" class="weapon-detail"></div><div class="arsenal-bottom"><div class="supply-icon">${icon('plus')}</div><div><strong>路上有惊喜</strong><p>每 5 回合空投补给，移动可拾取</p></div></div></aside>
     </div>
@@ -120,6 +122,7 @@ $('.force-meter .meter-label').innerHTML=icon('bolt');$('.force-meter .meter-lab
 $('.mobility-meter .meter-label').innerHTML=icon('transfer');$('.mobility-meter .meter-label').dataset.helpName='移动力';
 $('.wait-readout').dataset.helpName='行动等待';$('.wait-readout').dataset.helpDescription='特殊武器会增加等待；等待影响再次行动的先后';
 installControlHints(()=>{if(!game.paused)audio.unlock();audio.play('aim');});
+installMobileGestureGuards($('#app'));
 const renderer=new Renderer($('#battlefield'),game);
 const dashboard=new DashboardView($('#angle-dial'),$('#minimap'));
 function paintMapChoices(){
@@ -139,7 +142,7 @@ function renderInventory() {
   $('#inventory-grid').innerHTML=activeTab==='weapons'?weapons.map(w=>`<button class="inventory-tile ${game.selected===w.id?'selected':''} ${tank.ammo[w.id]<=0?'depleted':''}" data-weapon="${w.id}" title="${w.name}：${w.description}" aria-label="${w.name}，${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]+' 发':'无限弹药'}" aria-pressed="${game.selected===w.id}"><span class="weapon-icon" style="--weapon-color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span class="tile-name">${w.name}</span><span class="ammo-count">${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]:'∞'}</span>${game.selected===w.id?`<span class="selection-tick">${icon('check')}</span>`:''}</button>`).join(''):
     ITEMS.filter(i=>TURN_ITEMS.includes(i.id)).sort((a,b)=>TURN_ITEMS.indexOf(a.id)-TURN_ITEMS.indexOf(b.id)).map(i=>{
       const reason=game.itemUnavailable(i.id),waiting=tank.itemReadyTurn[i.id]-tank.turnsTaken;
-      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${i.id==='teleport'&&game.teleporting?'selected':''}" data-item="${i.id}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="使用${i.name}，剩余 ${tank.items[i.id]} 件${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${icon(i.icon)}</span><span class="tile-name">${i.name}</span><span class="ammo-count">${tank.items[i.id]}</span><span class="item-hint">${reason||'每回合补齐一件'}</span><span class="item-cost">每回合最多一件</span></button>`;
+      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${i.id==='teleport'&&game.teleporting?'selected':''}" data-item="${i.id}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="使用${i.name}，剩余 ${tank.items[i.id]} 件${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${icon(i.icon)}</span><span class="tile-name">${i.name}</span><span class="ammo-count">${tank.items[i.id]}</span><span class="item-hint">${reason||'每格一件 · 空槽可拾取同类补给'}</span><span class="item-cost">每回合最多一件</span></button>`;
     }).join('');
   $('#inventory-grid').classList.toggle('items-grid',activeTab==='items');
   $('#inventory-grid').setAttribute('aria-label',activeTab==='weapons'?'武器清单':'道具清单');
@@ -153,7 +156,7 @@ function renderDetail(item?:ItemId) {
     const reference=WEAPON_REFERENCE[w.id];
     $('#weapon-detail').innerHTML=`<div class="detail-title"><span>${w.name}</span><span class="weapon-tag">${w.tag}</span></div><p>${w.description}</p><div class="weapon-metrics"><span>单枚伤害 <strong>${w.damage}${w.shots&&w.shots>1?` ×${w.shots}`:''}</strong></span><span>爆炸半径 <strong>${w.radius}m</strong></span><span>挖地 <strong>${w.digRadius} × ${w.digDepth}m</strong></span></div><p class="reference-note">以上为本作参数，原客户端精确数值未确证。${reference?`<br>弹数／核心效果：${reference.sources}支持。${reference.uncertain}。`:''}</p><button class="shell-atlas-button" data-dialog="projectiles">认认炮弹 · 弹体图鉴 ${icon('arrow')}</button>`;
   }
-  else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四件道具，选好这一件</span>${icon('shield')}</div><p>每回合限用一件，双发、转移弹、威力加强、补给各一件；自己的回合开始时补齐。</p><div class="weapon-metrics"><span>每回合最多一件 · 下回合补齐</span></div>`;}
+  else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四件道具，选好这一件</span>${icon('shield')}</div><p>开局各带一件，使用后不会自动恢复；补给只填对应空槽，满槽不拾取。每回合最多用一件。</p><div class="weapon-metrics"><span>每回合最多一件 · 用掉后留空</span></div>`;}
 }
 
 let lastInventory='';let lastPhase='';
@@ -172,7 +175,8 @@ function updateUI() {
   ['#weapon-normal','#weapon-special','#weapon-bonus'].forEach((selector,i)=>{$<HTMLButtonElement>(selector).disabled=!human||(t.ammo[pair[i]]??0)<=0;});
   $('#tank-pack-label').textContent=v?' / '+v.name:'';
   $('#instrument-tank').textContent=v?.name??'炮术演习';$('#angle-limits').textContent=`${t.minAngle}–${t.maxAngle}°`;
-  $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=config.mode==='hotseat'?String(game.delayFor(t,shownWeapon)):'—';$('#previous-power').style.left=`${t.lastPower}%`;
+  $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=config.mode==='hotseat'?String(game.delayFor(t,shownWeapon)):'—';
+  $('#previous-power').hidden=t.lastPower===null||lobby||game.phase==='ended';$('#previous-power').style.left=t.lastPower===null?'0%':`${t.lastPower}%`;
   const quick=TURN_ITEMS;const quickSignature=quick.map(id=>`${id}:${t.items[id]}:${game.itemUnavailable(id)}`).join('|')+'|'+game.teleporting;
   if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,i)=>{const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id);return `<button data-item="${id}" class="${id==='teleport'&&game.teleporting?'selected':''}" aria-pressed="${id==='teleport'&&game.teleporting}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+i}${reason?' · '+reason:''}" aria-label="快捷使用${item.name}">${icon(item.icon)}<span>${["双发","转移","加强","补给"][i]}</span><small>${t.items[id]}</small></button>`;}).join('');}
   $('.wait-readout').dataset.helpDescription=config.mode==='ai'?'AI 对局严格交替行动，DELAY 排序已关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
@@ -222,7 +226,7 @@ function updateUI() {
   $('#fire-button').classList.toggle('charging',Boolean(charge));
   $('#fire-button').style.setProperty('--charge',`${t.power}%`);
   $('#fire-title').textContent=charge?'蓄力中':'开火';
-  $('#fire-subtitle').textContent=charge?'松手发射':'按住 / SPACE';
+  $('#fire-subtitle').textContent=charge?'松手或蓄满发射':'按住 / SPACE';
   $('#fuel-value').textContent=String(Math.floor(t.fuel));$('#move-note').textContent=t.immobile?'紫冻水 · 暂时不能移动':t.frozen?'冰冻中 · 移动耗油加倍':t.vehicleId?`本回合最多移动 ${Math.round(t.moveDistance)}m`:'长按移动 · 每回合补充 18';
   if(t.immobile>0){$<HTMLButtonElement>('#move-left').disabled=true;$<HTMLButtonElement>('#move-right').disabled=true;}
   $<HTMLButtonElement>('#fire-button').disabled=!human||t.fallVelocity>0;
@@ -234,6 +238,19 @@ function updateUI() {
   const phaseKey=game.phase==='ended'?(game.resultAge<3?'ending-animation':'ending-result'):game.phase;
   $('#game-overlay').classList.toggle('result-overlay',game.phase==='ended');
   if(lastPhase!==phaseKey) {updateOverlay();lastPhase=phaseKey;}
+  if(game.phase==='ended'&&game.resultAge>=3)positionResult();
+}
+
+function positionResult(){
+  const layer=$('#game-overlay'),card=layer.querySelector<HTMLElement>('.result');if(!card)return;
+  const sx=layer.clientWidth/WORLD_W,sy=layer.clientHeight/renderer.viewHeight;
+  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-50)*sx,y:(t.y-(t.hp>0?100:25)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?130:50)*sy}));
+  const mapBox=$('#minimap-panel').getBoundingClientRect(),box=layer.getBoundingClientRect();
+  const map={x:mapBox.x-box.x,y:mapBox.y-box.y,width:mapBox.width,height:mapBox.height};
+  card.style.position='absolute';card.style.width='370px';
+  let placement=chooseResultPosition(layer.clientWidth,layer.clientHeight,card.offsetWidth,card.offsetHeight,actors,map);
+  if(placement.overlap>0){card.style.width='300px';const smaller=chooseResultPosition(layer.clientWidth,layer.clientHeight,card.offsetWidth,card.offsetHeight,actors,map);if(smaller.overlap<placement.overlap)placement=smaller;else card.style.width='370px';}
+  card.style.left=`${placement.x}px`;card.style.top=`${placement.y}px`;
 }
 
 function updateOverlay() {
@@ -402,10 +419,10 @@ function cancelCharge() {
   audio.stopCharge();
   if(charge) {game.tanks[charge.tank].power=charge.previousPower;charge=null;}
 }
-function finishCharge() {
+function finishCharge(maximum=false) {
   if(!charge) return;
   audio.stopCharge();
-  const tank=charge.tank,power=chargePower((performance.now()-charge.startedAt)/1000);charge=null;
+  const tank=charge.tank,power=maximum?100:chargePower((performance.now()-charge.startedAt)/1000);charge=null;
   if(game.humanTurn&&game.current===tank) game.setAim(game.active.angle,power);
   if(game.humanTurn&&game.current===tank) game.fire();updateUI();
 }
@@ -414,12 +431,12 @@ fireButton.addEventListener('pointerdown',e=>{if(startCharge(e.pointerId)){e.pre
 
 fireButton.addEventListener('pointerup',e=>{if(charge?.pointer===e.pointerId){e.preventDefault();finishCharge();}});
 fireButton.addEventListener('pointercancel',()=>{cancelCharge();updateUI();});
-fireButton.addEventListener('lostpointercapture',()=>{if(charge?.pointer!==null){cancelCharge();updateUI();}});
+fireButton.addEventListener('lostpointercapture',()=>{if(charge&&charge.pointer!==null){cancelCharge();updateUI();}});
 const forceBar=$<HTMLButtonElement>('#power-meter');
 forceBar.addEventListener('pointerdown',e=>{if(startCharge(e.pointerId)){e.preventDefault();forceBar.setPointerCapture(e.pointerId);}});
 forceBar.addEventListener('pointerup',e=>{if(charge?.pointer===e.pointerId){e.preventDefault();finishCharge();}});
 forceBar.addEventListener('pointercancel',()=>{cancelCharge();updateUI();});
-forceBar.addEventListener('lostpointercapture',()=>{if(charge?.pointer!==null){cancelCharge();updateUI();}});
+forceBar.addEventListener('lostpointercapture',()=>{if(charge&&charge.pointer!==null){cancelCharge();updateUI();}});
 forceBar.addEventListener('contextmenu',e=>e.preventDefault());
 fireButton.addEventListener('contextmenu',e=>e.preventDefault());
 fireButton.addEventListener('click',e=>{if(e.detail===0&&!charge&&game.humanTurn){audio.unlock();game.fire();updateUI();}});
@@ -483,7 +500,7 @@ let previous=performance.now(),lastUI=0;
 function frame(now:number) {
   const dt=Math.min((now-previous)/1000,0.05);previous=now;
   if(game.humanTurn&&!$<HTMLDialogElement>('#dialog').open) {
-    if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,chargePower((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);}
+    if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,chargePower((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
     const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
