@@ -28,7 +28,7 @@ test('iPad landscape uses the full viewport and relative movement preserves aim'
   await page.mouse.down();await page.waitForTimeout(350);await page.mouse.up();
   await expect.poll(async()=>Number(await page.locator('#fuel-value').textContent())).toBeLessThan(100);
   await expect(page.locator('#face-button span')).toHaveText('朝右');
-  await page.screenshot({path:'QA/v1.3-small-ipad-landscape.png'});
+  await page.screenshot({path:'QA/v1.4-small-ipad-landscape.png'});
   expect(errors).toEqual([]);
 });
 
@@ -111,9 +111,9 @@ test('clickable version checks fetch the live version and keep the battle runnin
 test('new bridge and sky maps render their destructible platforms in full screen',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await start(page,true,'coast');await expect(page.locator('#map-label')).toHaveText('独木桥');
-  await page.screenshot({path:'QA/v1.3-bridge.png'});
+  await page.screenshot({path:'QA/v1.4-bridge.png'});
   await page.goto('./');await start(page,true,'moon');await expect(page.locator('#map-label')).toHaveText('天空之城');
-  await page.screenshot({path:'QA/v1.3-sky-city.png'});expect(errors).toEqual([]);
+  await page.screenshot({path:'QA/v1.4-sky-city.png'});expect(errors).toEqual([]);
 });
 test('fog hides enemy information throughout the AI turn and uses the supplied avatars',async({page})=>{
   const seed=Array.from({length:300},(_,i)=>i+1).find(value=>rollWeather(makeRng(value)).fog)!;
@@ -122,7 +122,7 @@ test('fog hides enemy information throughout the AI turn and uses the supplied a
   await expect(page.locator('#hp-1')).toContainText('?');
   await expect(page.locator('.pink .avatar img')).toHaveAttribute('src',/icon-192.png/);
   await expect(page.locator('.green .avatar img')).toHaveAttribute('src',/dad-avatar.png/);
-  await page.screenshot({path:'QA/v1.3-fog.png'});
+  await page.screenshot({path:'QA/v1.4-fog.png'});
   await page.locator('#fire-button').click();
   await expect(page.locator('#turn-text')).toHaveText('大猪头爸爸正在瞄准…',{timeout:10_000});
   await expect(page.locator('#hp-1')).toContainText('?');
@@ -160,7 +160,7 @@ test('airdrop follows its own stage and preserves the full turn clock',async({pa
   }
   await expect(page.locator('#turn-text')).toContainText('补给正在空降',{timeout:12_000});
   await expect(page.locator('#timer span')).toHaveText('45');await page.waitForTimeout(500);
-  await expect(page.locator('#timer span')).toHaveText('45');await page.screenshot({path:'QA/v1.3-airdrop.png'});
+  await expect(page.locator('#timer span')).toHaveText('45');await page.screenshot({path:'QA/v1.4-airdrop.png'});
   await expect(page.locator('.handoff')).toBeVisible({timeout:10_000});
   await expect(page.locator('#timer span')).toHaveText('45');
 });
@@ -173,7 +173,7 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await expect(page.locator('#timer span')).toHaveText(clock!);
   const saying=await page.locator('#portrait-saying').textContent();await page.locator('#portrait-art').click();
   await expect(page.locator('#portrait-saying')).not.toHaveText(saying!);await expect(page.locator('.portrait-heart')).toBeVisible();
-  await page.screenshot({path:'QA/v1.3-portrait-preview.png'});
+  await page.screenshot({path:'QA/v1.4-portrait-preview.png'});
   await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
   await page.locator('.green .portrait-button').click();
   await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/dad.png/);
@@ -190,7 +190,7 @@ test('tank selection is remembered and two weapons switch directly without a dia
  await page.locator('#weapon-normal').click();await expect(page.locator('#fire-note')).toContainText('大铅弹');
  await page.reload();await page.getByRole('button',{name:'进入战场',exact:true}).click();
  await expect(page.locator('[data-choice="cannon"]')).toHaveClass(/selected/);await expect(page.locator('#vehicle-preview')).toContainText('老土');
- await page.screenshot({path:'QA/v1.3-tank-selection.png'});
+ await page.screenshot({path:'QA/v1.4-tank-selection.png'});
 });
 test('enabled action controls all acknowledge clicks with sound',async({page})=>{
  await page.addInitScript(()=>{(window as any).clickSounds=0;const original=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){if((this as HTMLAudioElement).src.includes('sfx_click'))(window as any).clickSounds++;return original.call(this);};});
@@ -225,7 +225,7 @@ test('small iPad Pro dashboard fits both 11-inch viewports with useful touch tar
     const overflowing=await page.locator('.dashboard').evaluate(el=>el.scrollWidth>el.clientWidth||el.scrollHeight>el.clientHeight);
     expect(overflowing).toBe(false);
     const minimap=await page.locator('#minimap-panel').boundingBox();expect(minimap!.x).toBeGreaterThan(width*.8);
-    await page.screenshot({path:`QA/v1.3-ipad-pro-11-${width}x834.png`});
+    await page.screenshot({path:`QA/v1.4-ipad-pro-11-${width}x834.png`});
   }
 });
 
@@ -256,4 +256,30 @@ test('two touch pointers can aim on the dial while holding the force meter',asyn
   await session.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});
   await expect(page.locator('#fire-title')).toHaveText('开火');await expect(page.locator('#fire-button')).toBeEnabled();
   await page.locator('#log-button').click();await expect(page.locator('.battle-log')).not.toContainText('发射了');
+});
+
+test('the shell atlas renders twenty-seven genuinely distinct projectiles on the small iPad Pro',async({page})=>{
+  await start(page,true,'valley',52,'45');await page.locator('#inventory-toggle').click();await page.locator('#weapons-tab').click();
+  await expect(page.locator('#weapon-detail')).toContainText('以上为本作参数');
+  await page.locator('.shell-atlas-button').click();await expect(page.locator('.shell-gallery article')).toHaveCount(27);
+  const pixels=await page.locator('.shell-card-art').evaluateAll((canvases:any[])=>canvases.map(canvas=>{
+    const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+    const rgb=canvas.dataset.color.match(/\w\w/g).map((x:string)=>parseInt(x,16));let body=0;
+    for(let i=0;i<data.length;i+=4)if(data[i]===rgb[0]&&data[i+1]===rgb[1]&&data[i+2]===rgb[2]&&data[i+3]>200)body++;
+    return {color:canvas.dataset.color,image:canvas.toDataURL(),body};
+  }));
+  expect(new Set(pixels.map(p=>p.color)).size).toBe(27);expect(new Set(pixels.map(p=>p.image)).size).toBe(27);expect(pixels.every(p=>p.body>12)).toBe(true);
+  const close=await page.locator('.projectile-dialog .dialog-primary').boundingBox();expect(close!.y+close!.height).toBeLessThanOrEqual(814);
+  const timer=await page.locator('#timer span').textContent();await page.waitForTimeout(400);await expect(page.locator('#timer span')).toHaveText(timer!);
+  await page.screenshot({path:'QA/v1.4-projectile-atlas-ipad-pro-11.png'});
+  await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
+});
+
+test('real snowfall is selectable at setup and remains visible in the battlefield UI',async({page})=>{
+  await start(page);await page.locator('#pause-button').click();await page.getByRole('button',{name:'重新部署',exact:true}).click();
+  await page.locator('[data-owner="0"]').click();await page.locator('[data-choice="water"]').click();
+  await page.locator('.weather-choice').click();await expect(page.locator('input[name="snow"]')).toBeChecked();
+  await page.screenshot({path:'QA/v1.4-snow-setup-ipad-pro-11.png'});
+  await page.getByRole('button',{name:'开始新对局',exact:true}).click();await expect(page.locator('#map-label')).toContainText('飘雪');
+  await expect(page.locator('#status-0')).toContainText('水鬼');await expect(page.locator('#fire-button')).toBeEnabled();
 });

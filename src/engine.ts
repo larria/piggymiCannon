@@ -6,7 +6,7 @@ import {rollWeather} from './weather';
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
-export interface Config { mode:'ai'|'hotseat'; difficulty:Difficulty; map:MapId; timer:number; seed:number;fog?:boolean;fireLine?:boolean;vehicle0?:VehicleChoice;vehicle1?:VehicleChoice }
+export interface Config { mode:'ai'|'hotseat'; difficulty:Difficulty; map:MapId; timer:number; seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;vehicle0?:VehicleChoice;vehicle1?:VehicleChoice }
 export interface Tank {
   id:number; name:string; x:number; y:number; hp:number; shield:number; fuel:number;
   angle:number; power:number; direction:number; ammo:Record<WeaponId,number>;
@@ -15,17 +15,17 @@ export interface Tank {
   tactics:number; turnsTaken:number; itemReadyTurn:Record<ItemId,number>;
   doubleShot:boolean;reaction:{kind:'direct'|'graze'|'fall';remaining:number}|null;
   vehicleId:VehicleId|null;maxHP:number;minAngle:number;maxAngle:number;moveSpeed:number;moveDistance:number;nextActionAt:number;lastDelay:number;poisoned:boolean;immobile:number;
-  selectedWeapon:WeaponId;lastPower:number;
+  selectedWeapon:WeaponId;lastPower:number;poisonOwner?:number;
 }
-export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number }
+export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
 export interface Blast { x:number;y:number;radius:number;life:number;maxLife:number;color:string }
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number }
-export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number }
+export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
 export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing';falling?:boolean;vy?:number;vx?:number }
 export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'; message:string; value?:number;x?:number;weapon?:WeaponId }
 export interface Mine {x:number;y:number;owner:number;weapon:WeaponId;boost:number}
-export interface Gas {x:number;y:number;owner:number;radius:number;turns:number}
+export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;clock?:number}
 export const clamp = (v:number,min:number,max:number) => Math.min(max,Math.max(min,v));
 export function makeRng(seed:number) { let a=seed>>>0; return () => { a+=0x6D2B79F5; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
 
@@ -44,6 +44,8 @@ export class Game {
   fog=false;fireLine:{x:number;top:number;bottom:number}|null=null;
   movingUntil=[0,0];
   mines:Mine[]=[];gases:Gas[]=[];
+  private volleySequence=0;
+  private volleyTargets=new Map<number,{x:number;y:number;target:number|null}>();
   private heardX=[175,1105];private afterSupply:'aiming'|'handoff'='aiming';private supplySettling=0;
   private rng:()=>number;
   private firedBy=0;
@@ -61,6 +63,7 @@ export class Game {
   get active() { return this.tanks[this.current]; }
   get enemy() { return this.tanks[1-this.current]; }
   get gravity() { return this.config.map==='moon'?145:230; }
+  get snow(){return this.config.snow===true;}
   get humanTurn() { return this.phase==='aiming' && !this.paused && (this.config.mode==='hotseat'||this.current===0); }
   get round() { return Math.floor(this.turn/2)+1; }
   get viewer() {return this.config.mode==='ai'?0:this.current;}
@@ -229,8 +232,9 @@ export class Game {
   launch(t:Tank,weapon:WeaponId,angle=t.angle,power=t.power):Projectile {
     const a=angle*Math.PI/180, muzzle=this.muzzle(t,angle);
     const spec=weaponById(weapon),speed=(120+power*6.1)*(weapon==='sniper'?2:spec.speed??1);
-    const rage=t.vehicleId==='sea'&&t.hp<t.maxHP*0.5?1.5:1;
-    return {x:muzzle.x,y:muzzle.y,vx:Math.cos(a)*speed*t.direction,vy:-Math.sin(a)*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage,trail:[],delay:0,echo:false,fireBoosted:false,homing:false,penetrations:0,scale:t.vehicleId&&!spec.effect?6:1,phase:0,lockAge:0,lockX:0,lockY:0};
+    const rage=t.vehicleId==='sea'&&t.hp<=t.maxHP*0.5?1.5:1;
+    const weather=t.vehicleId==='water'&&this.snow?1.25:1; // Sources disagree on +25% vs +50%; this is our chosen value.
+    return {x:muzzle.x,y:muzzle.y,vx:Math.cos(a)*speed*t.direction,vy:-Math.sin(a)*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,trail:[],delay:0,echo:false,fireBoosted:false,homing:false,penetrations:0,scale:t.vehicleId&&!spec.effect?6:1,phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:rage>1?1.15:1,rage:rage>1};
   }
   fire(ai=false) {
     if(this.paused||this.phase!=='aiming'||(!ai&&!this.humanTurn)||(this.active.ammo[this.selected]??0)<=0||this.active.fallVelocity>0) return false;
@@ -245,6 +249,11 @@ export class Game {
     else if(id==='triple') this.projectiles=[-5,0,5].map(d=>this.launch(t,id,t.angle+d));
     else if(id==='airstrike') this.projectiles=[-38,0,38].map(d=>({...this.launch(t,id),x:clamp(this.targetX+d,20,WORLD_W-20),y:-40-Math.abs(d),vx:0,vy:190}));
     else this.projectiles=[this.launch(t,id)];
+    if(spec.homingMode==='volley') {
+      const volley=++this.volleySequence,impact=this.predict(t.angle,t.power,id,12,t);
+      this.volleyTargets.set(volley,{x:impact.x,y:impact.y,target:null});
+      this.projectiles.forEach(p=>p.volley=volley);
+    }
     if(t.doubleShot) this.projectiles.push(...this.projectiles.map((p,i)=>({...p,trail:[],delay:0.35,echo:i===0})));
     t.boost=false;t.doubleShot=false;this.heardX[t.id]=Math.round(t.x/90)*90;
     this.emit('shot',`${t.name}发射了${weaponById(id).name}。`,undefined,t.x,id);
@@ -258,22 +267,38 @@ export class Game {
   private stepProjectile(p:Projectile,dt:number):boolean {
     if(p.delay>0) {p.delay-=dt;if(p.delay<=0&&p.echo) this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon);return false;}
     p.age+=dt;
+    p.hitCooldown=Math.max(0,p.hitCooldown-dt);
     const spec=weaponById(p.weapon),effect=spec.effect;
     const orbital=effect==='orbital'&&p.sub;
     const g=orbital?0:this.gravity*(p.weapon==='sniper'?0.27:spec.gravity??1);
     p.vx+=orbital?0:this.wind*(p.weapon==='sniper'?0.25:1)*dt;
+    if(effect==='helix') {p.x-=p.weaveX;p.y-=p.weaveY;}
     const oldX=p.x,oldY=p.y;
     if((p.weapon==='homing'||effect==='homing')&&(p.vy>0||p.homing)) {
-      const target=this.tanks[1-p.owner],dx=target.x-p.x,dy=target.y-p.y;
-      if(target.hp>0&&Math.hypot(dx,dy)<140&&p.y>Math.min(this.ground(p.x),target.y+18)-130) {
-        const speed=Math.max(250,Math.hypot(p.vx,p.vy)),angle=Math.atan2(dy,dx),blend=Math.min(1,dt*5);
+      const radius=spec.homingRadius??140,formation=this.volleyTargets.get(p.volley);
+      if(p.lockTarget===null&&p.age>.18&&p.y>this.ground(p.x)-130) {
+        // Classic guided missiles have no IFF. The bonus supply weapon keeps enemy-only targeting.
+        const candidates=effect==='homing'?this.tanks:this.tanks.filter(t=>t.id!==p.owner&&t.hp>0);
+        const x=formation?.x??p.x,y=formation?.y??p.y;
+        const nearest=[...candidates].sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];
+        if(formation?.target!==null&&formation?.target!==undefined) p.lockTarget=formation.target;
+        else if(nearest&&Math.hypot(nearest.x-x,nearest.y-y)<radius) {
+          p.lockTarget=nearest.id;if(formation)formation.target=nearest.id;
+        }
+      }
+      const target=p.lockTarget===null?null:this.tanks[p.lockTarget];
+      if(target) {
+        const dx=target.x-p.x,dy=target.y-p.y,speed=Math.max(250,Math.hypot(p.vx,p.vy)),angle=Math.atan2(dy,dx),blend=Math.min(1,dt*5);
         p.vx+=(Math.cos(angle)*speed-p.vx)*blend;p.vy+=(Math.sin(angle)*speed-p.vy)*blend;
         if(!p.homing) this.emit('lock',`${spec.name}锁定目标，开始追踪。`,undefined,p.x,p.weapon);
         p.homing=true;p.lockX=target.x;p.lockY=target.y;p.lockAge+=dt;
       }
     }
     p.vy+=g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
-    if(effect==='helix') {p.y+=Math.sin(p.age*17+p.phase)*45*dt;p.x+=Math.cos(p.age*17+p.phase)*25*dt;}
+    if(effect==='helix') {
+      const speed=Math.max(1,Math.hypot(p.vx,p.vy)),offset=Math.sin(p.age*17+p.phase)*18*Math.min(1,p.age*5);
+      p.weaveX=-p.vy/speed*offset;p.weaveY=p.vx/speed*offset;p.x+=p.weaveX;p.y+=p.weaveY;
+    }
     if(this.fireLine&&!p.fireBoosted&&(oldX-this.fireLine.x)*(p.x-this.fireLine.x)<=0&&p.y>=this.fireLine.top&&p.y<=this.fireLine.bottom) {
       p.boost*=1.5;p.fireBoosted=true;this.burst(p.x,p.y,10,'#f5a956');
     }
@@ -284,9 +309,8 @@ export class Game {
     }
     if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70||p.age>12) return true;
     const hitTank=this.projectileHit(p);
-    if(this.land.solid(p.x,p.y)||hitTank||p.drillY!==null) {
+    if(p.hitCooldown<=0&&(this.land.solid(p.x,p.y)||hitTank||p.drillY!==null)) {
       if(effect==='mine'&&!hitTank) {
-        this.mines=this.mines.filter(m=>m.owner!==p.owner||Math.abs(m.x-p.x)>12);
         this.mines.push({x:p.x,y:this.ground(p.x,oldY)-3,owner:p.owner,weapon:p.weapon,boost:p.boost});
         const own=this.mines.filter(m=>m.owner===p.owner);if(own.length>4) this.mines.splice(this.mines.indexOf(own[0]),1);
         this.burst(p.x,p.y,8,spec.color);return true;
@@ -305,7 +329,10 @@ export class Game {
         this.burst(p.x,p.y,8,'#c3bed2');return false;
       }
       this.explode(p,hitTank?.id);
-      if(effect==='pierce'&&p.penetrations<3) {p.penetrations++;p.x+=Math.sign(p.vx)*18;p.vx*=0.9;p.vy=Math.max(30,p.vy*0.7);return false;}
+      if(effect==='pierce'&&p.penetrations<3) {
+        // A new remaining section continues from the impact, rather than teleporting the same shell.
+        this.projectiles.push({...p,penetrations:p.penetrations+1,trail:[],hitCooldown:.025});
+      }
       return true;
     }
     return false;
@@ -319,39 +346,42 @@ export class Game {
   private explode(p:Projectile,directTarget?:number) {
     const direct=directTarget!==undefined;
     const w=weaponById(p.weapon), radius=w.radius;
-    const color=p.weapon==='ice'?'#a1d7e0':p.weapon==='emp'?'#c2a3d8':'#efb274';
+    const color=w.color;
     this.blasts.push({x:p.x,y:p.y,radius,life:0.65,maxLife:0.65,color});
     this.burst(p.x,p.y,Math.round(radius*0.6),color);
     this.shake=Math.min(10,radius/10);
     const dig=excavation(p.weapon,direct);
+    dig.radius*=p.digBoost;dig.depth*=p.digBoost;
     this.crater(p.x,p.y,dig.radius,dig.depth);
     for(const t of this.tanks) {
       const distance=Math.hypot(t.x-p.x,t.y-p.y);
       if(distance>radius+26) continue;
       if(p.weapon==='emp') {t.shield=0;t.fuel=Math.max(0,t.fuel-35);this.float(t.x,t.y-65,'脉冲','#ac88bc');}
       if(p.weapon==='ice') {t.frozen=2;this.float(t.x,t.y-65,'冻结 ×2','#79aebe');}
-      const damage=Math.round(w.damage*p.scale*p.boost*(distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)));
+      const mineScale=w.effect==='mine'?(!p.mineArmed?1/3:t.vehicleId==='mine'?.5:1):1;
+      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*(distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)));
       this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze');
-      if(w.effect==='poison'&&directTarget===t.id) t.poisoned=true;
-      if(w.effect==='freeze') t.immobile=3;
+      if(w.effect==='poison'&&directTarget===t.id) {t.poisoned=true;t.poisonOwner=p.owner;}
+      if(w.effect==='freeze'&&directTarget===t.id) t.immobile=2;
     }
     if(p.weapon==='napalm') this.fires.push({x:p.x,y:p.y,radius:60,turns:3,owner:p.owner});
-    if(w.effect==='fire') this.fires.push({x:p.x,y:p.y,radius:65,turns:3,owner:p.owner});
-    if(w.effect==='gas') this.gases.push({x:p.x,y:p.y,radius:75,turns:3,owner:p.owner});
+    if(w.effect==='fire'&&!this.snow) this.fires.push({x:p.x,y:this.ground(p.x,p.y-5),radius:25,turns:6,owner:p.owner,weapon:p.weapon,clock:0});
+    if(w.effect==='gas'&&!this.snow) this.gases.push({x:p.x,y:p.y,radius:75,turns:6,owner:p.owner,clock:0});
     for(const mine of [...this.mines]) if(Math.hypot(mine.x-p.x,mine.y-p.y)<radius) {
       const index=this.mines.indexOf(mine);
       if(index<0) continue; // A nested blast may already have detonated this mine.
       this.mines.splice(index,1);
-      this.explode({...this.launch(this.tanks[mine.owner],mine.weapon),x:mine.x,y:mine.y,boost:mine.boost});
+      this.explode({...this.launch(this.tanks[mine.owner],mine.weapon),x:mine.x,y:mine.y,boost:mine.boost,mineArmed:true});
     }
     this.emit('explosion',`${w.name}${direct?'直接命中，集中伤害':'命中地形，扩大挖地'}。`,undefined,p.x,p.weapon);
   }
   private triggerMines(t:Tank) {
+    if(t.vehicleId==='laser'||t.vehicleId==='water') return;
     for(const m of [...this.mines]) if(Math.hypot(t.x-m.x,t.y-m.y)<30) {
       const index=this.mines.indexOf(m);
       if(index<0) continue;
       this.mines.splice(index,1);
-      this.explode({...this.launch(this.tanks[m.owner],m.weapon),x:m.x,y:m.y,boost:m.boost},t.id);
+      this.explode({...this.launch(this.tanks[m.owner],m.weapon),x:m.x,y:m.y,boost:m.boost,mineArmed:true},t.id);
     }
   }
   damage(t:Tank,amount:number,owner:number,ignoreShield=false,reaction:'direct'|'graze'|'fall'='graze') {
@@ -421,12 +451,18 @@ export class Game {
     if(previous.immobile>0) previous.immobile--;
     this.wind=(this.rng()-0.5)*(this.turn>=40?42:26);
     this.clock=this.config.timer;this.aiTime=0;
-    for(const f of this.fires) if(Math.abs(this.active.x-f.x)<f.radius && Math.abs(this.active.y+18-(f.y??this.ground(f.x)))<100) this.damage(this.active,this.active.vehicleId?45:14,f.owner);
-    for(const gas of this.gases) if(Math.hypot(this.active.x-gas.x,this.active.y-gas.y)<gas.radius) this.damage(this.active,this.active.vehicleId?40:12,gas.owner);
-    if(this.active.poisoned) {const floor=Math.ceil(this.active.maxHP/3);if(this.active.hp<=floor) this.active.poisoned=false;else this.damage(this.active,Math.min(this.active.hp-floor,Math.round(this.active.maxHP*0.045)),1-this.active.id,true);}
-    // A fire lives for three complete pairs of turns.
-    if(this.current===0) { for(const f of this.fires) f.turns--;this.fires=this.fires.filter(f=>f.turns>0); }
-    if(this.current===0) {for(const gas of this.gases) gas.turns--;this.gases=this.gases.filter(gas=>gas.turns>0);}
+    for(const f of this.fires) if(!f.weapon&&Math.abs(this.active.x-f.x)<f.radius&&Math.abs(this.active.y+18-(f.y??this.ground(f.x)))<100) this.damage(this.active,14,f.owner);
+    for(const tank of this.tanks) if(tank.poisoned&&tank.hp>0) {
+      const floor=Math.ceil(tank.maxHP*(tank.vehicleId==='sea'?.5:.3));
+      const resistant=['crossbow','duke','water','dragon'].includes(tank.vehicleId??'');
+      if(tank.hp<=floor)tank.poisoned=false;
+      else this.damage(tank,Math.min(tank.hp-floor,resistant?20:40),tank.poisonOwner??1-tank.id,true);
+    }
+    // Six action handoffs is our lifetime cap, not a verified original-client duration.
+    for(const f of this.fires)if(f.weapon||this.current===0)f.turns--;
+    this.fires=this.fires.filter(f=>f.turns>0);
+    for(const gas of this.gases)gas.turns--;
+    this.gases=this.gases.filter(gas=>gas.turns>0);
     if(this.turn>=40) {this.damage(this.active,Math.ceil(this.active.maxHP*.08),1-this.current,true);this.float(this.active.x,this.active.y-55,'决胜时刻','#bd765d');}
     if(this.checkWin()) return;
     if(this.turn%5===0&&this.crates.length<3) {
@@ -524,11 +560,29 @@ export class Game {
     t.angle=clamp(bestAngle+(this.rng()-0.5)*[6,3,2,1.5][level],t.minAngle,t.maxAngle);
     t.power=clamp(bestPower+(this.rng()-0.5)*[7,4,3,2.5][level],10,100);
   }
+  private updateHazards(dt:number) {
+    if(this.snow){this.fires=[];this.gases=[];return;}
+    for(const fire of this.fires) if(fire.weapon) {
+      fire.radius=Math.min(90,fire.radius+dt*8);fire.x=clamp(fire.x+this.wind*.45*dt,0,WORLD_W);
+      fire.y=this.ground(fire.x,(fire.y??0)-12);fire.clock=(fire.clock??0)+dt;
+      const slope=Math.abs(this.ground(fire.x-10,fire.y-12)-this.ground(fire.x+10,fire.y-12));
+      if(fire.y>=WATER_Y||slope>Math.tan(35*Math.PI/180)*20){fire.turns=0;continue;}
+      while(fire.clock>=1){fire.clock-=1;for(const tank of this.tanks){
+        if(Math.abs(tank.x-fire.x)>=fire.radius||Math.abs(tank.y+18-this.ground(tank.x,fire.y-12))>26)continue;
+        const rate=tank.vehicleId==='bowl'||tank.vehicleId==='dragon'?1:tank.vehicleId==='water'?4:2;
+        this.damage(tank,rate,fire.owner);
+      }}
+    }
+    for(const gas of this.gases){
+      gas.x=clamp(gas.x+this.wind*2.8*dt,0,WORLD_W);gas.clock=(gas.clock??0)+dt;
+      while(gas.clock>=1){gas.clock-=1;for(const tank of this.tanks)if(Math.hypot(tank.x-gas.x,tank.y-gas.y)<gas.radius)this.damage(tank,2,gas.owner);}
+    }
+    this.fires=this.fires.filter(f=>f.turns>0);
+  }
   update(dt:number) {
     if(this.paused) return;
     dt=Math.min(dt,0.05);this.elapsed+=dt;
     this.shake=Math.max(0,this.shake-dt*16);
-    for(const gas of this.gases) gas.x=clamp(gas.x+this.wind*2.8*dt,0,WORLD_W);
     this.particles=this.particles.filter(p=>{p.life-=dt;p.vy+=170*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;return p.life>0;});
     this.blasts=this.blasts.filter(b=>{b.life-=dt;return b.life>0;});
     this.texts=this.texts.filter(t=>{t.life-=dt;t.y-=dt*20;return t.life>0;});
@@ -548,6 +602,7 @@ export class Game {
       if(!this.crates.some(c=>c.falling)) {this.supplySettling-=dt;if(this.supplySettling<=0) {this.phase=this.afterSupply;this.emit('turn',`${this.active.name}，轮到你了。`);}}
       return;
     }
+    this.updateHazards(dt);
     if(this.phase==='aiming') {
       this.collectCrates();
       if(this.checkWin()) return;
@@ -567,7 +622,7 @@ export class Game {
         const active=[...this.projectiles];
         for(const p of active) if(this.stepProjectile(p,step)) this.projectiles=this.projectiles.filter(q=>q!==p);
       }
-      if(this.projectiles.length===0) {this.phase='resolving';this.resolveTime=0.55;}
+      if(this.projectiles.length===0) {this.phase='resolving';this.resolveTime=0.55;this.volleyTargets.clear();}
     } else if(this.phase==='resolving') {
       this.resolveTime-=dt;
       if(this.resolveTime<=0&&this.tanks.every(t=>t.hp<=0||t.fallVelocity===0)) this.nextTurn();

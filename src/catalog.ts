@@ -3,7 +3,7 @@ export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bou
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
 export type MapId = 'valley' | 'coast' | 'moon';
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'expert';
-export interface Weapon { id: WeaponId; name: string; english: string; description: string; damage: number; radius: number; digRadius:number; digDepth:number; ammo: number; color: string; icon: string; tag: string;effect?:WeaponEffect;shots?:number;spread?:number;speed?:number;gravity?:number;sound?:number;shape?:string;extraDelay?:number;referenceDamage?:number }
+export interface Weapon { id: WeaponId; name: string; english: string; description: string; damage: number; radius: number; digRadius:number; digDepth:number; ammo: number; color: string; icon: string; tag: string;effect?:WeaponEffect;shots?:number;spread?:number;speed?:number;gravity?:number;sound?:number;shape?:string;extraDelay?:number;homingMode?:'nearest'|'volley';homingRadius?:number }
 export const WEAPONS: Weapon[] = [
   { id:'shell', name:'标准榴弹', english:'Classic shell', description:'可靠的抛物线弹道。无限弹药，爆炸会留下弹坑。', damage:42, radius:40, digRadius:32, digDepth:30, ammo:Infinity, color:'#72866d', icon:'shell', tag:'无限弹药' },
   { id:'heavy', name:'重磅炸弹', english:'Heavy bomb', description:'更大的爆炸范围和伤害。也要小心自己的脚下。', damage:68, radius:65, digRadius:57, digDepth:55, ammo:3, color:'#ce8051', icon:'bomb', tag:'大范围' },
@@ -19,6 +19,7 @@ export const WEAPONS: Weapon[] = [
   { id:'sniper', name:'穿甲飞镖', english:'Armor dart', description:'两倍初速、低重力的直射弹。高直接伤害，几乎不挖地。', damage:72, radius:16, digRadius:8, digDepth:8, ammo:2, color:'#bc7a73', icon:'dart', tag:'高速直射' },
   { id:'homing', name:'猎星追踪弹', english:'Homing shell', description:'仅从空投获得。下降到地面附近后，会追踪 140 米内的敌人；地形仍可阻挡它。', damage:62,radius:29,digRadius:20,digDepth:20,ammo:0,color:'#be9159',icon:'target',tag:'稀有空投' },
 ];
+WEAPONS.forEach((w,i)=>{w.shape=w.id;w.sound=27+i;});
 export const ITEMS: { id:ItemId; name:string; description:string; count:number; icon:string;cost:number;cooldown:number;unlock:number }[] = [
   { id:'repair', name:'维修包', description:'生命不高于最大值的 77% 时恢复约 23% 生命并解毒。消耗 2 战术点，冷却 2 个自己的回合。', count:2, icon:'plus',cost:2,cooldown:2,unlock:1 },
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
@@ -49,6 +50,6 @@ export const excavation = (id:WeaponId,direct:boolean) => {
 export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number) {
   const d=DIFFICULTIES.find(d=>d.id===difficulty)!,w=weaponById(weapon);
   const miss=rng()<d.missChance;
-  const offset=miss?(rng()<0.5?-1:1)*(Math.max(w.radius+45,w.digRadius*1.35+40,w.effect==='homing'||weapon==='homing'?185:0)+rng()*65):(rng()-0.5)*d.error*2;
+  const offset=miss?(rng()<0.5?-1:1)*(Math.max(w.radius+45,w.digRadius*1.35+40,w.effect==='homing'||weapon==='homing'?(w.homingRadius??140)+45:0)+rng()*65):(rng()-0.5)*d.error*2;
   return {miss,offset};
 }
