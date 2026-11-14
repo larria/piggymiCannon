@@ -1,10 +1,16 @@
 import { test,expect } from '@playwright/test';
+import {readFileSync} from 'node:fs';
+import {makeRng} from '../../src/engine';
+import {rollWeather} from '../../src/weather';
+const APP_VERSION=JSON.parse(readFileSync(new URL('../../package.json',import.meta.url),'utf8')).version;
 
-async function start(page:any,hotseat=false) {
+async function start(page:any,hotseat=false,map='valley',seed=52,timer='0') {
+  await page.addInitScript((value:number)=>{Date.now=()=>value;},seed);
   await page.goto('./');
   await page.getByRole('button',{name:'进入战场',exact:true}).click();
   if(hotseat) await page.locator('.mode-choices .choice-card').nth(1).click();
-  await page.locator('#turn-timer').selectOption('0');
+  if(map!=='valley') await page.locator(`input[name="map"][value="${map}"]`).locator('..').click();
+  await page.locator('#turn-timer').selectOption(timer);
   await page.getByRole('button',{name:'开始对局',exact:true}).click();
   await expect(page.locator('body')).toHaveClass(/combat-mode/);
 }
@@ -74,4 +80,95 @@ test('PWA installs its worker and reloads with icons and audio while offline',as
   const assets=await page.evaluate(async()=>Promise.all(['icons/icon-512.png','audio/bgm-sunny-30s.mp3'].map(async path=>(await fetch(path)).ok)));
   expect(assets).toEqual([true,true]);
   await context.setOffline(false);
+});
+test('item buttons enforce energy, unlocks and conditions instead of offering free effects',async({page})=>{
+  await start(page);
+  await page.locator('#inventory-toggle').click();await page.locator('#items-tab').click();
+  await expect(page.locator('[data-item="repair"]')).toBeDisabled();
+  await expect(page.locator('[data-item="fuel"]')).toBeDisabled();
+  await expect(page.locator('[data-item="teleport"]')).toBeDisabled();
+  await expect(page.locator('[data-item="boost"]')).toBeDisabled();
+  await page.locator('[data-item="shield"]').click();
+  await expect(page.locator('#status-0')).toContainText('护盾 40');
+  await expect(page.locator('[data-item="shield"]')).toBeDisabled();
+  await expect(page.locator('.weapon-detail')).toContainText('战术点 0 / 4');
+});
+test('clickable version checks fetch the live version and keep the battle running',async({page})=>{
+  await start(page);
+  await page.route('**/version.json?*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({version:APP_VERSION})}));
+  await page.locator('#stage-version-button').click();
+  await expect(page.locator('#toast')).toContainText(`当前已是最新版本 v${APP_VERSION}`);
+  await expect(page.locator('#fire-button')).toBeEnabled();
+  await page.unroute('**/version.json?*');
+  await page.route('**/version.json?*',route=>route.fulfill({contentType:'application/json',body:'{"version":"9.9.9"}'}));
+  await page.locator('#stage-version-button').click();
+  await expect(page.locator('#toast')).toContainText('发现 v9.9.9');
+  await expect(page.locator('#game-overlay')).toBeHidden();
+});
+test('new bridge and sky maps render their destructible platforms in full screen',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  await start(page,true,'coast');await expect(page.locator('#map-label')).toHaveText('独木桥');
+  await page.screenshot({path:'QA/v1.2-bridge.png'});
+  await page.goto('./');await start(page,true,'moon');await expect(page.locator('#map-label')).toHaveText('天空之城');
+  await page.screenshot({path:'QA/v1.2-sky-city.png'});expect(errors).toEqual([]);
+});
+test('fog hides enemy information throughout the AI turn and uses the supplied avatars',async({page})=>{
+  const seed=Array.from({length:300},(_,i)=>i+1).find(value=>rollWeather(makeRng(value)).fog)!;
+  await start(page,false,'valley',seed);
+  await expect(page.locator('#map-label')).toContainText('浓雾');
+  await expect(page.locator('#hp-1')).toContainText('?');
+  await expect(page.locator('.pink .avatar img')).toHaveAttribute('src',/icon-192.png/);
+  await expect(page.locator('.green .avatar img')).toHaveAttribute('src',/dad-avatar.png/);
+  await page.screenshot({path:'QA/v1.2-fog.png'});
+  await page.locator('#fire-button').click();
+  await expect(page.locator('#turn-text')).toHaveText('大猪头爸爸正在瞄准…',{timeout:10_000});
+  await expect(page.locator('#hp-1')).toContainText('?');
+});
+test('movement and charge create audio, and pausing cancels the charge without firing',async({page})=>{
+  await page.addInitScript(()=>{
+    (window as any).audioEvents=[];
+    const original=AudioContext.prototype.createOscillator;
+    AudioContext.prototype.createOscillator=function(){
+      const oscillator=original.call(this),start=oscillator.start.bind(oscillator),stop=oscillator.stop.bind(oscillator);
+      oscillator.start=(when?:number)=>{(window as any).audioEvents.push({event:'start',wave:oscillator.type,frequency:oscillator.frequency.value});start(when);};
+      oscillator.stop=(when?:number)=>{(window as any).audioEvents.push({event:'stop'});stop(when);};return oscillator;
+    };
+  });
+  await start(page);
+  const move=await page.locator('#move-left').boundingBox();await page.mouse.move(move!.x+move!.width/2,move!.y+move!.height/2);await page.mouse.down();await page.waitForTimeout(250);await page.mouse.up();
+  const fire=await page.locator('#fire-button').boundingBox();await page.mouse.move(fire!.x+fire!.width/2,fire!.y+fire!.height/2);await page.mouse.down();await page.waitForTimeout(500);
+  await page.keyboard.press('Escape');await page.mouse.up();
+  const events=await page.evaluate(()=>(window as any).audioEvents);
+  expect(events.some((e:any)=>e.event==='start'&&e.wave==='sawtooth')).toBe(true);
+  expect(events.some((e:any)=>e.event==='start'&&e.frequency===150)).toBe(true);
+  expect(events.filter((e:any)=>e.event==='stop').length).toBeGreaterThanOrEqual(3);
+  await expect(page.locator('#game-overlay')).toContainText('风也在等你');
+  await page.getByRole('button',{name:'继续对局',exact:true}).click();await page.locator('#log-button').click();
+  await expect(page.locator('.battle-log')).not.toContainText('发射了');
+});
+test('airdrop follows its own stage and preserves the full turn clock',async({page})=>{
+  await start(page,true,'coast',52,'45');
+  for(let i=0;i<5;i++) {
+    await page.locator('#fire-button').click();
+    if(i<4) {await expect(page.locator('.handoff')).toBeVisible({timeout:12_000});await page.getByRole('button',{name:'我准备好了',exact:true}).click();}
+  }
+  await expect(page.locator('#turn-text')).toContainText('补给正在空降',{timeout:12_000});
+  await expect(page.locator('#timer span')).toHaveText('45');await page.waitForTimeout(500);
+  await expect(page.locator('#timer span')).toHaveText('45');await page.screenshot({path:'QA/v1.2-airdrop.png'});
+  await expect(page.locator('.handoff')).toBeVisible({timeout:10_000});
+  await expect(page.locator('#timer span')).toHaveText('45');
+});
+test('large avatars open playful portraits and pause the battle clock',async({page})=>{
+  await start(page,true,'coast',52,'45');
+  const bounds=await page.locator('.pink .avatar').boundingBox();expect(bounds!.width).toBeGreaterThanOrEqual(58);
+  await page.locator('.pink .portrait-button').click();
+  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/mimi.png/);
+  const clock=await page.locator('#timer span').textContent();await page.waitForTimeout(450);
+  await expect(page.locator('#timer span')).toHaveText(clock!);
+  const saying=await page.locator('#portrait-saying').textContent();await page.locator('#portrait-art').click();
+  await expect(page.locator('#portrait-saying')).not.toHaveText(saying!);await expect(page.locator('.portrait-heart')).toBeVisible();
+  await page.screenshot({path:'QA/v1.2-portrait-preview.png'});
+  await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
+  await page.locator('.green .portrait-button').click();
+  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/dad.png/);
 });

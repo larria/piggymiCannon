@@ -11,7 +11,7 @@ test('all maps generate safe, deterministic deployment and distinct gravity',()=
     const g=ready({map:m.id}),same=ready({map:m.id});
     assert.deepEqual(g.terrain,same.terrain);
     for(const t of g.tanks){assert.ok(t.y<WATER_Y-40);assert.equal(t.hp,150);}
-    assert.ok(g.terrain.every(y=>Number.isFinite(y)&&y>300&&y<WATER_Y));
+    assert.ok(g.terrain.every(y=>Number.isFinite(y)&&y>=150&&y<=640));
   }
   assert.ok(ready({map:'moon'}).gravity<ready().gravity);
 });
@@ -37,7 +37,7 @@ test('limited ammunition and single shot per turn cannot be bypassed',()=>{
 });
 test('each weapon finishes its flight and produces its advertised projectile pattern',()=>{
   for(const w of WEAPONS) {
-    const g=ready({mode:'hotseat'});g.selectWeapon(w.id);g.targetX=g.enemy.x;
+    const g=ready({mode:'hotseat'});if(w.ammo===0) g.active.ammo[w.id]=1;g.selectWeapon(w.id);g.targetX=g.enemy.x;
     g.active.angle=48;g.active.power=58;
     assert.ok(g.fire(),w.name);
     if(w.id==='triple'||w.id==='airstrike') assert.equal(g.projectiles.length,3);
@@ -50,7 +50,7 @@ test('each weapon finishes its flight and produces its advertised projectile pat
 test('craters remove terrain permanently, cause fall damage, and water is lethal',()=>{
   const g=ready(),t=g.active;const old=g.ground(t.x);
   g.crater(t.x,old,65);assert.ok(g.ground(t.x)>old+60);
-  run(g,2);assert.ok(t.hp<150);assert.equal(t.y,g.ground(t.x)-18);
+  run(g,2);assert.ok(t.hp<150);assert.equal(t.y,g.support(t.x,t.y+18)-18);
   g.crater(t.x,WATER_Y-2,100);run(g,4);assert.equal(t.hp,0);assert.equal(g.phase,'ended');assert.equal(g.winner,1);
 });
 test('shields absorb damage, repair caps at maximum, and only one item per turn is allowed',()=>{
@@ -59,15 +59,16 @@ test('shields absorb damage, repair caps at maximum, and only one item per turn 
   g.damage(t,25,1);assert.equal(t.hp,150);assert.equal(t.shield,15);
   g.damage(t,35,1);assert.equal(t.hp,130);assert.equal(t.shield,0);
   assert.equal(g.useItem('repair'),false);
-  g.nextTurn();g.nextTurn();assert.ok(g.useItem('repair'));assert.equal(t.hp,150);assert.equal(t.items.repair,1);
+  g.nextTurn();g.nextTurn();assert.equal(g.useItem('repair'),false);
+  g.nextTurn();g.nextTurn();t.hp=110;assert.ok(g.useItem('repair'));assert.equal(t.hp,145);assert.equal(t.items.repair,1);
 });
 test('teleport validates its range and never consumes the item on invalid targets',()=>{
-  const g=ready(),t=g.active;assert.ok(g.useItem('teleport'));
+  const g=ready(),t=g.active;for(let i=0;i<4;i++) g.nextTurn();assert.ok(g.useItem('teleport'));
   assert.equal(g.teleport(t.x+400),false);assert.equal(t.items.teleport,1);
-  assert.ok(g.teleport(t.x+70));assert.equal(t.items.teleport,0);assert.equal(t.itemUsed,true);assert.equal(g.teleporting,false);
+  assert.ok(g.teleport(t.x+10));assert.equal(t.items.teleport,0);assert.equal(t.itemUsed,true);assert.equal(g.teleporting,false);
 });
 test('a pending teleport cannot be combined with another item in the same turn',()=>{
-  const g=ready();g.useItem('teleport');assert.ok(g.teleporting);
+  const g=ready();for(let i=0;i<4;i++) g.nextTurn();g.useItem('teleport');assert.ok(g.teleporting);
   assert.ok(g.useItem('shield'));assert.equal(g.teleporting,false);
   assert.equal(g.teleport(g.active.x+60),false);assert.equal(g.active.items.teleport,1);
 });
@@ -99,7 +100,7 @@ test('AI at every difficulty plans legal shots and hands the turn back',()=>{
 });
 test('supply crates can be collected and turn-41 sudden death damages the active tank',()=>{
   const g=ready(),t=g.active;g.crates.push({x:t.x,y:t.y,type:'medical'});t.hp=90;
-  run(g,0.05);assert.equal(g.crates.length,0);assert.equal(t.hp,112);assert.equal(t.items.repair,3);
+  run(g,0.05);assert.equal(g.crates.length,0);assert.equal(t.hp,112);assert.equal(t.items.repair,2);
   g.turn=39;g.nextTurn();assert.equal(g.turn,40);assert.equal(g.active.hp,138);
 });
 test('a seeded automated match reaches a valid winner without deadlocking',()=>{
