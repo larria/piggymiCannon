@@ -12,8 +12,8 @@ const run=(g:Game,seconds:number)=>{for(let i=0;i<seconds*120;i++) g.update(1/12
 test('bridge and sky terrains have real empty space below solid platforms',()=>{
   const bridge=ready({map:'coast'}),sky=ready({map:'moon'});
   assert.ok(bridge.land.solid(175,bridge.ground(175)+10));assert.equal(bridge.land.solid(175,500),false);
-  assert.ok(sky.ground(630)<250);assert.equal(sky.land.solid(630,300),false);
-  assert.ok(sky.ground(630,300)>400);assert.ok(sky.land.solid(630,460));
+  assert.ok(sky.ground(630)<250);assert.equal(sky.land.solid(630,380),false);
+  assert.ok(sky.ground(630,380)>400);assert.ok(sky.land.solid(630,460));
 });
 test('excavating a bridge foundation drops a full-health enemy for a win',()=>{
   const g=ready({map:'coast'}),enemy=g.enemy;g.crater(enemy.x,g.ground(enemy.x)+20,65,90);
@@ -21,7 +21,7 @@ test('excavating a bridge foundation drops a full-health enemy for a win',()=>{
 });
 test('a falling tank can land on a lower sky island without snapping to an upper floor',()=>{
   const g=ready({map:'moon'}),t=g.active;t.x=630;t.y=g.ground(630)-18;
-  const lower=g.ground(630,300);g.crater(630,g.ground(630),110,55);run(g,4);
+  const lower=g.ground(630,380);g.crater(630,g.ground(630),110,160);run(g,4);
   assert.ok(t.hp>0&&t.hp<150);assert.ok(Math.abs(t.y+18-lower)<10);assert.ok(t.y+18<WATER_Y);
 });
 test('tanks cannot climb steep slopes or cross a narrow pit with a large movement step',()=>{
@@ -132,7 +132,7 @@ test('fire-line crossing boosts a shell only once even if it crosses back',()=>{
   p.x=231;p.vx=-80;g.update(0.04);assert.equal(p.boost,1.5);
 });
 test('supply animation pauses the turn clock and drops on reachable stable ground near the human',()=>{
-  for(const map of ['valley','coast','moon'] as const) {
+  for(const map of ['valley','coast','moon','factory','temple','egypt'] as const) {
     const g=ready({map,timer:45});g.turn=4;g.nextTurn();assert.equal(g.phase,'supply',map);
     const c=g.crates.find(c=>c.falling)!;assert.ok(c);
     const clock=g.clock,start=c.x;

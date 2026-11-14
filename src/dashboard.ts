@@ -1,5 +1,6 @@
 import type {Game,Tank} from './engine';
 import {WORLD_W,WORLD_H} from './engine';
+import {paintMapOverview} from './map-preview';
 export class DashboardView {
   private terrain=document.createElement('canvas');private revision=-1;private previousGame:Game|null=null;
   constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;}
@@ -16,9 +17,7 @@ export class DashboardView {
     const p=polar(t.angle,50);c.strokeStyle='#718c5a';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(p.x,p.y);c.stroke();c.fillStyle='#e8a26a';c.beginPath();c.arc(p.x,p.y,3,0,7);c.fill();c.restore();
     c.fillStyle='#8da273';c.beginPath();c.arc(65,65,5,0,7);c.fill();c.fillStyle='#597347';c.font='600 19px "Manrope",sans-serif';c.textAlign='center';c.fillText(`${Math.round(t.angle)}°`,65,96);c.restore();
     const m=this.map.getContext('2d')!,base=this.terrain.getContext('2d')!;
-    if(this.previousGame!==game||this.revision!==game.land.revision){base.fillStyle=game.config.map==='moon'?'#454b61':'#e0e7d8';base.fillRect(0,0,300,168);base.fillStyle=game.config.map==='moon'?'#8d95a8':game.config.map==='coast'?'#aa9a7f':'#80946b';
-      for(let x=0;x<WORLD_W;x+=8)for(let y=0;y<WORLD_H;y+=8)if(game.land.solid(x,y))base.fillRect(x/WORLD_W*300,y/640*168,2.5,2.5);
-      base.fillStyle='#acc5c5';base.fillRect(0,579/640*168,300,168-579/640*168);this.previousGame=game;this.revision=game.land.revision;}
+    if(this.previousGame!==game||this.revision!==game.land.revision){paintMapOverview(base,game,300,168);this.previousGame=game;this.revision=game.land.revision;}
     m.drawImage(this.terrain,0,0);m.strokeStyle='#f9f2d7b0';m.lineWidth=2;m.strokeRect(2,offset/640*168,296,viewHeight/640*168);
     if(game.fireLine){m.strokeStyle='#f5ae70';m.beginPath();m.moveTo(game.fireLine.x/WORLD_W*300,15);m.lineTo(game.fireLine.x/WORLD_W*300,145);m.stroke();}
     for(const tank of game.tanks)if(tank.hp>0&&(!game.fog||tank.id===game.viewer)){m.fillStyle=tank.id===0?'#e89076':'#ebd28c';m.strokeStyle='#f8f5e3';m.lineWidth=1;m.beginPath();m.arc(tank.x/WORLD_W*300,tank.y/640*168,4,0,7);m.fill();m.stroke();}

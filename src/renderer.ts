@@ -3,12 +3,16 @@ import { weaponById } from './catalog';
 import { breathingPose } from './feedback';
 import {vehicleById} from './vehicles';
 import {projectileArt} from './vehicle-art';
+import {classicBackdrop,classicDetails} from './classic-map-art';
 
 interface Palette {sky:string;horizon:string;sun:string;mountains:string[];soil:string;soilLight:string;grass:string;grassLight:string;water:string;ink:string}
 const PALETTES:Record<string,Palette>={
   valley:{sky:'#e8eee3',horizon:'#f3edd9',sun:'#f5ce82',mountains:['#d1decd','#b5cbb5','#95b29a'],soil:'#586b4c',soilLight:'#70805a',grass:'#759160',grassLight:'#b8c78b',water:'#a7bbb0',ink:'#3d5543'},
   coast:{sky:'#f0dfd0',horizon:'#f8eacb',sun:'#e6a976',mountains:['#e0c9b4','#c7b4a3','#a0aba0'],soil:'#827262',soilLight:'#a18a70',grass:'#9a9b6c',grassLight:'#d2c28a',water:'#8eafb2',ink:'#626b57'},
-  moon:{sky:'#34384e',horizon:'#6c6b83',sun:'#e7dbc1',mountains:['#626279','#515a70','#424e62'],soil:'#62697b',soilLight:'#7b8193',grass:'#9298a7',grassLight:'#bdc5d0',water:'#7786a1',ink:'#343e57'},
+  moon:{sky:'#e2eef2',horizon:'#f4f8f2',sun:'#f1dfa7',mountains:['#d0e1e7','#c0d5df','#afc9d3'],soil:'#a3becb',soilLight:'#d0e0e5',grass:'#e0eeeb',grassLight:'#f7faf1',water:'#acc3cf',ink:'#718d9b'},
+  factory:{sky:'#e4e8e5',horizon:'#efece2',sun:'#dfc89c',mountains:['#c5d2cd','#b1c2bc','#9fafaa'],soil:'#607275',soilLight:'#8da1a2',grass:'#a6baba',grassLight:'#c5d5cf',water:'#9daeb0',ink:'#45595c'},
+  temple:{sky:'#eeeadf',horizon:'#f7efd9',sun:'#edd198',mountains:['#dfd6c0','#cec3ac','#bdae92'],soil:'#a38b65',soilLight:'#c4b18e',grass:'#ccbb96',grassLight:'#f0deb6',water:'#b6c5bd',ink:'#756746'},
+  egypt:{sky:'#f1e6d0',horizon:'#faedcd',sun:'#ecc079',mountains:['#e5ceaa','#d2b990','#bea575'],soil:'#b39260',soilLight:'#d3b481',grass:'#d6bd86',grassLight:'#f1d69c',water:'#9eaca7',ink:'#806641'},
 };
 const rr=(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number) => {ctx.beginPath();ctx.roundRect(x,y,w,h,r);};
 
@@ -67,20 +71,20 @@ export class Renderer {
     ctx.fillStyle=this.game.config.map==='moon'?'#cbc3b41a':'#f6d49435';ctx.beginPath();ctx.ellipse(sx,sy,81,81*sunRatio,0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle=this.game.config.map==='moon'?'#e5decc17':'#f6d49440';ctx.beginPath();ctx.ellipse(sx,sy,64,64*sunRatio,0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle=p.sun;ctx.beginPath();ctx.ellipse(sx,sy,44,44*sunRatio,0,0,Math.PI*2);ctx.fill();
-    if(this.game.config.map==='moon') {ctx.fillStyle='#c9c3b3';ctx.beginPath();ctx.arc(sx-13,sy+13,10,0,Math.PI*2);ctx.arc(sx+18,sy-11,6,0,Math.PI*2);ctx.fill();}
     this.cloud(ctx,227,115,0.92,0.55);this.cloud(ctx,639,80,0.7,0.4);this.cloud(ctx,1170,219,0.64,0.5);
     this.mountain(ctx,376,p.mountains[0],26,162);
     this.mountain(ctx,422,p.mountains[1],75,123);
     const rng=makeRng(192);
-    for(let x=0;x<WORLD_W;x+=17+rng()*12) {
+    if(['valley','coast','moon'].includes(this.game.config.map))for(let x=0;x<WORLD_W;x+=17+rng()*12) {
       const y=393+Math.sin(x/91)*16;
       this.pine(ctx,x,y,28+rng()*48,p.mountains[1]);
     }
     this.mountain(ctx,472,p.mountains[2],9,100);
-    for(let x=-20;x<WORLD_W+40;x+=23+rng()*24) {
+    if(['valley','coast','moon'].includes(this.game.config.map))for(let x=-20;x<WORLD_W+40;x+=23+rng()*24) {
       const y=441+Math.sin(x/157+0.8)*18;
       this.pine(ctx,x,y,25+rng()*62,p.mountains[2]);
     }
+    classicBackdrop(ctx,this.game.config.map,p.mountains[2]);
     // Quiet ink details make the valley feel like a little illustrated world.
     if(this.game.config.map!=='moon') {
       ctx.strokeStyle=p.ink+'70';ctx.lineWidth=1.7;ctx.lineCap='round';
@@ -113,7 +117,9 @@ export class Renderer {
       const edge=x===0||x===WORLD_W||!mask[index-1]||!mask[index+1]||!mask[index+stride];
       const shade=clamp((y-250)/350,0,1);
       const grain=((x*13+y*7)%31===0?7:0)+(Math.sin(x/90+y/20)>0.99?4:0);
-      const color=top?grass:edge?ink:soil.map((v,i)=>light[i]*(1-shade)+v*shade+grain);
+      const permanent=g.land.protectedMask[index];
+      const snowcap=g.config.map==='moon'&&(y<9||!mask[index-stride*9]);
+      const color=permanent?(g.config.map==='factory'?[135,157,157]:[200,177,106]):top?grass:edge?ink:snowcap?[241,247,239]:soil.map((v,i)=>light[i]*(1-shade)+v*shade+grain);
       data.data[offset]=color[0];data.data[offset+1]=color[1];data.data[offset+2]=color[2];data.data[offset+3]=255;
     }
     ctx.putImageData(data,0,0);
@@ -139,7 +145,7 @@ export class Renderer {
     ctx.stroke();
     // Grass tufts and little flowers follow the destructible surface.
     const flora=makeRng(20);
-    for(let x=18;x<WORLD_W;x+=16+flora()*23) {
+    if(['valley','coast'].includes(g.config.map))for(let x=18;x<WORLD_W;x+=16+flora()*23) {
       const y=g.ground(x);if(y>WATER_Y-10) continue;
       const size=5+flora()*8;
       ctx.strokeStyle=flora()>0.55?p.grass:p.grassLight;ctx.lineWidth=2;
@@ -147,11 +153,12 @@ export class Renderer {
       if(flora()>0.86) {ctx.fillStyle='#edd3a0';ctx.beginPath();ctx.arc(x+2,y-size*1.1,2.5,0,Math.PI*2);ctx.fill();}
     }
     // Foreground shrubs at the perimeter frame the battlefield.
-    for(const x of [14,52,1236,1270]) {
+    if(['valley','coast'].includes(g.config.map))for(const x of [14,52,1236,1270]) {
       const y=g.ground(x);if(y>WATER_Y-5) continue;
       ctx.fillStyle=p.ink;ctx.beginPath();ctx.ellipse(x,y,19,10,-0.2,Math.PI,Math.PI*2);ctx.fill();
       ctx.fillStyle=p.grass;ctx.beginPath();ctx.ellipse(x+3,y-7,12,9,0,Math.PI,Math.PI*2);ctx.fill();
     }
+    if(g.config.map==='factory')return;
     ctx.fillStyle=p.water+'85';ctx.fillRect(0,WATER_Y,WORLD_W,WORLD_H-WATER_Y);
     ctx.strokeStyle=p.water;ctx.lineWidth=2;ctx.beginPath();
     for(let x=0;x<=WORLD_W;x+=8) ctx.lineTo(x,WATER_Y+Math.sin(x/23+this.time)*2);ctx.stroke();
@@ -282,7 +289,7 @@ export class Renderer {
     if(g.shake>0) ctx.translate(Math.sin(this.time*88)*g.shake,Math.cos(this.time*69)*g.shake*0.5);
     ctx.drawImage(this.background,0,0,WORLD_W,this.viewHeight);
     ctx.translate(0,-this.offsetY);
-    this.terrain();this.atmosphere();this.targetAid();
+    this.terrain();classicDetails(ctx,g);this.atmosphere();this.targetAid();
     for(const f of g.fires) {
       for(let i=-Math.floor(f.radius/11);i<=Math.floor(f.radius/11);i++) {
         const x=f.x+i*11,y=g.ground(x,(f.y??0)-20)-1;if(y>=WATER_Y-5) continue;

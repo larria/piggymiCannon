@@ -25,7 +25,7 @@ export const WEAPON_REFERENCE:Partial<Record<WeaponId,WeaponReference>>={
  'laser-normal':reference(1,'单枚能量弹，擅长挖地'),
  'laser-special':reference(3,'三枚交织能量弹；沿同一主弹道旋转前进'),
  'water-normal':reference(1,'单枚水球；雪天增强但资料给出 +25%／+50% 两种说法',undefined,'雪天倍率冲突；各服伤害、碰撞半径未确证'),
- 'water-special':reference(1,'紫水正中后定身；旧版两份资料为两回合，续作 FAQ 为三回合',undefined,'各服回合计数口径未确证；本作采用两个自己的回合'),
+ 'water-special':reference(1,'紫水命中定身；历史资料回合数有差异',undefined,'当前用户要求本作采用一个敌人自己的回合，含爆炸波及；未宣称该数值是原版各服公式'),
  'ion-normal':reference(1,'一枚离子能量弹'),
  'ion-special':reference(1,'一枚定位弹，引来一次从上方发出的卫星打击；上层地形会遮挡射线'),
  'sea-normal':reference(1,'一个大光环；半血怒气提高伤害'),

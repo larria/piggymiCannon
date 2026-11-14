@@ -1,7 +1,7 @@
 import {VEHICLE_WEAPONS,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
-export type MapId = 'valley' | 'coast' | 'moon';
+export type MapId = 'valley' | 'coast' | 'moon' | 'factory' | 'temple' | 'egypt';
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'expert';
 export interface Weapon { id: WeaponId; name: string; english: string; description: string; damage: number; radius: number; digRadius:number; digDepth:number; ammo: number; color: string; icon: string; tag: string;effect?:WeaponEffect;shots?:number;spread?:number;speed?:number;gravity?:number;sound?:number;shape?:string;extraDelay?:number;homingMode?:'nearest'|'volley';homingRadius?:number }
 export const WEAPONS: Weapon[] = [
@@ -29,10 +29,13 @@ export const ITEMS: { id:ItemId; name:string; description:string; count:number; 
   { id:'wind', name:'定风装置', description:'风速至少 1.5 m/s 时将本回合风力归零。消耗 2 战术点，冷却 2 回合。', count:1, icon:'wind',cost:2,cooldown:2,unlock:1 },
   {id:'double',name:'双发装填',description:'仅从空投获得，本次攻击追加一轮齐射。消耗 3 战术点，限本回合，冷却 4 回合。',count:0,icon:'triple',cost:3,cooldown:4,unlock:1},
 ];
-export const MAPS: { id:MapId; name:string; sub:string; color:string }[] = [
-  { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75' },
-  { id:'coast', name:'独木桥', sub:'薄桥易断 · 挖地击落', color:'#c58b6c' },
-  { id:'moon', name:'天空之城', sub:'多层浮岛 · 低重力争夺', color:'#8584a6' },
+export const MAPS: { id:MapId; name:string; sub:string; color:string;description:string }[] = [
+  { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75',description:'本作原创峡谷，高地与断崖构成攻防。' },
+  { id:'coast', name:'独木桥', sub:'薄桥易断 · 挖地击落', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；桥宽、厚度与比例为本作重绘。' },
+  { id:'moon', name:'天空之城', sub:'厚雪浮岛 · 多次挖穿', color:'#91aab6',description:'2003 年游侠攻略描述厚雪平台难以打穿。本作采用厚雪多层浮岛；布局、坐标及低重力是 Web 配置。' },
+  { id:'factory', name:'钢铁工厂', sub:'永久底板 · Z 形钢梁',color:'#8f9998',description:'依据游侠《疯狂坦克II制胜宝典》：不会被打掉下去，Z 形地形提供直射机会。底板永久不破，钢梁可破；尺寸与连接布局为本作重绘，仍可能摔伤。' },
+  { id:'temple', name:'神圣殿堂', sub:'薄轨与安全节点 · 易碎',color:'#bba883',description:'依据用户确认的薄轨道及不可破节点，并参照游侠攻略“中央殿堂和下方永久半圆，其余地面很薄”。下层薄轨间隔设永久节点，中央节点带半圆承托；其余平台易碎。节点位置和比例为本作重绘。' },
+  { id:'egypt', name:'古老埃及', sub:'金字塔高地 · 主题重绘',color:'#c4a274',description:'月光 2003 年赛事记录确认古老埃及场景名；未取得原版地形细节。金字塔、方尖碑和薄桥是本作战术主题重绘，不能称为原图复原。' },
 ];
 export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:number;missChance:number }[] = [
   { id:'easy', name:'新兵', sub:'默认推荐 · 瞄准误差较大，适合练习', error:115,missChance:0.5 },

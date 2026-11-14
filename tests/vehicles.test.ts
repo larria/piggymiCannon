@@ -51,9 +51,15 @@ test('four-section flyfire creates remaining projectiles and explodes no more th
  }
  assert.equal(g.projectiles.length,0);assert.equal(g.drainEvents().filter(e=>e.type==='explosion'&&e.weapon==='missile-normal').length,4);
 });
-test('purple water only immobilizes a direct target for two own turns',()=>{
- const g=flatGame('water'),e=g.enemy;g.explode({...g.launch(g.active,'water-special'),x:e.x+40,y:e.y});assert.equal(e.immobile,0);
- g.explode({...g.launch(g.active,'water-special'),x:e.x,y:e.y},e.id);assert.equal(e.immobile,2);
+test('purple water immobilizes a damaged enemy for exactly one own action, including grazes',()=>{
+ for(const offset of [0,40]){
+  const g=flatGame('water'),e=g.enemy;
+  g.explode({...g.launch(g.active,'water-special'),x:e.x+offset,y:e.y},offset===0?e.id:undefined);
+  assert.equal(e.immobile,1);g.nextTurn();g.acceptHandoff();assert.equal(g.current,e.id);
+  assert.equal(g.move(-1,.1),false);assert.ok(g.fire());g.projectiles=[];g.nextTurn();assert.equal(e.immobile,0);
+  while(g.current!==e.id)g.nextTurn();g.acceptHandoff();assert.ok(g.move(-1,.1));
+ }
+ const self=flatGame('water');self.explode({...self.launch(self.active,'water-special'),x:self.active.x,y:self.active.y},0);assert.equal(self.active.immobile,0);
 });
 test('hovering tanks do not trigger ground mines, while a direct mine hit still damages them',()=>{
  for(const id of ['laser','water'] as const){const g=flatGame(id,'mine'),t=g.active;g.mines=[{x:t.x+5,y:448,owner:1,weapon:'mine-special',boost:1}];const hp=t.hp;g.move(1,.05);assert.equal(t.hp,hp);assert.equal(g.mines.length,1);

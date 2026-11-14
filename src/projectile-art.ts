@@ -31,7 +31,9 @@ export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:stri
     case 'multi-special':poly([[9,0],[3,-3],[0,-9],[-3,-3],[-9,0],[-3,3],[0,9],[3,3]]);line([[-20,-3],[-11,-2]],color);line([[-20,3],[-11,2]],color);break;
     case 'laser-normal':poly([[14,0],[0,-6],[-14,0],[0,6]]);line([[-20,0],[10,0]],'#fff1d9',1.5);break;
     case 'laser-special':c.strokeStyle=color;c.lineWidth=4;c.beginPath();c.moveTo(-18,0);c.bezierCurveTo(-7,-13,6,13,17,0);c.moveTo(-18,0);c.bezierCurveTo(-7,13,6,-13,17,0);c.stroke();oval(17,0,3,3);break;
-    case 'water-normal':poly([[-9,0],[-4,-7],[4,-11],[11,-3],[9,6],[2,10],[-6,7]]);shine(3,-4);oval(-10,6,2,2);break;
+    case 'water-normal':
+      c.beginPath();c.moveTo(-13,1);c.bezierCurveTo(-15,-7,-6,-9,-2,-6);c.bezierCurveTo(2,-14,13,-8,12,-1);c.bezierCurveTo(18,5,7,12,2,8);c.bezierCurveTo(-4,14,-14,8,-13,1);c.closePath();c.fill();c.stroke();
+      shine(3,-4);shine(-6,0);oval(-17,5,2.2,2);oval(-13,-9,1.5,1.5);break;
     case 'water-special':poly([[10,0],[5,-9],[-5,-9],[-10,0],[-5,9],[5,9]]);for(let i=0;i<3;i++){const a=i*Math.PI/3;line([[-8*Math.cos(a),-8*Math.sin(a)],[8*Math.cos(a),8*Math.sin(a)]],'#fff1d9',1.5);}break;
     case 'ion-normal':oval(0,0,7,4);c.save();c.rotate(.6);c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.ellipse(0,0,13,6,0,0,7);c.stroke();c.rotate(-1.2);c.beginPath();c.ellipse(0,0,13,6,0,0,7);c.stroke();c.restore();shine(0,0);break;
     case 'ion-special':poly([[-4,-4],[4,-4],[4,4],[-4,4]]);poly([[-17,-6],[-8,-6],[-8,6],[-17,6]]);poly([[8,-6],[17,-6],[17,6],[8,6]]);line([[-8,0],[8,0]],'#fff1d9',1);break;

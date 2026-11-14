@@ -22,10 +22,10 @@ test('movement consumes fuel, stays bounded, and frozen movement costs twice as 
   g.move(1,0.1);assert.ok(Math.abs((f-g.active.fuel)-normal*2)<0.001);
   g.active.fuel=0;assert.equal(g.move(1,0.1),false);
 });
-test('backward movement preserves the facing direction and aiming angle',()=>{
+test('movement faces its absolute direction and preserves the aiming angle',()=>{
   const g=ready(),t=g.active;t.direction=1;t.angle=57;g.move(-1,0.1);
-  assert.equal(t.direction,1);assert.equal(t.angle,57);
-  t.direction=-1;g.move(1,0.1);assert.equal(t.direction,-1);
+  assert.equal(t.direction,-1);assert.equal(t.angle,57);
+  t.direction=-1;g.move(1,0.1);assert.equal(t.direction,1);
 });
 test('limited ammunition and single shot per turn cannot be bypassed',()=>{
   const g=ready();g.selectWeapon('heavy');const ammo=g.active.ammo.heavy;
