@@ -16,12 +16,12 @@ export default defineConfig(({mode}) => ({
   },VitePWA({
     registerType: 'prompt',
     injectRegister: false,
-    includeAssets: ['icons/*.png', 'audio/*.mp3', 'fonts/*.ttf'],
+    includeAssets: ['icons/*.png', 'icons/*.svg', 'audio/*.mp3', 'fonts/*.ttf'],
     manifest: {
       id: './',
       name: '咪猪头的疯狂坦克',
       short_name: '咪猪头坦克',
-      description: '咪猪头与大猪头爸爸的炮术对决。13 种经典坦克、26 种武器、可破坏地形、AI 与双人热座。',
+      description: '咪猪头与大猪头爸爸的炮术对决。13 种经典坦克、26 种武器、可破坏地形、独立 AI 难度与最多四人队伍热座。',
       lang: 'zh-CN',
       start_url: './',
       scope: './',
