@@ -6,11 +6,11 @@ const ready=()=>{const g=new Game({mode:'ai',vehicle0:'crossbow',vehicle1:'canno
 const run=(g:Game,until:(g:Game)=>boolean)=>{for(let i=0;i<2200&&!until(g);i++)g.update(1/120);};
 test('a real fired poison arrow striking the visible head attaches poison and ticks after victim actions',()=>{
  const g=ready(),e=g.enemy;g.selectWeapon('crossbow-special');g.setAim(15,35);assert.ok(g.fire());run(g,x=>x.current===1);
- assert.equal(e.hp,820);assert.equal(e.poisoned,true);
+ assert.equal(e.hp,840);assert.equal(e.poisoned,true);
  assert.equal(e.poisonOwner,0);assert.equal(g.active.id,1);
- for(const expected of [636,452,276]){
+ for(const expected of [656,472,288,276]){
   g.skipTurn();assert.equal(e.hp,expected);if(g.current===0)g.skipTurn();
-  const labels=g.texts.filter(text=>text.tankId===e.id);assert.equal(labels.length,1);assert.match(labels[0].text,/^毒伤 −(184|176)$/);
+  const labels=g.texts.filter(text=>text.tankId===e.id);assert.equal(labels.length,1);assert.match(labels[0].text,/^毒伤 −(184|12)$/);
  }
  assert.equal(e.poisoned,false);assert.equal(e.hp,276);g.skipTurn();assert.equal(e.hp,276);
 });

@@ -14,7 +14,7 @@ export function aiScenario(difficulty:Difficulty,seed:number,map:MapId='valley',
 export function measureAIShot(g:Game){
  const shooter=g.active,from=shooter.x,nearest=g.enemy.id,before=g.opponents(shooter).map(t=>({id:t.id,hp:t.hp,maxHP:t.maxHP,shield:t.shield}));
  const own=g.damage.bind(g);let direct=false,damage=0;const damageById:Record<number,number>={};const directById=new Set<number>();let decision:Game['aiDecision']=null;
- g.damage=(t,amount,owner,ignoreShield,reaction,status)=>{const hp=t.hp,shield=t.shield;own(t,amount,owner,ignoreShield,reaction,status);if(owner===shooter.id&&t.team!==shooter.team){const loss=hp-t.hp+shield-t.shield;damage+=loss;damageById[t.id]=(damageById[t.id]??0)+loss;if(loss>0&&reaction==='direct'){direct=true;directById.add(t.id);}}};
+ g.damage=(t,amount,owner,ignoreShield,reaction,status,context)=>{const hp=t.hp,shield=t.shield;own(t,amount,owner,ignoreShield,reaction,status,context);if(owner===shooter.id&&t.team!==shooter.team){const loss=hp-t.hp+shield-t.shield;damage+=loss;damageById[t.id]=(damageById[t.id]??0)+loss;if(loss>0&&reaction==='direct'){direct=true;directById.add(t.id);}}};
  let planned=false,angle=shooter.angle,power=shooter.power,weapon=g.selected;
  for(let step=0;step<3600;step++){
   if(g.current!==shooter.id||g.phase==='ended')break;

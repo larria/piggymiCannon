@@ -1,5 +1,6 @@
+import {eraDamageFactor} from './era-damage';
 import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,type Game,type Tank} from './engine';
-import {weaponById,excavation,type WeaponId} from './catalog';
+import {weaponById,launchDamageScale,excavation,type WeaponId} from './catalog';
 import {aimGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
 import {projectileSpeed} from './ballistics';
@@ -52,7 +53,7 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
   const scale=hit||d<=28?1:clamp(1-(d-28)/(spec.radius+8),.1,1);
   const mine=spec.effect==='mine'?1/3:1;
   const rage=t.vehicleId==='sea'&&t.hp<t.maxHP*.5?1.5:1,snow=t.vehicleId==='water'&&g.snow?1.25:1;
-  const damage=landed&&b.eligible&&(hit||d<=spec.radius+26)?Math.round(spec.damage*boost*rage*snow*mine*scale):0;
+  const damage=landed&&b.eligible&&(hit||d<=spec.radius+26)?Math.round(spec.damage*launchDamageScale(!!t.vehicleId,weapon)*boost*rage*snow*mine*scale*eraDamageFactor(t.vehicleId,b.tank.vehicleId).value):0;
   return {body:b,damage,direct:hit};
  });
  return {x,y,hits,age};
@@ -127,7 +128,7 @@ export function predictAIImpact(game:Game,tank:Tank,weapon:WeaponId,angle=tank.a
 export function safeAIPositions(game:Game,tank:Tank,targets?:Tank[],travelLimit=160){
  if(tank.fallVelocity>0||tank.immobile||tank.fuel<=0)return [];
  const budget=tank.moveDistance*tank.fuel/100/(tank.frozen>0?2:1),positions:Tank[]=[];
- for(const direction of [-1,1])for(const distance of [...new Set([24,64,128,Math.min(travelLimit,budget*.85)].map(d=>Math.min(d,budget)))]){
+ for(const direction of [-1,1])for(const distance of [...new Set([8,24,64,128,Math.min(travelLimit,budget*.85)].map(d=>Math.min(d,budget)))]){
   if(distance<4)continue;const x=tank.x+direction*distance,foot=game.traversable(tank,x);
   if(foot===null||!Number.isFinite(foot))continue;
   const lo=Math.min(tank.x,x),hi=Math.max(tank.x,x);
@@ -144,7 +145,7 @@ export function chooseAIPosition(game:Game,tank:Tank,weapons:WeaponId[],targets:
  const stay=solveAIShot(game,tank,weapons,targets),danger=game.fires.some(f=>Math.abs(f.x-tank.x)<f.radius&&game.canDamage(tank,f.owner));
  // A solid firing solution needs no gratuitous travel. Fuel, time and movement
  // delay all count, even though AI matches retain their cyclic turn order.
- const potential=Math.max(...weapons.map(id=>{const w=weaponById(id);return w.damage*(w.shots??1)*(w.effect==='mine'?1/3:1)*(tank.boost?1.5:1);}));
+ const potential=Math.max(...weapons.map(id=>{const w=weaponById(id);return w.damage*launchDamageScale(!!tank.vehicleId,id)*(w.shots??1)*(w.effect==='mine'?1/3:1)*(tank.boost?1.5:1)*(tank.vehicleId==='sea'&&tank.hp<tank.maxHP*.5?1.5:1)*(tank.vehicleId==='water'&&game.snow?1.25:1)*Math.max(...targets.map(t=>eraDamageFactor(tank.vehicleId,t.vehicleId).value));}));
  if(stay.effective&&stay.utility>=potential*.65&&!danger)return {stay,best:stay};
  let best=stay,bestValue=stay.utility-(danger?160:0);
  for(const position of safeAIPositions(game,tank,targets)){

@@ -1,4 +1,5 @@
-import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById, weaponHasTrail,MODERN_TRAIL_POINTS,MODERN_TRAIL_LENGTH, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
+import {eraDamageFactor,ERA_DAMAGE_VERSION} from './era-damage';
+import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById,launchDamageScale, weaponHasTrail,MODERN_TRAIL_POINTS,MODERN_TRAIL_LENGTH, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
 import {isRaging,redHealthLimit} from './health';
 import {pointHitsTank} from './tank-hitbox';
 import {resolveVehicle,vehicleById,type VehicleId,type VehicleChoice} from './vehicles';
@@ -105,7 +106,7 @@ export class Game {
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:Math.floor(this.turn/Math.max(1,this.tanks.length))+1,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
-  private traceRules(){return {雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,直接选择暴龙:!!this.config.allowDragon};}
+  private traceRules(){return {eraDamageVersion:ERA_DAMAGE_VERSION,雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=WATER_Y||t.x<0||t.x>WORLD_W)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
@@ -166,7 +167,10 @@ export class Game {
     if(t.fallVelocity>0) return 0;
     const levels=this.walkLevels(t.x,t.y+18);
     const limit=MAX_CLIMB_ANGLE*Math.PI/180;
-    return clamp(Math.atan2(levels[4]-levels[0],32),-limit,limit);
+    // Ignore a missing tread end or a different lower platform; neither is this body's slope.
+    const offsets=[-16,-8,0,8,16],valid=(i:number)=>levels[i]<WATER_Y&&Math.abs(levels[i]-levels[2])<=MAX_STEP_HEIGHT+Math.abs(offsets[i])*Math.tan(limit);
+    const left=[0,1,2].find(valid)??2,right=[4,3,2].find(valid)??2,span=offsets[right]-offsets[left];
+    return span?clamp(Math.atan2(levels[right]-levels[left],span),-limit,limit):0;
   }
   private walkSurface(x:number,foot:number) {
     // Find the actual top of this connected platform, even when the probe starts inside a small step.
@@ -185,14 +189,21 @@ export class Game {
   }
   private reasonableSlope(x:number,foot:number,direction:number) {
     const heights:number[]=[];let probe=foot;
-    for(let i=0;i<13;i++){probe=this.walkSurface(x+direction*i*2,probe);heights.push(probe);}
-    if(heights.some(y=>y>=WATER_Y-10))return false;
+    for(let i=0;i<13;i++){
+      const next=this.walkSurface(x+direction*i*2,probe);
+      // A gap beyond the requested position is not an uphill wall. The actual
+      // route still checks every step and safe callers reject real drops.
+      if(next>=WATER_Y-10||(heights.length&&next-probe>MAX_STEP_HEIGHT))break;
+      probe=next;heights.push(probe);
+    }
+    if(!heights.length)return false;
     if(heights.slice(1).some((y,i)=>Math.abs(y-heights[i])>MAX_STEP_HEIGHT))return false;
     if(Math.max(...heights)-Math.min(...heights)<=MAX_STEP_HEIGHT)return true;
     const limit=Math.tan(MAX_CLIMB_ANGLE*Math.PI/180);
     // Check both a half-tread and full-tread run. One isolated ledge may be stepped over;
     // Sequential probes preserve thin sloped platforms; sustained ramps remain capped.
-    for(const end of [6,12]){
+    for(const end of new Set([Math.min(6,heights.length-1),heights.length-1])){
+      if(!end)continue;
       let steps=0;
       for(let i=1;i<=end;i++){
         const jump=Math.abs(heights[i]-heights[i-1]);
@@ -399,7 +410,7 @@ export class Game {
     const spec=weaponById(weapon),speed=projectileSpeed(power,weapon==='sniper'?2:spec.speed??1,this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
     const rage=isRaging(t)?1.5:1;
     const weather=t.vehicleId==='water'&&this.snow?1.25:1;
-    return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:t.vehicleId&&!spec.effect?6:1,phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:rage>1?1.15:1,rage:rage>1};
+    return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:launchDamageScale(!!t.vehicleId,weapon),phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:rage>1?1.15:1,rage:rage>1};
   }
   delayFor(t:Tank,weapon?:WeaponId) {
     const base=t.vehicleId?vehicleById(t.vehicleId).waiting:560;
@@ -597,10 +608,11 @@ export class Game {
       if(p.weapon==='emp') {const before={shield:t.shield,fuel:t.fuel};t.shield=0;t.fuel=Math.max(0,t.fuel-35);this.float(t.x,t.y-65,'脉冲','#ac88bc');this.recordBattle('status',`${t.name}被脉冲移除护盾${before.shield}，燃料−35（伤害计算前）`,{target:t.id,weapon:p.weapon,impact,before,after:{shield:t.shield,fuel:t.fuel}});}
       if(p.weapon==='ice') {t.frozen=2;this.float(t.x,t.y-65,'冻结 ×2','#79aebe');this.recordBattle('status',`${t.name}冻结2次行动`,{target:t.id,weapon:p.weapon,impact,frozen:2});}
       const mineScale=w.effect==='mine'?(!p.mineArmed?1/3:t.vehicleId==='mine'?.5:1):1;
-      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*(directTarget===t.id||distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)));
+      const era=eraDamageFactor(this.tanks[p.owner]?.vehicleId,t.vehicleId);
+      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*era.value*(directTarget===t.id||distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)));
       const sources=p.boostSources??{fire:p.fireBoosted?'line':null,rage:p.rage?1.5:1,snow:1},fire=sources.fire?1.5:1,known=fire*sources.rage*sources.snow;
-      const factors=[{source:'弹体scale（实际实现）',value:p.scale},{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:directTarget===t.id||distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)}];
-      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base:w.damage,factors,formula:'round(base × scale × boost × mineScale × distanceScale)',dig:{...dig,digBoost:p.digBoost,source:p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:w.damage,dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
+      const factors=[era,{source:'弹体scale（实际实现）',value:p.scale},{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:directTarget===t.id||distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)}];
+      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base:w.damage,factors,formula:'round(base × scale × boost × mineScale × distanceScale × eraScale)',dig:{...dig,digBoost:p.digBoost,source:p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:w.damage,dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
       if(w.effect==='poison'&&damage>0&&t.hp>redHealthLimit(t)) {
         const fresh=!t.poisoned;t.poisoned=true;t.poisonOwner=p.owner;
         if(fresh){this.float(t.x,t.y-95,'中毒','#6c994b',t.id);this.emit('poison',`${t.name}中了毒箭，自己的行动结束时结算毒伤。`,undefined,t.x,p.weapon);}

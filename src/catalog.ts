@@ -36,18 +36,20 @@ export const MAPS: { id:MapId; name:string; sub:string; color:string;description
   { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；本作加厚桥面，老土单发普通弹落地不能直接挖穿，连续挖掘仍可击落。桥宽、厚度与比例为本作配置。' },
   { id:'moon', name:'天空之城', sub:'厚雪浮岛 · 多次挖穿', color:'#91aab6',description:'2003 年游侠攻略描述厚雪平台难以打穿。本作采用厚雪多层浮岛；布局、坐标及低重力是 Web 配置。' },
   { id:'factory', name:'钢铁工厂', sub:'永久 Z 形底板 · 钢梁',color:'#8f9998',description:'用户确认底层是永久Z形连续斜面，圆滑折点可移位调角；中层钢梁仍可破，仍会摔伤。参照游侠攻略“不会被打掉下去”，坐标与坡面为本作重绘。' },
-  { id:'temple', name:'神圣殿堂', sub:'圆顶蘑菇节点 · 薄轨',color:'#bba883',description:'用户确认永久蘑菇节点：圆顶伞盖、窄柄，可移位调角。非节点薄轨保持4像素且易碎，上层殿堂可破。参照游侠攻略，五节点坐标／弧度为本作重绘，不宣称逐像素复刻。' },
+  { id:'temple', name:'神圣殿堂', sub:'小蘑菇永久节点 · 易碎薄轨',color:'#bba883',description:'用户确认永久蘑菇节点缩至原尺寸约1/3：圆顶伞盖、窄柄／小基座，可微移调角。非节点薄轨保持4像素且易碎，上层殿堂可破。参照游侠攻略，五节点坐标／弧度为本作重绘，不宣称逐像素复刻。' },
   { id:'egypt', name:'古老埃及', sub:'金字塔高地 · 主题重绘',color:'#c4a274',description:'月光 2003 年赛事记录确认古老埃及场景名；未取得原版地形细节。金字塔、方尖碑和薄桥是本作战术主题重绘，不能称为原图复原。' },
 ];
 export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:number;missChance:number }[] = [
   { id:'easy', name:'新兵', sub:'默认推荐 · 瞄准误差较大，适合练习', error:115,missChance:0.65 },
   { id:'normal', name:'老兵', sub:'温和挑战 · 偶尔使用特殊武器', error:75,missChance:0.48 },
-  { id:'hard', name:'精英', sub:'会使用道具与避险，仍有明显射击误差', error:36,missChance:0.36 },
-  { id:'expert', name:'王牌', sub:'会选择射击位置与目标，仍会失手', error:10,missChance:0.19 },
+  { id:'hard', name:'精英', sub:'会使用道具与避险，仍有明显射击误差', error:34,missChance:0.36 },
+  { id:'expert', name:'王牌', sub:'会选择射击位置与目标，仍会失手', error:10,missChance:0.16 },
 ];
 export const ALL_WEAPONS=[...WEAPONS,...VEHICLE_WEAPONS];
 const weaponTable=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,w])) as Record<WeaponId,Weapon>;
 export const weaponById = (id:WeaponId) => weaponTable[id];
+/** Existing native-carrier amplification of legacy bonus shells; shared with AI. */
+export const launchDamageScale=(hasVehicle:boolean,id:WeaponId)=>hasVehicle&&!weaponById(id).effect?6:1;
 /** Only native rounds of the catalog's modern era have a faint ordinary trail. */
 export const weaponHasTrail=(id:WeaponId)=>VEHICLES.some(v=>v.era==='现代系'&&(v.normal===id||v.special===id));
 export const MODERN_TRAIL_POINTS=6,MODERN_TRAIL_LENGTH=24,MODERN_TRAIL_ALPHA=.16,MODERN_TRAIL_WIDTH=1;

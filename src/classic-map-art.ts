@@ -26,8 +26,8 @@ export function classicDetails(c:CanvasRenderingContext2D,g:Game){
   }else if(g.config.map==='temple'){
     c.strokeStyle='#ead391';c.fillStyle='#c7ac60';c.lineWidth=2;
     for(const node of TEMPLE_NODES){
-      const {radius,stem}=templeNode(node),left=Math.max(0,node-radius),right=Math.min(1280,node+radius);c.beginPath();for(let x=left;x<=right;x+=2){const y=templeCap(x,node)+1;x===left?c.moveTo(x,y):c.lineTo(x,y);}c.stroke();
-      c.strokeStyle='#a88e50';c.lineWidth=1;for(let x=node-stem+5;x<node+stem;x+=7){c.beginPath();c.moveTo(x,templeRail(x)+10);c.lineTo(x,569);c.stroke();}
+      const {radius,stem,stemStart,bottom}=templeNode(node),left=Math.max(0,node-radius),right=Math.min(1280,node+radius);c.beginPath();for(let x=left;x<=right;x+=2){const y=templeCap(x,node)+1;x===left?c.moveTo(x,y):c.lineTo(x,y);}c.stroke();
+      c.strokeStyle='#a88e50';c.lineWidth=1;for(let x=node-stem+2;x<node+stem;x+=3){c.beginPath();c.moveTo(x,templeRail(node)+stemStart+1);c.lineTo(x,bottom-1);c.stroke();}
       c.strokeStyle='#ead391';c.lineWidth=2;
     }
     if(g.land.solid(640,370)){c.fillStyle='#e8d7b1';for(let x=572;x<725;x+=28)c.fillRect(x,370,7,24);}

@@ -1,14 +1,15 @@
 import type {Weapon,WeaponId} from './catalog';
+export type Era='古代系'|'近代系'|'现代系'|'未来系'|'超代系';
 export type VehicleId='bowl'|'crossbow'|'cannon'|'beetle'|'duke'|'mine'|'missile'|'multi'|'laser'|'water'|'ion'|'sea'|'dragon';
 export type VehicleChoice=VehicleId|'random';
 export type WeaponEffect='shell'|'fire'|'poison'|'gas'|'mine'|'pierce'|'homing'|'orbital'|'freeze'|'beam'|'helix';
 export interface Vehicle {
-  id:VehicleId;name:string;era:string;hp:number;minAngle:number;maxAngle:number;movement:number;waiting:number;range:number;
+  id:VehicleId;name:string;era:Era;hp:number;minAngle:number;maxAngle:number;movement:number;waiting:number;range:number;
   color:string;body:string;trait:string;hidden:boolean;normal:WeaponId;special:WeaponId;
 }
 type Gun=[string,number,number,number,number,WeaponEffect,number?];
 const weaponList:Weapon[]=[];
-function vehicle(id:VehicleId,name:string,era:string,hp:number,angles:[number,number],movement:number,waiting:number,range:number,color:string,body:string,trait:string,normal:Gun,special:Gun) :Vehicle {
+function vehicle(id:VehicleId,name:string,era:Era,hp:number,angles:[number,number],movement:number,waiting:number,range:number,color:string,body:string,trait:string,normal:Gun,special:Gun) :Vehicle {
   for(const [slot,gun] of [['normal',normal],['special',special]] as const) {
     const [gunName,damage,radius,digRadius,digDepth,effect,shots=1]=gun;
     const effects:Record<WeaponEffect,string>={shell:'抛物线爆破。',fire:'火石落地留下沿地面扩散的火焰，接触时持续受伤。',poison:'毒箭命中未红血目标（含造成伤害的擦中、爆炸波及）后中毒；每次自己的行动结束扣最大生命20%，最多扣到30%红血临界线，补给不会解毒。',gas:'落地形成毒气，随风漂移，接触时持续受伤。',mine:'发射两枚地雷。落地埋设；踩雷伤害高于直接砸中。小妖、水鬼悬浮，不会踩响。',pierce:'一枚四节飞火弹，撞击后剩余弹节继续前进，最多爆破四次。',homing:'下降末段追踪附近允许受伤的存活机体；默认自伤、友伤关闭，设置开启后也可能锁定自己或队友。',orbital:'定位弹落地后由上方卫星轰击，上层地形会挡住射线。正中同样满额挖土，范围略小于大铅弹、坑更浅。',freeze:'紫水命中敌人后（含爆炸波及）限制其一个自己的回合无法移动。这是按用户要求设定的本作规则。',beam:'能量弹抛射。',helix:'多枚能量弹沿同一弹道交织、旋转前进。'};

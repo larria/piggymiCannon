@@ -1,0 +1,260 @@
+[
+  {
+    "target": "water",
+    "version": "normalised-era-cycle-v1",
+    "event": {
+      "time": 0.34999999999999976,
+      "action": 1,
+      "round": 1,
+      "actor": 0,
+      "type": "damage",
+      "summary": "咪猪头→大猪头爸爸，大铅弹／直接命中：基础140 ×1.0000[系别相克（本作规则）古代系→未来系] ×1.0000[弹体scale（实际实现）] ×1.0000[未强化] ×1.0000[海怪发怒] ×1.0000[水鬼雪天] ×1.0000[继承／外部boost修正] ×1.0000[地雷直击／踩踏系数] ×1.0000[距离衰减]，计算140，护盾吸收20，实际扣血120，HP 930→810",
+      "data": {
+        "cause": "direct",
+        "weapon": "cannon-normal",
+        "projectile": 1,
+        "impact": 18,
+        "base": 140,
+        "factors": [
+          {
+            "source": "系别相克（本作规则）古代系→未来系",
+            "value": 1
+          },
+          {
+            "source": "弹体scale（实际实现）",
+            "value": 1
+          },
+          {
+            "source": "未强化",
+            "value": 1
+          },
+          {
+            "source": "海怪发怒",
+            "value": 1
+          },
+          {
+            "source": "水鬼雪天",
+            "value": 1
+          },
+          {
+            "source": "继承／外部boost修正",
+            "value": 1
+          },
+          {
+            "source": "地雷直击／踩踏系数",
+            "value": 1
+          },
+          {
+            "source": "距离衰减",
+            "value": 1
+          }
+        ],
+        "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale)",
+        "dig": {
+          "radius": 44.4,
+          "depth": 42.25,
+          "digBoost": 1,
+          "source": "武器挖土（不乘入伤害）"
+        },
+        "origin": {
+          "projectileStart": 1,
+          "launch": {
+            "action": 1,
+            "time": 0,
+            "owner": 0,
+            "name": "咪猪头",
+            "vehicle": "cannon",
+            "hp": 920,
+            "maxHP": 920,
+            "x": 245.39371337295876,
+            "y": 401.21913047311756,
+            "vx": 136.94401842635742,
+            "vy": -95.88923401486485,
+            "relative": 35,
+            "absolute": 35,
+            "power": 14,
+            "wind": 0,
+            "rngIndex": 9
+          },
+          "impact": {
+            "x": 331.6684449815635,
+            "y": 386.8146630437528,
+            "age": 0.6300000000000004
+          },
+          "boost": 1,
+          "fireBoosted": false,
+          "weaponBase": 140,
+          "dragon": null
+        },
+        "requested": 140,
+        "actual": 120,
+        "hpBefore": 930,
+        "hpAfter": 810,
+        "shieldBefore": 20,
+        "shieldAfter": 0,
+        "absorbed": 20,
+        "ignoreShield": false,
+        "owner": 0,
+        "target": 1,
+        "sourceName": "咪猪头",
+        "targetName": "大猪头爸爸",
+        "weaponName": "大铅弹",
+        "relation": "enemy",
+        "rules": {
+          "eraDamageVersion": "normalised-era-cycle-v1",
+          "雾": false,
+          "火线": false,
+          "雪": false,
+          "自伤": false,
+          "友伤": false,
+          "直接选择暴龙": false
+        },
+        "reaction": "direct",
+        "highDamage": false,
+        "position": {
+          "x": 330,
+          "y": 432
+        },
+        "stateBefore": {
+          "poisoned": false,
+          "frozen": 0,
+          "immobile": 0,
+          "rage": false
+        }
+      },
+      "sequence": 20,
+      "rngIndex": 245
+    },
+    "self": true,
+    "ally": true
+  },
+  {
+    "target": "missile",
+    "version": "normalised-era-cycle-v1",
+    "event": {
+      "time": 0.34999999999999976,
+      "action": 1,
+      "round": 1,
+      "actor": 0,
+      "type": "damage",
+      "summary": "咪猪头→大猪头爸爸，大铅弹／直接命中：基础140 ×0.8000[系别相克（本作规则）古代系→现代系] ×1.0000[弹体scale（实际实现）] ×1.0000[未强化] ×1.0000[海怪发怒] ×1.0000[水鬼雪天] ×1.0000[继承／外部boost修正] ×1.0000[地雷直击／踩踏系数] ×1.0000[距离衰减]，计算112，护盾吸收20，实际扣血92，HP 1100→1008",
+      "data": {
+        "cause": "direct",
+        "weapon": "cannon-normal",
+        "projectile": 1,
+        "impact": 18,
+        "base": 140,
+        "factors": [
+          {
+            "source": "系别相克（本作规则）古代系→现代系",
+            "value": 0.8
+          },
+          {
+            "source": "弹体scale（实际实现）",
+            "value": 1
+          },
+          {
+            "source": "未强化",
+            "value": 1
+          },
+          {
+            "source": "海怪发怒",
+            "value": 1
+          },
+          {
+            "source": "水鬼雪天",
+            "value": 1
+          },
+          {
+            "source": "继承／外部boost修正",
+            "value": 1
+          },
+          {
+            "source": "地雷直击／踩踏系数",
+            "value": 1
+          },
+          {
+            "source": "距离衰减",
+            "value": 1
+          }
+        ],
+        "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale)",
+        "dig": {
+          "radius": 44.4,
+          "depth": 42.25,
+          "digBoost": 1,
+          "source": "武器挖土（不乘入伤害）"
+        },
+        "origin": {
+          "projectileStart": 1,
+          "launch": {
+            "action": 1,
+            "time": 0,
+            "owner": 0,
+            "name": "咪猪头",
+            "vehicle": "cannon",
+            "hp": 920,
+            "maxHP": 920,
+            "x": 245.39371337295876,
+            "y": 401.21913047311756,
+            "vx": 136.94401842635742,
+            "vy": -95.88923401486485,
+            "relative": 35,
+            "absolute": 35,
+            "power": 14,
+            "wind": 0,
+            "rngIndex": 9
+          },
+          "impact": {
+            "x": 331.6684449815635,
+            "y": 386.8146630437528,
+            "age": 0.6300000000000004
+          },
+          "boost": 1,
+          "fireBoosted": false,
+          "weaponBase": 140,
+          "dragon": null
+        },
+        "requested": 112,
+        "actual": 92,
+        "hpBefore": 1100,
+        "hpAfter": 1008,
+        "shieldBefore": 20,
+        "shieldAfter": 0,
+        "absorbed": 20,
+        "ignoreShield": false,
+        "owner": 0,
+        "target": 1,
+        "sourceName": "咪猪头",
+        "targetName": "大猪头爸爸",
+        "weaponName": "大铅弹",
+        "relation": "enemy",
+        "rules": {
+          "eraDamageVersion": "normalised-era-cycle-v1",
+          "雾": false,
+          "火线": false,
+          "雪": false,
+          "自伤": false,
+          "友伤": false,
+          "直接选择暴龙": false
+        },
+        "reaction": "direct",
+        "highDamage": false,
+        "position": {
+          "x": 330,
+          "y": 432
+        },
+        "stateBefore": {
+          "poisoned": false,
+          "frozen": 0,
+          "immobile": 0,
+          "rage": false
+        }
+      },
+      "sequence": 20,
+      "rngIndex": 245
+    },
+    "self": true,
+    "ally": true
+  }
+]

@@ -145,7 +145,7 @@ test('supplies top up double fire and grant rare homing ammunition',()=>{
   g.nextTurn();g.nextTurn();assert.ok(g.useItem('double'));g.fire();assert.equal(g.projectiles.length,2);assert.equal(t.items.double,0);
 });
 test('the rare homing shell acquires a nearby enemy during its descent',()=>{
-  const g=ready(),target=g.enemy,p=g.launch(g.active,'homing');
+  const g=ready();g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=i?900:200;t.y=432;t.fallVelocity=0;});const target=g.enemy,p=g.launch(g.active,'homing');
   Object.assign(p,{x:target.x-90,y:target.y-65,vx:80,vy:130,age:0.2});
   g.projectiles=[p];g.phase='flying';g.update(0.04);assert.equal(p.homing,true);
   run(g,2);assert.ok(target.hp<150);

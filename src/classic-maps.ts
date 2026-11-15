@@ -12,7 +12,11 @@ export function factoryFloor(x:number){
   if(d>half-round)return 560-slope*(round/2+(half-d)**2/(2*round));
   return 512+slope*d;
 }
-export const templeNode=(node:number)=>({radius:node===640?104:node===95||node===1185?96:72,rise:node===640?32:28,stem:node===640?16:12});
+export const TEMPLE_NODE_SCALE=1/3;
+export const templeNode=(node:number)=>{
+ const scale=TEMPLE_NODE_SCALE,rail=templeRail(node),stem=node===640?16:12;
+ return {radius:(node===640?104:node===95||node===1185?96:72)*scale,rise:(node===640?32:28)*scale,stem:stem*scale,rim:7*scale,stemStart:6*scale,baseWidth:(stem+3)*scale,baseTop:rail+(566-rail)*scale,bottom:rail+(574-rail)*scale};
+};
 /** Smooth cap meets the existing thin rail without a vertical step. */
 export function templeCap(x:number,node:number){const {radius,rise}=templeNode(node),u=(x-node)/radius;return templeRail(x)-rise*Math.max(0,1-u*u)**2;}
 /** Key material/topology facts are sourced; coordinates and scale are original Web layouts. */
@@ -33,12 +37,12 @@ export function buildClassicMap(land:Terrain,map:MapId){
     beam(400,535,420,8);beam(745,880,420,8);beam(550,730,365,44);
     beam(40,1240,templeRail,4);
     for(const node of TEMPLE_NODES){
-      const {radius,stem}=templeNode(node);
-      for(let x=Math.max(0,node-radius);x<=Math.min(WORLD_W,node+radius);x++){
-        land.column(x,templeCap(x,node),templeRail(x)+7,true);
+      const {radius,stem,rim,stemStart,baseWidth,baseTop,bottom}=templeNode(node);
+      for(let x=Math.max(0,Math.ceil(node-radius));x<=Math.min(WORLD_W,Math.floor(node+radius));x++){
+        land.column(x,templeCap(x,node),templeRail(x)+rim,true);
       }
-      for(let x=node-stem;x<=node+stem;x++)land.column(x,templeRail(x)+6,574,true);
-      for(let x=node-stem-3;x<=node+stem+3;x++)land.column(x,566,574,true);
+      for(let x=Math.ceil(node-stem);x<=Math.floor(node+stem);x++)land.column(x,templeRail(node)+stemStart,bottom,true);
+      for(let x=Math.ceil(node-baseWidth);x<=Math.floor(node+baseWidth);x++)land.column(x,baseTop,bottom,true);
     }
   }else{
     for(let x=0;x<=WORLD_W;x++)if(x<580||x>700){

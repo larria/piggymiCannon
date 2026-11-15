@@ -66,7 +66,7 @@ test('a real arrow applies poison and each victim action visibly ticks to the re
   });
   await page.locator('#weapon-special').click();
   await page.evaluate(()=>{const g=(window as any).__qa.game;g.setAim(15,35);g.fire();});
-  await expect(page.locator('#hp-1')).toHaveText('820 / 920');
+  await expect(page.locator('#hp-1')).toHaveText('840 / 920');
   expect(await page.evaluate(()=>(window as any).__qa.game.tanks[1].poisoned)).toBe(true);
   const capture=async(hp:number,name:string)=>{
    await expect(page.locator('#hp-1')).toHaveText(`${hp} / 920`);
@@ -76,7 +76,7 @@ test('a real arrow applies poison and each victim action visibly ticks to the re
    if(name==='stopped')await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.texts.some((text:any)=>text.tankId===1&&text.text.startsWith('毒伤')))).toBe(false);
    await page.screenshot({path:`QA/slots-regression-poison-${name}-${width}x834.png`});
   };
-  await capture(820,'applied');
+  await capture(840,'applied');
   const readyVictim=async()=>{
    for(let action=0;action<6;action++){
     const state=await page.evaluate(()=>{const g=(window as any).__qa.game;return {current:g.current,phase:g.phase};});
@@ -86,11 +86,11 @@ test('a real arrow applies poison and each victim action visibly ticks to the re
    }
    throw new Error('Victim did not receive an action');
   };
-  for(const [i,hp]of [636,452,276].entries()){
+  for(const [i,hp]of [656,472,288,276].entries()){
    await readyVictim();await page.locator('#skip-button').click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
    const effect=await page.evaluate(()=>{const g=(window as any).__qa.game;return {hp:g.tanks[1].hp,poisoned:g.tanks[1].poisoned,texts:g.texts.map((t:any)=>t.text),log:g.log};});
    expect(effect.hp).toBe(hp);expect(effect.poisoned).toBe(hp>276);
-   expect(effect.texts).toContain(`毒伤 −${i===2?176:184}`);expect(effect.log.some((s:string)=>s.includes(`生命 ${hp}/920`))).toBe(true);
+   expect(effect.texts).toContain(`毒伤 −${i===3?12:184}`);expect(effect.log.some((s:string)=>s.includes(`生命 ${hp}/920`))).toBe(true);
    await capture(hp,`tick-${i+1}`);
   }
   await expect(page.locator('#hp-bar-1')).toHaveClass(/critical/);await readyVictim();await page.locator('#skip-button').click();

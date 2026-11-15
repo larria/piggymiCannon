@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game,WATER_Y} from '../src/engine';import {defaultSlots} from '../src/crew';import {factoryFloor,templeCap,templeNode,TEMPLE_NODES} from '../src/classic-maps';
+import {Game,WATER_Y} from '../src/engine';import {defaultSlots} from '../src/crew';import {factoryFloor,templeCap,templeNode,templeRail,TEMPLE_NODES} from '../src/classic-maps';
 import {ALL_WEAPONS,excavation} from '../src/catalog';import {solveAIShot,safeAIPositions,predictAIImpact} from '../src/ai-planner';
 function ready(map:'factory'|'temple',seed=52){const slots=defaultSlots();slots.forEach(s=>Object.assign(s,{controller:'human',vehicle:'cannon'}));const g=new Game({slots,map,seed,timer:0,fog:false,fireLine:false});g.start();return g;}
 function permanentOnly(g:Game){for(let i=0;i<g.land.mask.length;i++)if(!g.land.protectedMask[i])g.land.mask[i]=0;g.land.rebuild();}
@@ -24,12 +24,12 @@ test('normal movement across several Z folds neither blocks nor falls and all ai
  }
 });
 test('mushrooms have curved permanent caps, narrow stems and thin destructible gaps',()=>{
- const g=ready('temple');for(const node of TEMPLE_NODES){const {radius,stem}=templeNode(node),cap=Math.ceil(templeCap(node,node));assert.ok(cap<Math.ceil(templeCap(node+radius*.75,node))-10);assert.equal(g.land.protectedMask[cap*g.land.stride+node],1);assert.equal(g.land.protectedMask[560*g.land.stride+node],1);assert.equal(g.land.protectedMask[560*g.land.stride+node+stem+10],0);g.crater(node,530,150,150);assert.equal(g.ground(node,490),cap);}
+ const g=ready('temple');for(const node of TEMPLE_NODES){const {radius,stem,rise,bottom}=templeNode(node),cap=Math.ceil(templeCap(node,node));assert.ok((templeRail(node+radius*.75)-templeCap(node+radius*.75,node))<rise*.3);assert.equal(g.land.protectedMask[cap*g.land.stride+node],1);assert.equal(g.land.protectedMask[(Math.floor(bottom)-1)*g.land.stride+node],1);assert.equal(g.land.protectedMask[(Math.floor(bottom)-1)*g.land.stride+node+Math.ceil(stem)+10],0);g.crater(node,530,150,150);assert.equal(g.ground(node,490),cap);}
  const fresh=ready('temple'),x=240,top=fresh.ground(x,490);assert.equal(fresh.land.bottom(x,top)-top,4);fresh.crater(x,top,30,20);assert.equal(fresh.ground(x,490),640);
 });
 test('small real movements over every mushroom change angle smoothly and remain supported after excavation',()=>{
- for(const node of TEMPLE_NODES){const g=ready('temple');g.enemy.x=node<900?1200:95;g.enemy.y=300;const t=place(g,node-32,templeCap(node-32,node));g.crater(node,530,130,140);let min=99,max=-99,last=g.tankSlope(t),maxDelta=0;
-  for(let i=0;i<119;i++){assert.ok(g.move(1,1/120));g.update(1/120);assert.equal(t.fallVelocity,0);assert.equal(t.hp,t.maxHP);const deg=g.tankSlope(t)*180/Math.PI;min=Math.min(min,deg);max=Math.max(max,deg);maxDelta=Math.max(maxDelta,Math.abs(g.tankSlope(t)-last)*180/Math.PI);last=g.tankSlope(t);assert.ok(Math.abs(g.aim(t,35).absolute-(35-deg))<1e-8);}
+ for(const node of TEMPLE_NODES){const g=ready('temple');g.enemy.x=node<900?1200:95;g.enemy.y=300;const distance=templeNode(node).radius*.35,t=place(g,node-distance,templeCap(node-distance,node));g.crater(node,530,130,140);let min=99,max=-99,last=g.tankSlope(t),maxDelta=0;
+  for(let i=0;i<Math.floor(distance*2/(t.moveSpeed/120));i++){assert.ok(g.move(1,1/120));g.update(1/120);assert.equal(t.fallVelocity,0);assert.equal(t.hp,t.maxHP);const deg=g.tankSlope(t)*180/Math.PI;min=Math.min(min,deg);max=Math.max(max,deg);maxDelta=Math.max(maxDelta,Math.abs(g.tankSlope(t)-last)*180/Math.PI);last=g.tankSlope(t);assert.ok(Math.abs(g.aim(t,35).absolute-(35-deg))<1e-8);}
   assert.ok(min< -8&&max>8,`${node}: ${min}/${max}`);assert.ok(maxDelta<4);assert.equal(t.outOfBounds,false);
  }
 });
