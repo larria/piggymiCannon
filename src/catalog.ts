@@ -1,4 +1,4 @@
-import {VEHICLE_WEAPONS,type VehicleId,type WeaponEffect} from './vehicles';
+import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
 export type MapId = 'valley' | 'coast' | 'moon' | 'factory' | 'temple' | 'egypt';
@@ -48,8 +48,9 @@ export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:numbe
 export const ALL_WEAPONS=[...WEAPONS,...VEHICLE_WEAPONS];
 const weaponTable=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,w])) as Record<WeaponId,Weapon>;
 export const weaponById = (id:WeaponId) => weaponTable[id];
-/** No weapon has an ordinary path trail; fireBoosted alone enables stars. */
-export const weaponHasTrail=(_id:WeaponId)=>false;
+/** Only native rounds of the catalog's modern era have a faint ordinary trail. */
+export const weaponHasTrail=(id:WeaponId)=>VEHICLES.some(v=>v.era==='现代系'&&(v.normal===id||v.special===id));
+export const MODERN_TRAIL_POINTS=6,MODERN_TRAIL_LENGTH=24,MODERN_TRAIL_ALPHA=.16,MODERN_TRAIL_WIDTH=1;
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
 export const excavation = (id:WeaponId,direct:boolean) => {
   const w=weaponById(id),full=id==='ion-special'||!direct;

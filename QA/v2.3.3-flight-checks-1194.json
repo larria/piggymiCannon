@@ -1,0 +1,1450 @@
+[
+  {
+    "vehicle": "bowl",
+    "era": "古代系",
+    "weapon": "bowl-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "bowl",
+    "era": "古代系",
+    "weapon": "bowl-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "bowl",
+    "era": "古代系",
+    "weapon": "bowl-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "bowl",
+    "era": "古代系",
+    "weapon": "bowl-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "crossbow",
+    "era": "古代系",
+    "weapon": "crossbow-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "crossbow",
+    "era": "古代系",
+    "weapon": "crossbow-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "crossbow",
+    "era": "古代系",
+    "weapon": "crossbow-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "crossbow",
+    "era": "古代系",
+    "weapon": "crossbow-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "cannon",
+    "era": "古代系",
+    "weapon": "cannon-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "cannon",
+    "era": "古代系",
+    "weapon": "cannon-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "cannon",
+    "era": "古代系",
+    "weapon": "cannon-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "cannon",
+    "era": "古代系",
+    "weapon": "cannon-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "beetle",
+    "era": "近代系",
+    "weapon": "beetle-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "beetle",
+    "era": "近代系",
+    "weapon": "beetle-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "beetle",
+    "era": "近代系",
+    "weapon": "beetle-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 3,
+    "expected": 1,
+    "flags": [
+      false,
+      false,
+      false
+    ],
+    "trails": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "beetle",
+    "era": "近代系",
+    "weapon": "beetle-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 3,
+    "expected": 1,
+    "flags": [
+      true,
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "duke",
+    "era": "近代系",
+    "weapon": "duke-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "duke",
+    "era": "近代系",
+    "weapon": "duke-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "duke",
+    "era": "近代系",
+    "weapon": "duke-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "duke",
+    "era": "近代系",
+    "weapon": "duke-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "mine",
+    "era": "近代系",
+    "weapon": "mine-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "mine",
+    "era": "近代系",
+    "weapon": "mine-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "mine",
+    "era": "近代系",
+    "weapon": "mine-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 2,
+    "expected": 1,
+    "flags": [
+      false,
+      false
+    ],
+    "trails": [
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "mine",
+    "era": "近代系",
+    "weapon": "mine-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 2,
+    "expected": 1,
+    "flags": [
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "missile",
+    "era": "现代系",
+    "weapon": "missile-normal",
+    "boosted": false,
+    "weakPixels": 23,
+    "weakStrokes": [
+      {
+        "width": 1,
+        "alpha": 0.16
+      }
+    ],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      6
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "missile",
+    "era": "现代系",
+    "weapon": "missile-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "missile",
+    "era": "现代系",
+    "weapon": "missile-special",
+    "boosted": false,
+    "weakPixels": 23,
+    "weakStrokes": [
+      {
+        "width": 1,
+        "alpha": 0.16
+      }
+    ],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      6
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "missile",
+    "era": "现代系",
+    "weapon": "missile-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "multi",
+    "era": "现代系",
+    "weapon": "multi-normal",
+    "boosted": false,
+    "weakPixels": 132,
+    "weakStrokes": [
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      }
+    ],
+    "count": 6,
+    "expected": 1,
+    "flags": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "trails": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "multi",
+    "era": "现代系",
+    "weapon": "multi-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 6,
+    "expected": 1,
+    "flags": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "multi",
+    "era": "现代系",
+    "weapon": "multi-special",
+    "boosted": false,
+    "weakPixels": 414,
+    "weakStrokes": [
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      },
+      {
+        "width": 1,
+        "alpha": 0.16
+      }
+    ],
+    "count": 18,
+    "expected": 1,
+    "flags": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "trails": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "multi",
+    "era": "现代系",
+    "weapon": "multi-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 18,
+    "expected": 1,
+    "flags": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "laser",
+    "era": "未来系",
+    "weapon": "laser-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "laser",
+    "era": "未来系",
+    "weapon": "laser-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "laser",
+    "era": "未来系",
+    "weapon": "laser-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 3,
+    "expected": 1,
+    "flags": [
+      false,
+      false,
+      false
+    ],
+    "trails": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "laser",
+    "era": "未来系",
+    "weapon": "laser-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 3,
+    "expected": 1,
+    "flags": [
+      true,
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "water",
+    "era": "未来系",
+    "weapon": "water-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "water",
+    "era": "未来系",
+    "weapon": "water-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "water",
+    "era": "未来系",
+    "weapon": "water-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "water",
+    "era": "未来系",
+    "weapon": "water-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "ion",
+    "era": "未来系",
+    "weapon": "ion-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "ion",
+    "era": "未来系",
+    "weapon": "ion-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "ion",
+    "era": "未来系",
+    "weapon": "ion-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "ion",
+    "era": "未来系",
+    "weapon": "ion-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "sea",
+    "era": "未来系",
+    "weapon": "sea-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      false
+    ],
+    "trails": [
+      0
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "sea",
+    "era": "未来系",
+    "weapon": "sea-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 1,
+    "expected": 1,
+    "flags": [
+      true
+    ],
+    "trails": [
+      40
+    ],
+    "scale": [
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "sea",
+    "era": "未来系",
+    "weapon": "sea-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 2,
+    "expected": 1,
+    "flags": [
+      false,
+      false
+    ],
+    "trails": [
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "sea",
+    "era": "未来系",
+    "weapon": "sea-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 2,
+    "expected": 1,
+    "flags": [
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "dragon",
+    "era": "超代系",
+    "weapon": "dragon-normal",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 6,
+    "expected": 1,
+    "flags": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "trails": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "dragon",
+    "era": "超代系",
+    "weapon": "dragon-normal",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 6,
+    "expected": 1,
+    "flags": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "dragon",
+    "era": "超代系",
+    "weapon": "dragon-special",
+    "boosted": false,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 18,
+    "expected": 1,
+    "flags": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "trails": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  },
+  {
+    "vehicle": "dragon",
+    "era": "超代系",
+    "weapon": "dragon-special",
+    "boosted": true,
+    "weakPixels": 0,
+    "weakStrokes": [],
+    "count": 18,
+    "expected": 1,
+    "flags": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "trails": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40
+    ],
+    "scale": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "phase": "flying"
+  }
+]

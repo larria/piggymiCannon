@@ -1,6 +1,6 @@
 import { Game, WORLD_W, WORLD_H, WATER_Y, clamp, makeRng, type Tank } from './engine';
-import { weaponById } from './catalog';
-import {projectileDrawScale} from './projectile-art';
+import { weaponById,weaponHasTrail,MODERN_TRAIL_ALPHA,MODERN_TRAIL_WIDTH } from './catalog';
+import {projectileDrawScale,projectileRearExtent} from './projectile-art';
 import { breathingPose } from './feedback';
 import {isRaging} from './health';
 import {defeatedPig,victoryConfetti} from './result-art';
@@ -277,6 +277,7 @@ export class Renderer {
     this.labelRects=[];g.tanks.filter(t=>g.visible(t)).forEach(t=>this.tank(t));
     for(const p of g.projectiles) {
       if(p.delay>0||!this.visibleAt(p.x)) continue;
+      if(!p.fireBoosted&&!p.transfer&&weaponHasTrail(p.weapon)&&p.trail.length>1){ctx.save();const first=p.trail[0],last=p.trail[p.trail.length-1],weapon=weaponById(p.weapon),color=weapon.color,rear=projectileRearExtent(weapon.shape??p.weapon,4-p.penetrations),angle=Math.atan2(p.vy,p.vx);ctx.translate(-Math.cos(angle)*rear,-Math.sin(angle)*rear);const fade=ctx.createLinearGradient(first.x,first.y,last.x,last.y);fade.addColorStop(0,color+'00');fade.addColorStop(1,color);ctx.strokeStyle=fade;ctx.globalAlpha=MODERN_TRAIL_ALPHA;ctx.lineWidth=MODERN_TRAIL_WIDTH;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();p.trail.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.stroke();ctx.restore();}
       if(p.fireBoosted){ctx.save();p.trail.filter((_,i)=>i%6===0).forEach((q,i)=>{ctx.globalAlpha=.3+i/10;ctx.translate(q.x,q.y);ctx.fillStyle=i%2?'#e8a958':'#fae5a1';ctx.strokeStyle='#b27939';ctx.lineWidth=.6;ctx.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,r=j%2?2.6:6;const x=Math.cos(a)*r,y=Math.sin(a)*r;j?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.stroke();ctx.translate(-q.x,-q.y);});ctx.restore();}
       ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(p.vy,p.vx));
       const weapon=weaponById(p.weapon),shape=p.transfer?'transfer':weapon.shape??p.weapon;ctx.save();const size=projectileDrawScale(shape);ctx.scale(size,size);projectileArt(ctx,shape,p.transfer?'#63adbd':weapon.color,this.time+p.phase,4-p.penetrations);ctx.restore();

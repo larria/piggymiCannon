@@ -2,6 +2,15 @@ import {weaponById,type WeaponId} from './catalog';
 
 /** Render-only visibility adjustment. Never use projectile.scale (a damage factor). */
 export const projectileDrawScale=(shape:string)=>shape==='cannon-special'?1.35:shape==='shell'?1.2:['crossbow-normal','crossbow-special','sniper','ion-normal'].includes(shape)?1.12:1;
+const rearExtents=new Map<string,number>();
+/** Sample our actual vector silhouette once, so a short exhaust starts at its rear. */
+export function projectileRearExtent(shape:string,sections=4){
+ const key=shape+':'+sections,cached=rearExtents.get(key);if(cached!==undefined)return cached;
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=100;const c=canvas.getContext('2d',{willReadFrequently:true})!;
+ c.translate(50,50);const size=projectileDrawScale(shape);c.scale(size,size);projectileArt(c,shape,'#ffffff',0,sections);
+ const data=c.getImageData(0,0,100,100).data;let minX=50;for(let y=0;y<100;y++)for(let x=0;x<50;x++)if(data[(y*100+x)*4+3]>20)minX=Math.min(minX,x);
+ const extent=Math.max(0,50-minX-1);rearExtents.set(key,extent);return extent;
+}
 
 /** Every available and legacy shell has its own silhouette. The catalog owns its body color. */
 export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:string,time:number,sections=4){

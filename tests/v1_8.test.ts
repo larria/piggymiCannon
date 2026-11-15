@@ -59,7 +59,7 @@ test('all multi and dragon volleys have distinct impact positions, including nin
 });
 test('cannon rounds never accumulate a flight trail, and a fresh or ended match has no power marker',()=>{
  for(const id of ['cannon-normal','cannon-special'] as const){const g=flat({vehicle0:'cannon'});assert.equal(g.active.lastPower,null);g.selectWeapon(id);g.fire();run(g,.1);assert.equal(g.projectiles[0].trail.length,0);assert.equal(weaponHasTrail(id),false);assert.equal(g.active.lastPower,68);g.damage(g.enemy,9999,0);run(g,10);assert.ok(g.tanks.every(t=>t.lastPower===null));}
- assert.equal(weaponHasTrail('multi-normal'),false);
+ assert.equal(weaponHasTrail('multi-normal'),true);
 });
 test('seeded deployments vary, include close encounters, and always have safe separated escape routes',()=>{
  let close=0,total=0;const positions=new Set<string>();
