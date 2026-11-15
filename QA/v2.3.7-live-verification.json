@@ -1,0 +1,61 @@
+{
+  "version": "2.3.7",
+  "liveBundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "offlineReload": true,
+  "all101OfflineAudioHashesMatch": true,
+  "all7OfflineVisualHashesMatch": true,
+  "actualMap": "temple",
+  "seed": 52,
+  "activeSlots": 4,
+  "eraRule": "normalised-era-cycle-v1",
+  "eraFactor": {
+    "source": "系别相克（本作规则）古代系→现代系",
+    "value": 0.8
+  },
+  "damage": {
+    "base": 420,
+    "factors": [
+      {
+        "source": "系别相克（本作规则）古代系→现代系",
+        "value": 0.8
+      },
+      {
+        "source": "弹体scale（实际实现）",
+        "value": 1
+      },
+      {
+        "source": "威力加强（fireBoosted仅一次）",
+        "value": 1.5
+      },
+      {
+        "source": "海怪发怒",
+        "value": 1
+      },
+      {
+        "source": "水鬼雪天",
+        "value": 1
+      },
+      {
+        "source": "继承／外部boost修正",
+        "value": 1
+      },
+      {
+        "source": "地雷直击／踩踏系数",
+        "value": 1
+      },
+      {
+        "source": "距离衰减",
+        "value": 1
+      }
+    ],
+    "requested": 504,
+    "absorbed": 0,
+    "actual": 504,
+    "summary": "咪猪头→大猪头爸爸，小红豆／直接命中：基础420 ×0.8000[系别相克（本作规则）古代系→现代系] ×1.0000[弹体scale（实际实现）] ×1.5000[威力加强（fireBoosted仅一次）] ×1.0000[海怪发怒] ×1.0000[水鬼雪天] ×1.0000[继承／外部boost修正] ×1.0000[地雷直击／踩踏系数] ×1.0000[距离衰减]，计算504，护盾吸收0，实际扣血504，HP 1100→596"
+  },
+  "permanentMushroomColumns": 297,
+  "actualMapMusicPlayedOffline": true,
+  "errors": [],
+  "qaHook": false
+}
