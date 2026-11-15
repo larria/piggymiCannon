@@ -1,0 +1,106 @@
+{
+  "version": "2.3.2",
+  "bundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "offlineReload": true,
+  "frozenClock": true,
+  "matches": [
+    {
+      "version": "2.3.2",
+      "seed": 52,
+      "choice": "random",
+      "map": "coast",
+      "name": "独木桥",
+      "current": "coast",
+      "selection": {
+        "choice": "random",
+        "actual": "coast",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "critical": 0,
+      "shots": [
+        0,
+        0
+      ],
+      "currentPhase": "aiming"
+    },
+    {
+      "version": "2.3.2",
+      "seed": 53,
+      "choice": "random",
+      "map": "valley",
+      "name": "青苔峡谷",
+      "current": "valley",
+      "selection": {
+        "choice": "random",
+        "actual": "valley",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "critical": 0,
+      "shots": [
+        0,
+        0
+      ],
+      "currentPhase": "aiming"
+    },
+    {
+      "version": "2.3.2",
+      "seed": 54,
+      "choice": "random",
+      "map": "coast",
+      "name": "独木桥",
+      "current": "coast",
+      "selection": {
+        "choice": "random",
+        "actual": "coast",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "critical": 0,
+      "shots": [
+        0,
+        0
+      ],
+      "currentPhase": "aiming"
+    }
+  ],
+  "fixedMap": {
+    "version": "2.3.2",
+    "seed": 55,
+    "choice": "factory",
+    "map": "factory",
+    "name": "钢铁工厂",
+    "current": "factory",
+    "critical": 0,
+    "shots": [
+      0,
+      0
+    ],
+    "currentPhase": "aiming"
+  },
+  "audioFiles": 101,
+  "audioHashesCorrect": true,
+  "errors": [],
+  "rawRequests": [],
+  "qaHook": false
+}
