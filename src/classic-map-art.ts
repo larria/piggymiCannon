@@ -1,5 +1,5 @@
 import type {Game} from './engine';
-import {TEMPLE_NODES,templeRail} from './classic-maps';
+import {TEMPLE_NODES,templeRail,templeCap,templeNode,factoryFloor} from './classic-maps';
 export function classicBackdrop(c:CanvasRenderingContext2D,map:string,color:string){
   c.save();c.fillStyle=color;c.strokeStyle=color;c.globalAlpha=.35;
   if(map==='factory'){
@@ -19,12 +19,17 @@ export function classicBackdrop(c:CanvasRenderingContext2D,map:string,color:stri
 export function classicDetails(c:CanvasRenderingContext2D,g:Game){
   c.save();
   if(g.config.map==='factory'){
-    c.fillStyle='#c9d5d3';for(let x=48;x<1280;x+=56)for(const y of [316,415,556])if(g.land.solid(x,y)){c.beginPath();c.arc(x,y,2.3,0,7);c.fill();}
-    c.strokeStyle='#99a9aa';c.lineWidth=1.5;for(let x=0;x<1280;x+=44){c.beginPath();c.moveTo(x,564);c.lineTo(x+16,576);c.stroke();}
-    c.fillStyle='#d2dcdb';c.font='11px sans-serif';c.fillText('永久底板',30,576);
+    c.fillStyle='#c9d5d3';for(let x=48;x<1280;x+=56)for(const y of [316,415,factoryFloor(x)+9])if(g.land.solid(x,y)){c.beginPath();c.arc(x,y,2.3,0,7);c.fill();}
+    c.strokeStyle='#d2c182';c.lineWidth=2;c.beginPath();for(let x=0;x<=1280;x+=2){const y=factoryFloor(x)+2;x?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
+    c.strokeStyle='#99a9aa';c.lineWidth=1.5;for(let x=0;x<1280;x+=44){const y=factoryFloor(x)+14;c.beginPath();c.moveTo(x,y);c.lineTo(x+12,y+9);c.stroke();}
+    c.fillStyle='#d2dcdb';c.font='11px sans-serif';c.fillText('永久 Z 形底板',30,589);
   }else if(g.config.map==='temple'){
     c.strokeStyle='#ead391';c.fillStyle='#c7ac60';c.lineWidth=2;
-    for(const x of TEMPLE_NODES){const y=templeRail(x);c.beginPath();c.arc(x,y+4,5,0,7);c.fill();c.stroke();}
+    for(const node of TEMPLE_NODES){
+      const {radius,stem}=templeNode(node),left=Math.max(0,node-radius),right=Math.min(1280,node+radius);c.beginPath();for(let x=left;x<=right;x+=2){const y=templeCap(x,node)+1;x===left?c.moveTo(x,y):c.lineTo(x,y);}c.stroke();
+      c.strokeStyle='#a88e50';c.lineWidth=1;for(let x=node-stem+5;x<node+stem;x+=7){c.beginPath();c.moveTo(x,templeRail(x)+10);c.lineTo(x,569);c.stroke();}
+      c.strokeStyle='#ead391';c.lineWidth=2;
+    }
     if(g.land.solid(640,370)){c.fillStyle='#e8d7b1';for(let x=572;x<725;x+=28)c.fillRect(x,370,7,24);}
   }else if(g.config.map==='egypt'){
     c.strokeStyle='#efd4a3';c.lineWidth=1.2;for(let y=385;y<520;y+=24)for(let x=95;x<1230;x+=34)if(g.land.solid(x,y)&&g.land.solid(x+26,y)){c.beginPath();c.moveTo(x,y);c.lineTo(x+26,y);c.stroke();}

@@ -750,7 +750,9 @@ export class Game {
         const time=distance>capDistance?capTime+(distance-capDistance)/250:(-80+Math.sqrt(6400+440*distance))/220;
         const drift=this.wind*2.5*(time/0.35-(1-Math.exp(-0.35*time))/0.35**2);
         const start=desired-drift,landing=this.predictSupply(start);
-        if(start<32||start>WORLD_W-32||!landing||landing.x<40||landing.x>WORLD_W-40||!this.stablePlatform(landing.x)||this.traversable(human,landing.x)===null||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45)) continue;
+        const reachable=landing?this.traversable(human,landing.x):null;
+        // A lower-layer player cannot collect a box resting on the roof above.
+        if(start<32||start>WORLD_W-32||!landing||landing.x<40||landing.x>WORLD_W-40||!this.stablePlatform(landing.x)||reachable===null||Math.abs(landing.y+14-reachable)>MAX_STEP_HEIGHT||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45)) continue;
         const roll=this.rng(),type=roll<.3?'medical':roll<.5?'double':roll<.65?'transfer':roll<.8?'boost':'homing';
         this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0});
         this.emit('crate','补给空降中，回合计时暂停。');break;

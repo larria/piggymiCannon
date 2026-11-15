@@ -30,6 +30,9 @@ export function mountSetup(root:HTMLElement,config:Config,base:string,toast:(s:s
   root.querySelectorAll<HTMLSelectElement>('[data-controller]').forEach(b=>b.addEventListener('change',()=>{slots[Number(b.dataset.controller)].controller=b.value as Slot['controller'];render();}));
   root.querySelectorAll<HTMLSelectElement>('[data-difficulty]').forEach(b=>b.addEventListener('change',()=>slots[Number(b.dataset.difficulty)].difficulty=b.value as Slot['difficulty']));gallery();
  };
- const mapNote=()=>{$('#map-choice-note').textContent=MAPS.find(m=>m.id===$<HTMLInputElement>('input[name="map"]:checked').value)!.description;};root.querySelectorAll('input[name="map"]').forEach(b=>b.addEventListener('change',mapNote));mapNote();rules();render();
+ const revealStart=()=>{if(($<HTMLElement>('#map-choice-note').closest('details') as HTMLDetailsElement).open)requestAnimationFrame(()=>$('#deploy-slots').scrollIntoView({block:'nearest',inline:'nearest'}));};
+ const mapNote=()=>{$('#map-choice-note').textContent=MAPS.find(m=>m.id===$<HTMLInputElement>('input[name="map"]:checked').value)!.description;revealStart();};
+ $('#map-choice-note').closest('details')!.addEventListener('toggle',revealStart);
+ root.querySelectorAll('input[name="map"]').forEach(b=>b.addEventListener('change',mapNote));mapNote();rules();render();
  $('#setup-form').addEventListener('submit',e=>{e.preventDefault();const problem=slotProblem(slots);if(problem){toast(problem);return;}const data=new FormData(e.target as HTMLFormElement);onStart({...config,slots,map:data.get('map') as Config['map'],timer:Number(data.get('timer')),snow:data.get('snow')==='on',fog:data.get('fog')==='on'?true:undefined,fireLine:data.get('fireLine')==='on'?true:undefined});});
 }

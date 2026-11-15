@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WATER_Y} from '../src/engine.ts';
 import {MAPS,ALL_WEAPONS,excavation} from '../src/catalog.ts';
-import {TEMPLE_NODES,templeRail} from '../src/classic-maps.ts';
+import {TEMPLE_NODES,templeRail,factoryFloor} from '../src/classic-maps.ts';
 
 const ready=(config={})=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,...config});g.start();return g;};
 const run=(g:Game,seconds:number,until?:(g:Game)=>boolean)=>{for(let i=0;i<seconds*120;i++){g.update(1/120);if(until?.(g))break;}};
@@ -87,8 +87,8 @@ test('factory has a permanent full-width floor which every weapon excavation pre
  for(const w of ALL_WEAPONS){const dig=excavation(w.id,false);g.crater(640,552,dig.radius,dig.depth);}
  g.crater(640,300,1500,1000);
  for(let i=0;i<floor.length;i++)if(floor[i])assert.equal(g.land.mask[i],1);
- for(let x=0;x<=1280;x++)assert.equal(g.ground(x),552);
- run(g,4);assert.ok(g.tanks.every(t=>t.y+18<=552&&t.y<WATER_Y));
+ for(let x=0;x<=1280;x++)assert.equal(g.ground(x),Math.ceil(factoryFloor(x)));
+ run(g,4);assert.ok(g.tanks.every(t=>t.y+18<=557&&t.y<WATER_Y));
 });
 
 test('temple has a four-pixel lower rail, permanent nodes and destructible ordinary tracks',()=>{
@@ -101,8 +101,8 @@ test('temple has a four-pixel lower rail, permanent nodes and destructible ordin
 });
 
 test('an explosion on a high platform does not delete an untouched thin lower track',()=>{
- const g=ready({map:'temple'}),rail=g.ground(175,500);g.crater(175,335,40,35);
- assert.equal(g.ground(175,500),rail);assert.equal(g.land.bottom(175,rail)-rail,4);
+ const g=ready({map:'temple'}),x=240,rail=g.ground(x,500);g.crater(x,335,40,35);
+ assert.equal(g.ground(x,500),rail);assert.equal(g.land.bottom(x,rail)-rail,4);
 });
 
 test('all six maps finish a full AI match without invalid terrain or a stalled action',()=>{
