@@ -67,6 +67,9 @@ test('default self/friendly damage blocks are explicit and do not alter HP',()=>
  const g=flat();g.tanks[2].x=g.tanks[1].x-10;impact(g);const blocked=entries(g,'damage-blocked').find(e=>e.data.target===2)!;
  assert.ok(blocked);assert.equal(g.tanks[2].hp,g.tanks[2].maxHP);assert.equal(blocked.data.rules.友伤,false);
 });
+test('transfer action distinguishes the actual transfer carrier from the selected cannon weapon',()=>{
+ const g=flat();assert.ok(g.useItem('teleport'));assert.ok(g.fire());const action=entries(g,'fire-action')[0];assert.equal(action.data.transfer,true);assert.equal(action.data.weapon,'shell');assert.equal(action.data.selectedWeapon,'cannon-normal');assert.equal(g.projectiles[0].transfer,true);
+});
 test('continuous movement and aim are coalesced into actions with accurate endpoints and fuel',()=>{
  const g=flat(),start=g.active.x,fuel=g.active.fuel;for(let i=0;i<100;i++)g.move(1,.005);for(let i=0;i<100;i++)g.setAim(20+i*.1,40+i*.1);
  const moves=entries(g,'move'),aims=entries(g,'aim');assert.equal(moves.length,1);assert.equal(aims.length,1);assert.equal(moves[0].data.from.x,start);assert.equal(moves[0].data.to.x,g.active.x);assert.equal(moves[0].data.fuelBefore,fuel);assert.equal(moves[0].data.fuelAfter,g.active.fuel);
