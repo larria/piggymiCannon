@@ -1,0 +1,14 @@
+[
+  {
+    "initiallyUncontrolled": true,
+    "userButton": true,
+    "reloads": 1,
+    "activated": true
+  },
+  {
+    "initiallyUncontrolled": false,
+    "userButton": true,
+    "reloads": 1,
+    "activated": true
+  }
+]

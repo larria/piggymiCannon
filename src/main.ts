@@ -9,6 +9,7 @@ import { chargePower,touchChargePower } from './interaction';
 import {installMobileGestureGuards} from './mobile-gestures';
 import {chooseResultPosition} from './result-layout';
 import { registerSW } from 'virtual:pwa-register';
+import {applyWaitingUpdate} from './pwa-update';
 import { compareVersions } from './version';
 import {VEHICLES,VEHICLE_WEAPONS,vehicleById,validChoice,type VehicleChoice} from './vehicles';
 import {vehicleIcon,paintProjectilePreviews} from './vehicle-art';
@@ -528,14 +529,38 @@ function frame(now:number) {
   requestAnimationFrame(frame);
 }
 setImmersive(false);renderInventory();updateSound();updateUI();requestAnimationFrame(frame);
+let applyingUpdate=false,updateReloadRequested=false;
+let pageWorker=navigator.serviceWorker?.controller??null;
+if('serviceWorker' in navigator){
+  void navigator.serviceWorker.ready.then(reg=>{pageWorker??=reg.active;});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    const current=navigator.serviceWorker.controller;
+    if(!pageWorker){pageWorker=current;return;}
+    if(current&&current!==pageWorker&&!applyingUpdate){pendingUpdate=true;updateUI();}
+  });
+}
+const reloadUpdatedClient=()=>{if(applyingUpdate&&!updateReloadRequested){updateReloadRequested=true;location.reload();}};
 const updateSW=registerSW({
   immediate:true,
+  // The requested worker's activated state below owns reload, even on a fresh page.
+  onNeedReload:()=>{},
   onNeedRefresh(){pendingUpdate=true;updateUI();toast(game.phase==='lobby'||game.phase==='ended'?'新版本已准备好，点击「更新游戏」即可安装。':'新版本已准备好，本局结束后可更新。');},
   onRegisteredSW(_url,registration){swRegistration=registration;},
   onOfflineReady(){toast('离线缓存已就绪，断网也可以开战。');},
   onRegisterError(error){console.warn('Offline cache registration failed',error);},
 });
-$('#apply-update').addEventListener('click',()=>{if(game.phase==='lobby'||game.phase==='ended') void updateSW(true);});
+$('#apply-update').addEventListener('click',async()=>{
+  if(applyingUpdate||(game.phase!=='lobby'&&game.phase!=='ended'))return;
+  applyingUpdate=true;
+  try {
+    if(!await applyWaitingUpdate(swRegistration,()=>updateSW(true),reloadUpdatedClient)){
+      if(pageWorker&&swRegistration?.active?.state==='activated'&&swRegistration.active!==pageWorker)reloadUpdatedClient();
+      else toast('更新文件还在准备，请稍后再试。');
+    }
+  }
+  catch {toast('更新暂未完成，请稍后再试。');}
+  finally {applyingUpdate=false;}
+});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e as typeof installPrompt;$('#install-button').classList.remove('hidden');});
 window.addEventListener('appinstalled',()=>{$('#install-button').classList.add('hidden');installPrompt=null;toast('安装好了，从主屏幕就能进入游戏。');});
 $('#install-button').addEventListener('click',async()=>{
