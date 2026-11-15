@@ -1,0 +1,90 @@
+{
+  "version": "2.2.6",
+  "worker": "https://larria.github.io/piggymiCannon/sw.js",
+  "bundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "onlineImages": [
+    {
+      "path": "portraits/mimi.png",
+      "ok": true,
+      "type": "image/png",
+      "bytes": 1756806,
+      "hash": "9cd197ce9bd85f933655a746349fa2c7b8ac0a53902ee740425587dbecc99592"
+    },
+    {
+      "path": "portraits/dad.png",
+      "ok": true,
+      "type": "image/png",
+      "bytes": 1723260,
+      "hash": "f27bea34659c6e599706a3996a076a4233180a68e9c4c393d820501ca173f1a8"
+    }
+  ],
+  "offlineAssets": [
+    {
+      "path": "portraits/mimi.png",
+      "ok": true,
+      "type": "image/png",
+      "bytes": 1756806,
+      "hash": "9cd197ce9bd85f933655a746349fa2c7b8ac0a53902ee740425587dbecc99592"
+    },
+    {
+      "path": "portraits/dad.png",
+      "ok": true,
+      "type": "image/png",
+      "bytes": 1723260,
+      "hash": "f27bea34659c6e599706a3996a076a4233180a68e9c4c393d820501ca173f1a8"
+    },
+    {
+      "path": "icons/fox-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 738,
+      "hash": "b701e27a3ac4e34eba4b9161c5ca01f72979c053383d1af0ef27b46988d57614"
+    },
+    {
+      "path": "icons/fish-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 805,
+      "hash": "e80d71d8994c9cdc20710e3347ac21a8bd54f0b2e1264e14bee7588b9775bfab"
+    },
+    {
+      "path": "fonts/dm-sans-regular.ttf",
+      "ok": true,
+      "type": "font/ttf",
+      "bytes": 48280,
+      "hash": "b0ae3e89a7d3ef2b1838bb4b1ceb0b17cc3435af061eee809d76aa623ff116e9"
+    },
+    {
+      "path": "audio/bgm-sunny-30s.mp3",
+      "ok": true,
+      "type": "audio/mp3",
+      "bytes": 761382,
+      "hash": "bd819e8aa86fcfba83236dd17c136e7a66aa64f3cc0854619b84d3835a634ce9"
+    }
+  ],
+  "offlineReload": true,
+  "providedPNGDecoded": true,
+  "bothSizesPreviouslyTested": true,
+  "fourHumanMomTurn": true,
+  "portraitsAndSpeech": true,
+  "snapshot": {
+    "version": "2.2.6",
+    "names": [
+      "咪猪头",
+      "大猪头爸爸",
+      "阿狸",
+      "小黄鱼妈妈"
+    ],
+    "currentNames": [
+      "咪猪头",
+      "大猪头爸爸",
+      "阿狸",
+      "小黄鱼妈妈"
+    ],
+    "textHasMom": true
+  },
+  "errors": [],
+  "qaHook": false,
+  "researchRequests": []
+}
