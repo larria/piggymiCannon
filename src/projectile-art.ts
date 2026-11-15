@@ -1,3 +1,4 @@
+import {paintProjectileGrain} from './battle-sprites';
 import {weaponById,type WeaponId} from './catalog';
 
 /** Render-only visibility adjustment. Never use projectile.scale (a damage factor). */
@@ -68,6 +69,7 @@ export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:stri
     case 'sniper':poly([[23,0],[-15,-3],[-11,0],[-15,3]]);break;
     case 'homing':poly([[16,0],[4,-4],[-5,-10],[-4,-3],[-13,0],[-4,3],[-5,10],[4,4]]);ring(2,0,4,color,1.5);break;
   }
+  paintProjectileGrain(c,shape,time,sections);
 }
 
 export function paintProjectilePreviews(root:ParentNode=document){

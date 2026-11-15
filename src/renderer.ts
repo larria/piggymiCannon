@@ -1,3 +1,4 @@
+import {loadBattleSprites,paintBattleSprite} from './battle-sprites';
 import { Game, WORLD_W, WORLD_H, WATER_Y, clamp, makeRng, type Tank } from './engine';
 import { weaponById,weaponHasTrail,MODERN_TRAIL_ALPHA,MODERN_TRAIL_WIDTH } from './catalog';
 import {projectileDrawScale,projectileRearExtent} from './projectile-art';
@@ -32,7 +33,7 @@ export class Renderer {
   constructor(canvas:HTMLCanvasElement,game:Game) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d')!;this.background=document.createElement('canvas');
     this.background.width=WORLD_W;this.background.height=WORLD_H;this.game=game;this.palette=PALETTES[game.config.map];
-    this.resize();
+    this.resize();void loadBattleSprites();
   }
   setGame(game:Game) {this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.windMotes=[];this.manualFocus=null;this.paintBackground();}
   resize() {
@@ -260,10 +261,12 @@ export class Renderer {
       for(let i=-Math.floor(f.radius/11);i<=Math.floor(f.radius/11);i++) {
         const x=f.x+i*11,y=g.ground(x,(f.y??0)-20)-1;if(y>=WATER_Y-5) continue;
         ctx.fillStyle=i%2===0?'#e89754bd':'#f5c376bb';ctx.beginPath();ctx.moveTo(x-5,y);ctx.quadraticCurveTo(x-8,y-10,x+Math.sin(this.time*6+i)*6,y-20-Math.sin(this.time*5+i)*7);ctx.quadraticCurveTo(x+8,y-8,x+5,y);ctx.fill();
+        paintBattleSprite(ctx,'flame',this.time*.6+i*.09,x-8,y-30,16,30,.5,true);
       }
     }
     for(const gas of g.gases) if(this.visibleAt(gas.x)) {
-      ctx.save();ctx.fillStyle='#a7bc7660';for(let i=0;i<6;i++) {ctx.beginPath();ctx.ellipse(gas.x+Math.sin(i*3+this.time)*gas.radius*.6,gas.y-15+Math.cos(i+this.time)*12,23,15,0,0,7);ctx.fill();}ctx.restore();
+      ctx.save();ctx.fillStyle='#a7bc7660';for(let i=0;i<6;i++) {ctx.beginPath();ctx.ellipse(gas.x+Math.sin(i*3+this.time)*gas.radius*.6,gas.y-15+Math.cos(i+this.time)*12,23,15,0,0,7);ctx.fill();}
+      paintBattleSprite(ctx,'gas',this.time*.3,gas.x-gas.radius,gas.y-43,gas.radius*2,54,.48,true);ctx.restore();
     }
     for(const mine of g.mines) if((mine.owner===g.viewer||g.snow)&&this.visibleAt(mine.x)) {ctx.fillStyle=weaponById(mine.weapon).color;ctx.beginPath();ctx.ellipse(mine.x,mine.y,9,4,0,0,7);ctx.fill();ctx.fillStyle='#eeb58a';ctx.fillRect(mine.x-2,mine.y-5,4,2);}
     for(const crate of g.crates) {
@@ -288,6 +291,9 @@ export class Renderer {
     for(const b of g.blasts) {
       if(!this.visibleAt(b.x)) continue;
       const progress=1-b.life/b.maxLife;
+      const effect=b.weapon?weaponById(b.weapon).effect:undefined;
+      const sprite=effect==='freeze'||b.weapon?.startsWith('water-')?'water':['beam','helix','orbital'].includes(effect??'')?'energy':'blast';
+      paintBattleSprite(ctx,sprite,progress,b.x-b.radius*1.15,b.y-b.radius*1.15,b.radius*2.3,b.radius*2.3,.6*(1-progress*.7));
       ctx.globalAlpha=(1-progress)*0.7;ctx.fillStyle=b.color;
       ctx.beginPath();ctx.arc(b.x,b.y,b.radius*(0.4+progress*0.8),0,Math.PI*2);ctx.fill();
       ctx.globalAlpha=(1-progress)*0.9;ctx.strokeStyle='#fff0c9';ctx.lineWidth=3;ctx.beginPath();ctx.arc(b.x,b.y,b.radius*(0.2+progress*1.25),0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;

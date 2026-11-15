@@ -1,0 +1,64 @@
+{
+  "decoded": [
+    {
+      "file": "effects/ft2-blast.png",
+      "width": 1728,
+      "height": 96
+    },
+    {
+      "file": "effects/ft2-energy.png",
+      "width": 960,
+      "height": 96
+    },
+    {
+      "file": "effects/ft2-water.png",
+      "width": 1152,
+      "height": 64
+    },
+    {
+      "file": "effects/ft2-flame.png",
+      "width": 576,
+      "height": 64
+    },
+    {
+      "file": "effects/ft2-gas.png",
+      "width": 768,
+      "height": 72
+    },
+    {
+      "file": "effects/ft2-missile-grain.png",
+      "width": 256,
+      "height": 16
+    },
+    {
+      "file": "effects/ft2-multi-grain.png",
+      "width": 128,
+      "height": 16
+    }
+  ],
+  "flight": [
+    {
+      "trail": 6,
+      "boost": false,
+      "scale": 1
+    }
+  ],
+  "states": {
+    "phase": "resolving",
+    "weapon": "water-normal",
+    "life": 0.38,
+    "damage": 300
+  },
+  "changing": {
+    "changed": 7025
+  },
+  "requests": [
+    "http://localhost:4177/piggymiCannon/effects/ft2-blast.png",
+    "http://localhost:4177/piggymiCannon/effects/ft2-energy.png",
+    "http://localhost:4177/piggymiCannon/effects/ft2-water.png",
+    "http://localhost:4177/piggymiCannon/effects/ft2-flame.png",
+    "http://localhost:4177/piggymiCannon/effects/ft2-gas.png",
+    "http://localhost:4177/piggymiCannon/effects/ft2-missile-grain.png",
+    "http://localhost:4177/piggymiCannon/effects/ft2-multi-grain.png"
+  ]
+}

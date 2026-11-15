@@ -1,0 +1,49 @@
+{
+  "painted": [
+    "ft2-blast.png",
+    "ft2-energy.png",
+    "ft2-flame.png",
+    "ft2-gas.png",
+    "ft2-missile-grain.png",
+    "ft2-multi-grain.png",
+    "ft2-water.png"
+  ],
+  "bodies": [
+    {
+      "shape": "missile-normal",
+      "sections": 1,
+      "changed": 48,
+      "outside": 0
+    },
+    {
+      "shape": "missile-normal",
+      "sections": 4,
+      "changed": 120,
+      "outside": 0
+    },
+    {
+      "shape": "missile-special",
+      "sections": 1,
+      "changed": 82,
+      "outside": 0
+    },
+    {
+      "shape": "missile-special",
+      "sections": 4,
+      "changed": 82,
+      "outside": 0
+    },
+    {
+      "shape": "multi-normal",
+      "sections": 1,
+      "changed": 79,
+      "outside": 0
+    },
+    {
+      "shape": "multi-normal",
+      "sections": 4,
+      "changed": 79,
+      "outside": 0
+    }
+  ]
+}

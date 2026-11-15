@@ -33,7 +33,7 @@ export interface DefeatPose {x:number;y:number;slope:number;direction:number}
 export interface Tank {defeat?:DefeatPose|null;deathResolved?:boolean}
 export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean;aimOffsetX?:number;aimOffsetY?:number }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
-export interface Blast { x:number;y:number;radius:number;life:number;maxLife:number;color:string }
+export interface Blast { x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
 export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
@@ -584,7 +584,7 @@ export class Game {
     const w=weaponById(p.weapon), radius=w.radius;
     const impact=this.recordBattle('impact',`第${p.traceId}弹 ${this.tanks[p.owner]?.name??p.owner}的${w.name}${direct?`直接命中${this.tanks[directTarget!]?.name}`:'命中地形／爆炸波及'}；(${p.x.toFixed(2)},${p.y.toFixed(2)})`,{projectile:p.traceId,parent:p.traceParent,owner:p.owner,weapon:p.weapon,directTarget,x:p.x,y:p.y,age:p.age,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,sources:p.boostSources});
     const color=w.color;
-    this.blasts.push({x:p.x,y:p.y,radius,life:0.65,maxLife:0.65,color});
+    this.blasts.push({x:p.x,y:p.y,radius,life:0.65,maxLife:0.65,color,weapon:p.weapon});
     this.burst(p.x,p.y,Math.round(radius*0.6),color);
     this.shake=Math.min(10,radius/10);
     const dig=excavation(p.weapon,direct);

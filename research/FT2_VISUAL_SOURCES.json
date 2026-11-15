@@ -1,0 +1,749 @@
+{
+  "formatVersion": 1,
+  "source": "用户本机 ft2逆向/resources/ 逆向提取，仅本项目使用，未宣称官方授权",
+  "processing": "Pillow LANCZOS; atlas rect crop; shared frame scale; monochrome warm palette; lossless PNG optimize/compress_level=9; bullet rear 60% discarded; interior clipping at runtime",
+  "totalSourceBytes": 52878173,
+  "runtimeBytes": 291620,
+  "assets": [
+    {
+      "id": "blast",
+      "file": "effects/ft2-blast.png",
+      "cell": [
+        96,
+        96
+      ],
+      "frames": 18,
+      "source": "assets/ft2-bullets/effect/explos.png",
+      "sourceBytes": 486364,
+      "bytes": 68571,
+      "sourceSha256": "8b42560ce8996b49912ca018d240dab569d87a4a99dc5b4b4d444298955216f8",
+      "sha256": "a56f43c94f9d10c4a78ed1d31a51b4e29fd3794976e86aeaa0a370acc67d956e",
+      "metadataSha256": "2314f5096cb134060ae03293e630459b528c6ee14ea4236f24547ddd7c7e02a9",
+      "selected": [
+        {
+          "name": "explos_000",
+          "rect": [
+            79,
+            45,
+            112,
+            81
+          ]
+        },
+        {
+          "name": "explos_001",
+          "rect": [
+            0,
+            9,
+            78,
+            81
+          ]
+        },
+        {
+          "name": "explos_002",
+          "rect": [
+            250,
+            73,
+            346,
+            160
+          ]
+        },
+        {
+          "name": "explos_003",
+          "rect": [
+            250,
+            161,
+            367,
+            281
+          ]
+        },
+        {
+          "name": "explos_004",
+          "rect": [
+            250,
+            391,
+            391,
+            544
+          ]
+        },
+        {
+          "name": "explos_005",
+          "rect": [
+            250,
+            282,
+            382,
+            390
+          ]
+        },
+        {
+          "name": "explos_006",
+          "rect": [
+            850,
+            678,
+            1006,
+            813
+          ]
+        },
+        {
+          "name": "explos_007",
+          "rect": [
+            250,
+            663,
+            427,
+            813
+          ]
+        },
+        {
+          "name": "explos_008",
+          "rect": [
+            651,
+            687,
+            849,
+            813
+          ]
+        },
+        {
+          "name": "explos_009",
+          "rect": [
+            250,
+            545,
+            463,
+            662
+          ]
+        },
+        {
+          "name": "explos_010",
+          "rect": [
+            428,
+            696,
+            650,
+            813
+          ]
+        },
+        {
+          "name": "explos_011",
+          "rect": [
+            735,
+            871,
+            978,
+            1024
+          ]
+        },
+        {
+          "name": "explos_012",
+          "rect": [
+            470,
+            883,
+            734,
+            1024
+          ]
+        },
+        {
+          "name": "explos_013",
+          "rect": [
+            0,
+            82,
+            240,
+            280
+          ]
+        },
+        {
+          "name": "explos_014",
+          "rect": [
+            250,
+            814,
+            469,
+            1024
+          ]
+        },
+        {
+          "name": "explos_015",
+          "rect": [
+            0,
+            281,
+            225,
+            506
+          ]
+        },
+        {
+          "name": "explos_016",
+          "rect": [
+            0,
+            507,
+            243,
+            756
+          ]
+        },
+        {
+          "name": "explos_017",
+          "rect": [
+            0,
+            757,
+            249,
+            1024
+          ]
+        }
+      ]
+    },
+    {
+      "id": "energy",
+      "file": "effects/ft2-energy.png",
+      "cell": [
+        96,
+        96
+      ],
+      "frames": 10,
+      "source": "assets/ft2-bullets/effect/BLaser.png",
+      "sourceBytes": 273373,
+      "bytes": 86048,
+      "sourceSha256": "a174150397a66a49933a8f685e25779ae0cef72158d0ee0093209aeff8641493",
+      "sha256": "2f91a0bb94ff9b3f9f2b643e29915aa8bd22317e36d07d81faf416c1621da0c3",
+      "metadataSha256": "2314f5096cb134060ae03293e630459b528c6ee14ea4236f24547ddd7c7e02a9",
+      "selected": [
+        {
+          "name": "BLaser_000",
+          "rect": [
+            387,
+            304,
+            441,
+            352
+          ]
+        },
+        {
+          "name": "BLaser_001",
+          "rect": [
+            278,
+            247,
+            386,
+            352
+          ]
+        },
+        {
+          "name": "BLaser_002",
+          "rect": [
+            0,
+            69,
+            138,
+            204
+          ]
+        },
+        {
+          "name": "BLaser_003",
+          "rect": [
+            0,
+            353,
+            162,
+            512
+          ]
+        },
+        {
+          "name": "BLaser_004",
+          "rect": [
+            0,
+            205,
+            156,
+            352
+          ]
+        },
+        {
+          "name": "BLaser_005",
+          "rect": [
+            163,
+            359,
+            322,
+            512
+          ]
+        },
+        {
+          "name": "BLaser_006",
+          "rect": [
+            323,
+            362,
+            482,
+            512
+          ]
+        },
+        {
+          "name": "BLaser_007",
+          "rect": [
+            157,
+            235,
+            277,
+            352
+          ]
+        },
+        {
+          "name": "BLaser_008",
+          "rect": [
+            0,
+            2,
+            66,
+            68
+          ]
+        },
+        {
+          "name": "BLaser_009",
+          "rect": [
+            67,
+            20,
+            121,
+            68
+          ]
+        }
+      ]
+    },
+    {
+      "id": "water",
+      "file": "effects/ft2-water.png",
+      "cell": [
+        128,
+        64
+      ],
+      "frames": 9,
+      "source": "assets/ft2-bullets/effect/BSWater.png",
+      "sourceBytes": 393846,
+      "bytes": 38563,
+      "sourceSha256": "32838ee00059c35faf9b46c2020c5f99b256b49e26859baeefed5b405773afe1",
+      "sha256": "d8cba89a0a0d5c12afacfc97094310682a90edaa4998885d66265254e5d03b4d",
+      "metadataSha256": "2314f5096cb134060ae03293e630459b528c6ee14ea4236f24547ddd7c7e02a9",
+      "selected": [
+        {
+          "name": "BSWater_000",
+          "rect": [
+            0,
+            75,
+            273,
+            189
+          ]
+        },
+        {
+          "name": "BSWater_001",
+          "rect": [
+            0,
+            190,
+            324,
+            349
+          ]
+        },
+        {
+          "name": "BSWater_002",
+          "rect": [
+            388,
+            359,
+            784,
+            512
+          ]
+        },
+        {
+          "name": "BSWater_003",
+          "rect": [
+            0,
+            350,
+            387,
+            512
+          ]
+        },
+        {
+          "name": "BSWater_004",
+          "rect": [
+            388,
+            223,
+            811,
+            358
+          ]
+        },
+        {
+          "name": "BSWater_005",
+          "rect": [
+            388,
+            132,
+            847,
+            222
+          ]
+        },
+        {
+          "name": "BSWater_006",
+          "rect": [
+            388,
+            74,
+            817,
+            131
+          ]
+        },
+        {
+          "name": "BSWater_007",
+          "rect": [
+            388,
+            43,
+            667,
+            73
+          ]
+        },
+        {
+          "name": "BSWater_008",
+          "rect": [
+            0,
+            47,
+            117,
+            74
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flame",
+      "file": "effects/ft2-flame.png",
+      "cell": [
+        32,
+        64
+      ],
+      "frames": 18,
+      "source": "assets/ft2-bullets/effect/fire.png",
+      "sourceBytes": 89801,
+      "bytes": 34472,
+      "sourceSha256": "d5df8aed4509c103df109ad7e8861f29ffcb1d4d3a00377536cce4c2c4f91b11",
+      "sha256": "03972842c76acded4160781a24407e602efb1c9fcebedce73e95c29e333ac37e",
+      "metadataSha256": "2314f5096cb134060ae03293e630459b528c6ee14ea4236f24547ddd7c7e02a9",
+      "selected": [
+        {
+          "name": "fire_000",
+          "rect": [
+            160,
+            38,
+            190,
+            107
+          ]
+        },
+        {
+          "name": "fire_001",
+          "rect": [
+            0,
+            187,
+            42,
+            256
+          ]
+        },
+        {
+          "name": "fire_002",
+          "rect": [
+            197,
+            117,
+            233,
+            186
+          ]
+        },
+        {
+          "name": "fire_003",
+          "rect": [
+            83,
+            187,
+            122,
+            256
+          ]
+        },
+        {
+          "name": "fire_004",
+          "rect": [
+            123,
+            108,
+            159,
+            186
+          ]
+        },
+        {
+          "name": "fire_005",
+          "rect": [
+            160,
+            117,
+            196,
+            186
+          ]
+        },
+        {
+          "name": "fire_006",
+          "rect": [
+            123,
+            41,
+            159,
+            107
+          ]
+        },
+        {
+          "name": "fire_007",
+          "rect": [
+            43,
+            172,
+            82,
+            256
+          ]
+        },
+        {
+          "name": "fire_008",
+          "rect": [
+            203,
+            190,
+            242,
+            256
+          ]
+        },
+        {
+          "name": "fire_009",
+          "rect": [
+            43,
+            96,
+            82,
+            171
+          ]
+        },
+        {
+          "name": "fire_010",
+          "rect": [
+            43,
+            26,
+            82,
+            95
+          ]
+        },
+        {
+          "name": "fire_011",
+          "rect": [
+            0,
+            44,
+            39,
+            131
+          ]
+        },
+        {
+          "name": "fire_012",
+          "rect": [
+            123,
+            187,
+            162,
+            256
+          ]
+        },
+        {
+          "name": "fire_013",
+          "rect": [
+            83,
+            4,
+            122,
+            58
+          ]
+        },
+        {
+          "name": "fire_014",
+          "rect": [
+            163,
+            187,
+            202,
+            256
+          ]
+        },
+        {
+          "name": "fire_015",
+          "rect": [
+            0,
+            132,
+            42,
+            186
+          ]
+        },
+        {
+          "name": "fire_016",
+          "rect": [
+            83,
+            123,
+            122,
+            186
+          ]
+        },
+        {
+          "name": "fire_017",
+          "rect": [
+            83,
+            59,
+            122,
+            122
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gas",
+      "file": "effects/ft2-gas.png",
+      "cell": [
+        128,
+        72
+      ],
+      "frames": 6,
+      "source": "assets/ft2-bullets/effect/chemi.png",
+      "sourceBytes": 203748,
+      "bytes": 56389,
+      "sourceSha256": "1919324b6bc64c664e68c80f7e39e52dc7825ed08bf1e5ce1882752ab9174019",
+      "sha256": "6458b1df0c1dda4f8e6ae7540f67a95a5a9eddf2ea95fad52317368b62e2ff58",
+      "metadataSha256": "2314f5096cb134060ae03293e630459b528c6ee14ea4236f24547ddd7c7e02a9",
+      "selected": [
+        {
+          "name": "chemi_000",
+          "rect": [
+            0,
+            262,
+            210,
+            388
+          ]
+        },
+        {
+          "name": "chemi_001",
+          "rect": [
+            0,
+            389,
+            225,
+            512
+          ]
+        },
+        {
+          "name": "chemi_002",
+          "rect": [
+            226,
+            401,
+            442,
+            512
+          ]
+        },
+        {
+          "name": "chemi_003",
+          "rect": [
+            211,
+            183,
+            439,
+            285
+          ]
+        },
+        {
+          "name": "chemi_004",
+          "rect": [
+            211,
+            92,
+            442,
+            182
+          ]
+        },
+        {
+          "name": "chemi_005",
+          "rect": [
+            211,
+            286,
+            445,
+            388
+          ]
+        }
+      ]
+    },
+    {
+      "id": "missile-grain",
+      "file": "effects/ft2-missile-grain.png",
+      "cell": [
+        64,
+        16
+      ],
+      "frames": 4,
+      "source": "assets/ft2-bullets/bullet/bullet07.png",
+      "sourceBytes": 962500,
+      "bytes": 4573,
+      "sourceSha256": "6bbea2d66e58a907a74dcbc9ad1d652c25bad2eda9ee2f3403e5f306ca326e7e",
+      "sha256": "54cd167cabf160483fb5c08c109bb7fd1b5d20e55e29b9ba6b5b061b97aa1939",
+      "metadataSha256": "4c642ba2a52e1b9bcab10a9841322480c04ee1a92cae154197b7a3c090e4763e",
+      "selected": [
+        {
+          "name": "bullet07_064",
+          "rect": [
+            617,
+            718,
+            800,
+            757
+          ]
+        },
+        {
+          "name": "bullet07_065",
+          "rect": [
+            334,
+            302,
+            481,
+            341
+          ]
+        },
+        {
+          "name": "bullet07_066",
+          "rect": [
+            447,
+            846,
+            636,
+            891
+          ]
+        },
+        {
+          "name": "bullet07_067",
+          "rect": [
+            334,
+            576,
+            496,
+            615
+          ]
+        }
+      ]
+    },
+    {
+      "id": "multi-grain",
+      "file": "effects/ft2-multi-grain.png",
+      "cell": [
+        32,
+        16
+      ],
+      "frames": 4,
+      "source": "assets/ft2-bullets/bullet/bullet08.png",
+      "sourceBytes": 344237,
+      "bytes": 3004,
+      "sourceSha256": "2b0baa9875da4f20d4c3078b743d5b3327c16b181fe28affc32ee138be416aa7",
+      "sha256": "376ee523ce7c8e41bebd1dd67112eb16d726f542483a98d878a9f64ab9fb0d91",
+      "metadataSha256": "4c642ba2a52e1b9bcab10a9841322480c04ee1a92cae154197b7a3c090e4763e",
+      "selected": [
+        {
+          "name": "bullet08_064",
+          "rect": [
+            183,
+            299,
+            252,
+            344
+          ]
+        },
+        {
+          "name": "bullet08_065",
+          "rect": [
+            425,
+            394,
+            506,
+            442
+          ]
+        },
+        {
+          "name": "bullet08_066",
+          "rect": [
+            374,
+            464,
+            464,
+            512
+          ]
+        },
+        {
+          "name": "bullet08_067",
+          "rect": [
+            330,
+            160,
+            384,
+            187
+          ]
+        }
+      ]
+    }
+  ]
+}
