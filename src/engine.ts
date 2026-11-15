@@ -37,7 +37,7 @@ export interface Blast { x:number;y:number;radius:number;life:number;maxLife:num
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
 export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
-export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
+export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'|'defeat'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
 export interface Mine {x:number;y:number;owner:number;weapon:WeaponId;boost:number}
 export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;clock?:number}
 interface BoostSources {fire:'item'|'line'|null;rage:number;snow:number;inherited?:number}
@@ -122,6 +122,7 @@ export class Game {
     if(!pose)t.outOfBounds=true;
     this.movingUntil[t.id]=0;
     this.recordBattle('defeat-state',`${t.name}${pose?'立即进入陆地趴地哭泣，位置固定':'不留残骸：落水／出界或无陆地落点'}`,{target:t.id,pose:t.defeat,outOfBounds:t.outOfBounds});
+    this.emit('defeat',`${t.name}出局了。`,undefined,t.x);
   }
   private traceTanks(){return this.tanks.map(t=>({...t,flag:teamFlag(t.team),red:t.hp>0&&t.hp<=redHealthLimit(t),raging:isRaging(t),slope:this.tankSlope(t),absoluteAngle:this.aim(t).absolute}));}
   private traceTurn(type:'turn-start'|'turn-end'){

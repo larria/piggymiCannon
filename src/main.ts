@@ -286,6 +286,7 @@ function begin() {audio.unlock();audio.pause(false);game.start();audio.setScene(
 function newMatch(next:Config,start=true) {
   cancelCharge();
   audio.resetEffects();
+  audio.setSelectionMusic(false);
   audio.pause(false);
   config={...next,seed:Date.now()};game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}
@@ -310,6 +311,7 @@ function showDialog(type:string) {
       const heart=document.createElement('span');heart.className='portrait-heart';heart.innerHTML=icon('heart');heart.style.left=`${30+(taps*17)%45}%`;art.appendChild(heart);window.setTimeout(()=>heart.remove(),900);
     });
   } else if(type==='setup') {
+    audio.setSelectionMusic(true);
     content.innerHTML=setupMarkup(config,import.meta.env.BASE_URL);
     mountSetup(content,config,import.meta.env.BASE_URL,toast,next=>{closeDialog();newMatch(next);},{soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,change:(key,value)=>{if(key==='soundEnabled')audio.setSoundEnabled(value);else if(key==='musicEnabled')audio.setMusicEnabled(value);else{config[key]=value;game.setBattleRule(key,value);}updateSound();persistSettings();}});paintMapChoices();
   } else if(type==='exit') {content.innerHTML=`<span class="eyebrow">暂别这一场炮火</span><h2>回演习场歇一歇？</h2><p class="dialog-intro">当前对局会结束，坦克选择与设置会保留。</p><button class="button button-dark dialog-primary" data-action="leave-match">回到演习场</button><button class="text-button" data-action="close">继续这场对局</button>`;
@@ -336,7 +338,7 @@ function showDialog(type:string) {
   }
   if(!dialog.open) dialog.showModal();paintProjectilePreviews(dialog);
 }
-function closeDialog() {const dialog=$<HTMLDialogElement>('#dialog');dialog.close();game.paused=dialogPaused;audio.pause(game.paused);updateOverlay();updateUI();}
+function closeDialog() {const dialog=$<HTMLDialogElement>('#dialog');dialog.close();audio.setSelectionMusic(false);game.paused=dialogPaused;audio.pause(game.paused);updateOverlay();updateUI();}
 
 let lastControlSound=0;
 function controlSound(target:HTMLElement) {
@@ -513,6 +515,7 @@ function frame(now:number) {
     if(event.type==='timeout')audio.play('warning');
     if(event.type==='poison')audio.play('item',event.x,game.tanks[game.viewer].x);
     if(event.type==='win') audio.play('win');
+    if(event.type==='defeat')audio.play('death',event.x,game.tanks[game.viewer].x);
     if(event.type==='crate') audio.play(event.message.includes('空降')?'supply':'item',event.x,game.tanks[game.viewer].x);
     if(event.type==='item') audio.play('item',event.x,game.tanks[game.viewer].x);
     if(event.type==='lock') audio.play('lock',event.x,game.tanks[game.viewer].x,event.weapon);
