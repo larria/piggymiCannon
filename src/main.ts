@@ -29,9 +29,9 @@ const safeRead=(key:string)=>{try{return JSON.parse(localStorage.getItem(key)||'
 const save=(key:string,value:unknown)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private browsing can disable storage. */}};
 const saved=safeRead('piggy-settings');
 let config:Config={slots:defaultSlots(),map:'valley',timer:45,seed:Date.now(),...(saved?.config||{})};
-config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',timer:[0,30,45,60].includes(config.timer)?config.timer:45,seed:Date.now(),snow:config.snow,fog:config.fog,fireLine:config.fireLine,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,allowDragon:config.allowDragon};
+config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:[0,30,45,60].includes(config.timer)?config.timer:45,seed:Date.now(),snow:config.snow,fog:config.fog,fireLine:config.fireLine,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,allowDragon:config.allowDragon};
 if(config.slots.filter(s=>s.enabled).length<2||new Set(config.slots.filter(s=>s.enabled).map(s=>s.team)).size<2)config.slots=defaultSlots();
-let game=new Game(config,APP_VERSION);
+let game=new Game(config,APP_VERSION);config={...game.config};
 const audio=new AudioManager();
 audio.setSoundEnabled(saved?.soundEnabled??saved?.sound??true);audio.setMusicEnabled(saved?.musicEnabled??saved?.sound??true);audio.setVolume(saved?.audioVersion===2?clamp(Number(saved.volume)||0,0,1):Math.max(0.65,clamp(Number(saved?.volume)||0.65,0,1)));
 let stats:{games:number;wins:number;damage:number;shots:number}=safeRead('piggy-stats')||{games:0,wins:0,damage:0,shots:0};
@@ -204,13 +204,13 @@ function updateUI() {
   $('.dashboard').style.setProperty('--actor-paper',teamFlag(game.active.team).paper);
   $('.dashboard').style.setProperty('--actor-color',teamFlag(game.active.team).color);
   if(lastActor!==game.current){lastActor=game.current;$('.dashboard').classList.remove('handoff-pulse');void $('.dashboard').offsetWidth;$('.dashboard').classList.add('handoff-pulse');}
-  $('#map-label').textContent=MAPS.find(m=>m.id===config.map)!.name+(game.fog?` · 浓雾 ${game.fogTurnsRemaining}`:'')+(game.snow?' · 飘雪':'')+(game.fireLine?` · 火线 +50% ·${game.fireLineTurnsRemaining} 回合`:'');
-  $('#map-code').textContent=String(MAPS.findIndex(m=>m.id===config.map)+1).padStart(2,'0');
+  $('#map-label').textContent=MAPS.find(m=>m.id===game.config.map)!.name+(game.fog?` · 浓雾 ${game.fogTurnsRemaining}`:'')+(game.snow?' · 飘雪':'')+(game.fireLine?` · 火线 +50% ·${game.fireLineTurnsRemaining} 回合`:'');
+  $('#map-code').textContent=String(MAPS.findIndex(m=>m.id===game.config.map)+1).padStart(2,'0');
   $('#wind-label').textContent=Math.abs(game.wind)<0.5?'风平浪静':`${game.wind>0?'→':'←'} ${(Math.abs(game.wind)/2).toFixed(1)} m/s`;
-  $('#gravity-note').textContent=config.map==='moon'?'重力 0.63 g':'重力 1.0 g';
-  $('#field-note').textContent=game.phase==='supply'?'空投受风影响 · 计时暂停':game.teleporting?'转移弹按弹道落点传送':game.selected==='airstrike'?'点击战场指定空袭落点':MAPS.find(m=>m.id===config.map)!.sub;
+  $('#gravity-note').textContent=game.config.map==='moon'?'重力 0.63 g':'重力 1.0 g';
+  $('#field-note').textContent=game.phase==='supply'?'空投受风影响 · 计时暂停':game.teleporting?'转移弹按弹道落点传送':game.selected==='airstrike'?'点击战场指定空袭落点':MAPS.find(m=>m.id===game.config.map)!.sub;
   if(game.fireLine) $('#field-note').textContent+=` · 火线 +50% · 剩 ${game.fireLineTurnsRemaining} 行动回合`;
-  $('#minimap-toggle').dataset.helpDescription=`${MAPS.find(m=>m.id===config.map)!.description} ${$('#field-note').textContent} · ${$('#gravity-note').textContent}。轻点折叠或展开，点击地图定位视野。`;
+  $('#minimap-toggle').dataset.helpDescription=`${MAPS.find(m=>m.id===game.config.map)!.description} ${$('#field-note').textContent} · ${$('#gravity-note').textContent}。轻点折叠或展开，点击地图定位视野。`;
   $('#lobby-overlay').classList.toggle('hidden',!lobby);
   $('#turn-indicator').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff');
   $('#timer').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff'||config.timer===0);
@@ -282,10 +282,12 @@ function setDrawer(value:boolean) {
   $('#inventory-toggle').setAttribute('aria-expanded',String(value));
   $('#inventory-toggle').setAttribute('aria-label',value?'关闭军火库':'展开军火库');
 }
-function begin() {audio.unlock();game.start();setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
+function begin() {audio.unlock();audio.pause(false);game.start();audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
 function newMatch(next:Config,start=true) {
   cancelCharge();
-  config={...next,seed:Date.now()};game=new Game(config,APP_VERSION);renderer.setGame(game);statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
+  audio.resetEffects();
+  audio.pause(false);
+  config={...next,seed:Date.now()};game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}
 }
 function togglePause() {
@@ -325,7 +327,7 @@ function showDialog(type:string) {
   } else if(type==='log') {
     content.innerHTML=`<span class="eyebrow">战场里的那些瞬间</span><h2>作战记录。</h2><p class="dialog-intro">最近 24 条事件 · 当前第 ${game.round} 轮</p><ol class="battle-log">${game.log.length?game.log.map((line,i)=>`<li><span>${String(game.log.length-i).padStart(2,'0')}</span>${colorNames(line)}</li>`).join(''):'<li>战场很安静。第一发炮弹会写下故事。</li>'}</ol><button class="button button-dark dialog-primary" data-action="close">返回对局 ${icon('arrow')}</button>`;
   } else {
-    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>轻快的战场音乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','队友之间可造成伤害'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="settings-note">${icon('music')}<p>背景音乐与部分音效来自你提供的素材；炮火声由音频合成生成。开关和音量会保存在这台设备。</p></div><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
+    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>随实际地图切换，大厅与结算各有配乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','队友之间可造成伤害'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="settings-note">${icon('music')}<p>地图配乐和炮火等采样来自你提供的原版素材；蓄力等音效保留合成。开关和音量会保存在这台设备。</p></div><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
     $('#copy-battle-snapshot').addEventListener('click',copyBattleSnapshot);
     $('#effects-toggle').addEventListener('click',()=>{audio.unlock();audio.setSoundEnabled(!audio.soundEnabled);$('#effects-toggle').classList.toggle('on',audio.soundEnabled);$('#effects-toggle').setAttribute('aria-checked',String(audio.soundEnabled));updateSound();persistSettings();});
     $('#music-toggle').addEventListener('click',()=>{audio.unlock();audio.setMusicEnabled(!audio.musicEnabled);$('#music-toggle').classList.toggle('on',audio.musicEnabled);$('#music-toggle').setAttribute('aria-checked',String(audio.musicEnabled));updateSound();persistSettings();});
@@ -498,17 +500,20 @@ function frame(now:number) {
   }
   game.update(dt);renderer.draw(dt);dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight);
   const moving=game.movingUntil.findIndex(until=>until>game.elapsed);
-  audio.updateMovement(moving>=0&&game.phase==='aiming'&&!game.paused,game.tanks[Math.max(0,moving)].x,game.tanks[game.viewer].x);
+  audio.setScene(game.phase==='lobby'?'lobby':game.phase==='ended'?'result':game.config.map);
+  audio.updateMovement(moving>=0&&game.phase==='aiming'&&!game.paused,game.tanks[Math.max(0,moving)].x,game.tanks[game.viewer].x,game.tanks[Math.max(0,moving)].vehicleId);
   const tracking=game.projectiles.find(p=>p.homing);audio.updateTracking(Boolean(tracking)&&!game.paused&&game.phase==='flying',tracking?.weapon,tracking?.x??0,game.tanks[game.viewer].x);
   if(charge&&(!game.humanTurn||charge.tank!==game.current)) cancelCharge();
   for(const event of game.drainEvents()) {
     if(event.type!=='explosion') $('#battle-message').innerHTML=colorNames(event.message);
     if(event.type==='shot') audio.play(event.transfer?'transfer':'shot',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='explosion') audio.play('explosion',event.x,game.tanks[game.viewer].x,event.weapon);
-    if(event.type==='weather')toast(event.message);
+    if(event.type==='weather'){toast(event.message);audio.play(event.message.includes('火线')?'firewall':'wind');}
+    if(event.type==='turn'){audio.play('turn');if(Math.abs(game.wind)>=1)audio.play('wind');}
+    if(event.type==='timeout')audio.play('warning');
     if(event.type==='poison')audio.play('item',event.x,game.tanks[game.viewer].x);
     if(event.type==='win') audio.play('win');
-    if(event.type==='crate') audio.play('item',event.x,game.tanks[game.viewer].x);
+    if(event.type==='crate') audio.play(event.message.includes('空降')?'supply':'item',event.x,game.tanks[game.viewer].x);
     if(event.type==='item') audio.play('item',event.x,game.tanks[game.viewer].x);
     if(event.type==='lock') audio.play('lock',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='crate-land') audio.play('crate-land',event.x,game.tanks[game.viewer].x);

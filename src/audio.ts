@@ -1,29 +1,51 @@
 const asset=(name:string)=>`${import.meta.env.BASE_URL}audio/${name}`;
 import {weaponById,type WeaponId} from './catalog';
+import type {VehicleId} from './vehicles';
+import {BGM_TRACKS,COMMON_CLIPS,vehicleClips,weaponSoundClip,type AudioScene} from './audio-catalog';
 export class AudioManager {
-  music=new Audio(asset('bgm-sunny-30s.mp3'));
+  music=new Audio(asset(BGM_TRACKS.lobby));
   soundEnabled=false;musicEnabled=false;volume=0.65;unlocked=false;
   private paused=false;
   private playingEffects=new Set<HTMLAudioElement>();
+  private pausedEffects=new Set<HTMLAudioElement>();
+  private scene:AudioScene='lobby';
+  private buffers=new Map<string,AudioBuffer>();
+  private loading=new Map<string,Promise<void>>();
+  private sources=new Set<AudioBufferSourceNode>();
+  private lastSamples=new Map<string,number>();
+  private movementSample:AudioBufferSourceNode|null=null;private movingVehicle:VehicleId|null=null;
   private context:AudioContext|null=null;
   private master:GainNode|null=null;
   private charge:{oscillators:OscillatorNode[];gain:GainNode}|null=null;
   private movement:{oscillator:OscillatorNode;noise:AudioBufferSourceNode;gain:GainNode;pan:StereoPannerNode}|null=null;
   private tracking:{oscillator:OscillatorNode;gain:GainNode;pan:StereoPannerNode}|null=null;private lastLock=-10;
   constructor() {this.music.loop=true;this.music.volume=this.volume*0.55;}
-  unlock() {this.unlocked=true;if(this.musicEnabled&&!this.paused) this.start();}
+  unlock() {this.unlocked=true;try{this.graph();void this.preloadForMatch([]);}catch{/* Optional audio. */}if(this.musicEnabled&&!this.paused) this.start();}
   setMusicEnabled(enabled:boolean) {this.musicEnabled=enabled;if(enabled&&this.unlocked&&!this.paused)this.start();else this.music.pause();}
-  setSoundEnabled(enabled:boolean) {this.soundEnabled=enabled;if(this.master&&this.context)this.master.gain.setTargetAtTime(enabled?this.volume:0,this.context.currentTime,.02);if(!enabled){this.stopCharge();this.stopMovement();this.stopTracking();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();}}
+  setSoundEnabled(enabled:boolean) {this.soundEnabled=enabled;if(this.master&&this.context)this.master.gain.setTargetAtTime(enabled?this.volume:0,this.context.currentTime,.02);if(!enabled)this.resetEffects();}
   private start() {void this.music.play().catch(()=>{});}
-  setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.volume*0.55;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
-  pause(paused:boolean) {this.paused=paused;if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();}else if(this.musicEnabled&&this.unlocked) this.start();}
+  setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.volume*0.55;for(const clip of this.playingEffects)clip.volume=this.volume*.75;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
+  pause(paused:boolean) {this.paused=paused;if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();if(this.context)void this.context.suspend().catch(()=>{});for(const clip of this.playingEffects)if(!clip.paused){clip.pause();this.pausedEffects.add(clip);}}else {if(this.context&&this.unlocked)void this.context.resume().catch(()=>{});if(this.musicEnabled&&this.unlocked)this.start();if(this.soundEnabled&&this.unlocked)for(const clip of this.pausedEffects)void clip.play().catch(()=>{});this.pausedEffects.clear();}}
+  setScene(scene:AudioScene){if(this.scene===scene)return;this.scene=scene;this.music.pause();this.music.src=asset(BGM_TRACKS[scene]);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.paused)this.start();}
+  resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources])source.stop();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();}
+  async preloadForMatch(vehicles:(VehicleId|null)[]){if(!this.unlocked)return;await Promise.all([...new Set([...COMMON_CLIPS,...vehicles.flatMap(id=>vehicleClips(id??'cannon'))])].map(name=>this.loadClip(name)));}
+  private loadClip(name:string){if(this.buffers.has(name))return Promise.resolve();const existing=this.loading.get(name);if(existing)return existing;
+    const task=(async()=>{try{const {c}=this.graph(),response=await fetch(asset(name));if(!response.ok)throw new Error('Audio missing');this.buffers.set(name,await c.decodeAudioData(await response.arrayBuffer()));}catch{/* Keep synthesized fallback; retry after reconnect. */}})().finally(()=>this.loading.delete(name));this.loading.set(name,task);return task;
+  }
+  private sample(name:string,x?:number,viewerX=0,loop=false):AudioBufferSourceNode|null {
+    const buffer=this.buffers.get(name);if(!buffer){void this.loadClip(name);return null;}
+    const {c,output}=this.graph();if(!loop&&c.currentTime-(this.lastSamples.get(name)??-10)<.075)return null;
+    this.lastSamples.set(name,c.currentTime);if(this.sources.size>=20)[...this.sources][0].stop();
+    const source=c.createBufferSource(),gain=c.createGain(),pan=c.createStereoPanner();source.buffer=buffer;source.loop=loop;gain.gain.value=loop?.22:.75;pan.pan.value=x===undefined?0:Math.max(-1,Math.min(1,(x-viewerX)/600));source.connect(gain);gain.connect(pan);pan.connect(output);this.sources.add(source);
+    source.onended=()=>{this.sources.delete(source);if(this.movementSample===source)this.movementSample=null;source.disconnect();gain.disconnect();pan.disconnect();};source.start();return source;
+  }
   private graph() {
     if(!this.context) {
-      this.context=new AudioContext();this.master=this.context.createGain();this.master.gain.value=this.volume;
+      this.context=new AudioContext();this.master=this.context.createGain();this.master.gain.value=this.soundEnabled?this.volume:0;
       const compressor=this.context.createDynamicsCompressor();compressor.threshold.value=-16;compressor.knee.value=20;compressor.ratio.value=4;compressor.attack.value=0.004;compressor.release.value=0.22;
       this.master.connect(compressor);compressor.connect(this.context.destination);
     }
-    if(this.context.state==='suspended') void this.context.resume();
+    if(this.context.state==='suspended'&&!this.paused) void this.context.resume().catch(()=>{});
     return {c:this.context,output:this.master!};
   }
   startCharge() {
@@ -52,10 +74,12 @@ export class AudioManager {
     gain.gain.cancelScheduledValues(now);gain.gain.setTargetAtTime(0.0001,now,0.012);
     for(const oscillator of oscillators) {oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};oscillator.stop(now+0.06);}
   }
-  updateMovement(active:boolean,sourceX=0,viewerX=0) {
-    if(!active||!this.soundEnabled||!this.unlocked) {this.stopMovement();return;}
+  updateMovement(active:boolean,sourceX=0,viewerX=0,vehicle:VehicleId|null='cannon') {
+    if(!active||!this.soundEnabled||!this.unlocked||this.paused) {this.stopMovement(!this.paused&&this.soundEnabled&&this.unlocked);return;}
     try {
       const {c,output}=this.graph();
+      const id=vehicle??'cannon';if(this.movingVehicle!==id){this.stopMovement();this.movingVehicle=id;}
+      if(!this.movementSample)this.movementSample=this.sample(`sfx-move-${id}.mp3`,sourceX,viewerX,true);
       if(!this.movement) {
         const oscillator=c.createOscillator(),noise=c.createBufferSource(),gain=c.createGain(),pan=c.createStereoPanner(),filter=c.createBiquadFilter();
         oscillator.type='sawtooth';oscillator.frequency.value=65;filter.type='lowpass';filter.frequency.value=390;
@@ -65,11 +89,13 @@ export class AudioManager {
         gain.gain.value=0.18;oscillator.start();noise.start();this.movement={oscillator,noise,gain,pan};
       }
       this.movement.pan.pan.setTargetAtTime(Math.max(-1,Math.min(1,(sourceX-viewerX)/600)),c.currentTime,0.05);
-      this.movement.gain.gain.setTargetAtTime(0.22/(1+Math.abs(sourceX-viewerX)/900),c.currentTime,0.05);
+      this.movement.gain.gain.setTargetAtTime((this.movementSample?.055:.22)/(1+Math.abs(sourceX-viewerX)/900),c.currentTime,0.05);
       this.movement.oscillator.frequency.setTargetAtTime(62+Math.sin(c.currentTime*18)*9,c.currentTime,0.02);
     }catch{this.stopMovement();}
   }
-  stopMovement() {
+  stopMovement(stoppingSound=false) {
+    if(this.movementSample){this.movementSample.stop();this.movementSample=null;}
+    if(stoppingSound&&this.movingVehicle)this.sample(`sfx-stop-${this.movingVehicle}.mp3`);this.movingVehicle=null;
     if(!this.movement||!this.context) return;
     const m=this.movement;this.movement=null;m.gain.gain.setTargetAtTime(0.0001,this.context.currentTime,0.012);
     m.oscillator.stop(this.context.currentTime+0.05);m.noise.stop(this.context.currentTime+0.05);
@@ -85,12 +111,17 @@ export class AudioManager {
     }catch{this.stopTracking();}
   }
   stopTracking(){if(!this.tracking||!this.context)return;const t=this.tracking;this.tracking=null;t.gain.gain.setTargetAtTime(.0001,this.context.currentTime,.02);t.oscillator.stop(this.context.currentTime+.07);t.oscillator.onended=()=>{t.oscillator.disconnect();t.gain.disconnect();t.pan.disconnect();};}
-  play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer',sourceX?:number,viewerX=0,weapon?:WeaponId) {
-    if(!this.soundEnabled||!this.unlocked) return;
-    if(type==='click'||type==='win') {
-      const audio=new Audio(asset(type==='win'?'sfx_celebrate.mp3':'sfx_click.mp3'));audio.volume=this.volume*0.95;this.playingEffects.add(audio);audio.onended=()=>this.playingEffects.delete(audio);void audio.play().catch(()=>this.playingEffects.delete(audio));return;
+  play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer'|'turn'|'wind'|'firewall'|'supply'|'warning',sourceX?:number,viewerX=0,weapon?:WeaponId) {
+    if(!this.soundEnabled||!this.unlocked||(this.paused&&type!=='click'&&type!=='aim')) return;
+    if(type==='click'||type==='win'||(type==='aim'&&this.paused)) {
+      const audio=new Audio(asset(`sfx-${type==='aim'?'select':type}.mp3`));audio.volume=this.volume*.75;this.playingEffects.add(audio);audio.onended=()=>{this.playingEffects.delete(audio);this.pausedEffects.delete(audio);};void audio.play().catch(()=>this.playingEffects.delete(audio));return;
     }
     try {
+      const name=type==='shot'||type==='explosion'?weaponSoundClip(type,weapon):`sfx-${type==='aim'?'select':type}.mp3`;
+      const loaded=this.buffers.has(name),sample=this.sample(name,sourceX,viewerX);
+      // Keep the established lock chirp alongside Homming; fallback synthesis covers first-use loading.
+      if(type!=='lock'&&(sample||loaded))return;
+      if(['turn','wind','firewall','supply','warning'].includes(type))return;
       const graph=this.graph(),c=graph.c,now=c.currentTime;let output:AudioNode=graph.output;
       if(sourceX!==undefined) {const pan=c.createStereoPanner();pan.pan.value=Math.max(-1,Math.min(1,(sourceX-viewerX)/600));pan.connect(output);output=pan;}
       const tone=(start:number,end:number,duration:number,level:number,wave:OscillatorType='sine')=>{

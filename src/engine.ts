@@ -10,7 +10,7 @@ import {defaultSlots,slotProblem,teamFlag,CREW,type Slot,type CrewId} from './cr
 import {aimGeometry} from './aim';
 import {chooseAIPosition,solveAIShot,type AIShot} from './ai-planner';
 import {BattleTrace,packTerrain,unpackTerrain,snapshotText,traceClone,type BattleSnapshot} from './battle-trace';
-import {MAPS} from './catalog';
+import {MAPS,type MapChoice} from './catalog';
 import {projectileSpeed} from './ballistics';
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
@@ -18,7 +18,7 @@ export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
 export const SHOT_WIND_GAIN=3;
 export const BRIDGE_THICKNESS=130;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
-export interface Config {slots:Slot[];map:MapId;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean }
+export interface Config {slots:Slot[];map:MapId;mapChoice?:MapChoice;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean }
 export interface Tank {
   id:number; name:string;crew:CrewId;slot:number;team:number;controller:'human'|'ai';difficulty:Difficulty; x:number; y:number; hp:number; shield:number; fuel:number;
   angle:number; power:number; direction:number; ammo:Record<WeaponId,number>;
@@ -85,6 +85,10 @@ export class Game {
     this.config={slots:defaultSlots(),map:'valley',timer:45,seed:Date.now(),...config};
     if(this.config.slots.length!==4||slotProblem(this.config.slots))throw new Error(slotProblem(this.config.slots)??'需要四个固定槽位');
     this.trace=new BattleTrace(this.config.seed);this.rng=this.diagnosticRng(makeRng(this.config.seed));
+    if(this.config.mapChoice==='random'){
+      this.config.map=MAPS[Math.min(MAPS.length-1,Math.floor(this.rng()*MAPS.length))].id;
+      this.recordBattle('map-selection',`随机地图抽中${MAPS.find(m=>m.id===this.config.map)!.name}`,{choice:'random',actual:this.config.map,available:MAPS.map(m=>m.id)});
+    }else if(this.config.mapChoice&&MAPS.some(m=>m.id===this.config.mapChoice))this.config.map=this.config.mapChoice;
     const weather=rollWeather(this.rng);this.fog=this.config.fog??weather.fog;
     this.fogTurnsRemaining=this.fog?2:0;
     if(this.config.fireLine??weather.fireLine) this.fireLine={x:450+this.rng()*380,top:50,bottom:550};

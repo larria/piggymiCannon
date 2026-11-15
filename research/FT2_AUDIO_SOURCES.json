@@ -1,0 +1,802 @@
+{
+  "formatVersion": 1,
+  "source": "用户本机 ft2逆向/resources/sound 提取素材；仅用于本项目，未宣称官方授权",
+  "mapping": "本作按13载具顺序分配音效组；1/2分配普通/特殊音。地图选曲为本作安排，未确证原版同名地图编号。",
+  "musicBitrate": 80000,
+  "effectBitrate": 64000,
+  "totalBytes": 4350108,
+  "files": [
+    {
+      "runtime": "bgm-lobby.mp3",
+      "source": "assets/ft2-audio/bgm/GM01.mp3",
+      "sourceSHA256": "4b71fdcf3601c7eb71d9642e2dcb9265698fbb51533fcf623f429a80570346fa",
+      "seconds": 45,
+      "bytes": 450656,
+      "runtimeSHA256": "ff3220184e25f483914c32bd439b933b7364fc27899df93fff7bc06a8c8a6f6a"
+    },
+    {
+      "runtime": "bgm-result.mp3",
+      "source": "assets/ft2-audio/bgm/GM04.mp3",
+      "sourceSHA256": "915391bff69789dda52c1284d15f15ec76f4c8afbd0e4dedcffecd03852d84c2",
+      "seconds": 18,
+      "bytes": 180811,
+      "runtimeSHA256": "6bc51511f6e3bd120cfb5ae0e8270537ddb3e53884249c515a2d8a7e3ca2bb99"
+    },
+    {
+      "runtime": "bgm-valley.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00000.mp3",
+      "sourceSHA256": "8faa84f352c870887cdc1dea43688f7fa252580d4ad9b22e35d417cd12939ca5",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "022659f521fbca66f5d9c66aee93b89c06d1bf21935659e13bd731786165998a"
+    },
+    {
+      "runtime": "bgm-coast.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00001.mp3",
+      "sourceSHA256": "74cff49d2265510251ee01e8fe2de149901ec31178b82b261cb09ece8dc47ace",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "96f5a23a1aeeb607c7083dcd2591636b12c9e02ae6f94bc4730a199f18c1f538"
+    },
+    {
+      "runtime": "bgm-moon.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00002.mp3",
+      "sourceSHA256": "89e2a2c836642e399488e7179b6279bd95bf19a2f58e9245f1e1cf99c0810337",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "decdde8e5f3a232daa98fea7eef5f8fb02970fc33053d702fc520392f768d8f8"
+    },
+    {
+      "runtime": "bgm-factory.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00003.mp3",
+      "sourceSHA256": "32ffc5bc0d95969e9b2eef951b30edcf501c9d7591ca77937f69aaee66289cc7",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "7cb1c2137f63951b7c9038904bfbe09ab43cf39fc75d792b3d29b54aa35ac11e"
+    },
+    {
+      "runtime": "bgm-temple.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00004.mp3",
+      "sourceSHA256": "abf8c4b3ebc081d953dc3881fc9d5a40628de8459b675c8bcec42d20f4de1516",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "e2bc546bc6e302ee30ee5255f0ba0394c34ed8d64d0075bd8c2374770de692fa"
+    },
+    {
+      "runtime": "bgm-egypt.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00005.mp3",
+      "sourceSHA256": "79436b87a9ad6af85a1aa8788c10dca758dd6dc857f712834fc3a8590d448e01",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "129f74b6c63beb938bcb3b7a8d8b9be377d6f0be5ab94faa8ec57ee5b11dff66"
+    },
+    {
+      "runtime": "sfx-fire-bowl-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire1-1.wav",
+      "sourceSHA256": "f5a7a61b29e558c109c1d3f447b9edff11ffb6bf4975d57e6ba994e9ab5f5c2e",
+      "seconds": 0.975,
+      "bytes": 8402,
+      "runtimeSHA256": "8ba8910e3874490f25f05bec4780083f9f3de0ff40720a91d9b050d27866cdc8"
+    },
+    {
+      "runtime": "sfx-bomb-bowl-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb1-1.wav",
+      "sourceSHA256": "735bba3109a24afbb7e311e89902f33ffb13dadc7e4faf8815c5618c57917e00",
+      "seconds": 1.379,
+      "bytes": 11536,
+      "runtimeSHA256": "c581ef93bcdda15d2f1d312a490d5b77ee0e737b20ed94bd5997820897a49f72"
+    },
+    {
+      "runtime": "sfx-fire-bowl-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire1-2.wav",
+      "sourceSHA256": "a9effd739fb325b248b8bedfd943823ec546fc90cccf6fb108532be8884abe2e",
+      "seconds": 0.997,
+      "bytes": 8611,
+      "runtimeSHA256": "830024b8ee1bd015de463a72ba813072d942f587138856f56a3ca67ea1d6dff2"
+    },
+    {
+      "runtime": "sfx-bomb-bowl-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb1-2.wav",
+      "sourceSHA256": "e4fa1419bea64d86e52b703d07be8b45f48036a8e75f4f796862fd0b574abae5",
+      "seconds": 1.088,
+      "bytes": 9238,
+      "runtimeSHA256": "9cbcdabdcd4f0b86ab9ffdbf0191d603ac73ed969780d30259873eb50741ffe0"
+    },
+    {
+      "runtime": "sfx-move-bowl.mp3",
+      "source": "assets/ft2-audio/sfx/Move1.wav",
+      "sourceSHA256": "331fb4f8385737e410dabac318bacc7540babe8724617ba7fa0df8eee5ca149c",
+      "seconds": 0.835,
+      "bytes": 7148,
+      "runtimeSHA256": "94875129fb50c4db170f1ae735d6f404c5bbd2df1bfd1720103ab8b4e37cb653"
+    },
+    {
+      "runtime": "sfx-stop-bowl.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove1.wav",
+      "sourceSHA256": "52af9633b9e2bdcb72e11a8000d58aaab29394235a01117d0befb2c98bc62411",
+      "seconds": 0.327,
+      "bytes": 3227,
+      "runtimeSHA256": "baf62f1f0396becab3c7dffe4839c0aaf60ff0845dc421d72aaea8247d781afc"
+    },
+    {
+      "runtime": "sfx-fire-crossbow-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire2-1.wav",
+      "sourceSHA256": "3ab090aafdaa20f332d75f4b9f22b77853119469568b78befaef7e53a109bd8f",
+      "seconds": 0.434,
+      "bytes": 4013,
+      "runtimeSHA256": "223c4e4b9d8182a40b7bba34c6f4097214d7c54d4af89eb69d54f124ac279298"
+    },
+    {
+      "runtime": "sfx-bomb-crossbow-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb2-1.wav",
+      "sourceSHA256": "ae9db876495c2eb1c5eabfc7b0bcf41b3ac995782f5644c5827eb50c8c6d28e8",
+      "seconds": 0.483,
+      "bytes": 4431,
+      "runtimeSHA256": "98d9e73c3b27e08c8f204a6944e999fe49dffd33d731d033e775da77a69db545"
+    },
+    {
+      "runtime": "sfx-fire-crossbow-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire2-2.wav",
+      "sourceSHA256": "4eeae4bd7a9cb658d5dbc57dcc521ce0cef3993af7a2605f9ebd87e98c9d7ace",
+      "seconds": 0.312,
+      "bytes": 2968,
+      "runtimeSHA256": "a38a03c4c97db73267e28714e1d120d06ea4b0091a72d9b8188bff8380d44d6d"
+    },
+    {
+      "runtime": "sfx-bomb-crossbow-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb2-2.wav",
+      "sourceSHA256": "c73bf9357e4ed38adaa03fdfeb58b39f786793f70990d5239a3b6e1a506af6f3",
+      "seconds": 0.725,
+      "bytes": 6312,
+      "runtimeSHA256": "da1f0c7ad521c6195beecbbb6ca9ca2850f9082ca1bb250c1ca5f16eee5fa7b8"
+    },
+    {
+      "runtime": "sfx-move-crossbow.mp3",
+      "source": "assets/ft2-audio/sfx/move2.wav",
+      "sourceSHA256": "6880c053c869ec3e8e690a39239435c7327d47fde114f3d235f8ae8f979eacf6",
+      "seconds": 1.007,
+      "bytes": 8611,
+      "runtimeSHA256": "86c8b8af2b9698c1a3e64e73151fb8e8a80a44c4a10543bd80096d5bdfc3fb27"
+    },
+    {
+      "runtime": "sfx-stop-crossbow.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove2.wav",
+      "sourceSHA256": "23688d7ec5c3bd0954eca967c1af9d32a0fad0d3e89193851413cca3e42ed952",
+      "seconds": 1.237,
+      "bytes": 10492,
+      "runtimeSHA256": "2f0c564142399ce41b7b6db920c1dc02908ae397d036f6fc54cf68c71370e06c"
+    },
+    {
+      "runtime": "sfx-fire-cannon-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire3-1.wav",
+      "sourceSHA256": "9b54cf79a143f1f586254eedc42783b650d33517981fab1ae4403c70ba5e0f73",
+      "seconds": 1.201,
+      "bytes": 10074,
+      "runtimeSHA256": "e85d5fc71d31910e274d124d0cba44895648a3c871bf7bfd64ccd57280756cf0"
+    },
+    {
+      "runtime": "sfx-bomb-cannon-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb3-1.wav",
+      "sourceSHA256": "2def9da520aed9d54148669e2b3f228747c04b28b7c06c4c3d7ffd266d6b44d3",
+      "seconds": 1.325,
+      "bytes": 11118,
+      "runtimeSHA256": "452c85d297b333be2dcf6f5a10c7a772b16110a0cc88ba519503c220f6fc8841"
+    },
+    {
+      "runtime": "sfx-fire-cannon-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire3-2.wav",
+      "sourceSHA256": "6f3ec2dd585e6f416803b0054f233c3266a5a13a09115def3301503d3923fc3e",
+      "seconds": 0.749,
+      "bytes": 6521,
+      "runtimeSHA256": "b2225eff038d5a65d2f916ce842404382e60f99a057bc55f9830d9f0441e1d64"
+    },
+    {
+      "runtime": "sfx-bomb-cannon-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb3-2.wav",
+      "sourceSHA256": "29d2f49c5614987751e8428c7aaaa071ee5a9f66173fef87647bfcd171b685c4",
+      "seconds": 1.331,
+      "bytes": 11118,
+      "runtimeSHA256": "e213d23c7dca07f59b81ec4314acf27cd02c14b0a8c7261f78d0f45a59f58383"
+    },
+    {
+      "runtime": "sfx-move-cannon.mp3",
+      "source": "assets/ft2-audio/sfx/move3.wav",
+      "sourceSHA256": "f0433b58b9caf669ae02080b854082c7d294f3ca8a880b13416734622d1bc2db",
+      "seconds": 1.372,
+      "bytes": 11536,
+      "runtimeSHA256": "cad556eb9743ca6a72a4a6920007d53f1eabf8d6c7d4348c650a3198821a3966"
+    },
+    {
+      "runtime": "sfx-stop-cannon.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove3.wav",
+      "sourceSHA256": "9a2e0cbbe5cd6c87fa280827a41e7e795f71277117d87f6c324fdc6ddafe674b",
+      "seconds": 1.315,
+      "bytes": 11118,
+      "runtimeSHA256": "662e10f9c3f2af11d4aa15693caccbd3b535341380849418ca52cb711381dcc4"
+    },
+    {
+      "runtime": "sfx-fire-beetle-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire4-1.wav",
+      "sourceSHA256": "394557fa6266b39605f308742a4889a6d028a0e9b98b0ffcde8cd526f62f45d6",
+      "seconds": 1.531,
+      "bytes": 12790,
+      "runtimeSHA256": "47925eeaa7bb3044ab6c388e49a0ea1440b1a74db46401b2068b5e561596305d"
+    },
+    {
+      "runtime": "sfx-bomb-beetle-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb4-1.wav",
+      "sourceSHA256": "06065a5553c17e6c8c584771bc8dd0e416f615c767d9425549289de33023499f",
+      "seconds": 1.069,
+      "bytes": 9029,
+      "runtimeSHA256": "2d00832471652a8c082c718c6f31e739746cc3fdc7d17ff51ee763c3eb8b460d"
+    },
+    {
+      "runtime": "sfx-fire-beetle-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire4-2.wav",
+      "sourceSHA256": "ea4b30e02509eff6dacd3f5750e28a84156697129c261c82d88ead2f118336ab",
+      "seconds": 0.454,
+      "bytes": 4222,
+      "runtimeSHA256": "9464805622b3c6c8857b44989de1c331dacda49474cbb90153e978fc36f7f902"
+    },
+    {
+      "runtime": "sfx-bomb-beetle-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb4-2.wav",
+      "sourceSHA256": "177cf49f8376283338f3b7d9c488eb2c9cc941947595fa048230eb9497bb4111",
+      "seconds": 1.011,
+      "bytes": 8611,
+      "runtimeSHA256": "54807de29abd8d86aab1d2eeccfb40c18ebb5dc9739178655bc455202bfa0b1e"
+    },
+    {
+      "runtime": "sfx-move-beetle.mp3",
+      "source": "assets/ft2-audio/sfx/move4.wav",
+      "sourceSHA256": "d4781a02a5c8018d451aa15165643a822449ddaae699d7b4c0495a7aea48286f",
+      "seconds": 1.246,
+      "bytes": 10492,
+      "runtimeSHA256": "f36a0ba733705c3a94ccca84f08806cd2479e5cfc416be3e1d09cedefd5a8377"
+    },
+    {
+      "runtime": "sfx-stop-beetle.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove4.wav",
+      "sourceSHA256": "9ad441fc5424998523a81db2a45cbd9235346ab237b10313de96056559df7cab",
+      "seconds": 0.957,
+      "bytes": 8193,
+      "runtimeSHA256": "89bfdfe32b9ccc69933b2f7ba9f28176fc0781007172459f6677cd8d99d1a1bc"
+    },
+    {
+      "runtime": "sfx-fire-duke-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire5-1.wav",
+      "sourceSHA256": "e994edc63154238b71e5d9090de74590f777d796d51439e9613c39e0b378aea1",
+      "seconds": 1.103,
+      "bytes": 9447,
+      "runtimeSHA256": "cad3450f15e1c32c58c9bd582573ff6646f6b2735e13146c832c678c2cb9f92d"
+    },
+    {
+      "runtime": "sfx-bomb-duke-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb5-1.wav",
+      "sourceSHA256": "9ee3e20ff06d9bfad34a301043a429758bbbd627ec5bb62f1bd51346eae810cd",
+      "seconds": 1.056,
+      "bytes": 9029,
+      "runtimeSHA256": "dac3c9a8462a57adec675dc86323a27bb54c42b7ff4701f3852f73affe4e1911"
+    },
+    {
+      "runtime": "sfx-fire-duke-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire5-2.wav",
+      "sourceSHA256": "b92cd7ed2e31da85de775f2994f00fde3d28390cfe79ed19069b47cfba80e96b",
+      "seconds": 0.599,
+      "bytes": 5267,
+      "runtimeSHA256": "6b0c3e2a47dc07f572c3b4aca4e37d73172ee2d5066b2b1fede2868b9015656a"
+    },
+    {
+      "runtime": "sfx-bomb-duke-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb5-2.wav",
+      "sourceSHA256": "59448a296fb86e1c3b676b1a35362e397cd44ee7e1e6807196537a59922342f4",
+      "seconds": 1.519,
+      "bytes": 12790,
+      "runtimeSHA256": "845fd0952a647f6575d8c780fd24da33e462909255cb9271cdfa8856fe4464ac"
+    },
+    {
+      "runtime": "sfx-move-duke.mp3",
+      "source": "assets/ft2-audio/sfx/move5.wav",
+      "sourceSHA256": "6d6128b0fcdc8b2f89f8cd45a5ecab0e3f02e5964b267857f63f65a30e9ef3a3",
+      "seconds": 1.132,
+      "bytes": 9656,
+      "runtimeSHA256": "eb760df069b8c0f341eaa3dba1899949aef62c54068d83dc9b5024fd043b664c"
+    },
+    {
+      "runtime": "sfx-stop-duke.mp3",
+      "source": "assets/ft2-audio/sfx/UnMove5.wav",
+      "sourceSHA256": "ab6aee5a965136192d4fcba6255b19d60563df62b96d38af97454b8d9e9932fc",
+      "seconds": 1.075,
+      "bytes": 9238,
+      "runtimeSHA256": "43e660bf3e09c78c7a87a0f9e6f4a66cf804ad543e96661b1b4dbf6221f5980c"
+    },
+    {
+      "runtime": "sfx-fire-mine-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire6-1.wav",
+      "sourceSHA256": "bba7bc1d5324ff75b78e9f4c986ba1e7febeed8aedc5de1e834b43b5d96fc938",
+      "seconds": 1.117,
+      "bytes": 9447,
+      "runtimeSHA256": "d9ad1de537b7e31aa6011e0cabb1340e45e3e51c0ebd99538dc650b9f4a0b983"
+    },
+    {
+      "runtime": "sfx-bomb-mine-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb6-1.wav",
+      "sourceSHA256": "09da50baa880f3108c65729edab94c74c4cfe38aacfa912b10b908a19ebea7f6",
+      "seconds": 1.058,
+      "bytes": 9029,
+      "runtimeSHA256": "01b6953c4e0cc7a3321ae7bc58179e4d6f7459dd7bd8a93c388de113eb75e666"
+    },
+    {
+      "runtime": "sfx-fire-mine-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire6-2.wav",
+      "sourceSHA256": "d6b461ba5448a575046535b82eef47332d1bc12106eb3b9031bafa15c22abf87",
+      "seconds": 0.83,
+      "bytes": 7148,
+      "runtimeSHA256": "9963d433ff8caec1b21950e714bca191a386e6c112dbb3ec6a527091ff32b3a8"
+    },
+    {
+      "runtime": "sfx-bomb-mine-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb6-2.wav",
+      "sourceSHA256": "162fd90b36df93fb3f7a118af35a068dba94f1ce83ab4d6b1e02a8c1f63d5e58",
+      "seconds": 1.0,
+      "bytes": 8611,
+      "runtimeSHA256": "642776cc6d84039a01e16561bb608f174bde34b0df05ac8f4d7281451c952caa"
+    },
+    {
+      "runtime": "sfx-move-mine.mp3",
+      "source": "assets/ft2-audio/sfx/move6.wav",
+      "sourceSHA256": "7bc19334c35c2f717a60c624e8db0ab106d87d80f70111830c04d63531a3992c",
+      "seconds": 0.826,
+      "bytes": 7148,
+      "runtimeSHA256": "d30d1378b3e53e85a6bff32d4ea5fdb99685a20c7a220ea68c58d6c2626ab867"
+    },
+    {
+      "runtime": "sfx-stop-mine.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove6.wav",
+      "sourceSHA256": "999aaade05bc8d28739cf5deca327dc7853e087458b4963594d3a3ac0bc811b7",
+      "seconds": 0.213,
+      "bytes": 2341,
+      "runtimeSHA256": "c6a20948c820f27d81ea4b802f96cf138bbe0e5ba6cbf2dfd93087857a785fa2"
+    },
+    {
+      "runtime": "sfx-fire-missile-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire7-1.wav",
+      "sourceSHA256": "f383f57945b33ce97bb68b9660154067cb8ea1406b33ea5a1a2c265524cce942",
+      "seconds": 0.824,
+      "bytes": 7148,
+      "runtimeSHA256": "5f0572f05c87f755e1f60ac82139732fdcf47cf09375a9db45e5f2a34954ec74"
+    },
+    {
+      "runtime": "sfx-bomb-missile-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb7-1.wav",
+      "sourceSHA256": "2f2cf1edba855ebd5e4f8762e51d89a67ed82b7605871ee018c79d05abbfdbe7",
+      "seconds": 1.201,
+      "bytes": 10074,
+      "runtimeSHA256": "ce69eb81c654f97066cdcbc5a98419c459321083db092e9acb25204dbaf97528"
+    },
+    {
+      "runtime": "sfx-fire-missile-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire7-2.wav",
+      "sourceSHA256": "e6af5c6e2bbcb3f9f4bcddf65e0988b8956b67c0af7c7a181e69ced9029ca172",
+      "seconds": 0.691,
+      "bytes": 6103,
+      "runtimeSHA256": "6eecde8421dc124fbfef1c9c3467869fbf34033b19ebf30a75270af746379475"
+    },
+    {
+      "runtime": "sfx-bomb-missile-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb7-2.wav",
+      "sourceSHA256": "2070b0595fb86617506a88f553266744f21861964c8cdc55fb67a84f8ceb95b0",
+      "seconds": 0.846,
+      "bytes": 7357,
+      "runtimeSHA256": "33a6e9a816bf762617e963a9b99b2dd9543942cfdebe559ed923bf57c1af4403"
+    },
+    {
+      "runtime": "sfx-move-missile.mp3",
+      "source": "assets/ft2-audio/sfx/move7.wav",
+      "sourceSHA256": "aa21cdb514715a770ca35c3949cdb04b0730b263b60337e56186b22f4e1c2c54",
+      "seconds": 0.977,
+      "bytes": 8402,
+      "runtimeSHA256": "978adc6d29b7c0a05c333ab31b9123c2a0b1462a69d422397f59c4d76c4b87d1"
+    },
+    {
+      "runtime": "sfx-stop-missile.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove7.wav",
+      "sourceSHA256": "6e23e40e670531d6db8dc8532e0eef691f1653d2b90a5bf9ba56e040c0695ce1",
+      "seconds": 0.183,
+      "bytes": 2132,
+      "runtimeSHA256": "67537fe8ae3be4fe5b3bf0929f7a2d16de8e1ac61847f857cf13ea886e4aa657"
+    },
+    {
+      "runtime": "sfx-fire-multi-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire8-1.wav",
+      "sourceSHA256": "dea3831b89e4134b9110c90359fe1028fa53591f81d6e5810ede9f1ff6cb34c0",
+      "seconds": 0.943,
+      "bytes": 8193,
+      "runtimeSHA256": "ad0579e20a27cf2a8f43b7779d097ec4b51429a57ba8eb8bbac91a3132260a7f"
+    },
+    {
+      "runtime": "sfx-bomb-multi-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb8-1.wav",
+      "sourceSHA256": "27bb0c6d7cc0fb19a131e86d76c91aba714f88676738101c220035f530df3717",
+      "seconds": 1.941,
+      "bytes": 16134,
+      "runtimeSHA256": "19b716f9b15e63b5e5bd873b26134b7ef339796fff2cc878eec18da05fc2e1f9"
+    },
+    {
+      "runtime": "sfx-fire-multi-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire8-2.wav",
+      "sourceSHA256": "c93323dc88ff4919eaf2bb682343b21961518e66fb70ad91196c83241b4a3938",
+      "seconds": 1.385,
+      "bytes": 11745,
+      "runtimeSHA256": "7b7d4f3d8805b80ced4a4ffbf3fe9b6da4acd7caae47b0d275b985be17f930b8"
+    },
+    {
+      "runtime": "sfx-bomb-multi-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb8-2.wav",
+      "sourceSHA256": "db35b79c35e23f66464c7af8fff7abe6cc5530807a502aa22e277dac0a51c157",
+      "seconds": 2.598,
+      "bytes": 21358,
+      "runtimeSHA256": "7b634fb0c4551acae91a5711cdb37a7f59039a0f725bf0542a9b18f1735d7dbf"
+    },
+    {
+      "runtime": "sfx-move-multi.mp3",
+      "source": "assets/ft2-audio/sfx/move8.wav",
+      "sourceSHA256": "5a8b3ad561ad415bcdfa856c4882778331ca956bbdce2b8483446ac3acf48644",
+      "seconds": 1.085,
+      "bytes": 9238,
+      "runtimeSHA256": "9ad04604ca002f07a9b7d1a2b385c1801bc03b57ba1931277d78fbb269c8292b"
+    },
+    {
+      "runtime": "sfx-stop-multi.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove8.wav",
+      "sourceSHA256": "da9ad16468244096f1cdebf4bdb4c8c74d6b27f6a479bf585e6403d886feb816",
+      "seconds": 2.928,
+      "bytes": 24075,
+      "runtimeSHA256": "6ac6eadd15f49aefb20a5d9082ea60e22c7d1105ada0d4d10b945bee250c1e4d"
+    },
+    {
+      "runtime": "sfx-fire-laser-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire9-1.wav",
+      "sourceSHA256": "4138f0dfdb2239db7a4b6165e1dfec765810b42a57136909c6184e3180056521",
+      "seconds": 0.282,
+      "bytes": 2759,
+      "runtimeSHA256": "6d6e5c879c02f21567a076fe997dfba69385a8be0cc09faf91075bdb1ba9381a"
+    },
+    {
+      "runtime": "sfx-bomb-laser-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb9-1.wav",
+      "sourceSHA256": "265bef64f120ba8de4788f32c04452d406e1094e98ad0484443ce995a98e67af",
+      "seconds": 1.341,
+      "bytes": 11327,
+      "runtimeSHA256": "0c4975dca004358a94d29e7f1dc238a13eef3bce15e01f39a08a274c4bac2f6f"
+    },
+    {
+      "runtime": "sfx-fire-laser-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire9-2.wav",
+      "sourceSHA256": "dbc50f6bf95ba8ec8337dd092b2577fc7fa77ee8713a18520624fefddffdc770",
+      "seconds": 0.246,
+      "bytes": 2550,
+      "runtimeSHA256": "5520ba615e45d46b4eafc25becc4843f2d0d7581433fe9522629413181be2772"
+    },
+    {
+      "runtime": "sfx-bomb-laser-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb9-2.wav",
+      "sourceSHA256": "385c98faf58bd1feeaed0ef31b983c5fe14ef6ff79a1150eb1826f2e147afd5c",
+      "seconds": 2.162,
+      "bytes": 17806,
+      "runtimeSHA256": "3eaccbda1e150e458e400294b2d53edd4c3de13ed6fea30760ad4cf528c64252"
+    },
+    {
+      "runtime": "sfx-move-laser.mp3",
+      "source": "assets/ft2-audio/sfx/move9.wav",
+      "sourceSHA256": "712d745cd3c38923701bdffaf694eae33f49c5a25e81bd28dbefda9e357abdf2",
+      "seconds": 1.176,
+      "bytes": 10074,
+      "runtimeSHA256": "ee208aa1448ddf636608ef27fd64992849387dd4c0a2f0d127a3b1438ee3b56d"
+    },
+    {
+      "runtime": "sfx-stop-laser.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove9.wav",
+      "sourceSHA256": "f2dca23960f5355b1308e5f4fdcd48171245f0d901db0f58a1fabe169eeaa08f",
+      "seconds": 0.916,
+      "bytes": 7984,
+      "runtimeSHA256": "9b0b419821c9c58567741592a266f049adeca23049a0ba758d0fd7cf5eb03d7a"
+    },
+    {
+      "runtime": "sfx-fire-water-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire10-1.wav",
+      "sourceSHA256": "2caadc52fd7a00aa47eb89a38acf62996ea6abe9237f82ed8e7bd07e76b13104",
+      "seconds": 0.729,
+      "bytes": 6312,
+      "runtimeSHA256": "ae26812c17946eaec4022e15122cdca237cf770230eddb17b2ae21000ebb83d0"
+    },
+    {
+      "runtime": "sfx-bomb-water-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb10-1.wav",
+      "sourceSHA256": "3455dd2e85415327bf361a9d7ae6e8965f72252833aca979cca6233d7d030db6",
+      "seconds": 0.995,
+      "bytes": 8611,
+      "runtimeSHA256": "704112e49f572c558b21782968ac1e77428fbfbe0750ada81639c11143947484"
+    },
+    {
+      "runtime": "sfx-fire-water-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire10-2.wav",
+      "sourceSHA256": "94e3309e7f89fa33b48ed5bf6a0e6c6a55d6d6741943e77f37cddc866421a868",
+      "seconds": 0.793,
+      "bytes": 6939,
+      "runtimeSHA256": "9d13c5054598b74465548fe35b57da70898a30fe2d684708725907e101c9ed33"
+    },
+    {
+      "runtime": "sfx-bomb-water-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb10-2.wav",
+      "sourceSHA256": "f80da7b330fa1c00a5e7aab0404a69b4d76368233046a9d412b56001681f593b",
+      "seconds": 1.38,
+      "bytes": 11536,
+      "runtimeSHA256": "f7b1bdcf041d3a4108baf4bae3b1a07094921287f7957f76e409caff14c68bbd"
+    },
+    {
+      "runtime": "sfx-move-water.mp3",
+      "source": "assets/ft2-audio/sfx/move10.wav",
+      "sourceSHA256": "48cf51265cca7da82835ece5a6b82a1b6ae7e7f1a111d7527c842fc88aac0c95",
+      "seconds": 0.665,
+      "bytes": 5894,
+      "runtimeSHA256": "eb04a4573632f544347cafe165f3a5192dd5be355cdec8dd58359f252b8f8f5f"
+    },
+    {
+      "runtime": "sfx-stop-water.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove10.wav",
+      "sourceSHA256": "b9eeef74a403fdd13d12c1bb1914141bbc34c0468f6c2d031800d9326fc4404b",
+      "seconds": 0.58,
+      "bytes": 5267,
+      "runtimeSHA256": "3552a79d12a40a925a941dac9dfabfd93ae3f8b566d68067cf00ae316aa809be"
+    },
+    {
+      "runtime": "sfx-fire-ion-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire11-1.wav",
+      "sourceSHA256": "310aca214f10670da643b7e20f616e934383f0ee7d978cefe84d3f9115e92952",
+      "seconds": 0.71,
+      "bytes": 6312,
+      "runtimeSHA256": "070907923a9cc1d42dade9df3614ea5db8e418975d685f8f47c72f9f33f97cd8"
+    },
+    {
+      "runtime": "sfx-bomb-ion-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb11-1.wav",
+      "sourceSHA256": "1efddef19f288db36b144a8325a614d652d55a6ea7378a587bd3629f28344bbb",
+      "seconds": 2.837,
+      "bytes": 23239,
+      "runtimeSHA256": "0af7f0f8d360023dba19af12e2b98327d01af4fe167d04a24a6a740c28f14b10"
+    },
+    {
+      "runtime": "sfx-fire-ion-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire11-2.wav",
+      "sourceSHA256": "929cb534c44d91702710e34d14ff32fd03b4db9c361a350e894912b67af9e84a",
+      "seconds": 0.859,
+      "bytes": 7357,
+      "runtimeSHA256": "f344190978a76008d054fcbd1752a2f614bb9a08f86cb668040c7869f68400cc"
+    },
+    {
+      "runtime": "sfx-bomb-ion-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb11-2.wav",
+      "sourceSHA256": "55a01a393e589c80fd93ce115fa83cdadb08ed6f56bab52856ed2735b819c75d",
+      "seconds": 1.892,
+      "bytes": 15716,
+      "runtimeSHA256": "0437e6e0285a09f51e01e742d807ed8d99945d719e7967b35fc5941e4392eb73"
+    },
+    {
+      "runtime": "sfx-move-ion.mp3",
+      "source": "assets/ft2-audio/sfx/move11.wav",
+      "sourceSHA256": "7559b86c347482189c765916ffd2715e75ce87eafa9323b75f86b0d4ac484cde",
+      "seconds": 1.241,
+      "bytes": 10492,
+      "runtimeSHA256": "177187ac018be36eb01083d269af843821c295487a49bf9963ca84e4fd137e46"
+    },
+    {
+      "runtime": "sfx-stop-ion.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove11.wav",
+      "sourceSHA256": "b3d4b9a0dc07e49d4fbea96c9ed4d8e897d0f733a8bdaca2db24784970391de6",
+      "seconds": 0.302,
+      "bytes": 2968,
+      "runtimeSHA256": "e8f243cf01be8fd83de27d7f86887f59582187ffa175344ded9b39961335389b"
+    },
+    {
+      "runtime": "sfx-fire-sea-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire12-1.wav",
+      "sourceSHA256": "bb6c073a9cce66c8ace7f3714fb2b6ed922f71ba7c2a413ecc91b75d53b96875",
+      "seconds": 0.729,
+      "bytes": 6312,
+      "runtimeSHA256": "09b8d4d56000894d02c7067aab8522b07d9a80944a97f640a57748d7bdb7ac65"
+    },
+    {
+      "runtime": "sfx-bomb-sea-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb12-1.wav",
+      "sourceSHA256": "eed46e7ebb886532d4883cda12321a006ac1cd08a6dea519419af5843c3f9798",
+      "seconds": 1.613,
+      "bytes": 13417,
+      "runtimeSHA256": "c9d0789c36d70bda7d03f6ef7a30442614180a2c36eaec01d0da6fc234b27275"
+    },
+    {
+      "runtime": "sfx-fire-sea-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire12-2.wav",
+      "sourceSHA256": "81e800cccded8cb6ede39f575f7a7ce985a6e5c67e603a720f555dba997ea996",
+      "seconds": 0.735,
+      "bytes": 6521,
+      "runtimeSHA256": "4e812dc9f46a82397409058eba4d56078956fe212623ed8bd793143e1a768988"
+    },
+    {
+      "runtime": "sfx-bomb-sea-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb12-2.wav",
+      "sourceSHA256": "121e7ad378bd55e0beec904407d9d9640f5caeed5671f87342afa18e930e1136",
+      "seconds": 1.562,
+      "bytes": 12999,
+      "runtimeSHA256": "a27b410d13229da4d30f447f78f0cc0cdf72125abaef927d7a66c45c94e954a7"
+    },
+    {
+      "runtime": "sfx-move-sea.mp3",
+      "source": "assets/ft2-audio/sfx/move12.wav",
+      "sourceSHA256": "6436d0085d2cc4e03e215cde6457f70c484c2692a7f398325efda54d8c1dcc2f",
+      "seconds": 1.018,
+      "bytes": 8661,
+      "runtimeSHA256": "7a0013504a65400f679d01a8bb799c29c82e917eada2ed16efb9cccebe540e0e"
+    },
+    {
+      "runtime": "sfx-stop-sea.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove12.wav",
+      "sourceSHA256": "71b668692a99947c95a33ddbb11acdc85bfbbe2c033868f5367fb8821b80e980",
+      "seconds": 0.974,
+      "bytes": 8402,
+      "runtimeSHA256": "5915c0fc18026865b231fdef49e01711c3adeb3c1b3f71135c738f4492e3d8cb"
+    },
+    {
+      "runtime": "sfx-fire-dragon-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Fire13-1.wav",
+      "sourceSHA256": "0f1772c3ace86725ee6a8e5a32847af63cbfbbd17bcbe8e8c5ad69c31aa346fa",
+      "seconds": 0.68,
+      "bytes": 6103,
+      "runtimeSHA256": "0f60cb6f1b05d75cc7bd563d85d214297a1904cabdb77eaedb567509db1dbe39"
+    },
+    {
+      "runtime": "sfx-bomb-dragon-normal.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb13-1.wav",
+      "sourceSHA256": "63273670a0e34659db3337af7f58dc0d0879c9e4feff565569f29e743960e1f0",
+      "seconds": 1.06,
+      "bytes": 9029,
+      "runtimeSHA256": "5241a9a46a03b37652fa313e888c19ecbbc0b37b4a2d943110fc20502737bfde"
+    },
+    {
+      "runtime": "sfx-fire-dragon-special.mp3",
+      "source": "assets/ft2-audio/sfx/Fire13-2.wav",
+      "sourceSHA256": "2c6d8e3bfa102d41a49f652a8f8380d0b94c43c2944087b23c78ca087b36f609",
+      "seconds": 1.161,
+      "bytes": 9865,
+      "runtimeSHA256": "fa553fed99da07efeb4d37ecc3fe3e7a76615e65c960450006e8c926a162faef"
+    },
+    {
+      "runtime": "sfx-bomb-dragon-special.mp3",
+      "source": "assets/ft2-audio/sfx/Bomb13-2.wav",
+      "sourceSHA256": "3ccfb1ec8cffe5f49010afeaac1074b9461c2c0bd627cbd0f2f354200ba7c794",
+      "seconds": 1.008,
+      "bytes": 8611,
+      "runtimeSHA256": "7d852deafc6014d3a6a4def1fbd2494bbf80edd6ac00a2a7328193c626592630"
+    },
+    {
+      "runtime": "sfx-move-dragon.mp3",
+      "source": "assets/ft2-audio/sfx/move13.wav",
+      "sourceSHA256": "80f06446a720aeb66a0ea6cd78c49a06b44afec9938f319b5536fc3e475b3731",
+      "seconds": 1.347,
+      "bytes": 11327,
+      "runtimeSHA256": "6e64d77eaa87b65875e9a74d305c0cf73a1e80feb63bfbf66b7494da88a7acfc"
+    },
+    {
+      "runtime": "sfx-stop-dragon.mp3",
+      "source": "assets/ft2-audio/sfx/Unmove13.wav",
+      "sourceSHA256": "ab43ff6d6d4f12497b1f843fb29f587dfe5ca6c35f84f18d05cf7085ab0b0c93",
+      "seconds": 1.119,
+      "bytes": 9447,
+      "runtimeSHA256": "e0100de51fcc3bd9ef1df0a21eb7b6cf9c501e42ef09890a47ab9af5d8544dd5"
+    },
+    {
+      "runtime": "sfx-click.mp3",
+      "source": "assets/ft2-audio/sfx/Push1.wav",
+      "sourceSHA256": "f03395c1ed87b1760ff016e29ba7400e67a91b821cef9a64e411b44bc336e5d3",
+      "seconds": 0.265,
+      "bytes": 2759,
+      "runtimeSHA256": "7b7e40573342a9bbd7f526f4619eafed52a7672dd3dd70fcdd4ba4f12696015c"
+    },
+    {
+      "runtime": "sfx-select.mp3",
+      "source": "assets/ft2-audio/sfx/Select1.wav",
+      "sourceSHA256": "553d46f9dae6a25279eb31ddecec5b405bf015d71a3c544961efc670ad8f2cf2",
+      "seconds": 0.157,
+      "bytes": 1923,
+      "runtimeSHA256": "24fd792c41e8b19d3295a4873d1adf100fb836a7b60179525548eb7125d1a9de"
+    },
+    {
+      "runtime": "sfx-item.mp3",
+      "source": "assets/ft2-audio/sfx/Friend.wav",
+      "sourceSHA256": "4bc2d19f34975899f414c60452bc4395c52d31a24c8c189f23453fe44a7ddf48",
+      "seconds": 1.022,
+      "bytes": 8820,
+      "runtimeSHA256": "33c04d46630c9c1e53de728e756aa763daeca64597d2838f5996898a1a23cce8"
+    },
+    {
+      "runtime": "sfx-win.mp3",
+      "source": "assets/ft2-audio/sfx/logo.wav",
+      "sourceSHA256": "67c7cb0d78d44c0c5f4421844f5a90a1251c12333c67c0c996fa71d9255a2794",
+      "seconds": 4,
+      "bytes": 32643,
+      "runtimeSHA256": "34f59511500da83a949cde53a581fdb72323bb6aa93429159602c276788ee290"
+    },
+    {
+      "runtime": "sfx-turn.mp3",
+      "source": "assets/ft2-audio/sfx/Turn.wav",
+      "sourceSHA256": "8a719267caff41f84f5c0f4cc68707ea230796c4c0804917f3cfbe7ce221fac5",
+      "seconds": 0.441,
+      "bytes": 4013,
+      "runtimeSHA256": "aaf15cac27580abcd8718cbfe8c88636acc0270b0c2674b3ee528ce05fcd1885"
+    },
+    {
+      "runtime": "sfx-wind.mp3",
+      "source": "assets/ft2-audio/sfx/Wind.wav",
+      "sourceSHA256": "9a361dae700b293ca6b1e768c4d1721924d7b5a419036e82d908e3916dff1ca0",
+      "seconds": 3.193,
+      "bytes": 25956,
+      "runtimeSHA256": "1e86bfe7178bae8213563830821bd313357546d380c720083a3e60da120f72c7"
+    },
+    {
+      "runtime": "sfx-firewall.mp3",
+      "source": "assets/ft2-audio/sfx/Firewall.wav",
+      "sourceSHA256": "ccd263013f571fa93d609aba7ec940d180a596e92f5a73b76e24f8ef7a81a3eb",
+      "seconds": 0.899,
+      "bytes": 7775,
+      "runtimeSHA256": "c12e0cd720e9cb4194829dc6923512658072f9a6bc7047a639c8c6e953d25fbd"
+    },
+    {
+      "runtime": "sfx-lock.mp3",
+      "source": "assets/ft2-audio/sfx/Homming.wav",
+      "sourceSHA256": "57d302a9be4c9fa1a2d7791a5161aecf29e8b171a4f3bfb04a41e938487a1857",
+      "seconds": 0.877,
+      "bytes": 7566,
+      "runtimeSHA256": "340a2cfa87ac50cff723ecd816e68b0b06b378138d75459059ca34db61bbe058"
+    },
+    {
+      "runtime": "sfx-crate-land.mp3",
+      "source": "assets/ft2-audio/sfx/BoxLanding.wav",
+      "sourceSHA256": "e8986e99729c135fc3bc6b6224a3fb76f5457ed08f380da8323cd8f60435fd36",
+      "seconds": 1.498,
+      "bytes": 12581,
+      "runtimeSHA256": "f242ac48c7f217083f1f3c8c5b7bf2d1b3a31ee32aae7f7a452aa038aa22e1d0"
+    },
+    {
+      "runtime": "sfx-supply.mp3",
+      "source": "assets/ft2-audio/sfx/heli.wav",
+      "sourceSHA256": "ddeb53a49e908343c5a52e9d8304659a56376d54f6bb40b919b9f365f1c47c55",
+      "seconds": 0.557,
+      "bytes": 5058,
+      "runtimeSHA256": "8116aa90bbed5a9843dd5fa5babf46edf8f0ecdf7b1109dec5ba733033b39efb"
+    },
+    {
+      "runtime": "sfx-warning.mp3",
+      "source": "assets/ft2-audio/sfx/Warring.wav",
+      "sourceSHA256": "a61f4ad78898e5f4edf84c99af201e18563bbd6f57a125c58dc6456c391d26ca",
+      "seconds": 0.211,
+      "bytes": 2341,
+      "runtimeSHA256": "f83ca379381a888bcf70c4c37ab11b9573bc14de3ef0f73a4320f12cc9e6dec5"
+    },
+    {
+      "runtime": "sfx-transfer.mp3",
+      "source": "assets/ft2-audio/sfx/Push3.wav",
+      "sourceSHA256": "e4a4e52531337af4941b7655b856b7cfc18d7146511f3d4f2f5c7516e59234e6",
+      "seconds": 0.058,
+      "bytes": 1087,
+      "runtimeSHA256": "eb12813fb16408c3dd75ba3573aeb30ad25db406ae1dc6c462062cfb163cfe93"
+    },
+    {
+      "runtime": "sfx-quake.mp3",
+      "source": "assets/ft2-audio/sfx/quake.wav",
+      "sourceSHA256": "c176579f4a6daad5aec00d4a0aea45e14f6f4b11e395d8e7c1cfaba74536843c",
+      "seconds": 2.083,
+      "bytes": 17179,
+      "runtimeSHA256": "7b91e5625825d9070411c892f488107c9b9a2a02a05d721bcbeec99d39815b91"
+    }
+  ]
+}

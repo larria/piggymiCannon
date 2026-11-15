@@ -16,7 +16,6 @@ export default defineConfig(({mode}) => ({
   },VitePWA({
     registerType: 'prompt',
     injectRegister: false,
-    includeAssets: ['icons/*.png', 'icons/*.svg', 'audio/*.mp3', 'fonts/*.ttf'],
     manifest: {
       id: './',
       name: '咪猪头的疯狂坦克',

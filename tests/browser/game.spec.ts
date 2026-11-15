@@ -81,7 +81,7 @@ test('PWA installs its worker and reloads with icons and audio while offline',as
   expect(manifest.name).toBe('咪猪头的疯狂坦克');expect(manifest.orientation).toBe('landscape');
   await context.setOffline(true);await page.reload();
   await expect(page.getByRole('button',{name:'进入战场',exact:true})).toBeVisible();
-  const assets=await page.evaluate(async()=>Promise.all(['icons/icon-512.png','audio/bgm-sunny-30s.mp3','portraits/mimi.png','portraits/dad.png','icons/fox-avatar.svg','icons/fish-avatar.svg'].map(async path=>(await fetch(path)).ok)));
+  const assets=await page.evaluate(async()=>Promise.all(['icons/icon-512.png','audio/bgm-valley.mp3','portraits/mimi.png','portraits/dad.png','icons/fox-avatar.svg','icons/fish-avatar.svg'].map(async path=>(await fetch(path)).ok)));
   expect(assets).toEqual([true,true,true,true,true,true]);
   await context.setOffline(false);
 });
@@ -196,7 +196,7 @@ test('tank selection is remembered and two weapons switch directly without a dia
  await page.screenshot({path:'QA/slots-regression-tank-selection.png'});
 });
 test('enabled action controls all acknowledge clicks with sound',async({page})=>{
- await page.addInitScript(()=>{(window as any).clickSounds=0;const original=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){if((this as HTMLAudioElement).src.includes('sfx_click'))(window as any).clickSounds++;return original.call(this);};});
+ await page.addInitScript(()=>{(window as any).clickSounds=0;const original=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){if((this as HTMLAudioElement).src.includes('sfx-click'))(window as any).clickSounds++;return original.call(this);};});
  await start(page);
  let count=await page.evaluate(()=>(window as any).clickSounds);
  for(const selector of ['#weapon-special','#weapon-normal','#inventory-toggle','#weapons-tab','#items-tab','#arsenal-close','#face-button','#stage-version-button']){

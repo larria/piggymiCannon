@@ -6,13 +6,13 @@ test('music and effects switches operate and persist independently in both direc
  await page.locator('#music-toggle').click();await expect(page.locator('#effects-toggle')).toHaveAttribute('aria-checked','true');
  await expect(page.locator('#music-toggle')).toHaveAttribute('aria-checked','false');await page.getByRole('button',{name:'设置好了',exact:false}).click();
  expect(await page.evaluate(()=>(window as any).__qa.audio.music.paused)).toBe(true);
- const plays=await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx_click')).length);
- await page.locator('#sound-button').click();expect(await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx_click')).length)).toBeGreaterThan(plays);
+ const plays=await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx-click')).length);
+ await page.locator('#sound-button').click();expect(await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx-click')).length)).toBeGreaterThan(plays);
  await page.locator('#effects-toggle').click();await page.locator('#music-toggle').click();await page.getByRole('button',{name:'设置好了',exact:false}).click();
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.audio.music.paused)).toBe(false);
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('piggy-settings')!))).toMatchObject({soundEnabled:false,musicEnabled:true});
- const mutedPlays=await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx_click')).length);
- await page.locator('#sound-button').click();expect(await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx_click')).length)).toBe(mutedPlays);
+ const mutedPlays=await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx-click')).length);
+ await page.locator('#sound-button').click();expect(await page.evaluate(()=>(window as any).audioPlays.filter((s:string)=>s.includes('sfx-click')).length)).toBe(mutedPlays);
  await page.screenshot({path:'QA/slots-regression-independent-audio-ipad.png'});await page.reload();await page.locator('#sound-button').click();
  await expect(page.locator('#effects-toggle')).toHaveAttribute('aria-checked','false');await expect(page.locator('#music-toggle')).toHaveAttribute('aria-checked','true');
 });

@@ -2,6 +2,7 @@ import {VEHICLE_WEAPONS,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
 export type MapId = 'valley' | 'coast' | 'moon' | 'factory' | 'temple' | 'egypt';
+export type MapChoice = MapId | 'random';
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'expert';
 export interface Weapon { id: WeaponId; name: string; english: string; description: string; damage: number; radius: number; digRadius:number; digDepth:number; ammo: number; color: string; icon: string; tag: string;effect?:WeaponEffect;shots?:number;spread?:number;speed?:number;gravity?:number;sound?:number;shape?:string;extraDelay?:number;homingMode?:'nearest'|'volley';homingRadius?:number }
 export const WEAPONS: Weapon[] = [
