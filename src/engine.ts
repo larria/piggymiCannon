@@ -374,7 +374,25 @@ export class Game {
     if(p.age<0.09) return undefined;
     return this.tanks.find(t=>t.hp>0&&this.canDamage(t,p.owner)&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
   }
+  private invalidVolleyTarget(p:Projectile) {
+    if(p.volley===0||weaponById(p.weapon).homingMode!=='volley')return false;
+    const id=this.volleyTargets.get(p.volley)?.target??p.lockTarget;
+    if(id===null)return false;
+    const target=this.tanks[id];
+    return !target||target.hp<=0||!this.canDamage(target,p.owner);
+  }
+  private cancelVolley(volley:number) {
+    // Disposal has no damage or new explosions. The impact that killed the target
+    // finishes normally; delayed double-shot copies belong to this same group.
+    this.projectiles=this.projectiles.filter(p=>{
+      if(p.volley!==volley)return true;
+      p.trail=[];p.lockTarget=null;p.homing=false;p.lockAge=0;p.lockX=0;p.lockY=0;
+      return false;
+    });
+    this.volleyTargets.delete(volley);
+  }
   private stepProjectile(p:Projectile,dt:number):boolean {
+    if(this.invalidVolleyTarget(p)){this.cancelVolley(p.volley);return true;}
     if(p.delay>0) {p.delay-=dt;if(p.delay<=0&&p.echo) this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon);return false;}
     p.age+=dt;
     p.hitCooldown=Math.max(0,p.hitCooldown-dt);
@@ -504,6 +522,13 @@ export class Game {
       this.explode({...this.launch(this.tanks[mine.owner],mine.weapon),x:mine.x,y:mine.y,boost:mine.boost,mineArmed:true});
     }
     this.emit('explosion',`${w.name}${direct?'直接命中，集中伤害':'命中地形，扩大挖地'}。`,undefined,p.x,p.weapon);
+    // A point-blank collision can kill before the .18s guidance acquisition.
+    // Only use that victim when no primary target was acquired: collateral
+    // deaths must not cancel a volley still pursuing a living primary target.
+    if(w.homingMode==='volley'&&p.volley>0&&directTarget!==undefined&&this.volleyTargets.get(p.volley)?.target===null) {
+      const target=this.tanks[directTarget];
+      if(!target||target.hp<=0||!this.canDamage(target,p.owner))this.cancelVolley(p.volley);
+    }
   }
   private triggerMines(t:Tank) {
     if(t.vehicleId==='laser'||t.vehicleId==='water') return;
@@ -527,6 +552,7 @@ export class Game {
       this.float(t.x,t.y-95,`毒伤 −${actual}`,'#6c994b',t.id);this.burst(t.x,t.y-18,12,'#91af6c');
       this.emit('poison',`${t.name}毒伤 −${actual}，生命 ${t.hp}/${t.maxHP}${t.poisoned?'':'，到达红血临界线，中毒解除'}。`,actual,t.x,'crossbow-special');
     }else if(actual){this.float(t.x,t.y-25,`−${actual}`,'#db674b',t.id);this.emit('hit',this.fog?`${t.name}的方向传来受击声。`:`${t.name}受到 ${actual} 点伤害。`,actual,t.x);}
+    if(t.hp<=0)for(const volley of new Set(this.projectiles.filter(p=>this.invalidVolleyTarget(p)).map(p=>p.volley)))this.cancelVolley(volley);
   }
   private float(x:number,y:number,text:string,color:string,tankId?:number) {this.texts.push({x,y,text,color,life:1.8,tankId});}
   burst(x:number,y:number,count:number,color:string) {
@@ -792,7 +818,8 @@ export class Game {
       const flightTime=dt*FLIGHT_SPEED,count=Math.ceil(flightTime/(1/180)),step=flightTime/count;
       for(let i=0;i<count;i++) {
         const active=[...this.projectiles];
-        for(const p of active) if(this.stepProjectile(p,step)) this.projectiles=this.projectiles.filter(q=>q!==p);
+        // A killing impact may cancel siblings already in this snapshot.
+        for(const p of active) if(this.projectiles.includes(p)&&this.stepProjectile(p,step)) this.projectiles=this.projectiles.filter(q=>q!==p);
       }
       if(this.projectiles.length===0) {this.phase='resolving';this.resolveTime=0.55;this.volleyTargets.clear();}
     } else if(this.phase==='resolving') {

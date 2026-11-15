@@ -19,14 +19,14 @@ test('all twenty-six guns match the historical shot counts and all thirty-nine v
  assert.equal(new Set(ALL_WEAPONS.map(w=>w.color)).size,39);assert.equal(new Set(ALL_WEAPONS.map(w=>w.shape)).size,39);
  assert.equal(VEHICLE_WEAPONS.find(w=>w.id==='missile-special')!.damage,90);
 });
-test('all nine golden missiles lock independently across the spread and continue tracking a wreck',()=>{
+test('all nine golden missiles lock independently across the spread and stop tracking a wreck',()=>{
  const g=flatGame('dragon'),t=g.active,e=g.enemy;g.selectWeapon('dragon-special');t.angle=45;
  let best=Infinity;for(let power=20;power<=65;power+=.5){const hit=g.predict(45,power,'dragon-special',12,t),distance=Math.abs(hit.x-e.x);if(distance<best){best=distance;t.power=power;}}
  assert.ok(best<15);g.fire();assert.equal(g.projectiles.length,9);
  g.projectiles.forEach((p,i)=>Object.assign(p,{x:e.x-330+i*55,y:340,vx:100,vy:50,age:.5}));g.update(.01);
  assert.equal(g.projectiles.filter(p=>p.homing&&p.lockTarget===e.id).length,9);
- const ages=g.projectiles.map(p=>p.lockAge);e.hp=0;g.update(.01);
- assert.equal(g.projectiles.length,9);g.projectiles.forEach((p,i)=>assert.ok(p.lockAge>ages[i]));
+ e.hp=0;g.update(.01);
+ assert.equal(g.projectiles.length,0);assert.equal(g.phase,'resolving');
  assert.equal(g.drainEvents().filter(e=>e.type==='lock').length,9);
 });
 test('guidance honors self-damage settings and excludes dead tanks',()=>{
