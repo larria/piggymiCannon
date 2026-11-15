@@ -57,7 +57,7 @@ test('self/friendly damage defaults off across blasts, statuses, hazards and gui
 test('one shared 50% boost for item, fire line, both, double volleys and transfer; line expires after two actions',()=>{
  for(const item of [false,true])for(const line of [false,true]){
   const g=flat({fireLine:line,vehicle0:'dragon'});g.active.boost=item;const p=g.launch(g.active,'dragon-normal');const base=420;
-  if(line){g.fireLine!.x=p.x+2;g.fireLine!.top=0;g.fireLine!.bottom=600;}g.projectiles=[p];g.phase='flying';g.update(.01);assert.equal(p.fireBoosted,item||line);assert.equal(p.boost,item||line?1.5:1);assert.equal(p.boost*base,item||line?630:420);assert.equal(p.trail.length>0,true);
+  if(line){g.fireLine!.x=p.x+2;g.fireLine!.top=0;g.fireLine!.bottom=600;}g.projectiles=[p];g.phase='flying';g.update(.01);assert.equal(p.fireBoosted,item||line);assert.equal(p.boost,item||line?1.5:1);assert.equal(p.boost*base,item||line?630:420);assert.equal(p.trail.length>0,item||line);
  }
  const g=flat({fireLine:true,vehicle0:'dragon'});g.active.boost=true;g.active.doubleShot=true;g.selectWeapon('dragon-special');g.fire();assert.equal(g.projectiles.length,18);assert.ok(g.projectiles.every(p=>p.fireBoosted&&p.boost===1.5));g.projectiles=[];g.nextTurn();assert.equal(g.fireLineTurnsRemaining,1);g.nextTurn();assert.equal(g.fireLine,null);assert.equal(g.fireLineTurnsRemaining,0);
  const t=flat({fireLine:true});t.teleporting=true;t.active.boost=true;t.fire();assert.equal(t.projectiles[0].fireBoosted,false);assert.equal(t.projectiles[0].boost,1);

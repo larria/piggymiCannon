@@ -1,12 +1,15 @@
 import {weaponById,type WeaponId} from './catalog';
 
+/** Render-only visibility adjustment. Never use projectile.scale (a damage factor). */
+export const projectileDrawScale=(shape:string)=>shape==='cannon-special'?1.35:shape==='shell'?1.2:['crossbow-normal','crossbow-special','sniper','ion-normal'].includes(shape)?1.12:1;
+
 /** Every available and legacy shell has its own silhouette. The catalog owns its body color. */
 export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:string,time:number,sections=4){
-  c.fillStyle=color;c.strokeStyle='#fff1d9';c.lineWidth=1.2;c.lineJoin='round';c.lineCap='round';
+  const edge='#53624f';c.fillStyle=color;c.strokeStyle=edge;c.lineWidth=1.2;c.lineJoin='round';c.lineCap='round';
   const poly=(p:number[][])=>{c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();};
   const oval=(x:number,y:number,rx:number,ry:number)=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill();c.stroke();};
-  const line=(p:number[][],ink=color,width=2)=>{c.strokeStyle=ink;c.lineWidth=width;c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.strokeStyle='#fff1d9';c.lineWidth=1.2;};
-  const ring=(x:number,y:number,r:number,ink=color,width=3)=>{c.strokeStyle='#fff1d9';c.lineWidth=width+2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();c.strokeStyle=ink;c.lineWidth=width;c.stroke();c.strokeStyle='#fff1d9';c.lineWidth=1.2;};
+  const line=(p:number[][],ink=color,width=2)=>{c.strokeStyle=ink;c.lineWidth=width;c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.strokeStyle=edge;c.lineWidth=1.2;};
+  const ring=(x:number,y:number,r:number,ink=color,width=3)=>{c.strokeStyle=edge;c.lineWidth=width+2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();c.strokeStyle=ink;c.lineWidth=width;c.stroke();c.strokeStyle=edge;c.lineWidth=1.2;};
   const shine=(x:number,y:number)=>{c.fillStyle='#fff4dd';c.beginPath();c.arc(x,y,1.6,0,7);c.fill();c.fillStyle=color;};
   switch(shape){
     case 'bowl-normal':poly([[-9,-3],[-4,-9],[5,-7],[10,2],[3,8],[-7,6]]);line([[-5,-2],[0,1],[4,-4]],'#413d36',1.5);break;
@@ -28,10 +31,10 @@ export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:stri
     }
     case 'missile-special':poly([[15,0],[3,-5],[-4,-5],[-12,-10],[-8,-2],[-15,0],[-8,2],[-12,10],[-4,5],[3,5]]);shine(7,-1);break;
     case 'multi-normal':poly([[15,0],[6,-3],[6,-7],[0,-7],[0,-3],[-12,-3],[-12,3],[0,3],[0,7],[6,7],[6,3]]);line([[-10,0],[11,0]],'#fff1d9',1);break;
-    case 'multi-special':poly([[9,0],[3,-3],[0,-9],[-3,-3],[-9,0],[-3,3],[0,9],[3,3]]);line([[-20,-3],[-11,-2]],color);line([[-20,3],[-11,2]],color);break;
-    case 'laser-normal':poly([[14,0],[0,-6],[-14,0],[0,6]]);line([[-20,0],[10,0]],'#fff1d9',1.5);break;
+    case 'multi-special':poly([[9,0],[3,-3],[0,-9],[-3,-3],[-9,0],[-3,3],[0,9],[3,3]]);break;
+    case 'laser-normal':poly([[14,0],[0,-6],[-14,0],[0,6]]);line([[-10,0],[10,0]],'#fff1d9',1.5);break;
     case 'laser-special':c.strokeStyle=color;c.lineWidth=4;c.beginPath();c.moveTo(-18,0);c.bezierCurveTo(-7,-13,6,13,17,0);c.moveTo(-18,0);c.bezierCurveTo(-7,13,6,-13,17,0);c.stroke();oval(17,0,3,3);break;
-    case 'transfer':poly([[-13,-4],[1,-4],[1,-9],[13,0],[1,9],[1,4],[-13,4]]);line([[-18,-6],[-22,-6]],color,2);line([[-18,6],[-22,6]],color,2);break;
+    case 'transfer':poly([[-13,-4],[1,-4],[1,-9],[13,0],[1,9],[1,4],[-13,4]]);break;
     case 'water-normal':
       c.beginPath();c.moveTo(-13,1);c.bezierCurveTo(-15,-7,-6,-9,-2,-6);c.bezierCurveTo(2,-14,13,-8,12,-1);c.bezierCurveTo(18,5,7,12,2,8);c.bezierCurveTo(-4,14,-14,8,-13,1);c.closePath();c.fill();c.stroke();
       shine(3,-4);shine(-6,0);oval(-17,5,2.2,2);oval(-13,-9,1.5,1.5);break;
@@ -47,13 +50,13 @@ export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:stri
     case 'triple':poly([[12,0],[4,-4],[-11,-4],[-11,4],[4,4]]);for(let x=-7;x<3;x+=4)line([[x,-3],[x,3]],'#fff1d9',1);break;
     case 'cluster':oval(-4,-4,5,5);oval(4,-4,5,5);oval(-4,4,5,5);oval(4,4,5,5);break;
     case 'drill':poly([[16,0],[-7,-8],[-7,8]]);for(let x=-5;x<10;x+=4)line([[x,-5],[x+3,4]],'#fff1d9',1);break;
-    case 'bounce':oval(0,0,7,7);line([[-10,4],[-13,8],[-17,5],[-20,9]],color);shine(-2,-3);break;
+    case 'bounce':oval(0,0,7,7);shine(-2,-3);break;
     case 'napalm':oval(-4,0,6,8);oval(4,0,6,8);oval(0,0,4,9);line([[0,-8],[3,-12]],color);break;
     case 'ice':poly([[13,0],[0,-11],[-9,0],[0,11]]);line([[-5,0],[8,0]],'#fff1d9',1);line([[0,-7],[0,7]],'#fff1d9',1);break;
     case 'emp':for(let i=0;i<8;i++){const a=i*Math.PI/4;line([[6*Math.cos(a),6*Math.sin(a)],[13*Math.cos(a),13*Math.sin(a)]],color,2);}oval(0,0,5,5);break;
     case 'airstrike':poly([[-4,-3],[4,-3],[6,7],[0,10],[-6,7]]);line([[-4,-3],[-11,-10],[11,-10],[4,-3]],color,1.5);break;
     case 'quake':poly([[-9,-7],[7,-9],[11,7],[-5,10]]);line([[-7,-5],[0,1],[5,-4]],'#fff1d9',2);break;
-    case 'sniper':poly([[23,0],[-15,-3],[-11,0],[-15,3]]);line([[-22,0],[-15,0]],color,1.5);break;
+    case 'sniper':poly([[23,0],[-15,-3],[-11,0],[-15,3]]);break;
     case 'homing':poly([[16,0],[4,-4],[-5,-10],[-4,-3],[-13,0],[-4,3],[-5,10],[4,4]]);ring(2,0,4,color,1.5);break;
   }
 }
@@ -62,7 +65,7 @@ export function paintProjectilePreviews(root:ParentNode=document){
   root.querySelectorAll<HTMLCanvasElement>('canvas[data-shell]').forEach(canvas=>{
     const w=weaponById(canvas.dataset.shell as WeaponId),large=canvas.classList.contains('shell-card-art');
     const width=large?84:40,height=large?44:28;canvas.width=width*2;canvas.height=height*2;
-    const c=canvas.getContext('2d')!;c.scale(2,2);c.translate(width/2,height/2);c.scale(large?1.2:.8,large?1.2:.8);
+    const c=canvas.getContext('2d')!;c.scale(2,2);c.translate(width/2,height/2);const size=(large?1.2:.8)*projectileDrawScale(w.shape??w.id);c.scale(size,size);
     projectileArt(c,w.shape??w.id,w.color,0);canvas.dataset.color=w.color;
   });
 }

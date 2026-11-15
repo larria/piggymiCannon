@@ -48,7 +48,8 @@ export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:numbe
 export const ALL_WEAPONS=[...WEAPONS,...VEHICLE_WEAPONS];
 const weaponTable=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,w])) as Record<WeaponId,Weapon>;
 export const weaponById = (id:WeaponId) => weaponTable[id];
-export const weaponHasTrail=(id:WeaponId)=>id!=='cannon-normal'&&id!=='cannon-special';
+/** No weapon has an ordinary path trail; fireBoosted alone enables stars. */
+export const weaponHasTrail=(_id:WeaponId)=>false;
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
 export const excavation = (id:WeaponId,direct:boolean) => {
   const w=weaponById(id),full=id==='ion-special'||!direct;

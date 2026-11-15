@@ -22,6 +22,7 @@ import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
 import {installControlHints} from './control-hints';
 import {paintMapOverview} from './map-preview';
+import {freshMatchSeed} from './match-seed';
 const APP_VERSION=__APP_VERSION__;
 
 const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
@@ -49,6 +50,7 @@ let installPrompt:(Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:s
 let swRegistration:ServiceWorkerRegistration|undefined;
 let checkingVersion=false;
 const keys=new Set<string>();
+const playedSeeds=new Set<number>();
 
 $('#app').innerHTML=`
   <header class="site-header">
@@ -282,13 +284,13 @@ function setDrawer(value:boolean) {
   $('#inventory-toggle').setAttribute('aria-expanded',String(value));
   $('#inventory-toggle').setAttribute('aria-label',value?'关闭军火库':'展开军火库');
 }
-function begin() {audio.unlock();audio.pause(false);game.start();audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
+function begin() {audio.unlock();audio.pause(false);game.start();playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
 function newMatch(next:Config,start=true) {
   cancelCharge();
   audio.resetEffects();
   audio.setSelectionMusic(false);
   audio.pause(false);
-  config={...next,seed:Date.now()};game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
+  config={...next,seed:freshMatchSeed(Date.now(),playedSeeds)};game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}
 }
 function togglePause() {

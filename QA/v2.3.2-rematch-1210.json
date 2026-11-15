@@ -1,0 +1,42 @@
+[
+  {
+    "seed": 52,
+    "map": "coast"
+  },
+  {
+    "seed": 53,
+    "map": "valley"
+  },
+  {
+    "seed": 54,
+    "map": "coast"
+  },
+  {
+    "seed": 55,
+    "map": "moon"
+  },
+  {
+    "seed": 56,
+    "map": "valley"
+  },
+  {
+    "seed": 57,
+    "map": "temple"
+  },
+  {
+    "seed": 58,
+    "map": "moon"
+  },
+  {
+    "seed": 59,
+    "map": "moon"
+  },
+  {
+    "seed": 60,
+    "map": "coast"
+  },
+  {
+    "seed": 61,
+    "map": "factory"
+  }
+]

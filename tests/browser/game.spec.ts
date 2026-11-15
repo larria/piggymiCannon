@@ -210,7 +210,7 @@ test('追魂弹 produces its own lock sound and persists the tracking event in t
  await page.locator('[data-owner="0"]').click();await page.locator('[data-choice="missile"]').click();
  await page.getByRole('button',{name:'开始对局',exact:true}).click();await page.locator('#weapon-special').click();
  // Replan against the seeded random deployment instead of aiming at old fixed spawns.
- const plan=new Game({seed:52,timer:0,mode:'hotseat',map:'valley',vehicle0:'missile',vehicle1:'bowl'});plan.start();
+ const plan=new Game({seed:53,timer:0,mode:'hotseat',map:'valley',vehicle0:'missile',vehicle1:'bowl'});plan.start();
  let aim={angle:45,power:50,score:Infinity};
  for(let angle=20;angle<=45;angle++)for(let power=20;power<=95;power++){const hit=plan.predict(angle,power,'missile-special'),score=Math.abs(hit.x-plan.enemy.x)+Math.abs(hit.y-plan.enemy.y)*.5;if(score<aim.score)aim={angle,power,score};}
  await page.locator('#angle').evaluate((el:any,angle)=>{el.value=String(angle);el.dispatchEvent(new Event('input',{bubbles:true}));},aim.angle);
