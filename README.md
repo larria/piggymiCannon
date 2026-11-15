@@ -12,6 +12,7 @@ npm run dev           # http://localhost:4175
 npm test              # 战斗机制、坦克与完整对局回归
 npm run test:ai       # 近距／走位、960次射击与36场完整AI对战统计
 npm run build:pages   # 类型检查，构建 /piggymiCannon/ 子路径
+npm run check:size    # 检查 dist 与 PWA 预缓存均不超过 90MB；构建时自动执行
 npm run preview:pages # http://localhost:4177/piggymiCannon/
 npm run test:browser  # Chrome，11 英寸 iPad Pro 横屏、触控与离线回归
 npm run deploy        # 自动构建，再用 gh-pages 发布 dist/
@@ -99,6 +100,8 @@ npm run deploy        # 自动构建，再用 gh-pages 发布 dist/
 版本号来自 `package.json`。演习场页脚与全屏战场右下角的版本号可点击检查更新，`version.json` 不进入缓存，检查强制访问网络。新版本在演习场或结算时提供更新按钮，不在交战中强制刷新；离线或失败会明确提示。发布前更新 package 与 lock 的版本，再推送源码、执行 `npm run deploy`。
 
 ## 结构与素材
+
+3.x 后备源素材暂不接入或提交；`.workbuddy/` 与三个 FT2 来源目录继续忽略。最终产物与PWA预缓存硬上限为90,000,000字节，构建／部署前自动检查，选材与性能约束见 [3.x备料规则](research/FT2_3X_ASSET_POLICY.md)。
 
 - `src/engine.ts`、`terrain.ts`：物理、二维地形、战斗状态、AI 与行动顺序。
 - `src/vehicles.ts`、`catalog.ts`：坦克／武器与道具参数；`vehicle-art.ts`：13 种车体图标；`projectile-art.ts`：39 个不同颜色／轮廓的弹体。
