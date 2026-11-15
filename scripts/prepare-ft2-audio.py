@@ -6,10 +6,15 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'assets/ft2-audio'
 OUTPUT = ROOT / 'public/audio'
 VEHICLES = ['bowl', 'crossbow', 'cannon', 'beetle', 'duke', 'mine', 'missile', 'multi', 'laser', 'water', 'ion', 'sea', 'dragon']
+SELECTION = json.loads((ROOT / 'research/FT2_MAP_BGM_SELECTION.json').read_text())
+EVIDENCE = json.loads((ROOT / 'research/FT2_MAP_BGM_EVIDENCE.json').read_text())
+# Validate against original MapUtil / FieldRVA evidence, not web remake rules.
+for scene, choice in SELECTION['maps'].items():
+    if choice['mapNumber'] is not None:
+        stage = next(m for m in EVIDENCE['maps'] if m['mapNumber'] == choice['mapNumber'])
+        assert choice['bgmNumber'] in stage['availableBgmNumbers'], (scene, choice)
 BGM = {'lobby': ('GM01.mp3', 45), 'setup': ('GM02.mp3', 45), 'result': ('GM04.mp3', 18),
-       'valley': ('Stage00000.mp3', 48), 'coast': ('Stage00001.mp3', 48),
-       'moon': ('Stage00002.mp3', 48), 'factory': ('Stage00003.mp3', 48),
-       'temple': ('Stage00004.mp3', 48), 'egypt': ('Stage00005.mp3', 48)}
+       **{scene: (choice['source'], choice['seconds']) for scene, choice in SELECTION['maps'].items()}}
 COMMON = {'click': 'Push1.wav', 'select': 'Select1.wav', 'item': 'Friend.wav',
           'win': 'logo.wav', 'turn': 'Turn.wav', 'wind': 'Wind.wav',
           'firewall': 'Firewall.wav', 'lock': 'Homming.wav', 'crate-land': 'BoxLanding.wav',
@@ -49,7 +54,9 @@ def build():
     for name, source in COMMON.items():
         convert('sfx', source, f'sfx-{name}.mp3', 4)
     manifest = {'formatVersion': 1, 'source': '用户本机 ft2逆向/resources/sound 提取素材；仅用于本项目，未宣称官方授权',
-                'mapping': '本作按13载具顺序分配音效组；1/2分配普通/特殊音。地图选曲为本作安排，未确证原版同名地图编号。',
+                'mapping': '本作13载具分配Fire/Bomb组；1/2分配普通/特殊。经典地图选曲来自原客户端MapUtil有效列表，本作择一；原创峡谷自行选曲，不使用复刻web规则。',
+                'mapBgmSelection': SELECTION['maps'],
+                'mapBgmEvidence': 'FT2_MAP_BGM_EVIDENCE.json',
                 'ffmpegVersion': subprocess.check_output(['ffmpeg', '-version'], text=True).splitlines()[0],
                 'settings': {'codec': 'libmp3lame', 'sampleRate': 44100, 'musicChannels': 2, 'effectChannels': 1,
                              'loudnessFilter': 'loudnorm=I=-20:TP=-2:LRA=9', 'musicFadeIn': 0.12, 'musicFadeOut': 0.35,

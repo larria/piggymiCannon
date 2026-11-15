@@ -1,0 +1,13 @@
+{
+  "formatVersion": 1,
+  "evidence": "FT2_MAP_BGM_EVIDENCE.json",
+  "policy": "Classic scenes select one verified entry from the extracted original client's allowed list. No map-number-to-Stage-number assumption; no replica web rules. Valley is original editorial selection. Original server-selected rotation is not claimed or implemented.",
+  "maps": {
+    "valley": {"mapNumber": null, "bgmNumber": 0, "source": "Stage00000.mp3", "seconds": 48, "basis": "本作原创地图选曲，无原版地图编号"},
+    "coast": {"mapNumber": 8, "bgmNumber": 4, "source": "Stage00004.mp3", "seconds": 48, "basis": "原客户端有效列表9/4/14，本作选其中4"},
+    "moon": {"mapNumber": 7, "bgmNumber": 9, "source": "Stage00009.mp3", "seconds": 48, "basis": "原客户端有效列表4/8/9，本作选其中9"},
+    "factory": {"mapNumber": 4, "bgmNumber": 5, "source": "Stage00005.mp3", "seconds": 48, "basis": "原客户端有效列表5/11/21，本作取首项5"},
+    "temple": {"mapNumber": 10, "bgmNumber": 10, "source": "Stage00010.mp3", "seconds": 48, "basis": "原客户端有效列表10/0/0/0，本作取首项10；0也是实际曲目"},
+    "egypt": {"mapNumber": 9, "bgmNumber": 15, "source": "Stage00015.mp3", "seconds": 48, "basis": "原客户端有效列表15/22，本作取首项15"}
+  }
+}

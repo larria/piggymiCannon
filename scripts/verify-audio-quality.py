@@ -1,8 +1,9 @@
 """Decode runtime clips and check peaks / BGM coding error against filtered originals."""
 from pathlib import Path
-import array, json, math, subprocess
+import array, json, math, subprocess, argparse
 
 ROOT = Path(__file__).resolve().parents[1]
+parser = argparse.ArgumentParser(); parser.add_argument('--output', type=Path, default=ROOT / 'QA/v2.3.1-audio-quality.json'); args = parser.parse_args()
 manifest = json.loads((ROOT / 'research/FT2_AUDIO_SOURCES.json').read_text())
 
 def decode(path, filters=None, length=None, rate=16000, channels=1):
@@ -46,6 +47,6 @@ result = {'formatVersion': 1, 'decodeSampleRate': 44100, 'comparisonSampleRate':
           'minimumBgmSnrDb': min(r['snrDb'] for r in rows if 'snrDb' in r),
           'maximumLoopBoundaryJump': max(r['loopBoundaryJump'] for r in rows if 'loopBoundaryJump' in r),
           'notes': '客观检查不等同于主观听感评测；对照原件相同响度／淡化处理，检查编码误差、解码、削波和循环边缘。'}
-(ROOT / 'QA/v2.3.1-audio-quality.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
+args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
 print(json.dumps({k:v for k,v in result.items() if k not in ['files','notes']}, ensure_ascii=False))
 assert result['clippedSamples'] == 0, 'Decoded overshoot; reduce effect headroom before release.'

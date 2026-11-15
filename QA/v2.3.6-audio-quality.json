@@ -1,0 +1,755 @@
+{
+  "formatVersion": 1,
+  "decodeSampleRate": 44100,
+  "comparisonSampleRate": 16000,
+  "files": [
+    {
+      "file": "bgm-lobby.mp3",
+      "decodedSamples": 3969000,
+      "peak": 0.3589780628681183,
+      "rms": 0.0695979789389486,
+      "clippedSamples": 0,
+      "snrDb": 18.602034479632902,
+      "loopBoundaryJump": 3.593661676859483e-05,
+      "headRms20ms": 6.772832314063194e-10,
+      "tailRms20ms": 0.0020651084199950092
+    },
+    {
+      "file": "bgm-setup.mp3",
+      "decodedSamples": 3969000,
+      "peak": 0.6010609865188599,
+      "rms": 0.08219388733902312,
+      "clippedSamples": 0,
+      "snrDb": 18.776536448147457,
+      "loopBoundaryJump": 7.729671051492915e-05,
+      "headRms20ms": 2.1804567122086232e-16,
+      "tailRms20ms": 0.0015721984692988113
+    },
+    {
+      "file": "bgm-result.mp3",
+      "decodedSamples": 1587600,
+      "peak": 0.6602025032043457,
+      "rms": 0.08743320418082019,
+      "clippedSamples": 0,
+      "snrDb": 19.32110398495414,
+      "loopBoundaryJump": 0.0001681317517068237,
+      "headRms20ms": 2.7804967914199387e-16,
+      "tailRms20ms": 0.0027531696490949746
+    },
+    {
+      "file": "bgm-valley.mp3",
+      "decodedSamples": 4233600,
+      "peak": 0.3672718107700348,
+      "rms": 0.06707868121215972,
+      "clippedSamples": 0,
+      "snrDb": 18.097535373018367,
+      "loopBoundaryJump": 0.0002758335031094999,
+      "headRms20ms": 8.578078396678518e-11,
+      "tailRms20ms": 0.0023012628132963835
+    },
+    {
+      "file": "bgm-coast.mp3",
+      "decodedSamples": 4233600,
+      "peak": 0.4958045184612274,
+      "rms": 0.07700971416534368,
+      "clippedSamples": 0,
+      "snrDb": 21.77030929982582,
+      "loopBoundaryJump": 0.00016796383715700358,
+      "headRms20ms": 2.3075676750097694e-10,
+      "tailRms20ms": 0.0018540989927572677
+    },
+    {
+      "file": "bgm-moon.mp3",
+      "decodedSamples": 4233600,
+      "peak": 0.5564615726470947,
+      "rms": 0.0717717757231757,
+      "clippedSamples": 0,
+      "snrDb": 19.759667208921282,
+      "loopBoundaryJump": 0.00024821551051039403,
+      "headRms20ms": 5.696388154758953e-11,
+      "tailRms20ms": 0.001522758239057768
+    },
+    {
+      "file": "bgm-factory.mp3",
+      "decodedSamples": 4233600,
+      "peak": 0.41204559803009033,
+      "rms": 0.0763852740444852,
+      "clippedSamples": 0,
+      "snrDb": 18.469791695604677,
+      "loopBoundaryJump": 8.382863597944379e-05,
+      "headRms20ms": 3.1168188949429837e-10,
+      "tailRms20ms": 0.001316750160921996
+    },
+    {
+      "file": "bgm-temple.mp3",
+      "decodedSamples": 4233600,
+      "peak": 0.46162575483322144,
+      "rms": 0.07798406581757429,
+      "clippedSamples": 0,
+      "snrDb": 21.345338135549824,
+      "loopBoundaryJump": 7.20403841114603e-05,
+      "headRms20ms": 3.302926971523689e-11,
+      "tailRms20ms": 0.0026978462047137866
+    },
+    {
+      "file": "bgm-egypt.mp3",
+      "decodedSamples": 4233600,
+      "peak": 0.46771883964538574,
+      "rms": 0.07226002972587021,
+      "clippedSamples": 0,
+      "snrDb": 17.13324550272454,
+      "loopBoundaryJump": 0.00014459934027538591,
+      "headRms20ms": 2.902439486003737e-10,
+      "tailRms20ms": 0.0016745125851718456
+    },
+    {
+      "file": "sfx-fire-bowl-normal.mp3",
+      "decodedSamples": 43004,
+      "peak": 0.17587819695472717,
+      "rms": 0.07180286628533615,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-bowl-normal.mp3",
+      "decodedSamples": 60828,
+      "peak": 0.2989237308502197,
+      "rms": 0.07864247410915802,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-bowl-special.mp3",
+      "decodedSamples": 43982,
+      "peak": 0.22831270098686218,
+      "rms": 0.06424597204847637,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-bowl-special.mp3",
+      "decodedSamples": 47972,
+      "peak": 0.21100635826587677,
+      "rms": 0.07075589211285553,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-bowl.mp3",
+      "decodedSamples": 36826,
+      "peak": 0.3159228265285492,
+      "rms": 0.07269725146816344,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-bowl.mp3",
+      "decodedSamples": 14412,
+      "peak": 0.7501963973045349,
+      "rms": 0.21281951366110555,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-crossbow-normal.mp3",
+      "decodedSamples": 19160,
+      "peak": 0.5338815450668335,
+      "rms": 0.07363215755144985,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-crossbow-normal.mp3",
+      "decodedSamples": 21322,
+      "peak": 0.3460174798965454,
+      "rms": 0.05868683484873609,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-crossbow-special.mp3",
+      "decodedSamples": 13772,
+      "peak": 0.7378059029579163,
+      "rms": 0.10504013112616699,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-crossbow-special.mp3",
+      "decodedSamples": 31966,
+      "peak": 0.32081830501556396,
+      "rms": 0.06433679371891429,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-crossbow.mp3",
+      "decodedSamples": 44418,
+      "peak": 0.4482947885990143,
+      "rms": 0.06190181832637926,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-crossbow.mp3",
+      "decodedSamples": 54556,
+      "peak": 0.6484197974205017,
+      "rms": 0.061689454550948486,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-cannon-normal.mp3",
+      "decodedSamples": 52960,
+      "peak": 0.34298479557037354,
+      "rms": 0.07034317217265801,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-cannon-normal.mp3",
+      "decodedSamples": 58438,
+      "peak": 0.2622806131839752,
+      "rms": 0.07271656151712533,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-cannon-special.mp3",
+      "decodedSamples": 33050,
+      "peak": 0.30697688460350037,
+      "rms": 0.08872783495436803,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-cannon-special.mp3",
+      "decodedSamples": 58696,
+      "peak": 0.3193187117576599,
+      "rms": 0.06173661892104221,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-cannon.mp3",
+      "decodedSamples": 60506,
+      "peak": 0.3512164056301117,
+      "rms": 0.08502189917065914,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-cannon.mp3",
+      "decodedSamples": 57988,
+      "peak": 0.3694012761116028,
+      "rms": 0.05928788219603324,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-beetle-normal.mp3",
+      "decodedSamples": 67538,
+      "peak": 0.48053455352783203,
+      "rms": 0.06179983626944745,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-beetle-normal.mp3",
+      "decodedSamples": 47150,
+      "peak": 0.37723997235298157,
+      "rms": 0.06698409620316483,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-beetle-special.mp3",
+      "decodedSamples": 20016,
+      "peak": 0.30410894751548767,
+      "rms": 0.04968962787732047,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-beetle-special.mp3",
+      "decodedSamples": 44574,
+      "peak": 0.27016592025756836,
+      "rms": 0.05496878396081714,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-beetle.mp3",
+      "decodedSamples": 54954,
+      "peak": 0.20531760156154633,
+      "rms": 0.06323707415627816,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-beetle.mp3",
+      "decodedSamples": 42218,
+      "peak": 0.509782075881958,
+      "rms": 0.06620667442792763,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-duke-normal.mp3",
+      "decodedSamples": 48640,
+      "peak": 0.44312068819999695,
+      "rms": 0.06663464817004466,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-duke-normal.mp3",
+      "decodedSamples": 46560,
+      "peak": 0.2990962564945221,
+      "rms": 0.08498913674698201,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-duke-special.mp3",
+      "decodedSamples": 26408,
+      "peak": 0.24891753494739532,
+      "rms": 0.06818236841842922,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-duke-special.mp3",
+      "decodedSamples": 66966,
+      "peak": 0.4251827597618103,
+      "rms": 0.07453351387221697,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-duke.mp3",
+      "decodedSamples": 49932,
+      "peak": 0.24454505741596222,
+      "rms": 0.05930176047294821,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-duke.mp3",
+      "decodedSamples": 47426,
+      "peak": 0.5899962782859802,
+      "rms": 0.11776862006188304,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-mine-normal.mp3",
+      "decodedSamples": 49252,
+      "peak": 0.5503947138786316,
+      "rms": 0.08842527295748304,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-mine-normal.mp3",
+      "decodedSamples": 46672,
+      "peak": 0.3282291293144226,
+      "rms": 0.0667627448479157,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-mine-special.mp3",
+      "decodedSamples": 36624,
+      "peak": 0.495182603597641,
+      "rms": 0.05442700046911219,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-mine-special.mp3",
+      "decodedSamples": 44104,
+      "peak": 0.24471667408943176,
+      "rms": 0.06683751677197818,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-mine.mp3",
+      "decodedSamples": 36434,
+      "peak": 0.23310407996177673,
+      "rms": 0.04137865641226954,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-mine.mp3",
+      "decodedSamples": 9386,
+      "peak": 0.49028223752975464,
+      "rms": 0.086928003994641,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-missile-normal.mp3",
+      "decodedSamples": 36322,
+      "peak": 0.15275226533412933,
+      "rms": 0.05343061048001483,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-missile-normal.mp3",
+      "decodedSamples": 52960,
+      "peak": 0.3362647593021393,
+      "rms": 0.0699783998432594,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-missile-special.mp3",
+      "decodedSamples": 30486,
+      "peak": 0.13906806707382202,
+      "rms": 0.047227667761828115,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-missile-special.mp3",
+      "decodedSamples": 37320,
+      "peak": 0.4076676666736603,
+      "rms": 0.060733745764534865,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-missile.mp3",
+      "decodedSamples": 43100,
+      "peak": 0.20675331354141235,
+      "rms": 0.07409012938274134,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-missile.mp3",
+      "decodedSamples": 8111,
+      "peak": 0.804939866065979,
+      "rms": 0.23114886112054708,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-multi-normal.mp3",
+      "decodedSamples": 41576,
+      "peak": 0.26905182003974915,
+      "rms": 0.06331389619558385,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-multi-normal.mp3",
+      "decodedSamples": 85610,
+      "peak": 0.32819491624832153,
+      "rms": 0.058190760804742225,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-multi-special.mp3",
+      "decodedSamples": 61103,
+      "peak": 0.24803340435028076,
+      "rms": 0.05927166706950992,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-multi-special.mp3",
+      "decodedSamples": 114580,
+      "peak": 0.36816781759262085,
+      "rms": 0.04929394039074888,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-multi.mp3",
+      "decodedSamples": 47850,
+      "peak": 0.34546878933906555,
+      "rms": 0.1081768849268553,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-multi.mp3",
+      "decodedSamples": 129128,
+      "peak": 0.1439846009016037,
+      "rms": 0.026772796051141433,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-laser-normal.mp3",
+      "decodedSamples": 12422,
+      "peak": 0.8252134323120117,
+      "rms": 0.12504772642853798,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-laser-normal.mp3",
+      "decodedSamples": 59136,
+      "peak": 0.4413582980632782,
+      "rms": 0.07966597516310023,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-laser-special.mp3",
+      "decodedSamples": 10846,
+      "peak": 0.8298486471176147,
+      "rms": 0.20118331399007508,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-laser-special.mp3",
+      "decodedSamples": 95362,
+      "peak": 0.45497241616249084,
+      "rms": 0.05553937528114651,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-laser.mp3",
+      "decodedSamples": 51887,
+      "peak": 0.14508649706840515,
+      "rms": 0.032354542530232525,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-laser.mp3",
+      "decodedSamples": 40388,
+      "peak": 0.2514309585094452,
+      "rms": 0.059281864042075874,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-water-normal.mp3",
+      "decodedSamples": 32154,
+      "peak": 0.3373662531375885,
+      "rms": 0.05782326044589101,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-water-normal.mp3",
+      "decodedSamples": 43898,
+      "peak": 0.39212533831596375,
+      "rms": 0.05129199903808113,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-water-special.mp3",
+      "decodedSamples": 34976,
+      "peak": 0.4229687750339508,
+      "rms": 0.0631493992466616,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-water-special.mp3",
+      "decodedSamples": 60846,
+      "peak": 0.40203362703323364,
+      "rms": 0.04511897817207537,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-water.mp3",
+      "decodedSamples": 29340,
+      "peak": 0.1973087042570114,
+      "rms": 0.04916718161627224,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-water.mp3",
+      "decodedSamples": 25562,
+      "peak": 0.2880634367465973,
+      "rms": 0.062400035109528816,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-ion-normal.mp3",
+      "decodedSamples": 31298,
+      "peak": 0.25828495621681213,
+      "rms": 0.0614204545217422,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-ion-normal.mp3",
+      "decodedSamples": 125094,
+      "peak": 0.35893064737319946,
+      "rms": 0.04144737495644008,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-ion-special.mp3",
+      "decodedSamples": 37872,
+      "peak": 0.29532989859580994,
+      "rms": 0.04635403790105044,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-ion-special.mp3",
+      "decodedSamples": 83426,
+      "peak": 0.3927059471607208,
+      "rms": 0.040104318496425026,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-ion.mp3",
+      "decodedSamples": 54718,
+      "peak": 0.25967898964881897,
+      "rms": 0.06397850999473348,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-ion.mp3",
+      "decodedSamples": 13312,
+      "peak": 0.7534046173095703,
+      "rms": 0.2460640797128153,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-sea-normal.mp3",
+      "decodedSamples": 32154,
+      "peak": 0.34385228157043457,
+      "rms": 0.06402101336766267,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-sea-normal.mp3",
+      "decodedSamples": 71128,
+      "peak": 0.4066767394542694,
+      "rms": 0.06560392426152271,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-sea-special.mp3",
+      "decodedSamples": 32406,
+      "peak": 0.25909730792045593,
+      "rms": 0.05812978439925809,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-sea-special.mp3",
+      "decodedSamples": 68868,
+      "peak": 0.2601785957813263,
+      "rms": 0.05088814567456858,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-sea.mp3",
+      "decodedSamples": 44908,
+      "peak": 0.204104483127594,
+      "rms": 0.07049801431578918,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-sea.mp3",
+      "decodedSamples": 42956,
+      "peak": 0.458533376455307,
+      "rms": 0.07600990540856402,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-dragon-normal.mp3",
+      "decodedSamples": 30000,
+      "peak": 0.28186845779418945,
+      "rms": 0.0470964415830482,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-dragon-normal.mp3",
+      "decodedSamples": 46724,
+      "peak": 0.40277278423309326,
+      "rms": 0.07169920815414518,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-fire-dragon-special.mp3",
+      "decodedSamples": 51206,
+      "peak": 0.21106889843940735,
+      "rms": 0.049656277953289175,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-bomb-dragon-special.mp3",
+      "decodedSamples": 44464,
+      "peak": 0.23508493602275848,
+      "rms": 0.06620358590330015,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-move-dragon.mp3",
+      "decodedSamples": 59388,
+      "peak": 0.23015297949314117,
+      "rms": 0.04932770627756835,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-stop-dragon.mp3",
+      "decodedSamples": 49332,
+      "peak": 0.4854537546634674,
+      "rms": 0.07268706998445605,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-click.mp3",
+      "decodedSamples": 11672,
+      "peak": 0.8104552626609802,
+      "rms": 0.322586606913428,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-select.mp3",
+      "decodedSamples": 6959,
+      "peak": 0.6770474910736084,
+      "rms": 0.13631257802022134,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-item.mp3",
+      "decodedSamples": 45064,
+      "peak": 0.44046324491500854,
+      "rms": 0.06829589386594624,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-win.mp3",
+      "decodedSamples": 176400,
+      "peak": 0.2975538671016693,
+      "rms": 0.06410160725678586,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-turn.mp3",
+      "decodedSamples": 19466,
+      "peak": 0.23252244293689728,
+      "rms": 0.06395186498752407,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-wind.mp3",
+      "decodedSamples": 140544,
+      "peak": 0.4064071774482727,
+      "rms": 0.0719757176650333,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-firewall.mp3",
+      "decodedSamples": 39640,
+      "peak": 0.19594191014766693,
+      "rms": 0.06780685126978744,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-lock.mp3",
+      "decodedSamples": 38694,
+      "peak": 0.14290553331375122,
+      "rms": 0.03012419376960262,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-crate-land.mp3",
+      "decodedSamples": 66048,
+      "peak": 0.452221155166626,
+      "rms": 0.06461780296057058,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-supply.mp3",
+      "decodedSamples": 24582,
+      "peak": 0.5656131505966187,
+      "rms": 0.07088301136719921,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-warning.mp3",
+      "decodedSamples": 9316,
+      "peak": 0.7474775910377502,
+      "rms": 0.3921117074606738,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-transfer.mp3",
+      "decodedSamples": 2578,
+      "peak": 0.7424764633178711,
+      "rms": 0.23356668241357845,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-quake.mp3",
+      "decodedSamples": 91848,
+      "peak": 0.13982531428337097,
+      "rms": 0.0616870932007945,
+      "clippedSamples": 0
+    },
+    {
+      "file": "sfx-death.mp3",
+      "decodedSamples": 80418,
+      "peak": 0.18537549674510956,
+      "rms": 0.039509500945359155,
+      "clippedSamples": 0
+    }
+  ],
+  "allDecodable": true,
+  "clippedSamples": 0,
+  "minimumBgmSnrDb": 17.13324550272454,
+  "maximumLoopBoundaryJump": 0.0002758335031094999,
+  "notes": "客观检查不等同于主观听感评测；对照原件相同响度／淡化处理，检查编码误差、解码、削波和循环边缘。"
+}

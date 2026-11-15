@@ -1,0 +1,38 @@
+[
+  {
+    "scene": "valley",
+    "source": "Stage00000.mp3",
+    "rawCopyMatchesOriginal": true,
+    "tags": {}
+  },
+  {
+    "scene": "coast",
+    "source": "Stage00004.mp3",
+    "rawCopyMatchesOriginal": true,
+    "tags": {}
+  },
+  {
+    "scene": "moon",
+    "source": "Stage00009.mp3",
+    "rawCopyMatchesOriginal": true,
+    "tags": {}
+  },
+  {
+    "scene": "factory",
+    "source": "Stage00005.mp3",
+    "rawCopyMatchesOriginal": true,
+    "tags": {}
+  },
+  {
+    "scene": "temple",
+    "source": "Stage00010.mp3",
+    "rawCopyMatchesOriginal": true,
+    "tags": {}
+  },
+  {
+    "scene": "egypt",
+    "source": "Stage00015.mp3",
+    "rawCopyMatchesOriginal": true,
+    "tags": {}
+  }
+]

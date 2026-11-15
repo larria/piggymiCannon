@@ -1,0 +1,883 @@
+{
+  "formatVersion": 1,
+  "source": "原客户端 MyScripts.dll.bytes 的 IL / FieldRVA，原 Language.txt 与 APK 清单；不使用 supertank-web 规则",
+  "files": [
+    {
+      "path": "extracted/assets/Dlls/MyScripts.dll.bytes",
+      "sha256": "bda84cf8839f7d22afb68700285b0db21881e6f391c86d2c467c3bf2a3edd8a5"
+    },
+    {
+      "path": "resources/config/decrypted/Language.txt",
+      "sha256": "c71d77b0b3360110f7ea265d9d00fdb6d6833ec3a50b83390935a354fe5b7f01"
+    },
+    {
+      "path": "apk_filelist.txt",
+      "sha256": "6c79da0f8fdeb907dce6431d51bb8040f81ebf6de30979641ef989cc720b46c6"
+    }
+  ],
+  "matrix": {
+    "field": "9E251969428E158CA84DAABC07D7CE7949F8A9359375492D2D93545D29C21EF2",
+    "rva": "0x24918c",
+    "sha256": "9e251969428e158ca84daabc07d7ce7949f8a9359375492d2d93545d29c21ef2",
+    "values": [
+      8,
+      0,
+      0,
+      0,
+      4,
+      12,
+      14,
+      18,
+      8,
+      9,
+      19,
+      0,
+      1,
+      2,
+      3,
+      20,
+      5,
+      11,
+      21,
+      0,
+      14,
+      14,
+      14,
+      14,
+      2,
+      4,
+      10,
+      12,
+      4,
+      8,
+      9,
+      0,
+      9,
+      4,
+      14,
+      0,
+      15,
+      22,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      2,
+      3,
+      13,
+      10,
+      9,
+      4,
+      14,
+      0,
+      8,
+      9,
+      12,
+      0,
+      11,
+      0,
+      0,
+      0,
+      11,
+      0,
+      0,
+      0,
+      8,
+      9,
+      12,
+      0,
+      7,
+      8,
+      12,
+      0,
+      2,
+      5,
+      6,
+      10,
+      2,
+      3,
+      0,
+      0,
+      8,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "soundCounts": {
+    "field": "485DD2C5DF3D94F8BA57C099CD73C52270FCB4DEDB23DF499487FBCB98B9DC88",
+    "rva": "0x248464",
+    "sha256": "485dd2c5df3d94f8ba57c099cd73c52270fcb4dedb23df499487fbcb98b9dc88",
+    "values": [
+      1,
+      4,
+      3,
+      4,
+      3,
+      3,
+      4,
+      3,
+      3,
+      2,
+      4,
+      4,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      3,
+      4,
+      2
+    ]
+  },
+  "maps": [
+    {
+      "mapNumber": 0,
+      "name": "随机地图",
+      "rawBgmNumbers": [
+        8,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 1,
+      "availableBgmNumbers": [
+        8
+      ]
+    },
+    {
+      "mapNumber": 1,
+      "name": "郁绿树林",
+      "rawBgmNumbers": [
+        4,
+        12,
+        14,
+        18
+      ],
+      "soundCount": 4,
+      "availableBgmNumbers": [
+        4,
+        12,
+        14,
+        18
+      ]
+    },
+    {
+      "mapNumber": 2,
+      "name": "蔚蓝云海",
+      "rawBgmNumbers": [
+        8,
+        9,
+        19,
+        0
+      ],
+      "soundCount": 3,
+      "availableBgmNumbers": [
+        8,
+        9,
+        19
+      ]
+    },
+    {
+      "mapNumber": 3,
+      "name": "梦幻大陆",
+      "rawBgmNumbers": [
+        1,
+        2,
+        3,
+        20
+      ],
+      "soundCount": 4,
+      "availableBgmNumbers": [
+        1,
+        2,
+        3,
+        20
+      ]
+    },
+    {
+      "mapNumber": 4,
+      "name": "钢铁工厂",
+      "rawBgmNumbers": [
+        5,
+        11,
+        21,
+        0
+      ],
+      "soundCount": 3,
+      "availableBgmNumbers": [
+        5,
+        11,
+        21
+      ]
+    },
+    {
+      "mapNumber": 5,
+      "name": "海盗码头",
+      "rawBgmNumbers": [
+        14,
+        14,
+        14,
+        14
+      ],
+      "soundCount": 3,
+      "availableBgmNumbers": [
+        14,
+        14,
+        14
+      ]
+    },
+    {
+      "mapNumber": 6,
+      "name": "奇幻仙境",
+      "rawBgmNumbers": [
+        2,
+        4,
+        10,
+        12
+      ],
+      "soundCount": 4,
+      "availableBgmNumbers": [
+        2,
+        4,
+        10,
+        12
+      ]
+    },
+    {
+      "mapNumber": 7,
+      "name": "天空之城",
+      "rawBgmNumbers": [
+        4,
+        8,
+        9,
+        0
+      ],
+      "soundCount": 3,
+      "availableBgmNumbers": [
+        4,
+        8,
+        9
+      ]
+    },
+    {
+      "mapNumber": 8,
+      "name": "独木桥",
+      "rawBgmNumbers": [
+        9,
+        4,
+        14,
+        0
+      ],
+      "soundCount": 3,
+      "availableBgmNumbers": [
+        9,
+        4,
+        14
+      ]
+    },
+    {
+      "mapNumber": 9,
+      "name": "古老埃及",
+      "rawBgmNumbers": [
+        15,
+        22,
+        0,
+        0
+      ],
+      "soundCount": 2,
+      "availableBgmNumbers": [
+        15,
+        22
+      ]
+    },
+    {
+      "mapNumber": 10,
+      "name": "神圣殿堂",
+      "rawBgmNumbers": [
+        10,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 4,
+      "availableBgmNumbers": [
+        10,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "mapNumber": 11,
+      "name": "神秘洞穴",
+      "rawBgmNumbers": [
+        2,
+        3,
+        13,
+        10
+      ],
+      "soundCount": 4,
+      "availableBgmNumbers": [
+        2,
+        3,
+        13,
+        10
+      ]
+    },
+    {
+      "mapNumber": 12,
+      "name": "草原夜色",
+      "rawBgmNumbers": [
+        9,
+        4,
+        14,
+        0
+      ],
+      "soundCount": 0,
+      "availableBgmNumbers": [
+        9
+      ]
+    },
+    {
+      "mapNumber": 13,
+      "name": "稻香小屋",
+      "rawBgmNumbers": [
+        8,
+        9,
+        12,
+        0
+      ],
+      "soundCount": 0,
+      "availableBgmNumbers": [
+        8
+      ]
+    },
+    {
+      "mapNumber": 14,
+      "name": "光芒码头",
+      "rawBgmNumbers": [
+        11,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 0,
+      "availableBgmNumbers": [
+        11
+      ]
+    },
+    {
+      "mapNumber": 15,
+      "name": "玩具工厂",
+      "rawBgmNumbers": [
+        11,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 0,
+      "availableBgmNumbers": [
+        11
+      ]
+    },
+    {
+      "mapNumber": 16,
+      "name": "冰封溪谷",
+      "rawBgmNumbers": [
+        8,
+        9,
+        12,
+        0
+      ],
+      "soundCount": 3,
+      "availableBgmNumbers": [
+        8,
+        9,
+        12
+      ]
+    },
+    {
+      "mapNumber": 17,
+      "name": "草原坟场",
+      "rawBgmNumbers": [
+        7,
+        8,
+        12,
+        0
+      ],
+      "soundCount": 0,
+      "availableBgmNumbers": [
+        7
+      ]
+    },
+    {
+      "mapNumber": 18,
+      "name": "The railroad",
+      "rawBgmNumbers": [
+        2,
+        5,
+        6,
+        10
+      ],
+      "soundCount": 3,
+      "availableBgmNumbers": [
+        2,
+        5,
+        6
+      ]
+    },
+    {
+      "mapNumber": 19,
+      "name": "The pirate ship",
+      "rawBgmNumbers": [
+        2,
+        3,
+        0,
+        0
+      ],
+      "soundCount": 4,
+      "availableBgmNumbers": [
+        2,
+        3,
+        0,
+        0
+      ]
+    },
+    {
+      "mapNumber": 20,
+      "name": "The night",
+      "rawBgmNumbers": [
+        8,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 2,
+      "availableBgmNumbers": [
+        8,
+        0
+      ]
+    },
+    {
+      "mapNumber": 21,
+      "name": "Random Stage",
+      "rawBgmNumbers": [
+        8,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 1,
+      "availableBgmNumbers": [
+        8
+      ]
+    },
+    {
+      "mapNumber": 22,
+      "name": "The Night",
+      "rawBgmNumbers": [
+        8,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 1,
+      "availableBgmNumbers": [
+        8
+      ]
+    },
+    {
+      "mapNumber": 23,
+      "name": "Egyptian Floor",
+      "rawBgmNumbers": [
+        8,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 1,
+      "availableBgmNumbers": [
+        8
+      ]
+    },
+    {
+      "mapNumber": 24,
+      "name": "The artificial sattls",
+      "rawBgmNumbers": [
+        8,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 1,
+      "availableBgmNumbers": [
+        8
+      ]
+    },
+    {
+      "mapNumber": 25,
+      "name": "Grave Yard",
+      "rawBgmNumbers": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "soundCount": 1,
+      "availableBgmNumbers": [
+        0
+      ]
+    }
+  ],
+  "bgmNames": {
+    "0": "Milyang Fortress",
+    "1": "I know what you did last stage",
+    "2": "The Profound",
+    "3": "Saving private Skull",
+    "4": "Once in a Lifetime",
+    "5": "The Invincible",
+    "6": "Culture Shock",
+    "7": "TeMP Time",
+    "8": "There's Something about Supertank",
+    "9": "Be Higher",
+    "10": "Tank Slayer",
+    "11": "Welcome to Skull's Hell",
+    "12": "Life is so Beautiful",
+    "13": "When Skull met the Gold-Crown",
+    "14": "Fortress Gump",
+    "15": "Egyptian Rule",
+    "16": "Culture Shock2",
+    "17": "Tank Slayer2",
+    "18": "Snow Land",
+    "19": "Garden",
+    "20": "Good Bye, My friends...",
+    "21": "stage00021",
+    "22": "Egyptian Rule2"
+  },
+  "methods": {
+    "LuaFramework.Logic.MapUtil.init": {
+      "rva": "0xb27b8",
+      "codeBytesSha256": "e991e9665dfcf39b3b97bf20d99fcd305949dc8c4fe2ade5f435b8144e14d830",
+      "instructions": [
+        "000c ldc.i4.s 26",
+        "000e ldc.i4.4 ",
+        "000f newobj ..ctor",
+        "0014 dup ",
+        "0015 ldtoken .<PrivateImplementationDetails>.9E251969428E158CA84DAABC07D7CE7949F8A9359375492D2D93545D29C21EF2",
+        "001a call .InitializeArray",
+        "001f stloc.0 ",
+        "0020 ldc.i4.0 ",
+        "0021 stloc.1 ",
+        "0022 br.s 0x7a",
+        "0024 ldarg.0 ",
+        "0025 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "002a ldloc.1 ",
+        "002b newobj LuaFramework.Logic.StageInfo..ctor",
+        "0030 stelem.ref ",
+        "0031 ldarg.0 ",
+        "0032 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "0037 ldloc.1 ",
+        "0038 ldelem.ref ",
+        "0039 ldstr map_name_{0}",
+        "003e ldloc.1 ",
+        "003f box .Int32",
+        "0044 call .Format",
+        "0049 call .Language.Get",
+        "004e callvirt LuaFramework.Logic.StageInfo.set_Name",
+        "0053 ldc.i4.0 ",
+        "0054 stloc.2 ",
+        "0055 br.s 0x72",
+        "0057 ldarg.0 ",
+        "0058 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "005d ldloc.1 ",
+        "005e ldelem.ref ",
+        "005f callvirt LuaFramework.Logic.StageInfo.get_BgmNumber",
+        "0064 ldloc.2 ",
+        "0065 ldloc.0 ",
+        "0066 ldloc.1 ",
+        "0067 ldloc.2 ",
+        "0068 call .Get",
+        "006d stelem.i4 ",
+        "006e ldloc.2 ",
+        "006f ldc.i4.1 ",
+        "0070 add ",
+        "0071 stloc.2 ",
+        "0072 ldloc.2 ",
+        "0073 ldc.i4.4 ",
+        "0074 blt.s 0x57",
+        "0076 ldloc.1 ",
+        "0077 ldc.i4.1 ",
+        "0078 add ",
+        "0079 stloc.1 ",
+        "007a ldloc.1 ",
+        "007b ldc.i4.s 26",
+        "007d blt.s 0x24",
+        "007f ldarg.0 ",
+        "0080 ldc.i4.1 ",
+        "0081 call LuaFramework.Logic.MapUtil.setStage",
+        "0086 ldarg.0 ",
+        "0087 call LuaFramework.Logic.MapUtil.setNormalStage",
+        "008c ldarg.0 ",
+        "008d call LuaFramework.Logic.MapUtil.setTargetStage",
+        "0092 ret "
+      ]
+    },
+    "LuaFramework.Logic.MapUtil.getStageBgm": {
+      "rva": "0xb284c",
+      "codeBytesSha256": "5eafbbc2114a6d16afdcaad7049fd8e606b6b7d7c0d1a5ce4f71d09a4d17e4a8",
+      "instructions": [
+        "000c ldc.i4.1 ",
+        "000d stloc.0 ",
+        "000e ldarg.0 ",
+        "000f ldfld LuaFramework.Logic.MapUtil.m_bNormal",
+        "0014 brfalse.s 0x3b",
+        "0016 ldarg.0 ",
+        "0017 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "001c ldarg.1 ",
+        "001d ldelem.ref ",
+        "001e callvirt LuaFramework.Logic.StageInfo.get_SoundCount",
+        "0023 stloc.0 ",
+        "0024 ldloc.0 ",
+        "0025 brtrue.s 0x29",
+        "0027 ldc.i4.1 ",
+        "0028 stloc.0 ",
+        "0029 ldarg.0 ",
+        "002a ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "002f ldarg.1 ",
+        "0030 ldelem.ref ",
+        "0031 callvirt LuaFramework.Logic.StageInfo.get_BgmNumber",
+        "0036 ldarg.2 ",
+        "0037 ldloc.0 ",
+        "0038 rem ",
+        "0039 ldelem.i4 ",
+        "003a ret ",
+        "003b ldarg.0 ",
+        "003c ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "0041 ldc.i4.s 21",
+        "0043 ldarg.1 ",
+        "0044 add ",
+        "0045 ldelem.ref ",
+        "0046 callvirt LuaFramework.Logic.StageInfo.get_SoundCount",
+        "004b stloc.0 ",
+        "004c ldloc.0 ",
+        "004d brtrue.s 0x51",
+        "004f ldc.i4.1 ",
+        "0050 stloc.0 ",
+        "0051 ldarg.0 ",
+        "0052 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "0057 ldc.i4.s 21",
+        "0059 ldarg.1 ",
+        "005a add ",
+        "005b ldelem.ref ",
+        "005c callvirt LuaFramework.Logic.StageInfo.get_BgmNumber",
+        "0061 ldarg.2 ",
+        "0062 ldloc.0 ",
+        "0063 rem ",
+        "0064 ldelem.i4 ",
+        "0065 ret "
+      ]
+    },
+    "LuaFramework.Logic.MapUtil.setNormalStage": {
+      "rva": "0xb28d0",
+      "codeBytesSha256": "5550f72bbdfc964e6e765322fe58f3fbe8edb3a7ac917e6144c701ca581b74c9",
+      "instructions": [
+        "000c ldc.i4.s 21",
+        "000e newarr .Int32",
+        "0013 dup ",
+        "0014 ldc.i4.2 ",
+        "0015 ldc.i4.s 10",
+        "0017 stelem.i4 ",
+        "0018 dup ",
+        "0019 ldc.i4.5 ",
+        "001a ldc.i4.s 15",
+        "001c stelem.i4 ",
+        "001d stloc.0 ",
+        "001e ldc.i4.s 21",
+        "0020 newarr .Int32",
+        "0025 dup ",
+        "0026 ldtoken .<PrivateImplementationDetails>.485DD2C5DF3D94F8BA57C099CD73C52270FCB4DEDB23DF499487FBCB98B9DC88",
+        "002b call .InitializeArray",
+        "0030 stloc.1 ",
+        "0031 ldc.i4.0 ",
+        "0032 stloc.2 ",
+        "0033 br.s 0xb3",
+        "0035 ldstr stageN_{0}",
+        "003a ldloc.2 ",
+        "003b box .Int32",
+        "0040 call .Format",
+        "0045 stloc.3 ",
+        "0046 ldarg.0 ",
+        "0047 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "004c ldloc.2 ",
+        "004d ldelem.ref ",
+        "004e ldloc.3 ",
+        "004f callvirt LuaFramework.Logic.StageInfo.set_FrontFileName",
+        "0054 ldarg.0 ",
+        "0055 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "005a ldloc.2 ",
+        "005b ldelem.ref ",
+        "005c ldloc.3 ",
+        "005d callvirt LuaFramework.Logic.StageInfo.set_BackFileName",
+        "0062 ldstr leaveN_{0}.i16",
+        "0067 ldloc.2 ",
+        "0068 box .Int32",
+        "006d call .Format",
+        "0072 stloc.3 ",
+        "0073 ldarg.0 ",
+        "0074 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "0079 ldloc.2 ",
+        "007a ldelem.ref ",
+        "007b ldloc.3 ",
+        "007c callvirt LuaFramework.Logic.StageInfo.set_LeaveFileName",
+        "0081 ldarg.0 ",
+        "0082 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "0087 ldloc.2 ",
+        "0088 ldelem.ref ",
+        "0089 ldloc.0 ",
+        "008a ldloc.2 ",
+        "008b ldelem.i4 ",
+        "008c callvirt LuaFramework.Logic.StageInfo.set_Point",
+        "0091 ldarg.0 ",
+        "0092 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "0097 ldloc.2 ",
+        "0098 ldelem.ref ",
+        "0099 ldloc.1 ",
+        "009a ldloc.2 ",
+        "009b ldelem.i4 ",
+        "009c callvirt LuaFramework.Logic.StageInfo.set_SoundCount",
+        "00a1 ldarg.0 ",
+        "00a2 ldfld LuaFramework.Logic.MapUtil.m_oStages",
+        "00a7 ldloc.2 ",
+        "00a8 ldelem.ref ",
+        "00a9 ldc.i4.0 ",
+        "00aa callvirt LuaFramework.Logic.StageInfo.set_StageType",
+        "00af ldloc.2 ",
+        "00b0 ldc.i4.1 ",
+        "00b1 add ",
+        "00b2 stloc.2 ",
+        "00b3 ldloc.2 ",
+        "00b4 ldc.i4.s 21",
+        "00b6 blt 0x35",
+        "00bb ret "
+      ]
+    },
+    "LuaFramework.SoundManager.InitSound": {
+      "rva": "0x9b0b0",
+      "codeBytesSha256": "11c14d5550c5d32781cd3587f3f9e6551d7f7d69b7ddc06b0ad9064d71a3081e",
+      "instructions": [
+        "000c ldc.i4.0 ",
+        "000d stloc.0 ",
+        "000e br.s 0x36",
+        "0010 ldarg.0 ",
+        "0011 ldfld LuaFramework.SoundManager.m_oSoundNameList",
+        "0016 ldc.i4 10000",
+        "001b ldloc.0 ",
+        "001c add ",
+        "001d ldstr GM{0:D2}.mp3",
+        "0022 ldloc.0 ",
+        "0023 box .Int32",
+        "0028 call .Format",
+        "002d callvirt .Add",
+        "0032 ldloc.0 ",
+        "0033 ldc.i4.1 ",
+        "0034 add ",
+        "0035 stloc.0 ",
+        "0036 ldloc.0 ",
+        "0037 ldc.i4.s 20",
+        "0039 blt.s 0x10",
+        "003b ldc.i4.0 ",
+        "003c stloc.1 ",
+        "003d br.s 0x65",
+        "003f ldarg.0 ",
+        "0040 ldfld LuaFramework.SoundManager.m_oSoundNameList",
+        "0045 ldc.i4 11000",
+        "004a ldloc.1 ",
+        "004b add ",
+        "004c ldstr stage{0:D5}.mp3",
+        "0051 ldloc.1 ",
+        "0052 box .Int32",
+        "0057 call .Format",
+        "005c callvirt .Add",
+        "0061 ldloc.1 ",
+        "0062 ldc.i4.1 ",
+        "0063 add ",
+        "0064 stloc.1 ",
+        "0065 ldloc.1 ",
+        "0066 ldc.i4.s 30",
+        "0068 blt.s 0x3f"
+      ]
+    }
+  },
+  "callers": [
+    {
+      "method": "LuaFramework.Logic.Share.setStartData",
+      "rva": "0xb3320",
+      "instructions": [
+        "006e call LuaFramework.Logic.Share.get_GameRoomInfo",
+        "0073 call LuaFramework.LuaHelper.GetDataManager",
+        "0078 callvirt LuaFramework.DataManager.get_SuperTankInfo",
+        "007d callvirt LuaFramework.Logic.SuperTankInfo.get_MapUtil",
+        "0082 ldarg.1 ",
+        "0083 callvirt Protocol.ChatStartAck.get_NStageNumber",
+        "0088 ldarg.1 ",
+        "0089 callvirt Protocol.ChatStartAck.get_NBgm",
+        "008e callvirt LuaFramework.Logic.MapUtil.getStageBgm",
+        "0093 callvirt LuaFramework.Logic.GameRoomInfo.set_StartStageBgm",
+        "0098 ldarg.0 ",
+        "0099 call LuaFramework.Logic.Share.get_GameRoomInfo",
+        "009e ldarg.1 ",
+        "009f callvirt Protocol.ChatStartAck.get_NItemUseMode",
+        "00a4 ldc.i4.0 ",
+        "00a5 bgt.s 170"
+      ]
+    },
+    {
+      "method": ".<IStartFight>d__52.MoveNext",
+      "rva": "0xd7248",
+      "instructions": [
+        "0519 call LuaFramework.LuaHelper.GetSoundManager",
+        "051e callvirt LuaFramework.SoundManager.StopBackSound",
+        "0523 call LuaFramework.LuaHelper.GetSoundManager",
+        "0528 ldc.i4 11000",
+        "052d ldarg.0 ",
+        "052e ldfld .<IStartFight>d__52.<Fort>5__3",
+        "0533 callvirt LuaFramework.Logic.SuperTankInfo.get_Share",
+        "0538 callvirt LuaFramework.Logic.Share.get_GameRoomInfo",
+        "053d callvirt LuaFramework.Logic.GameRoomInfo.get_StartStageBgm",
+        "0542 add ",
+        "0543 ldc.i4.1 ",
+        "0544 callvirt LuaFramework.SoundManager.PlayBacksound",
+        "0549 ldloc.1 ",
+        "054a ldc.i4.1 ",
+        "054b stfld LuaFramework.Logic.CFightManage.m_bFight",
+        "0550 ldc.i4.0 "
+      ]
+    }
+  ],
+  "scope": "此提取客户端允许列表，不宣称所有历史Fortress 2发行版只有一首固定配乐"
+}

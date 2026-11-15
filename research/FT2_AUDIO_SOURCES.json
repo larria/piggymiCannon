@@ -1,7 +1,52 @@
 {
   "formatVersion": 1,
   "source": "用户本机 ft2逆向/resources/sound 提取素材；仅用于本项目，未宣称官方授权",
-  "mapping": "本作按13载具顺序分配音效组；1/2分配普通/特殊音。地图选曲为本作安排，未确证原版同名地图编号。",
+  "mapping": "本作13载具分配Fire/Bomb组；1/2分配普通/特殊。经典地图选曲来自原客户端MapUtil有效列表，本作择一；原创峡谷自行选曲，不使用复刻web规则。",
+  "mapBgmSelection": {
+    "valley": {
+      "mapNumber": null,
+      "bgmNumber": 0,
+      "source": "Stage00000.mp3",
+      "seconds": 48,
+      "basis": "本作原创地图选曲，无原版地图编号"
+    },
+    "coast": {
+      "mapNumber": 8,
+      "bgmNumber": 4,
+      "source": "Stage00004.mp3",
+      "seconds": 48,
+      "basis": "原客户端有效列表9/4/14，本作选其中4"
+    },
+    "moon": {
+      "mapNumber": 7,
+      "bgmNumber": 9,
+      "source": "Stage00009.mp3",
+      "seconds": 48,
+      "basis": "原客户端有效列表4/8/9，本作选其中9"
+    },
+    "factory": {
+      "mapNumber": 4,
+      "bgmNumber": 5,
+      "source": "Stage00005.mp3",
+      "seconds": 48,
+      "basis": "原客户端有效列表5/11/21，本作取首项5"
+    },
+    "temple": {
+      "mapNumber": 10,
+      "bgmNumber": 10,
+      "source": "Stage00010.mp3",
+      "seconds": 48,
+      "basis": "原客户端有效列表10/0/0/0，本作取首项10；0也是实际曲目"
+    },
+    "egypt": {
+      "mapNumber": 9,
+      "bgmNumber": 15,
+      "source": "Stage00015.mp3",
+      "seconds": 48,
+      "basis": "原客户端有效列表15/22，本作取首项15"
+    }
+  },
+  "mapBgmEvidence": "FT2_MAP_BGM_EVIDENCE.json",
   "ffmpegVersion": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
   "settings": {
     "codec": "libmp3lame",
@@ -17,7 +62,7 @@
     "stripMetadata": true
   },
   "sourceOriginalBytes": 261293324,
-  "selectedOriginalBytes": 89102907,
+  "selectedOriginalBytes": 84378923,
   "musicBitrate": 80000,
   "effectBitrate": 64000,
   "totalBytes": 4815853,
@@ -60,33 +105,6 @@
     },
     {
       "runtime": "bgm-coast.mp3",
-      "source": "assets/ft2-audio/bgm/Stage00001.mp3",
-      "sourceBytes": 5968603,
-      "sourceSHA256": "74cff49d2265510251ee01e8fe2de149901ec31178b82b261cb09ece8dc47ace",
-      "seconds": 48,
-      "bytes": 480697,
-      "runtimeSHA256": "96f5a23a1aeeb607c7083dcd2591636b12c9e02ae6f94bc4730a199f18c1f538"
-    },
-    {
-      "runtime": "bgm-moon.mp3",
-      "source": "assets/ft2-audio/bgm/Stage00002.mp3",
-      "sourceBytes": 13323640,
-      "sourceSHA256": "89e2a2c836642e399488e7179b6279bd95bf19a2f58e9245f1e1cf99c0810337",
-      "seconds": 48,
-      "bytes": 480697,
-      "runtimeSHA256": "decdde8e5f3a232daa98fea7eef5f8fb02970fc33053d702fc520392f768d8f8"
-    },
-    {
-      "runtime": "bgm-factory.mp3",
-      "source": "assets/ft2-audio/bgm/Stage00003.mp3",
-      "sourceBytes": 10592276,
-      "sourceSHA256": "32ffc5bc0d95969e9b2eef951b30edcf501c9d7591ca77937f69aaee66289cc7",
-      "seconds": 48,
-      "bytes": 480697,
-      "runtimeSHA256": "7cb1c2137f63951b7c9038904bfbe09ab43cf39fc75d792b3d29b54aa35ac11e"
-    },
-    {
-      "runtime": "bgm-temple.mp3",
       "source": "assets/ft2-audio/bgm/Stage00004.mp3",
       "sourceBytes": 5669762,
       "sourceSHA256": "abf8c4b3ebc081d953dc3881fc9d5a40628de8459b675c8bcec42d20f4de1516",
@@ -95,13 +113,40 @@
       "runtimeSHA256": "e2bc546bc6e302ee30ee5255f0ba0394c34ed8d64d0075bd8c2374770de692fa"
     },
     {
-      "runtime": "bgm-egypt.mp3",
+      "runtime": "bgm-moon.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00009.mp3",
+      "sourceBytes": 12758350,
+      "sourceSHA256": "9e0671936bff8a5322d18dbb2ad6a217465ea979a684a291cd0d6d1c54f2d949",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "7586b3f3871a173ef87919d6c63f548673d6035953720d12800b2ee8f01ba421"
+    },
+    {
+      "runtime": "bgm-factory.mp3",
       "source": "assets/ft2-audio/bgm/Stage00005.mp3",
       "sourceBytes": 11820031,
       "sourceSHA256": "79436b87a9ad6af85a1aa8788c10dca758dd6dc857f712834fc3a8590d448e01",
       "seconds": 48,
       "bytes": 480697,
       "runtimeSHA256": "129f74b6c63beb938bcb3b7a8d8b9be377d6f0be5ab94faa8ec57ee5b11dff66"
+    },
+    {
+      "runtime": "bgm-temple.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00010.mp3",
+      "sourceBytes": 7634170,
+      "sourceSHA256": "7a6864c8f86d6d7257ab758471c85b3081c1f1dbb923906238a84685bc7f711b",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "d0e4c8cf06d2a5a905f07cca0160c17faa97e56ca66343354d0240acd627d5f0"
+    },
+    {
+      "runtime": "bgm-egypt.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00015.mp3",
+      "sourceBytes": 4768015,
+      "sourceSHA256": "62d77d592b3309ca742519a58ac5165ea1a17d98878ea77ffaf7adc30d25913b",
+      "seconds": 48,
+      "bytes": 480697,
+      "runtimeSHA256": "c0ffcf84b70f80aee5f499e08f462681458ef26f5379ace6079301b59fd84449"
     },
     {
       "runtime": "sfx-fire-bowl-normal.mp3",

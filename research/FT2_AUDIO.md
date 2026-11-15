@@ -1,14 +1,38 @@
 # 原版音频接入与选材
 
-来源是用户本机 `~/Downloads/ft2逆向/resources/sound/` 提取、并搬入 `assets/ft2-audio/` 的未加密WAV／MP3。参考同机 `supertank-web/src/ui/sound.ts` 的Fire／Bomb组与Stage／GM用途，以及逆向分析报告的音频资源说明；仅用于本项目，未宣称官方授权。
+来源是用户本机 `~/Downloads/ft2逆向/resources/sound/` 提取、并搬入 `assets/ft2-audio/` 的未加密WAV／MP3。现行地图映射从原客户端程序集／配置直接核对，原资源清单用于核实文件；不使用 `supertank-web/` 的规则、地图名称表或音乐映射作为依据；仅用于本项目，未宣称官方授权。
 
-249.19MiB来源素材保持本机原样，并由 `.gitignore` 排除；不进入Git提交、Vite运行时导入或Pages／PWA产物。只提交101个实际使用的压缩MP3，共4.59MiB，所选原件84.98MiB，压缩后减少94.60%；其余30份原件不采用。来源／运行时SHA-256清单 `FT2_AUDIO_SOURCES.json`记录每个文件的前后大小及参数。可在来源目录存在并安装ffmpeg时运行 `python3 scripts/prepare-ft2-audio.py` 重建。
+249.19MiB来源素材保持本机原样，并由 `.gitignore` 排除；不进入Git提交、Vite运行时导入或Pages／PWA产物。只提交101个实际使用的压缩MP3，共4.59MiB，所选原件80.47MiB，压缩后减少94.29%；其余30份原件不采用。来源／运行时SHA-256清单 `FT2_AUDIO_SOURCES.json`记录每个文件的前后大小及参数。可在来源目录存在并安装ffmpeg时运行 `python3 scripts/prepare-ft2-audio.py` 重建。
 
 ## 本作映射
 
-六图各取Stage00000～00005的前48秒：峡谷／独木桥／月球／工厂／殿堂／埃及分别对应0～5；大厅GM01前45秒，选坦克界面GM02前45秒，结算GM04前18秒。这是本作选曲安排，未确证原版同名地图的编号，不将其写成原版事实。BGM为80kbps、44.1kHz立体声，首尾短淡化后循环；只有当前场景的HTML Audio流播放。设置音乐单独使用媒体元素，底层战斗／地图音乐继续暂停，关闭后按原暂停状态恢复。
+### v2.3.6 原客户端地图／曲目转换
 
-按本作13载具顺序（大腕、叉叉、老土、甲壳虫、公爵、雷霆、飞火、流星、小妖、水鬼、闪灵、海怪、暴龙）分配Fire／Bomb组1～13；组内1／2分配普通／特殊武器，是本作的用途分配，参考代码把两者作为变体而非确证武器编号。52种炮火／爆炸采样＋各13种move／Unmove采样全部有实际路由。原目录另有move13／Unmove13，暴龙也能独立使用。
+此前按六图顺序配Stage00000～00005，属于未确证的本作选曲，现已修正。不能把map_name编号直接作为Stage编号，也不能只凭曲名推断地图。
+
+一手依据是提取的 `extracted/assets/Dlls/MyScripts.dll.bytes`（SHA-256 `bda84cf8839f7d22afb68700285b0db21881e6f391c86d2c467c3bf2a3edd8a5`）：
+
+- `MapUtil.init` RVA `0xb27b8` 建立26×4的BgmNumber表，并按 `map_name_{0}` 从Language取地图名；416字节静态表位于FieldRVA `0x24918c`。实际RVA／方法与静态数据哈希见证据JSON，代码位置以该提取客户端为限。
+- `MapUtil.setNormalStage` 的21项SoundCount表位于FieldRVA `0x248464`，限制有效曲目数；`getStageBgm(stage, bgm)` 按 `BgmNumber[bgm % SoundCount]` 取数（SoundCount=0时回退1）。因此末尾0不能一概删掉：神圣殿堂的4项实际为10/0/0/0，0也是有效曲目。
+- `Share.setStartData` 明确将原服务器 `NStageNumber` 和 `NBgm` 传入 `getStageBgm` 后存为StartStageBgm；SoundManager将Stage音频注册到11000+编号，并按 `stage{0:D5}.mp3` 查文件。这条链路独立于复刻web代码。
+- 原 `Language.txt` 的map_name和bgm_name分别提供地图名与曲名；APK清单验证Stage00000～15／17与小写stage00018～22实际存在，16缺失。不把逆向笔记“26张地图BGM”当作编号转换。
+
+| 本作场景 | 原地图号 | 此原客户端有效BGM列表 | 本作使用的原文件／曲名 | 依据与选择边界 |
+| --- | --- | --- | --- | --- |
+| 青苔峡谷 valley | 无（本作原创） | 无 | Stage00000 · Milyang Fortress | 本作自选，保留现有曲；不赋予原版地图编号 |
+| 独木桥 coast | 8 | 9 / 4 / 14 | Stage00004 · Once in a Lifetime | 已确证允许列表，本作选第2项，非唯一原版配乐 |
+| 天空之城 moon | 7 | 4 / 8 / 9 | Stage00009 · Be Higher | 已确证允许列表，本作选第3项，非唯一原版配乐 |
+| 钢铁工厂 factory | 4 | 5 / 11 / 21 | Stage00005 · The Invincible | 已确证允许列表，本作取首项 |
+| 神圣殿堂 temple | 10 | 10 / 0 / 0 / 0 | Stage00010 · Tank Slayer | 已确证允许列表，本作取首项；不能因TeMP Time曲名就选7 |
+| 古老埃及 egypt | 9 | 15 / 22 | Stage00015 · Egyptian Rule | 已确证允许列表，本作取首项，与原曲名主题也相符 |
+
+允许列表及调用代码已确证；从多首里固定取一首是本作选曲策略，未实现原服务器NBgm轮换，也不宣称所有历史Fortress 2发行版只有这首配乐。大厅GM01前45秒、选坦克GM02前45秒、结算GM04前18秒维持本作安排。六图各压缩前48秒，BGM为80kbps／44.1kHz立体声，首尾短淡化循环，未新增体积或降低既有编码规格。
+
+`FT2_MAP_BGM_EVIDENCE.json` 保留原程序集／文案／APK清单哈希、两张RVA表、原IL摘要与调用者；用独立Python环境安装dnfile/dncil后运行 `scripts/audit-ft2-bgm.py --client <原提取目录>` 可重核，脚本不读取复刻web项目。`FT2_MAP_BGM_SELECTION.json` 为本作单一选曲配置，压缩脚本读取并校验其是否在原有效列表内；每首原件与压缩文件哈希在 `FT2_AUDIO_SOURCES.json`。
+
+只有当前场景的HTML Audio流播放；设置音乐单独使用媒体元素，底层战斗／地图音乐继续暂停，关闭后按原暂停状态恢复。
+
+按本作13载具顺序（大腕、叉叉、老土、甲壳虫、公爵、雷霆、飞火、流星、小妖、水鬼、闪灵、海怪、暴龙）分配Fire／Bomb组1～13；组内1／2分配普通／特殊武器，是本作的用途分配，不将既有1／2用途分配声明为所有原版武器编号。52种炮火／爆炸采样＋各13种move／Unmove采样全部有实际路由。原目录另有move13／Unmove13，暴龙也能独立使用。
 
 公共14种采样：Push1点击、Select1瞄准／选择、Friend道具／拾取、logo胜利、Turn回合、Wind风／雾／雪、Firewall火线、Homming锁定、BoxLanding箱子落地、heli空投／空袭、Warring超时、Push3转移、quake震地武器、Enemy出局提示。死亡音用途是本作分配，未声明其为确证原版死亡编号；一次性defeat事件使陆地／落水出局均只触发一次，不拖延回合。未实现的陨石等事件不引入闲置素材。特效64kbps单声道，最长4秒，移动最长3秒；统一响度并增加0.7编码前余量，避免短音效MP3过峰，各文件远低于3MiB缓存上限。
 
