@@ -1,0 +1,18 @@
+{
+  "version": "2.3.4",
+  "bundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "offlineReload": true,
+  "actualWind": -6.732527478598058,
+  "meter": {
+    "value": -6.732527478598058,
+    "start": 19.397602370008826,
+    "width": 30.602397629991174,
+    "end": 19.397602370008826,
+    "text": "",
+    "height": 9
+  },
+  "foldFollowUnfold": true,
+  "errors": [],
+  "qaHook": false
+}
