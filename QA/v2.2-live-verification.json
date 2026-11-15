@@ -1,0 +1,55 @@
+{
+  "version": "2.2.0",
+  "worker": "https://larria.github.io/piggymiCannon/sw.js",
+  "orientation": "landscape",
+  "offlineReload": true,
+  "offlineFourExpertAI": true,
+  "roles": [
+    "王牌 AI",
+    "王牌 AI",
+    "王牌 AI",
+    "王牌 AI"
+  ],
+  "log": "24\n阿狸\n使用了威力加强。\n23\n阿狸\n，轮到你了。\n22\n小红豆直接命中，集中伤害。\n21\n咪猪头\n受到 630 点伤害。\n20\n大猪头爸爸\n发射了小红豆。\n19\n大猪头爸爸\n使用了威力加强。\n18\n大猪头爸爸\n，轮到你了。\n17\n流星雨直接命中，集中伤害。\n16\n小黄鱼\n受到 55 点伤害。\n15\n流星雨直接命中，集中伤害。\n14\n小黄鱼\n受到 55 点伤害。\n13\n流星雨直接命中，集中伤害。\n12\n小黄鱼\n受到 55 点伤害。\n11\n流星雨直接命中，集中伤害。\n10\n小黄鱼\n受到 55 点伤害。\n09\n流星雨直接命中，集中伤害。\n08\n小黄鱼\n受到 55 点伤害。\n07\n流星雨直接命中，集中伤害。\n06\n小黄鱼\n受到 55 点伤害。\n05\n流星雨直接命中，集中伤害。\n04\n小黄鱼\n受到 55 点伤害。\n03\n流星雨直接命中，集中伤害。\n02\n小黄鱼\n受到 55 点伤害。\n01\n流星雨命中地形，扩大挖地。",
+  "assets": [
+    {
+      "path": "icons/mimi-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 899
+    },
+    {
+      "path": "icons/dad-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 1105
+    },
+    {
+      "path": "icons/fox-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 738
+    },
+    {
+      "path": "icons/fish-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 805
+    },
+    {
+      "path": "fonts/dm-sans-regular.ttf",
+      "ok": true,
+      "type": "font/ttf",
+      "bytes": 48280
+    },
+    {
+      "path": "audio/bgm-sunny-30s.mp3",
+      "ok": true,
+      "type": "audio/mp3",
+      "bytes": 761382
+    }
+  ],
+  "errors": [],
+  "qaHook": false,
+  "researchRequests": []
+}
