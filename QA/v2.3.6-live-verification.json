@@ -1,0 +1,43 @@
+{
+  "version": "2.3.6",
+  "liveBundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "offlineReload": true,
+  "all101OfflineAudioHashesMatch": true,
+  "cachedAudioCount": 101,
+  "all7OfflineVisualHashesMatch": true,
+  "updated": [
+    {
+      "map": "coast",
+      "oldHash": "96f5a23a1aeeb607c7083dcd2591636b12c9e02ae6f94bc4730a199f18c1f538",
+      "newHash": "e2bc546bc6e302ee30ee5255f0ba0394c34ed8d64d0075bd8c2374770de692fa"
+    },
+    {
+      "map": "moon",
+      "oldHash": "decdde8e5f3a232daa98fea7eef5f8fb02970fc33053d702fc520392f768d8f8",
+      "newHash": "7586b3f3871a173ef87919d6c63f548673d6035953720d12800b2ee8f01ba421"
+    },
+    {
+      "map": "factory",
+      "oldHash": "7cb1c2137f63951b7c9038904bfbe09ab43cf39fc75d792b3d29b54aa35ac11e",
+      "newHash": "129f74b6c63beb938bcb3b7a8d8b9be377d6f0be5ab94faa8ec57ee5b11dff66"
+    },
+    {
+      "map": "temple",
+      "oldHash": "e2bc546bc6e302ee30ee5255f0ba0394c34ed8d64d0075bd8c2374770de692fa",
+      "newHash": "d0e4c8cf06d2a5a905f07cca0160c17faa97e56ca66343354d0240acd627d5f0"
+    },
+    {
+      "map": "egypt",
+      "oldHash": "129f74b6c63beb938bcb3b7a8d8b9be377d6f0be5ab94faa8ec57ee5b11dff66",
+      "newHash": "c0ffcf84b70f80aee5f499e08f462681458ef26f5379ace6079301b59fd84449"
+    }
+  ],
+  "actualRandomMap": "coast",
+  "mapName": "独木桥",
+  "seed": 52,
+  "randomDrawRecorded": true,
+  "actualMapMusicPlayedOffline": true,
+  "errors": [],
+  "qaHook": false
+}
