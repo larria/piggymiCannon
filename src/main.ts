@@ -17,7 +17,7 @@ import {DashboardView} from './dashboard';
 import {guideMarkup} from './guide';
 import {isRedHealth,isRaging} from './health';
 import {TURN_ITEMS} from './catalog';
-import {CREW,crewAvatar,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
+import {CREW,crewAvatar,crewAvatarPath,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
 import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
 import {installControlHints} from './control-hints';
@@ -299,8 +299,8 @@ function showDialog(type:string) {
   dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');
   if(type.startsWith('portrait:')) {
     const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name,team=game.tanks[id].team;
-    const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，爸爸也会打歪。','装甲厚一点，心软一点。','哼哼，轮到爸爸了！','不着急，咱们慢慢瞄。'];
-    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}"><img src="${import.meta.env.BASE_URL}${`icons/${crew}-avatar.svg`}" alt="${name}大头像"/><span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
+    const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼妈妈！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，爸爸也会打歪。','装甲厚一点，心软一点。','哼哼，轮到爸爸了！','不着急，咱们慢慢瞄。'];
+    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}"><img src="${crewAvatarPath(crew,import.meta.env.BASE_URL)}" alt="${name}大头像"/><span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
     let taps=0;
     $('#portrait-art').addEventListener('click',()=>{
       $('#portrait-saying').innerHTML=colorNames(sayings[++taps%sayings.length]);

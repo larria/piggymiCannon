@@ -3,7 +3,7 @@ import {validChoice,type VehicleChoice} from './vehicles';
 export type CrewId='mimi'|'dad'|'fox'|'fish';
 export interface Slot {enabled:boolean;crew:CrewId;team:number;controller:'human'|'ai';difficulty:Difficulty;vehicle:VehicleChoice|null}
 export type Seat=Slot;
-export const CREW={mimi:{name:'咪猪头',color:'#dd8e77',paper:'#f4e5db',symbol:'猪'},dad:{name:'大猪头爸爸',color:'#64859d',paper:'#e4edf2',symbol:'爸'},fox:{name:'阿狸',color:'#c56c48',paper:'#f4e4d5',symbol:'狸'},fish:{name:'小黄鱼',color:'#c5a44d',paper:'#f5efd8',symbol:'鱼'}} as const;
+export const CREW={mimi:{name:'咪猪头',color:'#dd8e77',paper:'#f4e5db',symbol:'猪'},dad:{name:'大猪头爸爸',color:'#64859d',paper:'#e4edf2',symbol:'爸'},fox:{name:'阿狸',color:'#c56c48',paper:'#f4e4d5',symbol:'狸'},fish:{name:'小黄鱼妈妈',color:'#c5a44d',paper:'#f5efd8',symbol:'鱼'}} as const;
 export const CREW_ORDER:CrewId[]=['mimi','dad','fox','fish'];
 export const FLAGS=[{name:'暖桃',letter:'A',color:'#a34c3c',paper:'#f5e5df',shape:'square'},{name:'青苔',letter:'B',color:'#466c44',paper:'#e8eedf',shape:'fork'},{name:'晴空',letter:'C',color:'#386a8c',paper:'#e3edf2',shape:'wave'},{name:'麦穗',letter:'D',color:'#826023',paper:'#f5ecd6',shape:'diamond'}] as const;
 export function teamFlag(team:number){const color=FLAGS[((team%4)+4)%4];return {...color,letter:team<4&&team>=0?color.letter:String(team+1),name:team<4&&team>=0?color.name:`队伍 ${team+1}`};}
@@ -14,5 +14,6 @@ export function normalizeSlots(input:unknown,allowDragon=false):Slot[]{
  return defaults.map((d,i)=>{const s=input[i]??{};return {...d,enabled:s.enabled===true,team:Number.isInteger(s.team)&&s.team>=0?s.team:d.team,controller:s.controller==='human'?'human':'ai',difficulty:DIFFICULTIES.some(x=>x.id===s.difficulty)?s.difficulty:d.difficulty,vehicle:validChoice(s.vehicle,allowDragon)?s.vehicle:'random'};});
 }
 export function slotProblem(slots:Slot[]){const active=slots.filter(s=>s.enabled);return active.length<2?'至少开启两个槽位':active.length>4?'最多四个槽位':new Set(active.map(s=>s.team)).size<2?'至少使用两面不同的队旗':null;}
-export function crewAvatar(id:CrewId,base=''){return `<img src="${base}icons/${id}-avatar.svg" alt="${CREW[id].name}"/>`;}
+export function crewAvatarPath(id:CrewId,base=''){return base+(id==='mimi'||id==='dad'?`portraits/${id}.png`:`icons/${id}-avatar.svg`);}
+export function crewAvatar(id:CrewId,base=''){return `<img src="${crewAvatarPath(id,base)}" alt="${CREW[id].name}"/>`;}
 export function nameMarkup(name:string,team:number){return `<span class="crew-name" style="color:${teamFlag(team).color}">${name}</span>`;}

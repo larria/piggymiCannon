@@ -3,11 +3,11 @@ import {WORLD_W,WORLD_H} from './engine';
 import {paintMapOverview} from './map-preview';
 import {paintVehicle} from './vehicle-art';
 import {vehicleById} from './vehicles';
-import {CREW,teamFlag} from './crew';
+import {CREW_ORDER,crewAvatarPath,teamFlag} from './crew';
 export class DashboardView {
   private portraits=new Map<string,HTMLImageElement>();
   private terrain=document.createElement('canvas');private revision=-1;private previousGame:Game|null=null;
-  constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;for(const id of ['mimi','dad','fox','fish']){const img=new Image();img.src=import.meta.env.BASE_URL+'icons/'+id+'-avatar.svg';this.portraits.set(id,img);}}
+  constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;for(const id of CREW_ORDER){const img=new Image();img.src=crewAvatarPath(id,import.meta.env.BASE_URL);this.portraits.set(id,img);}}
   draw(game:Game,t:Tank,offset:number,viewHeight:number){
     const c=this.dial.getContext('2d')!;c.clearRect(0,0,260,260);c.save();c.scale(2,2);
     c.fillStyle='#f6f4e9';c.strokeStyle='#ccd5bd';c.lineWidth=2;c.beginPath();c.arc(65,65,58,0,7);c.fill();c.stroke();

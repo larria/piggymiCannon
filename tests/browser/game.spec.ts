@@ -81,7 +81,7 @@ test('PWA installs its worker and reloads with icons and audio while offline',as
   expect(manifest.name).toBe('咪猪头的疯狂坦克');expect(manifest.orientation).toBe('landscape');
   await context.setOffline(true);await page.reload();
   await expect(page.getByRole('button',{name:'进入战场',exact:true})).toBeVisible();
-  const assets=await page.evaluate(async()=>Promise.all(['icons/icon-512.png','audio/bgm-sunny-30s.mp3',...['mimi','dad','fox','fish'].map(id=>`icons/${id}-avatar.svg`)].map(async path=>(await fetch(path)).ok)));
+  const assets=await page.evaluate(async()=>Promise.all(['icons/icon-512.png','audio/bgm-sunny-30s.mp3','portraits/mimi.png','portraits/dad.png','icons/fox-avatar.svg','icons/fish-avatar.svg'].map(async path=>(await fetch(path)).ok)));
   expect(assets).toEqual([true,true,true,true,true,true]);
   await context.setOffline(false);
 });
@@ -117,8 +117,8 @@ test('fog hides enemy information for two actions then clears and uses the suppl
   await start(page,false,'valley',seed);
   await expect(page.locator('#map-label')).toContainText('浓雾');
   await expect(page.locator('#hp-1')).toHaveText('950 / 950');
-  await expect(page.locator('[data-slot-id="0"] .avatar img')).toHaveAttribute('src',/mimi-avatar.svg/);
-  await expect(page.locator('[data-slot-id="1"] .avatar img')).toHaveAttribute('src',/dad-avatar.svg/);
+  await expect(page.locator('[data-slot-id="0"] .avatar img')).toHaveAttribute('src',/portraits\/mimi\.png/);
+  await expect(page.locator('[data-slot-id="1"] .avatar img')).toHaveAttribute('src',/portraits\/dad\.png/);
   await page.screenshot({path:'QA/slots-regression-fog.png'});
   await page.locator('#fire-button').click();
   await expect(page.locator('#turn-text')).toHaveText('大猪头爸爸正在瞄准…',{timeout:10_000});
@@ -171,7 +171,7 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await start(page,true,'coast',52,'45');
   const bounds=await page.locator('[data-slot-id="0"] .avatar').boundingBox();expect(bounds!.width).toBeGreaterThanOrEqual(44);
   await page.locator('[data-slot-id="0"] .portrait-button').click();
-  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/icons\/mimi-avatar.svg/);
+  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/mimi\.png/);
   const clock=await page.locator('#timer span').textContent();await page.waitForTimeout(450);
   await expect(page.locator('#timer span')).toHaveText(clock!);
   const saying=await page.locator('#portrait-saying').textContent();await page.locator('#portrait-art').click();
@@ -179,7 +179,7 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await page.screenshot({path:'QA/slots-regression-portrait-preview.png'});
   await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
   await page.locator('[data-slot-id="1"] .portrait-button').click();
-  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/icons\/dad-avatar.svg/);
+  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/dad\.png/);
 });
 test('tank selection is remembered and two weapons switch directly without a dialog',async({page})=>{
  await start(page);
