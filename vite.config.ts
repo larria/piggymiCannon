@@ -35,8 +35,10 @@ export default defineConfig(({mode}) => ({
       ],
     },
     workbox: {
+      importScripts: ['audio-range.js'],
       globPatterns: ['**/*.{js,css,html,png,svg,mp3,ttf,webmanifest}'],
-      maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      // Include the longest complete BGM; the separate total-size gate remains 90 MB.
+      maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       cleanupOutdatedCaches: true,
       clientsClaim: true,
       navigateFallbackDenylist: [/^\/api\//],

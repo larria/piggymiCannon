@@ -2,7 +2,7 @@
 
 来源是用户本机 `~/Downloads/ft2逆向/resources/sound/` 提取、并搬入 `assets/ft2-audio/` 的未加密WAV／MP3。现行地图映射从原客户端程序集／配置直接核对，原资源清单用于核实文件；不使用 `supertank-web/` 的规则、地图名称表或音乐映射作为依据；仅用于本项目，未宣称官方授权。
 
-249.19MiB来源素材保持本机原样，并由 `.gitignore` 排除；不进入Git提交、Vite运行时导入或Pages／PWA产物。只提交101个实际使用的压缩MP3，共4.59MiB，所选原件80.47MiB，压缩后减少94.29%；其余30份原件不采用。来源／运行时SHA-256清单 `FT2_AUDIO_SOURCES.json`记录每个文件的前后大小及参数。可在来源目录存在并安装ffmpeg时运行 `python3 scripts/prepare-ft2-audio.py` 重建。
+249.19MiB来源素材保持本机原样，并由 `.gitignore` 排除；不进入Git提交、Vite运行时导入或Pages／PWA产物。只提交101个实际使用的压缩MP3。v2.3.8恢复九首BGM完整曲目，采用128kbps立体声；总体积与完整时长校验见下方记录，其余30份原件不采用。来源／运行时SHA-256清单 `FT2_AUDIO_SOURCES.json`记录每个文件的前后大小及参数。可在来源目录存在并安装ffmpeg时运行 `python3 scripts/prepare-ft2-audio.py` 重建。
 
 ## 本作映射
 
@@ -26,7 +26,7 @@
 | 神圣殿堂 temple | 10 | 10 / 0 / 0 / 0 | Stage00010 · Tank Slayer | 已确证允许列表，本作取首项；不能因TeMP Time曲名就选7 |
 | 古老埃及 egypt | 9 | 15 / 22 | Stage00015 · Egyptian Rule | 已确证允许列表，本作取首项，与原曲名主题也相符 |
 
-允许列表及调用代码已确证；从多首里固定取一首是本作选曲策略，未实现原服务器NBgm轮换，也不宣称所有历史Fortress 2发行版只有这首配乐。大厅GM01前45秒、选坦克GM02前45秒、结算GM04前18秒维持本作安排。六图各压缩前48秒，BGM为80kbps／44.1kHz立体声，首尾短淡化循环，未新增体积或降低既有编码规格。
+允许列表及调用代码已确证；从多首里固定取一首是本作选曲策略，未实现原服务器NBgm轮换，也不宣称所有历史Fortress 2发行版只有这首配乐。大厅GM01、选坦克GM02、结算GM04以及六图Stage均保留原曲完整时长。BGM为128kbps／44.1kHz立体声；仅加0.12秒淡入／0.35秒淡出以衔接循环，不删除任何时段。此前v2.3.6的前N秒选段已由v2.3.8全曲替换，已核实选曲不变。
 
 `FT2_MAP_BGM_EVIDENCE.json` 保留原程序集／文案／APK清单哈希、两张RVA表、原IL摘要与调用者；用独立Python环境安装dnfile/dncil后运行 `scripts/audit-ft2-bgm.py --client <原提取目录>` 可重核，脚本不读取复刻web项目。`FT2_MAP_BGM_SELECTION.json` 为本作单一选曲配置，压缩脚本读取并校验其是否在原有效列表内；每首原件与压缩文件哈希在 `FT2_AUDIO_SOURCES.json`。
 
@@ -34,7 +34,7 @@
 
 按本作13载具顺序（大腕、叉叉、老土、甲壳虫、公爵、雷霆、飞火、流星、小妖、水鬼、闪灵、海怪、暴龙）分配Fire／Bomb组1～13；组内1／2分配普通／特殊武器，是本作的用途分配，不将既有1／2用途分配声明为所有原版武器编号。52种炮火／爆炸采样＋各13种move／Unmove采样全部有实际路由。原目录另有move13／Unmove13，暴龙也能独立使用。
 
-公共14种采样：Push1点击、Select1瞄准／选择、Friend道具／拾取、logo胜利、Turn回合、Wind风／雾／雪、Firewall火线、Homming锁定、BoxLanding箱子落地、heli空投／空袭、Warring超时、Push3转移、quake震地武器、Enemy出局提示。死亡音用途是本作分配，未声明其为确证原版死亡编号；一次性defeat事件使陆地／落水出局均只触发一次，不拖延回合。未实现的陨石等事件不引入闲置素材。特效64kbps单声道，最长4秒，移动最长3秒；统一响度并增加0.7编码前余量，避免短音效MP3过峰，各文件远低于3MiB缓存上限。
+公共14种采样：Push1点击、Select1瞄准／选择、Friend道具／拾取、logo胜利、Turn回合、Wind风／雾／雪、Firewall火线、Homming锁定、BoxLanding箱子落地、heli空投／空袭、Warring超时、Push3转移、quake震地武器、Enemy出局提示。死亡音用途是本作分配，未声明其为确证原版死亡编号；一次性defeat事件使陆地／落水出局均只触发一次，不拖延回合。未实现的陨石等事件不引入闲置素材。特效64kbps单声道，最长4秒，移动最长3秒；统一响度并增加0.7编码前余量，避免短音效MP3过峰，音效文件仍很小；最长完整BGM约4.87MiB，PWA单文件上限调整为8MiB，全部101文件预缓存，总量仍由90MB门禁约束。
 
 ## 播放与兼容
 
@@ -48,6 +48,24 @@ PWA直接对最终dist中的MP3扫描预缓存，移除与globPatterns重复的i
 
 ## 压缩与质量复核
 
-使用ffmpeg 9.0.2 / libmp3lame，统一44100Hz：BGM为80k／双声道、SFX为64k／单声道，均-vn -map_metadata -1，loudnorm=I=-20:TP=-2:LRA=9；BGM加0.12秒淡入／0.35秒淡出，SFX加volume=0.7。命令、文件裁剪秒数、原件字节和哈希均在脚本／清单可追溯。
+使用ffmpeg 9.0.2 / libmp3lame，统一44100Hz：BGM为128k／双声道、SFX为64k／单声道，均-vn -map_metadata -1，loudnorm=I=-20:TP=-2:LRA=9；BGM加0.12秒淡入／0.35秒淡出，SFX加volume=0.7。BGM转码命令不传-t／-ss／-to，解码到原件EOF；SFX维持既有最长4秒／移动3秒限制。清单formatVersion=2记录durationMode、sourceSeconds、runtimeSeconds、seconds（音乐为原件容器时长，仅作描述而非截取限制）、实际编码参数、字节与前后SHA-256。
 
-scripts/verify-audio-quality.py检查全部实际采样率／声道下的解码、非零PCM、峰值和循环边界；BGM再与相同响度／淡化处理的原件做16kHz对照。浏览器以实际媒体播放验证每段配乐连续两次原生循环，不暂停、不报错；客观指标是对编码／过峰／边缘的检查，不宣称替代主观听感评测。
+scripts/verify-audio-quality.py检查全部实际采样率／声道下的解码、非零PCM、峰值和循环边界；BGM逐首核对完整原件和运行时44100Hz解码帧数（允许重采样误差小于2ms），再与相同响度／淡化处理的完整原件做16kHz全曲与末5秒对照。浏览器以实际媒体播放验证每段配乐连续两次原生循环，不暂停、不报错；客观指标是对编码／过峰／边缘的检查，不宣称替代主观听感评测。
+
+## 全曲与体积实测
+
+| 场景 | 原件 | 原时长（秒） | 压缩后字节 |
+| --- | --- | ---: | ---: |
+| bgm-lobby.mp3 | GM01.mp3 | 105.441814 | 1,688,180 |
+| bgm-setup.mp3 | GM02.mp3 | 239.931791 | 3,839,834 |
+| bgm-result.mp3 | GM04.mp3 | 238.097415 | 3,810,576 |
+| bgm-valley.mp3 | Stage00000.mp3 | 207.029116 | 3,313,623 |
+| bgm-coast.mp3 | Stage00004.mp3 | 141.688163 | 2,267,889 |
+| bgm-moon.mp3 | Stage00009.mp3 | 318.902857 | 5,103,324 |
+| bgm-factory.mp3 | Stage00005.mp3 | 295.427483 | 4,727,997 |
+| bgm-temple.mp3 | Stage00010.mp3 | 190.775147 | 3,053,652 |
+| bgm-egypt.mp3 | Stage00015.mp3 | 119.141587 | 1,907,190 |
+
+九首总时长1856.435373秒；运行时101文件共30,561,813字节（29.15MiB），所选原件84,378,923字节，缩减63.78%。92个SFX运行时哈希与v2.3.7逐个一致。脚本已完整重建，清单同时记录SFX编码限制参数。
+
+完整曲目另由audio-range.js在默认预缓存路由前处理同作用域MP3字节Range，从同一完整缓存Blob切片返回206／Content-Range，支持闭区间、后缀与开放尾段，非法范围416；没有另存曲目副本。解决长曲离线跳转／Safari循环读取整份200响应的问题，实际末段前进后再检验循环。

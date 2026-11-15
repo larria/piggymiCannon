@@ -1,0 +1,65 @@
+[
+  {
+    "name": "bgm-lobby.mp3",
+    "duration": 105.48244897959184,
+    "tailStart": 104.78282147951785,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-setup.mp3",
+    "duration": 239.96081632653062,
+    "tailStart": 239.26107399321904,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-result.mp3",
+    "duration": 238.1322448979592,
+    "tailStart": 237.43248435635996,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-valley.mp3",
+    "duration": 207.07265306122449,
+    "tailStart": 206.37291222780792,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-coast.mp3",
+    "duration": 141.71428571428572,
+    "tailStart": 141.0146004226192,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-moon.mp3",
+    "duration": 318.9289795918367,
+    "tailStart": 318.22963875843914,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-factory.mp3",
+    "duration": 295.47102040816327,
+    "tailStart": 294.77138499149817,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-temple.mp3",
+    "duration": 190.82448979591837,
+    "tailStart": 190.12483833757116,
+    "tailPlayed": true,
+    "looped": true
+  },
+  {
+    "name": "bgm-egypt.mp3",
+    "duration": 119.17061224489795,
+    "tailStart": 118.47102728659144,
+    "tailPlayed": true,
+    "looped": true
+  }
+]

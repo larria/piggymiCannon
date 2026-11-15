@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';import {boot} from './qa-app';
 import {makeRng} from '../../src/engine';import {MAPS} from '../../src/catalog';import {VEHICLES} from '../../src/vehicles';import {BGM_TRACKS} from '../../src/audio-catalog';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 
 for(const width of [1194,1210])test(`${width} iPad random-map setup resolves seeded map, soundtrack, snapshot and rematch`,async({page})=>{
  await page.setViewportSize({width,height:834});await page.addInitScript(()=>{Date.now=()=>52;});await boot(page,false);
@@ -25,14 +25,14 @@ for(const width of [1194,1210])test(`${width} iPad random-map setup resolves see
 });
 
 test('real FT2 decoding/playback covers all 13 weapon pairs, movement, common cues and nine looping BGM scenes',async({page})=>{
- test.setTimeout(70000);
+ test.setTimeout(120000);
  await page.addInitScript(()=>{const frame=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>frame(t=>{if(!(window as any).qaFreezeFrames)cb(t);});(window as any).sampleStarts=[];const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...args:any[]){if(this.buffer){const data=this.buffer.getChannelData(0);(window as any).sampleStarts.push({duration:this.buffer.duration,signal:data.some(v=>Math.abs(v)>.0001),loop:this.loop});}return (start as any).apply(this,args);};});
  await boot(page);await page.evaluate(async()=>{(window as any).qaFreezeFrames=true;const a=(window as any).__qa.audio;a.unlock();a.pause(false);a.setSoundEnabled(true);a.setMusicEnabled(true);await a.preloadForMatch(['bowl','crossbow','cannon','beetle','duke','mine','missile','multi','laser','water','ion','sea','dragon']);});
  for(const scene of Object.keys(BGM_TRACKS)){
   // Freeze simulation only; actual HTML media / Web Audio clocks and playback keep running.
   await page.evaluate(scene=>(window as any).__qa.audio.setScene(scene),scene);
   await expect.poll(()=>page.evaluate(()=>{const a=(window as any).__qa.audio;return !a.music.paused&&a.music.currentTime>0;})).toBe(true);
-  const media=await page.evaluate(()=>{const a=(window as any).__qa.audio;return {src:a.music.src,duration:a.music.duration,error:a.music.error?.code??null};});expect(media.src).toContain(BGM_TRACKS[scene as keyof typeof BGM_TRACKS]);expect(media.error).toBeNull();expect(media.duration).toBeGreaterThan(10);
+  const media=await page.evaluate(()=>{const a=(window as any).__qa.audio;return {src:a.music.src,duration:a.music.duration,error:a.music.error?.code??null};});expect(media.src).toContain(BGM_TRACKS[scene as keyof typeof BGM_TRACKS]);expect(media.error).toBeNull();const record=JSON.parse(readFileSync('research/FT2_AUDIO_SOURCES.json','utf8')).files.find((r:any)=>r.runtime===BGM_TRACKS[scene as keyof typeof BGM_TRACKS]);expect(Math.abs(media.duration-record.sourceSeconds)).toBeLessThan(.06);
   for(let wrap=0;wrap<2;wrap++){await page.evaluate(()=>(window as any).__qa.audio.music.currentTime=(window as any).__qa.audio.music.duration-.18);await expect.poll(()=>page.evaluate(()=>{const m=(window as any).__qa.audio.music;return !m.paused&&m.currentTime<1&&!m.error;}),{intervals:[80,100,150]}).toBe(true);}
  }
  for(const v of VEHICLES){for(const weapon of [v.normal,v.special])for(const type of ['shot','explosion']){await page.evaluate(({type,weapon})=>(window as any).__qa.audio.play(type,400,600,weapon),{type,weapon});await page.waitForTimeout(90);}
@@ -46,7 +46,8 @@ test('real FT2 decoding/playback covers all 13 weapon pairs, movement, common cu
  await page.evaluate(()=>{const a=(window as any).__qa.audio;a.setSoundEnabled(true);a.setMusicEnabled(false);a.play('shot',300,500,'cannon-special');});expect(await page.evaluate(()=>(window as any).__qa.audio.music.paused)).toBe(true);expect(await page.evaluate(()=>(window as any).sampleStarts.length)).toBeGreaterThan(muted);
 });
 
-test('all 101 runtime clips cache once and actual random-map music plays offline in production',async({page,context})=>{
+test('all 101 runtime clips cache once and actual random-map music plays offline in production',async({page,context,browserName})=>{
+ test.setTimeout(120000);
  await page.addInitScript(()=>{Date.now=()=>52;(window as any).mediaPlayed=[];const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){(window as any).mediaPlayed.push(this);return play.call(this);};});
  await page.goto('./');await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
  await context.setOffline(true);await page.reload();
@@ -54,8 +55,33 @@ test('all 101 runtime clips cache once and actual random-map music plays offline
  const assets=await page.evaluate(async files=>Promise.all(files.map(async(name:string)=>{const r=await fetch('audio/'+name),bytes=await r.arrayBuffer(),hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(b=>b.toString(16).padStart(2,'0')).join('');return {name,ok:r.ok,bytes:bytes.byteLength,hash,type:r.headers.get('content-type')};})),manifest.files.map((e:any)=>e.runtime));
  expect(assets).toHaveLength(101);for(const a of assets){const expected=manifest.files.find((e:any)=>e.runtime===a.name);expect(a.ok,a.name).toBe(true);expect(a.type).toContain('audio');expect(a.bytes).toBe(expected.bytes);expect(a.hash).toBe(expected.runtimeSHA256);}
  const cached=await page.evaluate(async()=>{const names=await caches.keys(),urls=[];for(const name of names)if(name.includes('precache'))for(const key of await (await caches.open(name)).keys())if(key.url.includes('/audio/'))urls.push(key.url);return urls;});expect(cached).toHaveLength(101);
+ // Browser seeking requires a correct 206, not a cached whole-file 200 response.
+ for(const r of manifest.files.filter((r:any)=>r.runtime.startsWith('bgm-'))){
+  const range=await page.evaluate(async name=>{const r=await fetch('audio/'+name,{headers:{Range:'bytes=1000-1999'}});return {status:r.status,contentRange:r.headers.get('content-range'),bytes:Array.from(new Uint8Array(await r.arrayBuffer()))};},r.runtime);
+  expect(range.status).toBe(206);expect(range.contentRange).toBe(`bytes 1000-1999/${r.bytes}`);expect(range.bytes).toEqual(Array.from(readFileSync('public/audio/'+r.runtime).subarray(1000,2000)));
+ }
+ const ranges=await page.evaluate(async size=>{const rows=[];for(const value of ['bytes=-32',`bytes=${size-10}-`,'bytes=999999999-']){const r=await fetch('audio/bgm-lobby.mp3',{headers:{Range:value}});rows.push({status:r.status,bytes:(await r.arrayBuffer()).byteLength});}return rows;},manifest.files.find((r:any)=>r.runtime==='bgm-lobby.mp3').bytes);
+ expect(ranges).toEqual([{status:206,bytes:32},{status:206,bytes:10},{status:416,bytes:0}]);
+
  await page.getByRole('button',{name:'进入战场',exact:true}).click();await page.locator('input[name="map"][value="random"]').locator('..').click();await page.locator('[data-controller="1"]').selectOption('human');await page.locator('#turn-timer').selectOption('0');await page.getByRole('button',{name:'开始对局',exact:true}).click();
  const map=MAPS[Math.floor(makeRng(52)()*MAPS.length)];await expect(page.locator('#map-label')).toContainText(map.name);
  await expect.poll(()=>page.evaluate(track=>(window as any).mediaPlayed.some((m:HTMLMediaElement)=>m.src.endsWith(track)&&!m.paused&&m.currentTime>0),BGM_TRACKS[map.id])).toBe(true);expect(await page.evaluate(()=>'__qa' in window)).toBe(false);
+ // Full tracks must remain seekable at their original tail even with no network.
+ const complete=[];
+ for(const r of manifest.files.filter((r:any)=>r.runtime.startsWith('bgm-'))){
+  const result=await page.evaluate(async name=>{
+   const media=new Audio('audio/'+name);media.volume=0;media.loop=true;
+   await new Promise<void>((resolve,reject)=>{media.onloadedmetadata=()=>resolve();media.onerror=()=>reject(new Error('offline metadata '+name));media.load();});
+   const duration=media.duration;await media.play();
+   await new Promise<void>((resolve,reject)=>{media.onseeked=()=>resolve();media.onerror=()=>reject(new Error('offline seek '+name));media.currentTime=duration-.7;});
+   const tailStart=media.currentTime;if(tailStart<duration-.8)throw new Error('seek did not reach tail '+name);
+   let tailAdvanced=false;
+   await new Promise<void>((resolve,reject)=>{const start=performance.now(),check=()=>{if(media.currentTime>tailStart+.02)tailAdvanced=true;if(tailAdvanced&&media.currentTime<1&&!media.paused)resolve();else if(media.error||performance.now()-start>5000)reject(new Error('offline tail '+name));else setTimeout(check,30);};check();});
+   const row={name,duration,tailStart,tailPlayed:tailAdvanced,looped:true};media.pause();media.removeAttribute('src');media.load();return row;
+  },r.runtime);
+  expect(Math.abs(result.duration-r.sourceSeconds)).toBeLessThan(.06);complete.push(result);
+ }
+ writeFileSync(`QA/v2.3.8-offline-full-bgm-${browserName}.json`,JSON.stringify(complete,null,2));
+
  await page.locator('.battle-stage [data-dialog="settings"]').click();await page.screenshot({path:'QA/v2.3.0-offline-audio-settings-1194.png'});
 });
