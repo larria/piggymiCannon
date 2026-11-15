@@ -1,0 +1,639 @@
+{
+  "version": "2.3.0",
+  "bundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "offlineReload": true,
+  "audioFiles": 99,
+  "audioCacheEntries": 99,
+  "audioBytes": 4350108,
+  "assets": [
+    {
+      "name": "bgm-lobby.mp3",
+      "ok": true,
+      "bytes": 450656,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "bgm-result.mp3",
+      "ok": true,
+      "bytes": 180811,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "bgm-valley.mp3",
+      "ok": true,
+      "bytes": 480697,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "bgm-coast.mp3",
+      "ok": true,
+      "bytes": 480697,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "bgm-moon.mp3",
+      "ok": true,
+      "bytes": 480697,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "bgm-factory.mp3",
+      "ok": true,
+      "bytes": 480697,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "bgm-temple.mp3",
+      "ok": true,
+      "bytes": 480697,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "bgm-egypt.mp3",
+      "ok": true,
+      "bytes": 480697,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-bowl-normal.mp3",
+      "ok": true,
+      "bytes": 8402,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-bowl-normal.mp3",
+      "ok": true,
+      "bytes": 11536,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-bowl-special.mp3",
+      "ok": true,
+      "bytes": 8611,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-bowl-special.mp3",
+      "ok": true,
+      "bytes": 9238,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-bowl.mp3",
+      "ok": true,
+      "bytes": 7148,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-bowl.mp3",
+      "ok": true,
+      "bytes": 3227,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-crossbow-normal.mp3",
+      "ok": true,
+      "bytes": 4013,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-crossbow-normal.mp3",
+      "ok": true,
+      "bytes": 4431,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-crossbow-special.mp3",
+      "ok": true,
+      "bytes": 2968,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-crossbow-special.mp3",
+      "ok": true,
+      "bytes": 6312,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-crossbow.mp3",
+      "ok": true,
+      "bytes": 8611,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-crossbow.mp3",
+      "ok": true,
+      "bytes": 10492,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-cannon-normal.mp3",
+      "ok": true,
+      "bytes": 10074,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-cannon-normal.mp3",
+      "ok": true,
+      "bytes": 11118,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-cannon-special.mp3",
+      "ok": true,
+      "bytes": 6521,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-cannon-special.mp3",
+      "ok": true,
+      "bytes": 11118,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-cannon.mp3",
+      "ok": true,
+      "bytes": 11536,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-cannon.mp3",
+      "ok": true,
+      "bytes": 11118,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-beetle-normal.mp3",
+      "ok": true,
+      "bytes": 12790,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-beetle-normal.mp3",
+      "ok": true,
+      "bytes": 9029,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-beetle-special.mp3",
+      "ok": true,
+      "bytes": 4222,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-beetle-special.mp3",
+      "ok": true,
+      "bytes": 8611,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-beetle.mp3",
+      "ok": true,
+      "bytes": 10492,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-beetle.mp3",
+      "ok": true,
+      "bytes": 8193,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-duke-normal.mp3",
+      "ok": true,
+      "bytes": 9447,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-duke-normal.mp3",
+      "ok": true,
+      "bytes": 9029,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-duke-special.mp3",
+      "ok": true,
+      "bytes": 5267,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-duke-special.mp3",
+      "ok": true,
+      "bytes": 12790,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-duke.mp3",
+      "ok": true,
+      "bytes": 9656,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-duke.mp3",
+      "ok": true,
+      "bytes": 9238,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-mine-normal.mp3",
+      "ok": true,
+      "bytes": 9447,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-mine-normal.mp3",
+      "ok": true,
+      "bytes": 9029,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-mine-special.mp3",
+      "ok": true,
+      "bytes": 7148,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-mine-special.mp3",
+      "ok": true,
+      "bytes": 8611,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-mine.mp3",
+      "ok": true,
+      "bytes": 7148,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-mine.mp3",
+      "ok": true,
+      "bytes": 2341,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-missile-normal.mp3",
+      "ok": true,
+      "bytes": 7148,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-missile-normal.mp3",
+      "ok": true,
+      "bytes": 10074,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-missile-special.mp3",
+      "ok": true,
+      "bytes": 6103,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-missile-special.mp3",
+      "ok": true,
+      "bytes": 7357,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-missile.mp3",
+      "ok": true,
+      "bytes": 8402,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-missile.mp3",
+      "ok": true,
+      "bytes": 2132,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-multi-normal.mp3",
+      "ok": true,
+      "bytes": 8193,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-multi-normal.mp3",
+      "ok": true,
+      "bytes": 16134,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-multi-special.mp3",
+      "ok": true,
+      "bytes": 11745,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-multi-special.mp3",
+      "ok": true,
+      "bytes": 21358,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-multi.mp3",
+      "ok": true,
+      "bytes": 9238,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-multi.mp3",
+      "ok": true,
+      "bytes": 24075,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-laser-normal.mp3",
+      "ok": true,
+      "bytes": 2759,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-laser-normal.mp3",
+      "ok": true,
+      "bytes": 11327,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-laser-special.mp3",
+      "ok": true,
+      "bytes": 2550,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-laser-special.mp3",
+      "ok": true,
+      "bytes": 17806,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-laser.mp3",
+      "ok": true,
+      "bytes": 10074,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-laser.mp3",
+      "ok": true,
+      "bytes": 7984,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-water-normal.mp3",
+      "ok": true,
+      "bytes": 6312,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-water-normal.mp3",
+      "ok": true,
+      "bytes": 8611,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-water-special.mp3",
+      "ok": true,
+      "bytes": 6939,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-water-special.mp3",
+      "ok": true,
+      "bytes": 11536,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-water.mp3",
+      "ok": true,
+      "bytes": 5894,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-water.mp3",
+      "ok": true,
+      "bytes": 5267,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-ion-normal.mp3",
+      "ok": true,
+      "bytes": 6312,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-ion-normal.mp3",
+      "ok": true,
+      "bytes": 23239,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-ion-special.mp3",
+      "ok": true,
+      "bytes": 7357,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-ion-special.mp3",
+      "ok": true,
+      "bytes": 15716,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-ion.mp3",
+      "ok": true,
+      "bytes": 10492,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-ion.mp3",
+      "ok": true,
+      "bytes": 2968,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-sea-normal.mp3",
+      "ok": true,
+      "bytes": 6312,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-sea-normal.mp3",
+      "ok": true,
+      "bytes": 13417,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-sea-special.mp3",
+      "ok": true,
+      "bytes": 6521,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-sea-special.mp3",
+      "ok": true,
+      "bytes": 12999,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-sea.mp3",
+      "ok": true,
+      "bytes": 8661,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-sea.mp3",
+      "ok": true,
+      "bytes": 8402,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-dragon-normal.mp3",
+      "ok": true,
+      "bytes": 6103,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-dragon-normal.mp3",
+      "ok": true,
+      "bytes": 9029,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-fire-dragon-special.mp3",
+      "ok": true,
+      "bytes": 9865,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-bomb-dragon-special.mp3",
+      "ok": true,
+      "bytes": 8611,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-move-dragon.mp3",
+      "ok": true,
+      "bytes": 11327,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-stop-dragon.mp3",
+      "ok": true,
+      "bytes": 9447,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-click.mp3",
+      "ok": true,
+      "bytes": 2759,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-select.mp3",
+      "ok": true,
+      "bytes": 1923,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-item.mp3",
+      "ok": true,
+      "bytes": 8820,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-win.mp3",
+      "ok": true,
+      "bytes": 32643,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-turn.mp3",
+      "ok": true,
+      "bytes": 4013,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-wind.mp3",
+      "ok": true,
+      "bytes": 25956,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-firewall.mp3",
+      "ok": true,
+      "bytes": 7775,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-lock.mp3",
+      "ok": true,
+      "bytes": 7566,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-crate-land.mp3",
+      "ok": true,
+      "bytes": 12581,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-supply.mp3",
+      "ok": true,
+      "bytes": 5058,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-warning.mp3",
+      "ok": true,
+      "bytes": 2341,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-transfer.mp3",
+      "ok": true,
+      "bytes": 1087,
+      "type": "audio/mp3"
+    },
+    {
+      "name": "sfx-quake.mp3",
+      "ok": true,
+      "bytes": 17179,
+      "type": "audio/mp3"
+    }
+  ],
+  "playback": {
+    "nonzero": 8,
+    "loops": 2,
+    "tracks": [
+      "bgm-coast.mp3",
+      "sfx-click.mp3",
+      "sfx-select.mp3"
+    ]
+  },
+  "snapshot": {
+    "version": "2.3.0",
+    "seed": 52,
+    "choice": "random",
+    "initial": "coast",
+    "current": "coast",
+    "name": "独木桥",
+    "event": {
+      "choice": "random",
+      "actual": "coast",
+      "available": [
+        "valley",
+        "coast",
+        "moon",
+        "factory",
+        "temple",
+        "egypt"
+      ]
+    },
+    "shots": 1,
+    "power": 10
+  },
+  "errors": [],
+  "rawRequests": [],
+  "qaHook": false
+}
