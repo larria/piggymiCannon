@@ -1,6 +1,7 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game, WATER_Y, WORLD_W } from '../src/engine.ts';
+import {  WATER_Y, WORLD_W } from '../src/engine.ts';
 import { WEAPONS, MAPS, DIFFICULTIES } from '../src/catalog.ts';
 
 const run=(g:Game,seconds:number,until?:(g:Game)=>boolean)=>{for(let i=0;i<seconds*120;i++){g.update(1/120);if(until?.(g)) break;}};

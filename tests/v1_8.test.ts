@@ -1,5 +1,6 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game,WATER_Y,MAX_CLIMB_ANGLE} from '../src/engine.ts';
+import {WATER_Y,MAX_CLIMB_ANGLE} from '../src/engine.ts';
 import {Terrain} from '../src/terrain.ts';
 import {MAPS,TURN_ITEMS,excavation,weaponHasTrail} from '../src/catalog.ts';
 import {chooseResultPosition} from '../src/result-layout.ts';

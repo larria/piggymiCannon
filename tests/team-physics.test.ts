@@ -1,6 +1,7 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game,MAX_CLIMB_ANGLE,WATER_Y} from '../src/engine';import {Terrain} from '../src/terrain';
-import {aimGeometry} from '../src/aim';import {defaultSeats} from '../src/crew';import {validChoice,resolveVehicle,VEHICLES} from '../src/vehicles';
+import {MAX_CLIMB_ANGLE,WATER_Y} from '../src/engine';import {Terrain} from '../src/terrain';
+import {aimGeometry} from '../src/aim';import {defaultSlots} from '../src/crew';const defaultSeats=(f:any='1v1',m:any='ai')=>new Game({formation:f,mode:m}).config.slots.filter(s=>s.enabled);import {validChoice,resolveVehicle,VEHICLES} from '../src/vehicles';
 const ready=(c:any={})=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,vehicle0:'bowl',vehicle1:'cannon',...c});g.start();return g;};
 const flat=(c:any={})=>{const g=ready(c);g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=150+i*275;t.y=432;});g.wind=0;return g;};
 const run=(g:Game,n:number)=>{for(let i=0;i<n*120;i++)g.update(1/120);};

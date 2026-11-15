@@ -9,7 +9,7 @@ export function installControlHints(onShow:()=>void){
     if(!el.isConnected)return;
     hide();const name=el.dataset.helpName||el.getAttribute('aria-label')||el.title||el.textContent?.trim()||'';
     const description=el.dataset.helpDescription||el.title;
-    const title=document.createElement('strong'),body=document.createElement('span');title.textContent=name;body.textContent=description===name?'':description;
+    const title=document.createElement('strong'),body=document.createElement('span');title.textContent=name;title.style.color=el.dataset.helpColor??'';body.textContent=description===name?'':description;
     hint.replaceChildren(title,body);hint.hidden=false;described=el;previousDescription=el.getAttribute('aria-describedby');el.setAttribute('aria-describedby',hint.id);
     const r=el.getBoundingClientRect(),h=hint.getBoundingClientRect();
     hint.style.left=`${Math.max(8,Math.min(innerWidth-h.width-8,r.left+r.width/2-h.width/2))}px`;

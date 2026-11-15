@@ -1,6 +1,7 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game,FLIGHT_SPEED,WATER_Y,makeRng} from '../src/engine.ts';
+import {FLIGHT_SPEED,WATER_Y,makeRng} from '../src/engine.ts';
 import {Terrain} from '../src/terrain.ts';
 import {WEAPONS,DIFFICULTIES,excavation,aiAimOffset} from '../src/catalog.ts';
 import {compareVersions} from '../src/version.ts';
@@ -102,7 +103,7 @@ test('every AI level, including expert, retains substantial intentional misses',
     for(let i=0;i<1000;i++) {const aim=aiAimOffset(d.id,'heavy',rng);if(aim.miss) {misses++;assert.ok(Math.abs(aim.offset)>100);}}
     assert.ok(misses>100&&misses<650,d.id);
   }
-  assert.equal(ready().config.difficulty,'easy');
+  assert.equal(ready().tanks[1].difficulty,'easy');
 });
 test('version checks compare semantic version numbers instead of cached strings',()=>{
   assert.equal(compareVersions('1.10.0','1.9.8'),1);assert.equal(compareVersions('1.1.0','1.1.0'),0);

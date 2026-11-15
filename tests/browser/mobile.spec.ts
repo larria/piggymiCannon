@@ -16,12 +16,12 @@ test('mobile default gestures are cancelled without blocking app events or norma
  }
  await page.locator('#pause-button').click();await page.getByRole('button',{name:'声音设置',exact:true}).click();
  await page.locator('#music-toggle').click();await expect(page.locator('#music-toggle')).toHaveAttribute('aria-checked','false');
- await page.screenshot({path:`QA/next-mobile-${browserName}-mobile-settings-1194x834.png`});
+ await page.screenshot({path:`QA/slots-mobile-${browserName}-mobile-settings-1194x834.png`});
 });
 test('holding force to maximum auto-fires before release and release does not fire again',async({page,browserName})=>{
  await start(page);const bar=await page.locator('#power-meter').boundingBox();await page.mouse.move(bar!.x+100,bar!.y+bar!.height/2);await page.mouse.down();
  await page.waitForTimeout(2700);await expect(page.locator('#fire-button')).toBeDisabled();await expect(page.locator('#fire-title')).not.toHaveText('蓄力中');
- await page.screenshot({path:`QA/next-mobile-${browserName}-auto-full-power-1194x834.png`});
+ await page.screenshot({path:`QA/slots-mobile-${browserName}-auto-full-power-1194x834.png`});
  await page.mouse.up();await page.locator('#log-button').click();const log=await page.locator('.battle-log').textContent();expect(log!.match(/咪猪头发射了巨石/g)).toHaveLength(1);
 });
 test('real two-finger aiming and charging survives native pinch suppression',async({page,context,browserName})=>{

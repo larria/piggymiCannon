@@ -1,5 +1,6 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game} from '../src/engine.ts';
+import {} from '../src/engine.ts';
 import {Terrain} from '../src/terrain.ts';
 const ready=()=>{const g=new Game({mode:'ai',vehicle0:'crossbow',vehicle1:'cannon',map:'valley',seed:52,timer:0,fog:false,fireLine:false});g.start();g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=905+i*200;t.y=432;});g.wind=0;g.crates=[40,80,120].map(x=>({x,y:436,type:'ammo'}));return g;};
 const run=(g:Game,until:(g:Game)=>boolean)=>{for(let i=0;i<2200&&!until(g);i++)g.update(1/120);};

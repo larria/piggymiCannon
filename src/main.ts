@@ -17,7 +17,7 @@ import {DashboardView} from './dashboard';
 import {guideMarkup} from './guide';
 import {isRedHealth,isRaging} from './health';
 import {TURN_ITEMS} from './catalog';
-import {CREW,crewAvatar} from './crew';
+import {CREW,crewAvatar,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
 import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
 import {installControlHints} from './control-hints';
@@ -28,15 +28,9 @@ const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySele
 const safeRead=(key:string)=>{try{return JSON.parse(localStorage.getItem(key)||'null');}catch{return null;}};
 const save=(key:string,value:unknown)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private browsing can disable storage. */}};
 const saved=safeRead('piggy-settings');
-let config:Config={mode:'ai',difficulty:'easy',map:'valley',timer:45,seed:Date.now(),vehicle0:'random',vehicle1:'random',...(saved?.config||{})};
-if(!MAPS.some(m=>m.id===config.map)) config.map='valley';
-if(saved?.balanceVersion!==2) config.difficulty='easy';
-if(!DIFFICULTIES.some(d=>d.id===config.difficulty)) config.difficulty='easy';
-if(!['ai','hotseat'].includes(config.mode)) config.mode='ai';
-if(![0,30,45,60].includes(config.timer)) config.timer=45;
-if(!validChoice(config.vehicle0,config.allowDragon)) config.vehicle0='random';
-if(!validChoice(config.vehicle1,config.allowDragon)) config.vehicle1='random';
-config.seats?.forEach(s=>{if(!validChoice(s.vehicle,config.allowDragon))s.vehicle='random';});
+let config:Config={slots:defaultSlots(),map:'valley',timer:45,seed:Date.now(),...(saved?.config||{})};
+config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',timer:[0,30,45,60].includes(config.timer)?config.timer:45,seed:Date.now(),snow:config.snow,fog:config.fog,fireLine:config.fireLine,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,allowDragon:config.allowDragon};
+if(config.slots.filter(s=>s.enabled).length<2||new Set(config.slots.filter(s=>s.enabled).map(s=>s.team)).size<2)config.slots=defaultSlots();
 let game=new Game(config);
 const audio=new AudioManager();
 audio.setSoundEnabled(saved?.soundEnabled??saved?.sound??true);audio.setMusicEnabled(saved?.musicEnabled??saved?.sound??true);audio.setVolume(saved?.audioVersion===2?clamp(Number(saved.volume)||0,0,1):Math.max(0.65,clamp(Number(saved?.volume)||0.65,0,1)));
@@ -56,11 +50,6 @@ let swRegistration:ServiceWorkerRegistration|undefined;
 let checkingVersion=false;
 const keys=new Set<string>();
 
-function avatar(pink=true) {
-  const name=pink?'咪猪头':'大猪头爸爸';
-  return `<button class="portrait-button" data-portrait="${pink?0:1}" aria-label="查看${name}的大头像" title="点我，看看${name}"><img src="${import.meta.env.BASE_URL}icons/${pink?'icon-192.png':'dad-avatar.png'}" alt="${name}"/><span class="portrait-peek">${icon('plus')}</span></button>`;
-}
-
 $('#app').innerHTML=`
   <header class="site-header">
     <a class="brand" href="${import.meta.env.BASE_URL}" aria-label="咪猪头的疯狂坦克首页"><span class="brand-mark"><img src="${import.meta.env.BASE_URL}icons/icon-192.png" alt=""/></span><span class="brand-type">咪猪头的疯狂坦克<small>MIMI’S CRAZY TANKS</small></span></a>
@@ -68,21 +57,17 @@ $('#app').innerHTML=`
     <div class="header-tools"><button id="install-button" class="button button-outline install-button hidden">安装游戏</button><span class="local-badge"><span class="status-dot"></span>本地作战 · 无需联网</span><button id="sound-button" class="icon-button" aria-label="开启声音" title="开启声音">${icon('mute')}</button><button class="icon-button" data-dialog="settings" aria-label="游戏设置" title="游戏设置">${icon('settings')}</button></div>
   </header>
   <main class="main-shell">
-    <div class="page-heading"><div><div class="eyebrow"><span class="tiny-line"></span> 小小炮手，大大冒险</div><h1>风起，<span>开火。</span><span class="title-dot"></span></h1></div><div class="heading-actions"><div class="match-config"><span id="mode-label">单人演习</span><span class="config-divider"></span><span id="difficulty-label">老兵 AI</span></div><button id="new-game" class="button button-outline">${icon('refresh')}新对局</button></div></div>
+    <div class="page-heading"><div><div class="eyebrow"><span class="tiny-line"></span> 小小炮手，大大冒险</div><h1>风起，<span>开火。</span><span class="title-dot"></span></h1></div><div class="heading-actions"><div class="match-config"><span id="mode-label">自定义战场</span><span class="config-divider"></span><span id="difficulty-label">2 名炮手</span></div><button id="new-game" class="button button-outline">${icon('refresh')}新对局</button></div></div>
     <div class="game-layout">
       <section class="combat-column" aria-label="战场与操控">
         <div class="battle-card">
-          <div class="scoreboard">
-            <div class="player-hud pink"><span class="avatar">${avatar()}</span><div class="player-info"><div class="player-name">咪猪头 <span class="player-role" id="role-0">你</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-0"></span></div><span class="hp-value" id="hp-0">150 <small>/ 150</small></span></div><div class="status-line" id="status-0">状态良好</div></div></div>
-            <div class="versus"><span>VS</span><small>友谊第一，准头第二</small></div>
-            <div class="player-hud green"><div class="player-info"><div class="player-name"><span class="player-role" id="role-1">老兵 AI</span> <span id="name-1">大猪头爸爸</span></div><div class="health-line"><span class="hp-value" id="hp-1">150 <small>/ 150</small></span><div class="health-track"><span id="hp-bar-1"></span></div></div><div class="status-line" id="status-1">状态良好</div></div><span class="avatar">${avatar(false)}</span></div>
-          </div>
+          <div class="scoreboard"></div>
           <div class="battle-stage">
             <canvas id="battlefield" width="1280" height="600" aria-label="可破坏的炮术战场；使用下方面板或键盘调整角度、力度和移动。空袭与传送可点击战场选择位置。"></canvas>
             <div id="minimap-panel" class="minimap-panel"><div class="minimap-header"><button id="minimap-toggle" aria-label="折叠小地图" aria-expanded="true"><span>小地图</span>${icon('chevron')}</button><button id="minimap-follow" aria-label="恢复战场镜头跟随">跟随</button></div><canvas id="minimap" aria-label="小地图，点击定位视野"></canvas></div><div class="stage-top"><span class="map-chip">${icon('mountain')}<span id="map-label">青苔峡谷</span><span class="map-code" id="map-code">01</span></span><div class="wind-chip">${icon('wind')}<span id="wind-label">微风待命</span></div><button id="inventory-toggle" class="stage-button stage-extra inventory-toggle" aria-label="展开军火库" aria-expanded="false">${icon('shell')}<span>军火库</span></button><button id="fullscreen-button" class="stage-button stage-extra" title="全屏作战" aria-label="全屏作战">${icon('fullscreen')}</button><button id="layout-button" class="stage-button stage-extra" title="切换标准布局" aria-label="切换标准布局">${icon('shrink')}</button><button id="pause-button" class="stage-button" title="暂停 · Esc" aria-label="暂停游戏">${icon('pause')}</button></div>
             <div id="turn-indicator" class="turn-indicator hidden"><span class="status-dot"></span><span id="turn-text">轮到你了</span><span class="turn-divider"></span><span id="round-text">第 01 回合</span></div>
             <div id="timer" class="timer hidden">${icon('clock')}<span>45</span><small>s</small></div>
-            <div id="lobby-overlay" class="lobby-overlay"><div class="lobby-tag">FIELD NOTES / 01</div><h2>好风景。<br>也要好准头。</h2><p>调整角度，借一阵风。<br>让下一发，刚好落在对手身旁。</p><button id="start-button" class="button button-dark">进入战场 ${icon('arrow')}</button><span class="lobby-hint">单人挑战 AI / 双人热座对决</span></div>
+            <div id="lobby-overlay" class="lobby-overlay"><div class="lobby-tag">FIELD NOTES / 01</div><h2>好风景。<br>也要好准头。</h2><p>调整角度，借一阵风。<br>让下一发，刚好落在对手身旁。</p><button id="start-button" class="button button-dark">进入战场 ${icon('arrow')}</button><span class="lobby-hint">打开槽位，选好队旗，安排炮手</span></div>
 <div id="game-overlay" class="game-overlay hidden"></div>
             <div class="stage-bottom"><span id="field-note">丘陵地形 · 可破坏环境</span><span>${icon('sun')}<span id="gravity-note">重力 1.0 g</span><button id="stage-version-button" class="version-button" aria-label="点击版本号检查更新">v${APP_VERSION} · 检查更新</button></span></div>
           </div>
@@ -138,9 +123,10 @@ function paintMapChoices(){
   });
 }
 
-function persistSettings() {save('piggy-settings',{config,soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,volume:audio.volume,balanceVersion:2,audioVersion:2});}
+function colorNames(message:string){let text=message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');for(const t of [...game.tanks].sort((a,b)=>b.name.length-a.name.length))text=text.replaceAll(t.name,nameMarkup(t.name,t.team));return text;}
+function persistSettings() {save('piggy-settings',{config,soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,volume:audio.volume,balanceVersion:2,audioVersion:2,slotVersion:1});}
 function updateSound() {const b=$('#sound-button');b.innerHTML=icon(audio.soundEnabled||audio.musicEnabled?'sound':'mute');b.setAttribute('aria-label','声音设置');b.title='分别设置音效与背景音乐';}
-function toast(message:string) {const el=$('#toast');el.textContent=message;el.classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>el.classList.remove('visible'),2700);}
+function toast(message:string) {const el=$('#toast');el.innerHTML=colorNames(message);el.classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>el.classList.remove('visible'),2700);}
 function displayTank(){return game.active;}
 function renderInventory() {
   const tank=displayTank(),vehicle=tank.vehicleId?vehicleById(tank.vehicleId):null;
@@ -181,22 +167,22 @@ function updateUI() {
   ['#weapon-normal','#weapon-special','#weapon-bonus'].forEach((selector,i)=>{$<HTMLButtonElement>(selector).disabled=!human||(t.ammo[pair[i]]??0)<=0;});
   $('#tank-pack-label').textContent=v?' / '+v.name:'';
   $('#instrument-tank').textContent=v?.name??'炮术演习';$('#angle-limits').textContent=`${t.minAngle}–${t.maxAngle}°`;
-  $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=config.mode==='hotseat'&&game.tanks.every(t=>t.controller==='human')?String(game.delayFor(t,shownWeapon)):'—';
+  $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=game.delayEnabled?String(game.delayFor(t,shownWeapon)):'—';
   $('#previous-power').hidden=t.lastPower===null||lobby||game.phase==='ended';$('#previous-power').style.left=t.lastPower===null?'0%':`${t.lastPower}%`;
   const quick=TURN_ITEMS;const quickSignature=quick.map(id=>`${id}:${t.items[id]}:${game.itemUnavailable(id)}`).join('|')+'|'+game.teleporting;
   if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,i)=>{const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id);return `<button data-item="${id}" class="${id==='teleport'&&game.teleporting?'selected':''}" aria-pressed="${id==='teleport'&&game.teleporting}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+i}${reason?' · '+reason:''}" aria-label="快捷使用${item.name}">${icon(item.icon)}<span>${["双发","转移","加强","补给"][i]}</span><small>${t.items[id]}</small></button>`;}).join('');}
-  $('.wait-readout').dataset.helpDescription=!(config.mode==='hotseat'&&game.tanks.every(t=>t.controller==='human'))?'AI 对局严格交替行动，DELAY 排序已关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
+  $('.wait-readout').dataset.helpDescription=!(game.delayEnabled)?'含 AI 的对局按存活槽位轮转，DELAY 排序关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
   $('#pwa-update').classList.toggle('hidden',!pendingUpdate||(!lobby&&game.phase!=='ended'));
   $('.battle-stage').classList.toggle('started',!lobby);
   $('#move-left').setAttribute('aria-label','向左移动，长按持续行驶并转向左侧');
   $('#move-right').setAttribute('aria-label','向右移动，长按持续行驶并转向右侧');
   $('#move-left .icon').style.transform='';
   $('#move-right .icon').style.transform='';
-  $('#mode-label').textContent=config.mode==='ai'?'单机小队':'多人热座';
-  $('#difficulty-label').textContent=`${config.formation??'1v1'} · ${game.tanks.filter(t=>t.controller==='ai').length} 位 AI`;
+  $('#mode-label').textContent='自定义战场';
+  $('#difficulty-label').textContent=`${game.tanks.length} 名炮手 · ${new Set(game.tanks.map(t=>t.team)).size} 面队旗`;
   const hudSignature=game.tanks.map(t=>`${t.id}:${t.crew}:${t.vehicleId}:${t.controller}:${t.difficulty}:${t.team}`).join('|');
   if(hudSignature!==lastHud){
-    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud ${tank.team===0?'pink':'green'} team-${tank.team}" data-hud="${tank.id}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="查看${tank.name}的大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button></span><div class="player-info"><div class="player-name">${tank.name}<span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
+    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud team-${tank.team}" data-hud="${tank.id}" data-slot-id="${tank.slot}" style="--flag-ink:${teamFlag(tank.team).color};--flag-paper:${teamFlag(tank.team).paper}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="查看${tank.name}的大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button></span><div class="player-info"><div class="player-name">${flagIcon(tank.team)}${nameMarkup(tank.name,tank.team)}<span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
   }
   game.tanks.forEach((tank,i)=>{
     $(`#hp-${i}`).innerHTML=`${tank.hp} <small>/ ${tank.maxHP}</small>`;
@@ -204,10 +190,10 @@ function updateUI() {
     $(`[data-hud="${i}"]`).classList.toggle('acting',game.current===i&&game.phase!=='ended');$(`[data-hud="${i}"]`).classList.toggle('eliminated',tank.hp<=0);
     const status=[tank.poisoned?'中毒':isRaging(tank)?'发怒 +50%':isRedHealth(tank)?'喘气中':'',tank.immobile?'禁移动':'',tank.doubleShot?'双发装填':'',tank.boost?'威力加强':'',tank.frozen?'冻结':'',tank.shield?`护盾 ${tank.shield}`:'',tank.reaction?.kind==='direct'?'哭泣':tank.reaction?.kind==='graze'?'擦伤':tank.reaction?.kind==='fall'?'摔伤':'',tank.vehicleId?vehicleById(tank.vehicleId).name:''].filter(Boolean).join(' · ');
     $(`#status-${i}`).textContent=status;
-    const portrait=$<HTMLButtonElement>(`[data-hud="${i}"] .portrait-button`);portrait.dataset.helpName=tank.name;portrait.dataset.helpDescription=`${status} · 生命 ${tank.hp}/${tank.maxHP}`;
+    const portrait=$<HTMLButtonElement>(`[data-hud="${i}"] .portrait-button`);portrait.dataset.helpName=tank.name;portrait.dataset.helpColor=teamFlag(tank.team).color;portrait.dataset.helpDescription=`${status} · 生命 ${tank.hp}/${tank.maxHP}`;
   });
-  $('.dashboard').style.setProperty('--actor-paper',CREW[game.active.crew].paper);
-  $('.dashboard').style.setProperty('--actor-color',CREW[game.active.crew].color);
+  $('.dashboard').style.setProperty('--actor-paper',teamFlag(game.active.team).paper);
+  $('.dashboard').style.setProperty('--actor-color',teamFlag(game.active.team).color);
   if(lastActor!==game.current){lastActor=game.current;$('.dashboard').classList.remove('handoff-pulse');void $('.dashboard').offsetWidth;$('.dashboard').classList.add('handoff-pulse');}
   $('#map-label').textContent=MAPS.find(m=>m.id===config.map)!.name+(game.fog?` · 浓雾 ${game.fogTurnsRemaining}`:'')+(game.snow?' · 飘雪':'')+(game.fireLine?` · 火线 +50% ·${game.fireLineTurnsRemaining} 回合`:'');
   $('#map-code').textContent=String(MAPS.findIndex(m=>m.id===config.map)+1).padStart(2,'0');
@@ -219,8 +205,8 @@ function updateUI() {
   $('#lobby-overlay').classList.toggle('hidden',!lobby);
   $('#turn-indicator').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff');
   $('#timer').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff'||config.timer===0);
-  $('#turn-text').textContent=game.phase==='supply'?'补给正在空降 · 计时暂停':game.phase==='flying'?'炮弹飞行中':game.phase==='resolving'?'观察战场…':game.active.controller==='ai'?`${game.active.name}正在瞄准…`:`${game.active.name}，到你了` ;
-  $('#turn-indicator').classList.toggle('opponent-turn',game.active.team===1);
+  $('#turn-text').innerHTML=colorNames(game.phase==='supply'?'补给正在空降 · 计时暂停':game.phase==='flying'?'炮弹飞行中':game.phase==='resolving'?'观察战场…':game.active.controller==='ai'?`${game.active.name}正在瞄准…`:`${game.active.name}，到你了` );
+  $('#turn-indicator').style.setProperty('--flag-ink',teamFlag(game.active.team).color);$('#turn-indicator').style.setProperty('--flag-paper',teamFlag(game.active.team).paper);
   $('#round-text').textContent=game.round>=21?'决胜时刻':`第 ${String(game.round).padStart(2,'0')} 轮`;
   $('#timer span').textContent=String(Math.ceil(Math.max(0,game.clock))).padStart(2,'0');$('#timer').classList.toggle('urgent',game.clock<10);
   $('#angle-value').textContent=String(Math.round(t.angle));$('#relative-angle').textContent=`${Math.round(t.angle)}°`;$('#absolute-angle').textContent=`${Math.round(game.aim(t).absolute)}°`;$('#angle-limits').textContent=`车身 ${t.minAngle}–${t.maxAngle}° · 水平 ${Math.round(game.aim(t,t.minAngle).absolute)}–${Math.round(game.aim(t,t.maxAngle).absolute)}°`;$('#power-value').textContent=String(Math.round(t.power));
@@ -253,7 +239,7 @@ function updateUI() {
 function positionResult(){
   const layer=$('#game-overlay'),card=layer.querySelector<HTMLElement>('.result');if(!card)return;
   const sx=layer.clientWidth/WORLD_W,sy=layer.clientHeight/renderer.viewHeight;
-  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-50)*sx,y:(t.y-(t.hp>0?100:25)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?130:50)*sy}));
+  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-50)*sx,y:(t.y-(t.hp>0?124:28)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?154:54)*sy}));
   const mapBox=$('#minimap-panel').getBoundingClientRect(),box=layer.getBoundingClientRect();
   const map={x:mapBox.x-box.x,y:mapBox.y-box.y,width:mapBox.width,height:mapBox.height};
   card.style.position='absolute';card.style.width='370px';
@@ -269,12 +255,12 @@ function updateOverlay() {
   } else if(game.phase==='ended') {
     recordStats();
     if(game.resultAge<3){el.classList.add('hidden');el.innerHTML='';return;}
-    el.classList.remove('hidden');const draw=game.winner===null,winner=draw?'双方队长':game.tanks.filter(t=>t.team===game.winner).map(t=>t.name).join('与');
-    el.innerHTML=`<div class="overlay-card result"><span class="overlay-symbol">${icon('trophy')}</span><div class="eyebrow">一场漂亮的对决</div><h2>${draw?'握手言和。':`${winner}，好准头！`}</h2><p>${draw?'双双出局，平局也是一种默契。':`${winner}赢得了胜利。下一发，会更精彩。`}</p><div class="result-stats"><div><strong>${game.round}</strong><span>交战轮数</span></div><div><strong>${game.tanks.reduce((n,t)=>n+t.shots,0)}</strong><span>发射炮弹</span></div><div><strong>${game.tanks[0].damage}</strong><span>咪猪头伤害</span></div></div><button class="button button-dark" data-action="rematch">再来一局 ${icon('refresh')}</button><button class="text-button" data-dialog="setup">更换战场与模式</button></div>`;
+    el.classList.remove('hidden');const draw=game.winner===null,winner=draw?'各位炮手':game.tanks.filter(t=>t.team===game.winner).map(t=>nameMarkup(t.name,t.team)).join('与');
+    el.innerHTML=`<div class="overlay-card result"><span class="overlay-symbol">${icon('trophy')}</span><div class="eyebrow">一场漂亮的对决</div><h2>${draw?'握手言和。':`${winner}，好准头！`}</h2><p>${draw?'全部出局，平局也是一种默契。':`${winner}赢得了胜利。下一发，会更精彩。`}</p><div class="result-stats"><div><strong>${game.round}</strong><span>交战轮数</span></div><div><strong>${game.tanks.reduce((n,t)=>n+t.shots,0)}</strong><span>发射炮弹</span></div><div><strong>${game.tanks.find(t=>t.crew==='mimi')?.damage??game.tanks.reduce((n,t)=>n+t.damage,0)}</strong><span>${game.tanks.some(t=>t.crew==='mimi')?nameMarkup('咪猪头',game.tanks.find(t=>t.crew==='mimi')!.team)+'伤害':'总计伤害'}</span></div></div><button class="button button-dark" data-action="rematch">再来一局 ${icon('refresh')}</button><button class="text-button" data-dialog="setup">调整槽位与战场</button></div>`;
   } else {el.classList.add('hidden');el.innerHTML='';}
 }
 function recordStats() {
-  if(statsRecorded) return;statsRecorded=true;stats.games++;if(game.winner===0) stats.wins++;stats.damage+=game.tanks[0].damage;stats.shots+=game.tanks[0].shots;save('piggy-stats',stats);
+  if(statsRecorded) return;statsRecorded=true;stats.games++;if(game.winner===game.tanks.find(t=>t.crew==='mimi')?.team) stats.wins++;stats.damage+=game.tanks.find(t=>t.crew==='mimi')?.damage??0;stats.shots+=game.tanks.find(t=>t.crew==='mimi')?.shots??0;save('piggy-stats',stats);
 }
 function setImmersive(value:boolean) {
   immersive=value;document.body.classList.toggle('combat-mode',value);setDrawer(false);
@@ -287,7 +273,7 @@ function setDrawer(value:boolean) {
   $('#inventory-toggle').setAttribute('aria-expanded',String(value));
   $('#inventory-toggle').setAttribute('aria-label',value?'关闭军火库':'展开军火库');
 }
-function begin() {audio.unlock();game.start();setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&(config.seats?.[t.id]?.vehicle??(t.id===0?config.vehicle0:config.vehicle1))==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
+function begin() {audio.unlock();game.start();setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
 function newMatch(next:Config,start=true) {
   cancelCharge();
   config={...next,seed:Date.now()};game=new Game(config);renderer.setGame(game);statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
@@ -301,23 +287,25 @@ function togglePause() {
 function showDialog(type:string) {
   const dialog=$<HTMLDialogElement>('#dialog');
   if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;audio.pause(true);moveHeld=0;keys.clear();}
-  dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles');const content=$('#dialog-content');
+  dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');
   if(type.startsWith('portrait:')) {
-    const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name;
-    const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:id===0?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，爸爸也会打歪。','装甲厚一点，心软一点。','哼哼，轮到爸爸了！','不着急，咱们慢慢瞄。'];
-    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${name}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}"><img src="${import.meta.env.BASE_URL}${crew==='fox'||crew==='fish'?`icons/${crew}-avatar.svg`:`portraits/${crew}.png`}" alt="${name}大头像"/><span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${sayings[0]}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
+    const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name,team=game.tanks[id].team;
+    const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，爸爸也会打歪。','装甲厚一点，心软一点。','哼哼，轮到爸爸了！','不着急，咱们慢慢瞄。'];
+    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}"><img src="${import.meta.env.BASE_URL}${`icons/${crew}-avatar.svg`}" alt="${name}大头像"/><span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
     let taps=0;
     $('#portrait-art').addEventListener('click',()=>{
-      $('#portrait-saying').textContent=sayings[++taps%sayings.length];
+      $('#portrait-saying').innerHTML=colorNames(sayings[++taps%sayings.length]);
       const art=$('#portrait-art');art.classList.remove('boop');void art.offsetWidth;art.classList.add('boop');
       const heart=document.createElement('span');heart.className='portrait-heart';heart.innerHTML=icon('heart');heart.style.left=`${30+(taps*17)%45}%`;art.appendChild(heart);window.setTimeout(()=>heart.remove(),900);
     });
   } else if(type==='setup') {
     content.innerHTML=setupMarkup(config,import.meta.env.BASE_URL);
-    mountSetup(content,config,import.meta.env.BASE_URL,toast,next=>{closeDialog();newMatch(next);});paintMapChoices();
+    mountSetup(content,config,import.meta.env.BASE_URL,toast,next=>{closeDialog();newMatch(next);},{soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,change:(key,value)=>{if(key==='soundEnabled')audio.setSoundEnabled(value);else if(key==='musicEnabled')audio.setMusicEnabled(value);else{config[key]=value;game.config[key]=value;}updateSound();persistSettings();}});paintMapChoices();
   } else if(type==='exit') {content.innerHTML=`<span class="eyebrow">暂别这一场炮火</span><h2>回演习场歇一歇？</h2><p class="dialog-intro">当前对局会结束，坦克选择与设置会保留。</p><button class="button button-dark dialog-primary" data-action="leave-match">回到演习场</button><button class="text-button" data-action="close">继续这场对局</button>`;
   } else if(type==='install') {
     content.innerHTML=`<span class="eyebrow">把战场装进口袋</span><h2>安装到 iPad。</h2><p class="dialog-intro">首次打开并完成离线缓存后，就能从主屏幕直接进入游戏，离线也可以开战。</p><div class="install-art"><img src="${import.meta.env.BASE_URL}icons/icon-192.png" alt="咪猪头坦克图标"/><strong>咪猪头的疯狂坦克</strong></div><ol class="install-steps"><li>用 Safari 打开游戏。</li><li>点击分享按钮，选择「添加到主屏幕」。</li><li>点「添加」，再从主屏幕打开。横过 iPad，就可以开始了。</li></ol><button class="button button-dark dialog-primary" data-action="close">知道啦 ${icon('check')}</button>`;
+  } else if(type==='vehicles') {
+    content.innerHTML=`<span class="eyebrow">战车形象手册</span><h2>十三台，各有自己的模样</h2><p class="dialog-intro">机体主色与结构参照原版角色图，炮手仍是我们的四位伙伴。</p><div class="vehicle-atlas">${VEHICLES.map(v=>`<article>${vehicleIcon(v)}<strong>${v.name}</strong><small>${v.era}</small><p>${v.trait}</p></article>`).join('')}</div><button class="button button-dark dialog-primary" data-action="close">认好了，回战场 ${icon('arrow')}</button>`;
   } else if(type==='projectiles') {
     const shells=[...VEHICLE_WEAPONS,weaponById('homing')];
     content.innerHTML=`<span class="eyebrow">小炮手的认弹手册</span><h2>看看这一发，长什么样</h2><p class="dialog-intro">26 种坦克炮弹 + 稀有空投弹。这里展示单枚，形状和颜色与战场一致。强化炮弹临时带星星尾迹；威力加强与火线共用一次 +50%，不可叠加。火线最多持续 2 个行动回合。</p><div class="shell-gallery">${shells.map(w=>`<article><canvas class="shell-card-art" data-shell="${w.id}" aria-label="${w.name}弹体"></canvas><strong>${w.name}</strong><small>${VEHICLES.find(v=>v.normal===w.id||v.special===w.id)?.name??'稀有空投'} · ${w.shots??1} 枚${w.effect==='homing'?' · 追踪':''}</small></article>`).join('')}</div><div class="atlas-footer"><span>弹体为本作重新绘制，数值为 Web 版配置</span><a href="${HISTORICAL_GUIDE}" target="_blank" rel="noopener">查看旧版攻略</a></div><button class="button button-dark dialog-primary" data-action="close">认好了，去开炮 ${icon('arrow')}</button>`;
@@ -326,7 +314,7 @@ function showDialog(type:string) {
   } else if(type==='stats') {
     content.innerHTML=`<span class="eyebrow">每一发，都算数</span><h2>你的炮手履历。</h2><p class="dialog-intro">留在这台设备上的小小战绩，记录咪猪头完成的对局。</p><div class="stats-grid"><div><strong>${stats.games}</strong><span>完成对局</span></div><div><strong>${stats.wins}</strong><span>咪猪头获胜</span></div><div><strong>${stats.shots}</strong><span>发射次数</span></div><div><strong>${stats.damage}</strong><span>累计伤害</span></div></div><div class="stats-empty">${icon('trophy')}<p>${stats.games?'好准头都是练出来的。下一局，也许更漂亮。':'第一枚勋章，正等着你的第一场胜利。'}</p></div><button class="button button-dark dialog-primary" data-action="close">回到战场 ${icon('arrow')}</button>`;
   } else if(type==='log') {
-    content.innerHTML=`<span class="eyebrow">战场里的那些瞬间</span><h2>作战记录。</h2><p class="dialog-intro">最近 24 条事件 · 当前第 ${game.round} 轮</p><ol class="battle-log">${game.log.length?game.log.map((line,i)=>`<li><span>${String(game.log.length-i).padStart(2,'0')}</span>${line}</li>`).join(''):'<li>战场很安静。第一发炮弹会写下故事。</li>'}</ol><button class="button button-dark dialog-primary" data-action="close">返回对局 ${icon('arrow')}</button>`;
+    content.innerHTML=`<span class="eyebrow">战场里的那些瞬间</span><h2>作战记录。</h2><p class="dialog-intro">最近 24 条事件 · 当前第 ${game.round} 轮</p><ol class="battle-log">${game.log.length?game.log.map((line,i)=>`<li><span>${String(game.log.length-i).padStart(2,'0')}</span>${colorNames(line)}</li>`).join(''):'<li>战场很安静。第一发炮弹会写下故事。</li>'}</ol><button class="button button-dark dialog-primary" data-action="close">返回对局 ${icon('arrow')}</button>`;
   } else {
     content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>轻快的战场音乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','队友之间可造成伤害'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="settings-note">${icon('music')}<p>背景音乐与部分音效来自你提供的素材；炮火声由音频合成生成。开关和音量会保存在这台设备。</p></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
     $('#effects-toggle').addEventListener('click',()=>{audio.unlock();audio.setSoundEnabled(!audio.soundEnabled);$('#effects-toggle').classList.toggle('on',audio.soundEnabled);$('#effects-toggle').setAttribute('aria-checked',String(audio.soundEnabled));updateSound();persistSettings();});
@@ -499,7 +487,7 @@ function frame(now:number) {
   const tracking=game.projectiles.find(p=>p.homing);audio.updateTracking(Boolean(tracking)&&!game.paused&&game.phase==='flying',tracking?.weapon,tracking?.x??0,game.tanks[game.viewer].x);
   if(charge&&(!game.humanTurn||charge.tank!==game.current)) cancelCharge();
   for(const event of game.drainEvents()) {
-    if(event.type!=='explosion') $('#battle-message').textContent=event.message;
+    if(event.type!=='explosion') $('#battle-message').innerHTML=colorNames(event.message);
     if(event.type==='shot') audio.play(event.transfer?'transfer':'shot',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='explosion') audio.play('explosion',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='weather')toast(event.message);

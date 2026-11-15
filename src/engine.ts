@@ -6,7 +6,7 @@ import { Terrain, WORLD_W, WORLD_H, WATER_Y, TERRAIN_H } from './terrain';
 import {rollWeather} from './weather';
 import {buildClassicMap} from './classic-maps';
 
-import {defaultSeats,CREW,type Seat,type CrewId,type Formation} from './crew';
+import {defaultSlots,slotProblem,teamFlag,CREW,type Slot,type CrewId} from './crew';
 import {aimGeometry} from './aim';
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
@@ -14,9 +14,9 @@ export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
 export const SHOT_WIND_GAIN=3;
 export const BRIDGE_THICKNESS=130;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
-export interface Config { mode:'ai'|'hotseat'; difficulty:Difficulty; map:MapId; timer:number; seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;vehicle0?:VehicleChoice;vehicle1?:VehicleChoice;formation?:Formation;seats?:Seat[];selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean }
+export interface Config {slots:Slot[];map:MapId;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean }
 export interface Tank {
-  id:number; name:string;crew:CrewId;team:0|1;controller:'human'|'ai';difficulty:Difficulty; x:number; y:number; hp:number; shield:number; fuel:number;
+  id:number; name:string;crew:CrewId;slot:number;team:number;controller:'human'|'ai';difficulty:Difficulty; x:number; y:number; hp:number; shield:number; fuel:number;
   angle:number; power:number; direction:number; ammo:Record<WeaponId,number>;
   items:Record<ItemId,number>; frozen:number; boost:boolean; itemUsed:boolean;
   fallVelocity:number; fallStart:number; shots:number; damage:number;
@@ -60,18 +60,17 @@ export class Game {
   private firedBy=0;
 
   constructor(config:Partial<Config>={}) {
-    this.config={mode:'ai',difficulty:'easy',map:'valley',timer:45,seed:Date.now(),...config};
+    this.config={slots:defaultSlots(),map:'valley',timer:45,seed:Date.now(),...config};
+    if(this.config.slots.length!==4||slotProblem(this.config.slots))throw new Error(slotProblem(this.config.slots)??'需要四个固定槽位');
     this.rng=makeRng(this.config.seed);
     const weather=rollWeather(this.rng);this.fog=this.config.fog??weather.fog;
     this.fogTurnsRemaining=this.fog?2:0;
     if(this.config.fireLine??weather.fireLine) this.fireLine={x:450+this.rng()*380,top:50,bottom:550};
     this.fireLineTurnsRemaining=this.fireLine?2:0;
     this.generateTerrain();
-    const defaults=defaultSeats(this.config.formation??'1v1',this.config.mode,this.config.difficulty);
-    const seats=defaults.map((seat,i)=>({...seat,...this.config.seats?.[i]}));
-    if(!this.config.seats){seats[0].vehicle=this.config.vehicle0??'random';seats[1].vehicle=this.config.vehicle1??'random';}
-    this.tanks=seats.map((seat,i)=>this.createTank(i,175+i*260,seat));
-    this.movingUntil=seats.map(()=>0);
+    const participants=this.config.slots.map((slot,index)=>({...slot,index})).filter(s=>s.enabled);
+    this.tanks=participants.map((seat,i)=>this.createTank(i,175+i*260,seat,seat.index));
+    this.movingUntil=participants.map(()=>0);
     this.placeStartingTanks();this.heardX=this.tanks.map(t=>Math.round(t.x/90)*90);
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.targetX=this.tanks[1].x;
@@ -85,7 +84,8 @@ export class Game {
   get snow(){return this.config.snow===true;}
   get humanTurn() { return this.phase==='aiming' && !this.paused && this.active.hp>0 && this.active.controller==='human'; }
   get round() { return Math.floor(this.turn/this.tanks.length)+1; }
-  get viewer() {return this.active.controller==='human'?this.current:this.tanks.find(t=>t.controller==='human'&&t.team===this.active.team)?.id??0;}
+  get viewer() {return this.active.controller==='human'||this.tanks.every(t=>t.controller==='ai')?this.current:this.tanks.find(t=>t.controller==='human'&&t.hp>0&&t.team===this.active.team)?.id??this.tanks.find(t=>t.controller==='human'&&t.hp>0)?.id??this.current;}
+  get delayEnabled(){return this.tanks.every(t=>t.controller==='human');}
   ground(x:number,fromY=0) { return this.land.below(x,fromY); }
   support(x:number,footY:number) {
     return this.walkSupport(x,footY);
@@ -156,13 +156,12 @@ export class Game {
     }
     return previous;
   }
-  private createTank(id:number,x:number,seat:Seat):Tank {
+  private createTank(id:number,x:number,seat:Slot,slot:number):Tank {
     const choice=seat.vehicle;
-    const legacy=!this.config.seats&&!this.config.vehicle0&&!this.config.vehicle1;
-    const vehicleId=!legacy&&choice?resolveVehicle(choice,this.rng):null,v=vehicleId?vehicleById(vehicleId):null;
+    const vehicleId=choice?resolveVehicle(choice,this.rng):null,v=vehicleId?vehicleById(vehicleId):null;
     const ammo=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,v?0:w.ammo])) as Record<WeaponId,number>;
     if(v) {ammo[v.normal]=Infinity;ammo[v.special]=Infinity;}
-    return {id,crew:seat.crew,team:seat.team,controller:seat.controller,difficulty:seat.difficulty,name:CREW[seat.crew].name,x,y:this.ground(x)-18,hp:v?.hp??150,shield:0,fuel:100,angle:clamp(48,v?.minAngle??5,v?.maxAngle??175),power:68,direction:id===0?1:-1,
+    return {id,slot,crew:seat.crew,team:seat.team,controller:seat.controller,difficulty:seat.difficulty,name:CREW[seat.crew].name,x,y:this.ground(x)-18,hp:v?.hp??150,shield:0,fuel:100,angle:clamp(48,v?.minAngle??5,v?.maxAngle??175),power:68,direction:id===0?1:-1,
       ammo,
       items:Object.fromEntries(ITEMS.map(i=>[i.id,TURN_ITEMS.includes(i.id)?1:0])) as Record<ItemId,number>,
       frozen:0,boost:false,itemUsed:false,fallVelocity:0,fallStart:0,shots:0,damage:0,tactics:2,turnsTaken:0,
@@ -187,7 +186,7 @@ export class Game {
     if(pair){
       const chosen=[...pair];
       for(let i=2;i<this.tanks.length;i++){const options=pool.filter(x=>chosen.every(at=>Math.abs(x-at)>=90));chosen.push(options[Math.floor(this.rng()*options.length)]??(i===2?430:850));}
-      this.tanks.forEach((t,i)=>{t.x=chosen[i];t.y=this.ground(t.x)-18;t.direction=t.team===0?1:-1;});
+      this.tanks.forEach((t,i)=>{t.x=chosen[i];t.y=this.ground(t.x)-18;});this.tanks.forEach(t=>t.direction=this.opponents(t)[0]?.x>t.x?1:-1);
     }
   }
   private generateTerrain() {
@@ -382,15 +381,15 @@ export class Game {
     if(effect==='helix') {p.x-=p.weaveX;p.y-=p.weaveY;}
     const oldX=p.x,oldY=p.y;
     if((p.weapon==='homing'||effect==='homing')&&(p.vy>0||p.homing)) {
-      const radius=spec.homingRadius??140,formation=this.volleyTargets.get(p.volley);
+      const radius=spec.homingRadius??140,volleyTarget=this.volleyTargets.get(p.volley);
       if(p.lockTarget===null&&p.age>.18&&p.y>this.ground(p.x)-130) {
         // Classic guided missiles have no IFF. The bonus supply weapon keeps enemy-only targeting.
         const candidates=this.tanks.filter(t=>t.hp>0&&this.canDamage(t,p.owner));
-        const x=formation?.x??p.x,y=formation?.y??p.y;
+        const x=volleyTarget?.x??p.x,y=volleyTarget?.y??p.y;
         const nearest=[...candidates].sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];
-        if(formation?.target!==null&&formation?.target!==undefined) p.lockTarget=formation.target;
+        if(volleyTarget?.target!==null&&volleyTarget?.target!==undefined) p.lockTarget=volleyTarget.target;
         else if(nearest&&Math.hypot(nearest.x-x,nearest.y-y)<radius) {
-          p.lockTarget=nearest.id;if(formation)formation.target=nearest.id;
+          p.lockTarget=nearest.id;if(volleyTarget)volleyTarget.target=nearest.id;
         }
       }
       const target=p.lockTarget===null?null:this.tanks[p.lockTarget];
@@ -572,7 +571,7 @@ export class Game {
     this.tanks.forEach(t=>t.lastPower=null);
     this.fog=false;this.fogTurnsRemaining=0;this.fireLine=null;this.fireLineTurnsRemaining=0;
     this.winner=teams.size?[...teams][0]:null;
-    this.emit('win',this.winner===null?'双方打成了平局！':`${this.winner===0?'暖桃队':'青苔队'}赢得了这场对决！`);
+    this.emit('win',this.winner===null?'各队同时出局，平局！':`${teamFlag(this.winner).letter} 旗${teamFlag(this.winner).name}队赢得了这场对决！`);
     return true;
   }
   nextTurn() {
@@ -587,10 +586,10 @@ export class Game {
     if(!previous.delayCommitted)previous.lastDelay=this.delayFor(previous);
     previous.boost=false;previous.doubleShot=false;
     // DELAY is a PVP rule. Single-player always hands one complete action to the other side.
-    if(this.config.mode==='hotseat'&&this.tanks.every(t=>t.controller==='human')){previous.nextActionAt+=previous.lastDelay;this.current=this.tanks.filter(t=>t.hp>0).sort((a,b)=>a.nextActionAt-b.nextActionAt||a.id-b.id)[0].id;}
+    if(this.delayEnabled){previous.nextActionAt+=previous.lastDelay;this.current=this.tanks.filter(t=>t.hp>0).sort((a,b)=>a.nextActionAt-b.nextActionAt||a.id-b.id)[0].id;}
     else {do{this.current=(this.current+1)%this.tanks.length;}while(this.active.hp<=0);}
     this.turn++;
-    if(this.fog&&--this.fogTurnsRemaining<=0){this.fog=false;this.emit('weather','雾气散去了，双方重新可见。');}
+    if(this.fog&&--this.fogTurnsRemaining<=0){this.fog=false;this.emit('weather','雾气散去了，战场重新可见。');}
     if(this.fireLine&&--this.fireLineTurnsRemaining<=0){this.fireLine=null;this.emit('weather','火线熄灭了，强化通道已关闭。');}
     const preferred=this.active.selectedWeapon;
     this.selected=(this.active.ammo[preferred]??0)>0?preferred:this.active.vehicleId?vehicleById(this.active.vehicleId).normal:'shell';this.teleporting=false;

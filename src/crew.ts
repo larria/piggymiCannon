@@ -1,17 +1,18 @@
-import type {Difficulty} from './catalog';
-import type {VehicleChoice} from './vehicles';
+import {DIFFICULTIES,type Difficulty} from './catalog';
+import {validChoice,type VehicleChoice} from './vehicles';
 export type CrewId='mimi'|'dad'|'fox'|'fish';
-export type Formation='1v1'|'1v2'|'2v1'|'2v2';
-export interface Seat {crew:CrewId;team:0|1;controller:'human'|'ai';difficulty:Difficulty;vehicle:VehicleChoice}
-export const CREW={mimi:{name:'咪猪头',color:'#dd8e77',paper:'#f4e5db',symbol:'猪'},dad:{name:'大猪头爸爸',color:'#83976b',paper:'#e9eedf',symbol:'爸'},fox:{name:'阿狸',color:'#c56c48',paper:'#f4e4d5',symbol:'狸'},fish:{name:'小黄鱼',color:'#c5a44d',paper:'#f5efd8',symbol:'鱼'}} as const;
-export function defaultSeats(formation:Formation='1v1',mode:'ai'|'hotseat'='ai',difficulty:Difficulty='easy'):Seat[]{
- const [a,b]=formation.split('v').map(Number);
- const seats:Seat[]=[{crew:'mimi',team:0,controller:'human',difficulty,vehicle:'random'},{crew:'dad',team:1,controller:mode==='hotseat'?'human':'ai',difficulty,vehicle:'random'}];
- if(a===2)seats.push({crew:'fox',team:0,controller:mode==='hotseat'?'human':'ai',difficulty,vehicle:'random'});
- if(b===2)seats.push({crew:a===2?'fish':'fox',team:1,controller:mode==='hotseat'?'human':'ai',difficulty,vehicle:'random'});
- return seats;
+export interface Slot {enabled:boolean;crew:CrewId;team:number;controller:'human'|'ai';difficulty:Difficulty;vehicle:VehicleChoice|null}
+export type Seat=Slot;
+export const CREW={mimi:{name:'咪猪头',color:'#dd8e77',paper:'#f4e5db',symbol:'猪'},dad:{name:'大猪头爸爸',color:'#64859d',paper:'#e4edf2',symbol:'爸'},fox:{name:'阿狸',color:'#c56c48',paper:'#f4e4d5',symbol:'狸'},fish:{name:'小黄鱼',color:'#c5a44d',paper:'#f5efd8',symbol:'鱼'}} as const;
+export const CREW_ORDER:CrewId[]=['mimi','dad','fox','fish'];
+export const FLAGS=[{name:'暖桃',letter:'A',color:'#a34c3c',paper:'#f5e5df',shape:'square'},{name:'青苔',letter:'B',color:'#466c44',paper:'#e8eedf',shape:'fork'},{name:'晴空',letter:'C',color:'#386a8c',paper:'#e3edf2',shape:'wave'},{name:'麦穗',letter:'D',color:'#826023',paper:'#f5ecd6',shape:'diamond'}] as const;
+export function teamFlag(team:number){const color=FLAGS[((team%4)+4)%4];return {...color,letter:team<4&&team>=0?color.letter:String(team+1),name:team<4&&team>=0?color.name:`队伍 ${team+1}`};}
+export function flagIcon(team:number){const f=teamFlag(team),paths={square:'M7 3h17v14H7z',fork:'M7 3h20l-5 7 5 7H7z',wave:'M7 4q7-4 17 0v13q-10-4-17 0z',diamond:'M7 10 17 2l11 8-11 8z'};return `<svg class="flag-icon" viewBox="0 0 32 26" aria-hidden="true"><path d="M6 2v22" stroke="${f.color}" stroke-width="2" stroke-linecap="round"/><path d="${paths[f.shape]}" fill="${f.color}"/><text x="16" y="13" fill="#fff8ec" font-size="9" text-anchor="middle" font-family="sans-serif" font-weight="600">${f.letter}</text></svg>`;}
+export function defaultSlots():Slot[]{return CREW_ORDER.map((crew,i)=>({enabled:i<2,crew,team:i,controller:i===0?'human':'ai',difficulty:'easy',vehicle:'random'}));}
+export function normalizeSlots(input:unknown,allowDragon=false):Slot[]{
+ const defaults=defaultSlots();if(!Array.isArray(input)||input.length!==4)return defaults;
+ return defaults.map((d,i)=>{const s=input[i]??{};return {...d,enabled:s.enabled===true,team:Number.isInteger(s.team)&&s.team>=0?s.team:d.team,controller:s.controller==='human'?'human':'ai',difficulty:DIFFICULTIES.some(x=>x.id===s.difficulty)?s.difficulty:d.difficulty,vehicle:validChoice(s.vehicle,allowDragon)?s.vehicle:'random'};});
 }
-export function crewAvatar(id:CrewId,base=''){
- if(id==='mimi'||id==='dad')return `<img src="${base}icons/${id==='mimi'?'icon-192.png':'dad-avatar.png'}" alt="${CREW[id].name}"/>`;
- return `<img src="${base}icons/${id}-avatar.svg" alt="${CREW[id].name}"/>`;
-}
+export function slotProblem(slots:Slot[]){const active=slots.filter(s=>s.enabled);return active.length<2?'至少开启两个槽位':active.length>4?'最多四个槽位':new Set(active.map(s=>s.team)).size<2?'至少使用两面不同的队旗':null;}
+export function crewAvatar(id:CrewId,base=''){return `<img src="${base}icons/${id}-avatar.svg" alt="${CREW[id].name}"/>`;}
+export function nameMarkup(name:string,team:number){return `<span class="crew-name" style="color:${teamFlag(team).color}">${name}</span>`;}

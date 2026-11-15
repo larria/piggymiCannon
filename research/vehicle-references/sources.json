@@ -27,5 +27,237 @@
       "path_thumbnail": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3152590/ss_475da5c57fa147a72ed8e4674a97adba93c448ea.600x338.jpg?t=1784604805",
       "path_full": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3152590/ss_475da5c57fa147a72ed8e4674a97adba93c448ea.1920x1080.jpg?t=1784604805"
     }
-  ]
+  ],
+  "character_references": [
+    {
+      "id": "bowl",
+      "file": "bowl.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMTc0/MDAxNTAzNDAzMjk2MDU1.LuQHdQyyWTMEFBk8O43RJBUYAbgPBDuUDZIysnZawa4g.L-lYPZE6_x2Wwlv3hlZFxp7duGO5c7xOHsW1Rkp7OL8g.GIF.twelvecolor/txt_type0103.gif",
+      "panel": "original-panels/0103.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        200
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        200
+      ]
+    },
+    {
+      "id": "crossbow",
+      "file": "crossbow.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMjc1/MDAxNTAzNDAzMjk2NDUw.s9vVFw3rdXQHaxEFPnc0GlmFGyUBqSwmINVgT79c9hkg.K2r9n5cWeNNOgN2YzJr-L1hrEdPh87Arl8pNeFRT3W8g.GIF.twelvecolor/txt_type0101.gif",
+      "panel": "original-panels/0101.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        200
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        200
+      ]
+    },
+    {
+      "id": "cannon",
+      "file": "cannon.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMjY4/MDAxNTAzNDAzMjk2ODk5.8TbUqLC9L-Rz3g62jEkkyUHbV7j-vDHowOX83dyehuog.zh6sNbnlmNFWcb110rqOH0K3j9msSy8R-CngQwxQlkQg.GIF.twelvecolor/txt_type0102.gif",
+      "panel": "original-panels/0102.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        213
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        213
+      ]
+    },
+    {
+      "id": "duke",
+      "file": "duke.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMjYw/MDAxNTAzNDAzMjk3MjAx._pWsdxrII2Caz5K4jYe2_zHjr_9lRu_K1TdFECAmHagg.zThkcquPhk-KDlWcFXslzNtk1Zf0KKF294RvULzcul8g.GIF.twelvecolor/txt_type0201.gif",
+      "panel": "original-panels/0201.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        200
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        200
+      ]
+    },
+    {
+      "id": "beetle",
+      "file": "beetle.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMTQz/MDAxNTAzNDAzMjk3NTI1.rbdlPh4sCHDVxe1nmME8-T0j00s2mkY3aX99MC7eZP0g.vj2vggn0U0GhK7crrGtIStAfiJYhpvjqH8iFybFIpbAg.GIF.twelvecolor/txt_type0202.gif",
+      "panel": "original-panels/0202.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        213
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        213
+      ]
+    },
+    {
+      "id": "mine",
+      "file": "mine.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMjYy/MDAxNTAzNDAzMjk3ODk1.Z6FB-ppUXWpYkugkA8DK0HsH2vUu-jJ8Hcelriki03Ug.oKpOsVXkOQVdn_pae_dmYSeG7qyw8YTynD30CGbfgYIg.GIF.twelvecolor/txt_type0203.gif",
+      "panel": "original-panels/0203.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        225
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        225
+      ]
+    },
+    {
+      "id": "missile",
+      "file": "missile.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMTY0/MDAxNTAzNDAzMjk4NzA1.lFCVl7-M3_1uNUerBMACC-jIyt9pUB9Jz_fy0XwWpu0g.vHtV0Syqb2shRunjYq9MdanI2mc7vjR6zukZ_JWY8AQg.GIF.twelvecolor/txt_type0301.gif",
+      "panel": "original-panels/0301.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        240
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        240
+      ]
+    },
+    {
+      "id": "multi",
+      "file": "multi.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMjIg/MDAxNTAzNDAzMjk4OTk0.IWxPyi_4xomw-_4B5NzZQXMJxF_YYiigP13c4ckY-b4g.v-7d7-AnO_Cbncg1PI3eg7ut5mwTD26X6kwaMDcwORsg.GIF.twelvecolor/txt_type0302.gif",
+      "panel": "original-panels/0302.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        213
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        213
+      ]
+    },
+    {
+      "id": "laser",
+      "file": "laser.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMTE5/MDAxNTAzNDAzMjk5Mzkz._364sD_ZNyxGAZ7gNGOIFnCOpObAmIhvOLOftAycbLUg.A9z-RQ2J4n70iDh-ULLFx43TaUHjcoiIH18EWcX9jfYg.GIF.twelvecolor/txt_type0401.gif",
+      "panel": "original-panels/0401.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        240
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        240
+      ]
+    },
+    {
+      "id": "ion",
+      "file": "ion.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMjc2/MDAxNTAzNDAzMjk5NzAx.u4VYBW0vPVf4ozFe1BAXDYq2q18TKd8pollDCLfZvlog.VqWeDJx2C500nCb8CH3l89D6JUJAdO5M576ShMefNYIg.GIF.twelvecolor/txt_type0402.gif",
+      "panel": "original-panels/0402.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        213
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        213
+      ]
+    },
+    {
+      "id": "sea",
+      "file": "sea.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMTI5/MDAxNTAzNDAzMzAwNzc1.VRdYCdfFxi5imTKJK9FGFDw42EkA6jEiffP4Yx7v1Lcg.hvxbB6Jw0u1IK8-CyW-0j-1LRimgZzVSjzjmu_8bwsAg.GIF.twelvecolor/txt_type0403.gif",
+      "panel": "original-panels/0403.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        273
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        273
+      ]
+    },
+    {
+      "id": "water",
+      "file": "water.jpg",
+      "source": "https://m.blog.naver.com/twelvecolor/221268500439",
+      "original_url": "https://blogfiles.pstatic.net/MjAxNzA4MjJfMTY1/MDAxNTAzNDAzMzAxMzUx.oNQSmx0HvSAML_0Ccjoyd5BPMB4pJFa_YPDHpyPTWXkg.1N5Q3SpWSKvZorVFZMT0MC9pt0fd99I0EWcixioQ6mcg.GIF.twelvecolor/txt_type0404.gif",
+      "panel": "original-panels/0404.gif",
+      "kind": "Complete left-character illustration from the named official F2 Blue/Red panel repost (not anime art)",
+      "original_size": [
+        705,
+        224
+      ],
+      "crop": [
+        0,
+        0,
+        190,
+        224
+      ]
+    },
+    {
+      "id": "dragon",
+      "file": "dragon.jpg",
+      "source": "https://m.dailygame.co.kr/view.php?ud=200908261208260014641_26",
+      "original_url": "https://cgeimage.commutil.kr/phpwas/restmb_allidxmake.php?pp=002&idx=3&simg=200908261208260014641dgame_1.jpg&nmt=26",
+      "kind": "2009 named Super Tank article illustration",
+      "original_size": [
+        800,
+        698
+      ]
+    }
+  ],
+  "character_reference_date": "2026-11-15",
+  "missile_identity": "red warhead missile, user confirmed",
+  "rejected_reference": "The named Naver Super Tank section used a tiny Random-choice screenshot; replaced with a clear 800x698 illustration."
 }

@@ -1,7 +1,8 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {aiAimOffset,ALL_WEAPONS} from '../src/catalog.ts';
 import {WEAPON_REFERENCE} from '../src/weapon-reference.ts';
-import {Game,makeRng} from '../src/engine.ts';import {VEHICLES,VEHICLE_WEAPONS,resolveVehicle,vehicleById} from '../src/vehicles.ts';
+import {makeRng} from '../src/engine.ts';import {VEHICLES,VEHICLE_WEAPONS,resolveVehicle,vehicleById} from '../src/vehicles.ts';
 const game=(id:any='cannon',other:any='cannon')=>{const g=new Game({vehicle0:id,vehicle1:other,mode:'hotseat',seed:52,timer:0,fog:false,fireLine:false});g.start();return g;};
 test('the classic roster has twelve ordinary tanks, hidden dragon and twenty-six named weapons',()=>{
  assert.equal(VEHICLES.length,13);assert.equal(VEHICLES.filter(v=>!v.hidden).length,12);assert.equal(VEHICLE_WEAPONS.length,26);

@@ -1,5 +1,6 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game,BRIDGE_THICKNESS} from '../src/engine.ts';
+import {BRIDGE_THICKNESS} from '../src/engine.ts';
 import {TURN_ITEMS,excavation} from '../src/catalog.ts';
 import {VEHICLES,vehicleById} from '../src/vehicles.ts';
 import {isRaging,isRedHealth,redHealthLimit} from '../src/health.ts';

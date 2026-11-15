@@ -1,6 +1,7 @@
+import {Game} from './legacy-fixture';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game,WATER_Y} from '../src/engine.ts';
+import {WATER_Y} from '../src/engine.ts';
 import {MAPS,ALL_WEAPONS,excavation} from '../src/catalog.ts';
 import {TEMPLE_NODES,templeRail} from '../src/classic-maps.ts';
 

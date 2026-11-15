@@ -1,7 +1,9 @@
 import type {Tank} from './engine';
 import {CREW} from './crew';
+import {paintMimi,paintDad} from './pig-art';
 // The whole character uses one parent transform; the head never receives a separate jump.
 export function paintCrew(c:CanvasRenderingContext2D,t:Tank,time:number,state:'idle'|'move'|'fire'|'hurt'|'win'|'lose',breath=false){
+ if(t.crew==='mimi'){paintMimi(c,t,time,state,breath);return;}if(t.crew==='dad'){paintDad(c,t,time,state,breath);return;}
  const fox=t.crew==='fox',fish=t.crew==='fish';
  const pulse=Math.sin(time*(state==='win'?7:state==='hurt'?22:state==='move'?16:4));
  c.save();c.translate(-12,-14);

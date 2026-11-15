@@ -6,7 +6,7 @@ import {defeatedPig,victoryConfetti} from './result-art';
 import {vehicleById} from './vehicles';
 import {projectileArt,paintVehicle} from './vehicle-art';
 import {paintCrew} from './crew-art';
-import {CREW} from './crew';
+import {CREW,teamFlag} from './crew';
 import {classicBackdrop,classicDetails} from './classic-map-art';
 
 interface Palette {sky:string;horizon:string;sun:string;mountains:string[];soil:string;soilLight:string;grass:string;grassLight:string;water:string;ink:string}
@@ -191,13 +191,12 @@ export class Renderer {
   }
   private visibleAt(x:number) {return !this.game.fog||Math.abs(x-this.game.tanks[this.game.viewer].x)<230;}
   private tank(t:Tank) {
-    const ctx=this.ctx,g=this.game,isPink=t.id===0;
+    const ctx=this.ctx,g=this.game;
     if(t.hp<=0) {
-      if(!t.outOfBounds&&t.fallVelocity===0&&g.support(t.x,t.y+18)<WATER_Y){if(t.crew==='fox'||t.crew==='fish'){ctx.save();ctx.translate(t.x,t.y);ctx.rotate(g.tankSlope(t));ctx.scale(t.direction,1);paintCrew(ctx,t,this.time,'lose');ctx.restore();}else defeatedPig(ctx,t,this.time,g.tankSlope(t));}
+      if(!t.outOfBounds&&t.fallVelocity===0&&g.support(t.x,t.y+18)<WATER_Y){ctx.save();ctx.translate(t.x,t.y);ctx.rotate(g.tankSlope(t));ctx.scale(t.direction,1);paintCrew(ctx,t,this.time,'lose');ctx.restore();}
       return;
     }
     const vehicle=t.vehicleId?vehicleById(t.vehicleId):null;
-    const body=vehicle?.color??(isPink?'#e39079':'#81946c'),dark=isPink?'#a66250':'#52684d',light=isPink?'#f1b097':'#a8b98c';
     const slope=g.tankSlope(t);
     ctx.save();ctx.translate(t.x,t.y);ctx.rotate(slope);ctx.scale(t.direction,1);
     ctx.fillStyle='#34413028';ctx.beginPath();ctx.ellipse(0,17,33,7,0,0,Math.PI*2);ctx.fill();
@@ -219,13 +218,13 @@ export class Renderer {
     const active=g.current===t.id&&g.phase!=='lobby'&&g.phase!=='ended';
     if(active) {
       const bob=Math.sin(this.time*6)*5;
-      ctx.fillStyle=CREW[t.crew].color;ctx.beginPath();ctx.moveTo(-5,-82+bob);ctx.lineTo(5,-82+bob);ctx.lineTo(0,-75+bob);ctx.closePath();ctx.fill();
+      ctx.fillStyle=teamFlag(t.team).color;ctx.beginPath();ctx.moveTo(-7,-100+bob);ctx.lineTo(7,-100+bob);ctx.lineTo(0,-90+bob);ctx.closePath();ctx.fill();
     }
     const label=t.name;ctx.font='600 11px "PingFang SC", sans-serif';ctx.textAlign='center';
     const labelWidth=Math.max(58,ctx.measureText(label).width+20);
-    ctx.fillStyle='#fbf8ecdd';rr(ctx,-labelWidth/2,-70,labelWidth,21,10);ctx.fill();ctx.fillStyle='#4f5d49';ctx.fillText(label,0,-55);
-    ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-44,46,3,1.5);ctx.fill();ctx.fillStyle=body;rr(ctx,-23,-44,46*t.hp/t.maxHP,3,1.5);ctx.fill();
-    if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,32,-68,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.fillText('中毒',49,-56);}
+    ctx.fillStyle='#fbf8ecdd';rr(ctx,-labelWidth/2,-86,labelWidth,21,10);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;ctx.fillText(label,0,-71);
+    ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-60,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,-60,46*t.hp/t.maxHP,3,1.5);ctx.fill();
+    if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,32,-84,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.fillText('中毒',49,-72);}
     ctx.restore();
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}
     if(t.boost) {ctx.fillStyle='#f5cc83';ctx.font='bold 17px sans-serif';ctx.fillText('↑',34,-29);}
