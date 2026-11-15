@@ -28,6 +28,8 @@ export interface Tank {
   vehicleId:VehicleId|null;maxHP:number;minAngle:number;maxAngle:number;moveSpeed:number;moveDistance:number;nextActionAt:number;lastDelay:number;poisoned:boolean;immobile:number;
   selectedWeapon:WeaponId;lastPower:number|null;poisonOwner?:number;actionTime:number;movedThisTurn:number;itemDelay:number;delayCommitted:boolean;outOfBounds:boolean;
 }
+export interface DefeatPose {x:number;y:number;slope:number;direction:number}
+export interface Tank {defeat?:DefeatPose|null;deathResolved?:boolean}
 export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean;aimOffsetX?:number;aimOffsetY?:number }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
 export interface Blast { x:number;y:number;radius:number;life:number;maxLife:number;color:string }
@@ -71,6 +73,8 @@ export class Game {
   private visualRandom=false;
   private projectileSequence=0;
   private fallOrigins=new Map<number,unknown>();
+  private explosionDepth=0;
+  private blastGrounded=new Map<number,DefeatPose>();
   private firedBy=0;
   private aiMoveGoal:number|null=null;
   private aiPending:{weapons:WeaponId[];offset:number;level:number;miss:boolean;target:number}|null=null;
@@ -97,6 +101,23 @@ export class Game {
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:Math.floor(this.turn/Math.max(1,this.tanks.length))+1,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
   private traceRules(){return {雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,直接选择暴龙:!!this.config.allowDragon};}
+  private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
+    if(t.outOfBounds||t.y+18>=WATER_Y||t.x<0||t.x>WORLD_W)return null;
+    const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
+    if(foot>=WATER_Y||(groundedOnly&&(!near||t.fallVelocity>0)))return null;
+    const y=near?t.y:foot-18,probe={...t,y,fallVelocity:0};
+    return {x:t.x,y,slope:this.tankSlope(probe),direction:t.direction};
+  }
+  private settleDefeat(t:Tank) {
+    if(t.hp>0||t.deathResolved)return;
+    // The outer blast remembers land BEFORE excavation, including nested mines.
+    // Once resolved this is a visual marker, never another terrain physics body.
+    const pose=t.outOfBounds||t.y+18>=WATER_Y?null:this.blastGrounded.get(t.id)??this.landPose(t);
+    t.defeat=pose?{...pose}:null;t.deathResolved=true;t.fallVelocity=0;
+    if(!pose)t.outOfBounds=true;
+    this.movingUntil[t.id]=0;
+    this.recordBattle('defeat-state',`${t.name}${pose?'立即进入陆地趴地哭泣，位置固定':'不留残骸：落水／出界或无陆地落点'}`,{target:t.id,pose:t.defeat,outOfBounds:t.outOfBounds});
+  }
   private traceTanks(){return this.tanks.map(t=>({...t,flag:teamFlag(t.team),red:t.hp>0&&t.hp<=redHealthLimit(t),raging:isRaging(t),slope:this.tankSlope(t),absoluteAngle:this.aim(t).absolute}));}
   private traceTurn(type:'turn-start'|'turn-end'){
     const t=this.active;this.recordBattle(type,`${t.name}${type==='turn-start'?'开始':'结束'}行动；等待值 ${t.lastDelay}，风 ${this.wind.toFixed(2)}，火线剩余 ${this.fireLineTurnsRemaining}；${this.tanks.map(t=>`${t.name} HP${t.hp}/${t.maxHP} 护盾${t.shield}${t.poisoned?' 中毒':''}${t.frozen||t.immobile?' 冻结':''}${isRaging(t)?' 发怒':''}`).join('；')}`,{tanks:this.traceTanks(),delayEnabled:this.delayEnabled,lastDelay:t.lastDelay,nextActionAt:t.nextActionAt,wind:this.wind,fireLine:this.fireLine,fireLineTurnsRemaining:this.fireLineTurnsRemaining,fogTurnsRemaining:this.fogTurnsRemaining,rules:this.traceRules()});
@@ -529,7 +550,7 @@ export class Game {
   crater(x:number,y:number,radius:number,depth=radius,source?:{owner:number;weapon:WeaponId;traceId?:number}) {
     const removed=this.land.removeEllipse(x,y,radius,depth);
     const event=this.recordBattle('terrain',`挖土(${x.toFixed(2)},${y.toFixed(2)})，半径${radius.toFixed(2)}／深${depth.toFixed(2)}，移除${removed}像素（永久层保留）`,{x,y,radius,depth,removed,source});
-    for(const t of this.tanks) if(this.support(t.x,t.y+18)-18>t.y+3 && t.fallVelocity===0) { t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{event,source:traceClone(source??null),terrain:{x,y,radius,depth,removed},cause:'地形支撑被破坏'}); }
+    for(const t of this.tanks) if(t.hp>0&&this.support(t.x,t.y+18)-18>t.y+3 && t.fallVelocity===0) { t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{event,source:traceClone(source??null),terrain:{x,y,radius,depth,removed},cause:'地形支撑被破坏'}); }
     for(const c of this.crates) c.y=this.ground(c.x,c.y-5)-14;
     this.crates=this.crates.filter(c=>c.y<WATER_Y-14);
   }
@@ -545,6 +566,8 @@ export class Game {
     this.crater(x,y,radius,depth,p);
   }
   private explode(p:Projectile,directTarget?:number) {
+    if(this.explosionDepth++===0)for(const t of this.tanks)if(t.hp>0){const pose=this.landPose(t,true);if(pose)this.blastGrounded.set(t.id,pose);}
+    try {
     if(p.traceId===undefined)this.traceProjectile(p,p.traceParent);
     const direct=directTarget!==undefined;
     const w=weaponById(p.weapon), radius=w.radius;
@@ -590,6 +613,7 @@ export class Game {
       const target=this.tanks[directTarget];
       if(!target||target.hp<=0||!this.canDamage(target,p.owner))this.cancelVolley(p.volley);
     }
+    } finally {if(--this.explosionDepth===0)this.blastGrounded.clear();}
   }
   private triggerMines(t:Tank) {
     if(t.vehicleId==='laser'||t.vehicleId==='water') return;
@@ -606,11 +630,12 @@ export class Game {
     const hpBefore=t.hp,shieldBefore=t.shield;
     const absorbed=ignoreShield?0:Math.min(t.shield,amount);
     t.shield-=absorbed;const actual=Math.min(t.hp,amount-absorbed);t.hp-=actual;
+    if(t.hp<=0)this.settleDefeat(t);
     const high=amount>=t.maxHP*.5||actual>=t.maxHP*.5,cause=DAMAGE_CAUSES[context.cause]??context.cause,source=this.tanks[owner]?.name??`来源${owner}`,weapon=context.weapon?weaponById(context.weapon).name:'无武器／直接机制扣血';
     const detail={...context,base:context.base??amount,factors:context.factors??[],requested:amount,actual,hpBefore,hpAfter:t.hp,shieldBefore,shieldAfter:t.shield,absorbed,ignoreShield,owner,target:t.id,sourceName:source,targetName:t.name,weaponName:weapon,relation:t.id===owner?'self':this.tanks[owner]?.team===t.team?'ally':'enemy',rules:this.traceRules(),reaction,highDamage:high,position:{x:t.x,y:t.y},stateBefore:{poisoned:t.poisoned,frozen:t.frozen,immobile:t.immobile,rage:isRaging({...t,hp:hpBefore})}};
     const summary=`${high?'⚠ 高伤害 ':''}${source}→${t.name}，${weapon}／${cause}：基础${detail.base}${detail.factors.map(f=>` ×${f.value.toFixed(4)}[${f.source}]`).join('')}，计算${amount}，护盾吸收${absorbed}，实际扣血${actual}，HP ${hpBefore}→${t.hp}`;
     const damageEvent=this.recordBattle('damage',summary,detail,t.hp<=0);
-    if(t.hp<=0){const fallOrigin=this.fallOrigins.get(t.id) as any,trigger=fallOrigin?.source;const chain=['fall','out'].includes(context.cause)?`；触发：${fallOrigin?.cause??'失去地形支撑'}${trigger?`，${this.tanks[trigger.owner]?.name??trigger.owner}的${weaponById(trigger.weapon).name}挖土#${fallOrigin.event}`:''}`:'';this.recordBattle('death',`‼ ${t.name}死亡：${cause}，${source}／${weapon}；致死伤害#${damageEvent}，HP ${hpBefore}→0${chain}`,{target:t.id,cause:context.cause,damageEvent,lethal:detail,fallOrigin},true);}
+    if(t.hp<=0){const fallOrigin=this.fallOrigins.get(t.id) as any,trigger=fallOrigin?.source;const chain=['fall','out'].includes(context.cause)?`；触发：${fallOrigin?.cause??'失去地形支撑'}${trigger?`，${this.tanks[trigger.owner]?.name??trigger.owner}的${weaponById(trigger.weapon).name}挖土#${fallOrigin.event}`:''}`:'';this.recordBattle('death',`‼ ${t.name}死亡：${cause}，${source}／${weapon}；致死伤害#${damageEvent}，HP ${hpBefore}→0${chain}`,{target:t.id,cause:context.cause,damageEvent,lethal:detail,fallOrigin,defeat:t.defeat,outOfBounds:t.outOfBounds},true);}
     if(t.hp<=redHealthLimit(t))t.poisoned=false;
     if(amount>0) t.reaction={kind:actual>0?reaction:'graze',remaining:reaction==='direct'?1.4:reaction==='fall'?1.2:0.7};
     if(owner!==t.id&&actual>0) this.tanks[owner].damage+=actual;
@@ -840,6 +865,7 @@ export class Game {
   }
   update(dt:number) {
     if(this.paused) return;
+    for(const t of this.tanks)if(t.hp<=0&&!t.deathResolved)this.settleDefeat(t);
     dt=Math.min(dt,0.05);this.elapsed+=dt;
     this.shake=Math.max(0,this.shake-dt*16);
     this.particles=this.particles.filter(p=>{p.life-=dt;p.vy+=170*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;return p.life>0;});
@@ -848,12 +874,6 @@ export class Game {
     for(const tank of this.tanks) if(tank.reaction) {tank.reaction.remaining-=dt;if(tank.reaction.remaining<=0) tank.reaction=null;}
     if(this.phase==='ended'){
       this.resultAge+=dt;
-      for(const t of this.tanks)if(t.hp<=0&&!t.outOfBounds){
-        const foot=this.support(t.x,t.y+18),target=foot-18;
-        if(t.y<target-.5){t.fallVelocity+=this.gravity*dt;t.y=Math.min(target,t.y+t.fallVelocity*dt);}
-        else t.fallVelocity=0;
-        if(t.y+18>=WATER_Y)t.outOfBounds=true;
-      }
       return;
     }
     if(this.phase==='lobby'||this.phase==='handoff') return;

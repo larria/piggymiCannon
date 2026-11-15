@@ -193,7 +193,7 @@ export class Renderer {
   private tank(t:Tank) {
     const ctx=this.ctx,g=this.game;
     if(t.hp<=0) {
-      if(!t.outOfBounds&&t.fallVelocity===0&&g.support(t.x,t.y+18)<WATER_Y){ctx.save();ctx.translate(t.x,t.y);ctx.rotate(g.tankSlope(t));ctx.scale(t.direction,1);paintCrew(ctx,t,this.time,'lose');ctx.restore();}
+      defeatedPig(ctx,t,this.time);
       return;
     }
     const vehicle=t.vehicleId?vehicleById(t.vehicleId):null;
