@@ -1,0 +1,211 @@
+{
+  "date": "2026-11-15",
+  "version": "2.1.0",
+  "measure": "direct or >=max(30,5% maxHP) enemy damage in one action; all samples retained; no fog, friendly/self off, 2v2",
+  "easy": {
+    "hits": 136,
+    "total": 240,
+    "rate": 0.5666666666666667,
+    "direct": 107,
+    "moved": 0,
+    "nearestHits": 123,
+    "ms": 2397,
+    "breakdown": {
+      "valley": {
+        "hits": 15,
+        "n": 24
+      },
+      "coast": {
+        "hits": 14,
+        "n": 24
+      },
+      "moon": {
+        "hits": 14,
+        "n": 24
+      },
+      "factory": {
+        "hits": 16,
+        "n": 24
+      },
+      "temple": {
+        "hits": 14,
+        "n": 24
+      },
+      "egypt": {
+        "hits": 17,
+        "n": 24
+      },
+      "flat-90": {
+        "hits": 12,
+        "n": 24
+      },
+      "flat-130": {
+        "hits": 13,
+        "n": 24
+      },
+      "flat-220": {
+        "hits": 11,
+        "n": 24
+      },
+      "flat-600": {
+        "hits": 10,
+        "n": 24
+      }
+    }
+  },
+  "normal": {
+    "hits": 162,
+    "total": 240,
+    "rate": 0.675,
+    "direct": 136,
+    "moved": 0,
+    "nearestHits": 152,
+    "ms": 2248,
+    "breakdown": {
+      "valley": {
+        "hits": 18,
+        "n": 24
+      },
+      "coast": {
+        "hits": 15,
+        "n": 24
+      },
+      "moon": {
+        "hits": 18,
+        "n": 24
+      },
+      "factory": {
+        "hits": 13,
+        "n": 24
+      },
+      "temple": {
+        "hits": 19,
+        "n": 24
+      },
+      "egypt": {
+        "hits": 15,
+        "n": 24
+      },
+      "flat-90": {
+        "hits": 15,
+        "n": 24
+      },
+      "flat-130": {
+        "hits": 13,
+        "n": 24
+      },
+      "flat-220": {
+        "hits": 20,
+        "n": 24
+      },
+      "flat-600": {
+        "hits": 16,
+        "n": 24
+      }
+    }
+  },
+  "hard": {
+    "hits": 180,
+    "total": 240,
+    "rate": 0.75,
+    "direct": 164,
+    "moved": 0,
+    "nearestHits": 177,
+    "ms": 2233,
+    "breakdown": {
+      "valley": {
+        "hits": 18,
+        "n": 24
+      },
+      "coast": {
+        "hits": 21,
+        "n": 24
+      },
+      "moon": {
+        "hits": 18,
+        "n": 24
+      },
+      "factory": {
+        "hits": 14,
+        "n": 24
+      },
+      "temple": {
+        "hits": 18,
+        "n": 24
+      },
+      "egypt": {
+        "hits": 19,
+        "n": 24
+      },
+      "flat-90": {
+        "hits": 13,
+        "n": 24
+      },
+      "flat-130": {
+        "hits": 17,
+        "n": 24
+      },
+      "flat-220": {
+        "hits": 21,
+        "n": 24
+      },
+      "flat-600": {
+        "hits": 21,
+        "n": 24
+      }
+    }
+  },
+  "expert": {
+    "hits": 188,
+    "total": 240,
+    "rate": 0.7833333333333333,
+    "direct": 181,
+    "moved": 0,
+    "nearestHits": 187,
+    "ms": 2222,
+    "breakdown": {
+      "valley": {
+        "hits": 19,
+        "n": 24
+      },
+      "coast": {
+        "hits": 21,
+        "n": 24
+      },
+      "moon": {
+        "hits": 18,
+        "n": 24
+      },
+      "factory": {
+        "hits": 17,
+        "n": 24
+      },
+      "temple": {
+        "hits": 18,
+        "n": 24
+      },
+      "egypt": {
+        "hits": 19,
+        "n": 24
+      },
+      "flat-90": {
+        "hits": 15,
+        "n": 24
+      },
+      "flat-130": {
+        "hits": 17,
+        "n": 24
+      },
+      "flat-220": {
+        "hits": 22,
+        "n": 24
+      },
+      "flat-600": {
+        "hits": 22,
+        "n": 24
+      }
+    }
+  },
+  "uniqueSeeds": 240,
+  "baselineCommit": "5652a0a"
+}

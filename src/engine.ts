@@ -8,6 +8,7 @@ import {buildClassicMap} from './classic-maps';
 
 import {defaultSlots,slotProblem,teamFlag,CREW,type Slot,type CrewId} from './crew';
 import {aimGeometry} from './aim';
+import {chooseAIPosition,solveAIShot,type AIShot} from './ai-planner';
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
 export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
@@ -58,6 +59,9 @@ export class Game {
   private heardX=[175,1105];private afterSupply:'aiming'|'handoff'='aiming';private supplySettling=0;
   private rng:()=>number;
   private firedBy=0;
+  private aiMoveGoal:number|null=null;
+  private aiPending:{weapons:WeaponId[];offset:number;level:number;miss:boolean;target:number}|null=null;
+  aiDecision:{target:number;fromX:number;goalX:number;weapon:WeaponId;intentionalMiss:boolean}|null=null;
 
   constructor(config:Partial<Config>={}) {
     this.config={slots:defaultSlots(),map:'valley',timer:45,seed:Date.now(),...config};
@@ -601,7 +605,7 @@ export class Game {
     if(previous.frozen>0) previous.frozen--;
     if(previous.immobile>0) previous.immobile--;
     this.wind=(this.rng()-0.5)*(this.turn>=40?42:26);
-    this.clock=this.config.timer;this.aiTime=0;
+    this.clock=this.config.timer;this.aiTime=0;this.aiMoveGoal=null;this.aiPending=null;this.aiDecision=null;
     for(const f of this.fires) if(!f.weapon&&Math.abs(this.active.x-f.x)<f.radius&&Math.abs(this.active.y+18-(f.y??this.ground(f.x)))<100) this.damage(this.active,14,f.owner);
     // Six action handoffs is our lifetime cap, not a verified original-client duration.
     for(const f of this.fires)if(f.weapon||this.turn%this.tanks.length===0)f.turns--;
@@ -662,8 +666,6 @@ export class Game {
     if(level>=2) {
       const candidates:ItemId[]=[...(t.hp<=t.maxHP*.7?['repair' as ItemId]:[]),...(this.rng()>0.6?['boost' as ItemId]:[]),...(this.rng()>.8?['double' as ItemId]:[])];
       const item=candidates.find(id=>!this.itemUnavailable(id,true));if(item) this.useItem(item,true);
-      const danger=this.fires.some(f=>Math.abs(f.x-t.x)<f.radius);
-      if(danger||this.ground(t.x)>525) {for(let i=0;i<35;i++) this.move(t.x>640?-1:1,1/60,true);}
     }
     t.direction=enemyX>t.x?1:-1;
     let weapon:WeaponId='shell';
@@ -685,25 +687,37 @@ export class Game {
       if(level>=2&&!this.fog&&e.shield>0&&t.ammo.emp>0) weapon='emp';
       if(t.ammo.homing>0&&this.rng()<0.3) weapon='homing';
     }
-    this.selected=weapon;
-    const intent=aiAimOffset(difficulty,weapon,this.rng);
-    const target=enemyX+intent.offset+(this.fog?(this.rng()-0.5)*120:0);
-    if(weapon==='airstrike') {this.targetX=clamp(target,20,WORLD_W-20);return;}
-    let best=Infinity,bestAngle=48,bestPower=68;
-    for(let a=t.minAngle;a<=t.maxAngle;a+=2) for(let power=22;power<=100;power+=2) {
-      const impact=this.predict(a,power,weapon,10,t);
-      const distance=Math.hypot(impact.x-target,(impact.y-enemyY)*0.7);
-      let score=distance+(a<25?5:0)+Math.max(0,100-Math.abs(impact.x-t.x))*2;
-      if(level>=2&&!this.fog&&!intent.miss&&!impact.direct) {
-        const dig=excavation(weapon,false),dx=Math.abs(impact.x-e.x);
-        const foot=e.y+18,bottom=this.land.bottom(e.x,foot-5);
-        const reach=dx<dig.radius?dig.depth*Math.sqrt(1-(dx/dig.radius)**2):0;
-        if(dx<dig.radius-18 && impact.y-reach<=foot && impact.y+reach>=bottom && bottom<WATER_Y) score-=95;
-      }
-      if(score<best) {best=score;bestAngle=a;bestPower=power;}
+    this.aiMoveGoal=null;this.aiPending=null;
+    const targets=this.knownAITargets();
+    if(weapon==='airstrike') {this.selected=weapon;this.targetX=clamp(enemyX+aiAimOffset(difficulty,weapon,this.rng).offset,20,WORLD_W-20);return;}
+    const weapons=level===3&&t.vehicleId?[vehicleById(t.vehicleId).normal,vehicleById(t.vehicleId).special,...(t.ammo.homing>0?['homing' as WeaponId]:[])]:[weapon];
+    const planned=level===3||level===2&&this.fires.some(f=>Math.abs(f.x-t.x)<f.radius&&this.canDamage(t,f.owner))?chooseAIPosition(this,t,weapons,targets):{stay:solveAIShot(this,t,weapons,targets),best:undefined};
+    const best=planned.best??planned.stay;
+    this.selected=best.weapon;
+    const intent=aiAimOffset(difficulty,best.weapon,this.rng),offset=intent.offset+(this.fog?(this.rng()-.5)*120:0);
+    this.aiDecision={target:best.target,fromX:t.x,goalX:best.x,weapon:best.weapon,intentionalMiss:intent.miss};
+    this.applyAIShot(solveAIShot(this,t,[best.weapon],targets,offset,true,intent.miss,best.target),level);
+    if(Math.abs(best.x-t.x)>2){this.aiMoveGoal=best.x;this.aiPending={weapons:[best.weapon],offset,level,miss:intent.miss,target:best.target};}
+  }
+  private knownAITargets(){return this.opponents(this.active).map(t=>this.fog?{...t,x:this.heardX[t.id],y:this.ground(this.heardX[t.id])-18}:{...t});}
+  private applyAIShot(shot:AIShot,level:number){
+    const t=this.active;t.direction=shot.direction;this.selected=shot.weapon;t.selectedWeapon=shot.weapon;
+    t.angle=clamp(shot.angle+(this.rng()-.5)*[6,3,1.6,.5][level],t.minAngle,t.maxAngle);
+    t.power=clamp(shot.power+(this.rng()-.5)*[7,4,1.6,.5][level],10,100);
+  }
+  private updateAIMovement(dt:number){
+    if(!this.aiPending)return;
+    if(this.aiMoveGoal!==null){
+      const remaining=this.aiMoveGoal-this.active.x;
+      const moved=Math.abs(remaining)>0.01&&this.move(Math.sign(remaining),Math.min(dt,Math.abs(remaining)/this.active.moveSpeed),true);
+      if(moved&&Math.abs(this.aiMoveGoal-this.active.x)>=.1)return;
+      this.aiMoveGoal=null;
     }
-    t.angle=clamp(bestAngle+(this.rng()-0.5)*[6,3,2,1.5][level],t.minAngle,t.maxAngle);
-    t.power=clamp(bestPower+(this.rng()-0.5)*[7,4,3,2.5][level],10,100);
+    // Mines or a collapsing platform can interrupt a legal route. Wait for
+    // landing before solving from the actual support, never keep an air aim.
+    if(this.active.fallVelocity>0)return;
+    const pending=this.aiPending;this.aiPending=null;
+    this.applyAIShot(solveAIShot(this,this.active,pending.weapons,this.knownAITargets(),pending.offset,true,pending.miss,pending.target),pending.level);
   }
   private updateHazards(dt:number) {
     if(this.snow){this.fires=[];this.gases=[];return;}
@@ -770,7 +784,8 @@ export class Game {
       if(this.active.controller==='ai') {
         const previous=this.aiTime;this.aiTime+=dt;
         if(previous<0.8&&this.aiTime>=0.8) this.planAI();
-        if(this.aiTime>=1.8) this.fire(true);
+        this.updateAIMovement(dt);
+        if(this.aiTime>=1.8&&this.aiMoveGoal===null&&this.aiPending===null) this.fire(true);
       }
     } else if(this.phase==='flying') {
       // Fixed small substeps prevent fast shells tunnelling through tanks and ground.

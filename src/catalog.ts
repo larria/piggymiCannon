@@ -39,10 +39,10 @@ export const MAPS: { id:MapId; name:string; sub:string; color:string;description
   { id:'egypt', name:'古老埃及', sub:'金字塔高地 · 主题重绘',color:'#c4a274',description:'月光 2003 年赛事记录确认古老埃及场景名；未取得原版地形细节。金字塔、方尖碑和薄桥是本作战术主题重绘，不能称为原图复原。' },
 ];
 export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:number;missChance:number }[] = [
-  { id:'easy', name:'新兵', sub:'默认推荐 · 瞄准误差较大，适合练习', error:115,missChance:0.5 },
-  { id:'normal', name:'老兵', sub:'温和挑战 · 偶尔使用特殊武器', error:75,missChance:0.32 },
-  { id:'hard', name:'精英', sub:'懂得移动与道具，仍有明显射击误差', error:42,missChance:0.22 },
-  { id:'expert', name:'王牌', sub:'擅长破坏地形，也会失手，绝非发发必中', error:26,missChance:0.16 },
+  { id:'easy', name:'新兵', sub:'默认推荐 · 瞄准误差较大，适合练习', error:115,missChance:0.65 },
+  { id:'normal', name:'老兵', sub:'温和挑战 · 偶尔使用特殊武器', error:75,missChance:0.48 },
+  { id:'hard', name:'精英', sub:'会使用道具与避险，仍有明显射击误差', error:36,missChance:0.36 },
+  { id:'expert', name:'王牌', sub:'会选择射击位置与目标，仍会失手', error:10,missChance:0.19 },
 ];
 export const ALL_WEAPONS=[...WEAPONS,...VEHICLE_WEAPONS];
 const weaponTable=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,w])) as Record<WeaponId,Weapon>;

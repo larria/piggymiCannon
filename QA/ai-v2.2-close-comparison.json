@@ -1,0 +1,98 @@
+{
+  "protocol": "same fixture, 2v2, all Cannon, self/friendly off, 24 unique seeds per distance, +/-9 and 0 wind; nearest target damage checked separately",
+  "v2.1.0": {
+    "75": {
+      "n": 24,
+      "any": 6,
+      "nearest": 6,
+      "lowPower": 1
+    },
+    "90": {
+      "n": 24,
+      "any": 0,
+      "nearest": 0,
+      "lowPower": 14
+    },
+    "110": {
+      "n": 24,
+      "any": 0,
+      "nearest": 0,
+      "lowPower": 11
+    },
+    "130": {
+      "n": 24,
+      "any": 0,
+      "nearest": 0,
+      "lowPower": 8
+    },
+    "170": {
+      "n": 24,
+      "any": 14,
+      "nearest": 14,
+      "lowPower": 14
+    },
+    "roof": {
+      "effective": false,
+      "direct": false,
+      "damage": 0,
+      "damageById": {},
+      "nearestHit": false,
+      "moved": 0,
+      "angle": 25,
+      "power": 22.675910247373395,
+      "weapon": "cannon-normal"
+    }
+  },
+  "candidate": {
+    "75": {
+      "n": 24,
+      "any": 18,
+      "nearest": 18,
+      "lowPower": 23
+    },
+    "90": {
+      "n": 24,
+      "any": 20,
+      "nearest": 20,
+      "lowPower": 24
+    },
+    "110": {
+      "n": 24,
+      "any": 19,
+      "nearest": 19,
+      "lowPower": 24
+    },
+    "130": {
+      "n": 24,
+      "any": 17,
+      "nearest": 17,
+      "lowPower": 24
+    },
+    "170": {
+      "n": 24,
+      "any": 21,
+      "nearest": 21,
+      "lowPower": 24
+    },
+    "roof": {
+      "effective": true,
+      "direct": true,
+      "damage": 630,
+      "damageById": {
+        "1": 630
+      },
+      "decision": {
+        "target": 1,
+        "fromX": 250,
+        "goalX": 378,
+        "weapon": "cannon-special",
+        "intentionalMiss": false
+      },
+      "nearestHit": true,
+      "moved": 128,
+      "angle": 25,
+      "power": 20.03960276534781,
+      "weapon": "cannon-special"
+    }
+  }
+}

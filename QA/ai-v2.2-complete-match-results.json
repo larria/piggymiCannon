@@ -1,0 +1,43 @@
+{
+  "games": 36,
+  "shots": 443,
+  "hits": 340,
+  "direct": 306,
+  "intentional": 83,
+  "intentionalHits": 16,
+  "moves": 53,
+  "unfinished": 0,
+  "rate": 0.7674943566591422,
+  "maps": {
+    "valley": {
+      "games": 6,
+      "shots": 79,
+      "hits": 56
+    },
+    "coast": {
+      "games": 6,
+      "shots": 98,
+      "hits": 69
+    },
+    "moon": {
+      "games": 6,
+      "shots": 66,
+      "hits": 54
+    },
+    "factory": {
+      "games": 6,
+      "shots": 80,
+      "hits": 59
+    },
+    "temple": {
+      "games": 6,
+      "shots": 59,
+      "hits": 47
+    },
+    "egypt": {
+      "games": 6,
+      "shots": 61,
+      "hits": 55
+    }
+  }
+}
