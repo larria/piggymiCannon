@@ -1,0 +1,85 @@
+{
+  "version": "2.2.3",
+  "corpse": {
+    "observed": 2,
+    "persisted": true,
+    "matchPhase": "ended"
+  },
+  "snapshot": {
+    "clipboardActual": true,
+    "formatVersion": 1,
+    "gameVersion": "2.2.3",
+    "events": 198,
+    "damageEvents": 9,
+    "deathEvents": 2,
+    "bytes": 261885,
+    "hasSeed": true,
+    "hasFourSlots": true,
+    "hasTerrain": true,
+    "hasRandomState": true,
+    "noSnapshotStorage": true
+  },
+  "bundle": {
+    "hash": "9b11f62022fa4d28d7f7a19cc085e16891c25160a58425481e3b6a7b21549b76",
+    "cancellation": true,
+    "snapshot": true,
+    "defeat": true
+  },
+  "bundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "worker": "https://larria.github.io/piggymiCannon/sw.js",
+  "orientation": "landscape",
+  "offlineReload": true,
+  "offlineFourExpertAI": true,
+  "roles": [
+    "王牌 AI",
+    "王牌 AI",
+    "王牌 AI",
+    "王牌 AI"
+  ],
+  "log": "18\n小黄鱼\n，轮到你了。\n17\n小红豆直接命中，集中伤害。\n16\n小黄鱼\n受到 420 点伤害。\n15\n小红豆直接命中，集中伤害。\n14\n小黄鱼\n受到 420 点伤害。\n13\n双发装填追加了一轮齐射。\n12\n阿狸\n发射了小红豆。\n11\n阿狸\n使用了双发。\n10\n阿狸\n，轮到你了。\n09\n小红豆直接命中，集中伤害。\n08\n咪猪头\n受到 420 点伤害。\n07\n大猪头爸爸\n发射了小红豆。\n06\n大猪头爸爸\n使用了补给。\n05\n大猪头爸爸\n，轮到你了。\n04\n小红豆直接命中，集中伤害。\n03\n大猪头爸爸\n受到 420 点伤害。\n02\n咪猪头\n发射了小红豆。\n01\n咪猪头\n，轮到你了。",
+  "assets": [
+    {
+      "path": "icons/mimi-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 899
+    },
+    {
+      "path": "icons/dad-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 1105
+    },
+    {
+      "path": "icons/fox-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 738
+    },
+    {
+      "path": "icons/fish-avatar.svg",
+      "ok": true,
+      "type": "image/svg+xml",
+      "bytes": 805
+    },
+    {
+      "path": "fonts/dm-sans-regular.ttf",
+      "ok": true,
+      "type": "font/ttf",
+      "bytes": 48280
+    },
+    {
+      "path": "audio/bgm-sunny-30s.mp3",
+      "ok": true,
+      "type": "audio/mp3",
+      "bytes": 761382
+    }
+  ],
+  "errors": [],
+  "qaHook": false,
+  "researchRequests": [],
+  "sourceCommit": "20f4b429436a90123b2b0ae880ed9eb60997ec7f",
+  "pagesCommit": "f3a143e7f8150d18958ccb0fc08bf338d213c3ca",
+  "pagesStatus": "built"
+}
