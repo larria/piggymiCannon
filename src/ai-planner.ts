@@ -2,6 +2,7 @@ import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,type Game,type Tank} from './engine';
 import {weaponById,excavation,type WeaponId} from './catalog';
 import {aimGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
+import {projectileSpeed} from './ballistics';
 
 export interface AIShot {angle:number;power:number;direction:number;weapon:WeaponId;target:number;utility:number;effective:boolean;x:number;y:number}
 type Body={tank:Tank;slope:number;hostile:boolean;eligible:boolean};
@@ -20,7 +21,7 @@ function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetI
 // terrain, HP, ammo, weather, particles or the live volley-lock map.
 export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0){
  const {game:g,shooter:t,slope}=w,spec=weaponById(weapon),v=aimGeometry(angle,slope,t.direction);
- const speed=(120+power*6.1)*(weapon==='sniper'?2:spec.speed??1)*speedScale;
+ const speed=projectileSpeed(power,weapon==='sniper'?2:spec.speed??1,g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*speedScale;
  let x=t.x+Math.sin(slope)*13+v.x*31,y=t.y-Math.cos(slope)*13+v.y*31,vx=v.x*speed,vy=v.y*speed;
  let age=0,wx=0,wy=0,lock:Body|undefined,boost=t.boost?1.5:1,orbital=false;
  let direct:Body|undefined,landed=false;

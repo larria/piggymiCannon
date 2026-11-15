@@ -11,6 +11,7 @@ import {aimGeometry} from './aim';
 import {chooseAIPosition,solveAIShot,type AIShot} from './ai-planner';
 import {BattleTrace,packTerrain,unpackTerrain,snapshotText,traceClone,type BattleSnapshot} from './battle-trace';
 import {MAPS} from './catalog';
+import {projectileSpeed} from './ballistics';
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
 export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
@@ -390,7 +391,7 @@ export class Game {
   }
   launch(t:Tank,weapon:WeaponId,angle=t.angle,power=t.power):Projectile {
     const vector=this.aim(t,angle),muzzle=this.muzzle(t,angle);
-    const spec=weaponById(weapon),speed=(120+power*6.1)*(weapon==='sniper'?2:spec.speed??1);
+    const spec=weaponById(weapon),speed=projectileSpeed(power,weapon==='sniper'?2:spec.speed??1,this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
     const rage=isRaging(t)?1.5:1;
     const weather=t.vehicleId==='water'&&this.snow?1.25:1;
     return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:t.vehicleId&&!spec.effect?6:1,phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:rage>1?1.15:1,rage:rage>1};

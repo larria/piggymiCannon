@@ -1,3 +1,4 @@
+import {boot} from './qa-app';
 import { test,expect } from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {Game} from '../legacy-fixture';import {makeRng} from '../../src/engine';
@@ -152,7 +153,10 @@ test('movement and charge create audio, and pausing cancels the charge without f
   await expect(page.locator('.battle-log')).not.toContainText('发射了');
 });
 test('airdrop follows its own stage and preserves the full turn clock',async({page})=>{
-  await start(page,true,'coast',52,'45');
+  await page.addInitScript(()=>{Date.now=()=>52;});await boot(page,true,'coast','bowl','bowl');
+  // Isolate supply timing from the deliberately changed minimum-shot range.
+  // Destroying the near platform can legitimately leave no safe crate landing.
+  await page.evaluate(()=>{const g=(window as any).__qa.game;g.config.timer=45;g.clock=45;g.fog=false;g.fireLine=null;g.fireLineTurnsRemaining=0;g.land.protectedMask.set(g.land.mask);});
   for(let i=0;i<5;i++) {
     await page.locator('#fire-button').click();
     if(i<4) {await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});}

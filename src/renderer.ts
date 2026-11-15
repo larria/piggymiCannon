@@ -25,6 +25,7 @@ export class Renderer {
   game:Game; palette:Palette; ratio=1;time=0;viewHeight=WORLD_H;offsetY=0;offsetX=0;
   private windMotes:{x:number;y:number;vx:number;fall:number;alpha:number;size:number;phase:number}[]=[];
   private manualFocus:number|null=null;
+  private labelRects:{left:number;right:number;top:number;bottom:number}[]=[];
   focusAt(y:number){this.manualFocus=clamp(y-this.viewHeight*.52,-this.viewHeight*.6,WORLD_H-this.viewHeight+90);}
   follow(){this.manualFocus=null;}
   constructor(canvas:HTMLCanvasElement,game:Game) {
@@ -213,15 +214,20 @@ export class Renderer {
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
     // Names stay upright even when the tank turns around.
+    ctx.font='600 11px "PingFang SC", sans-serif';
+    const labelWidth=Math.max(58,ctx.measureText(t.name).width+20),celebrateOffset=celebrating?-26:0;
+    let labelOffset=0;
+    const box=()=>({left:t.x-labelWidth/2,right:t.x+Math.max(labelWidth/2,t.poisoned?67:0),top:t.y-86+celebrateOffset+labelOffset,bottom:t.y-55+celebrateOffset+labelOffset});
+    for(let attempt=0;attempt<4;attempt++){const b=box();if(!this.labelRects.some(a=>b.left<a.right+4&&b.right>a.left-4&&b.top<a.bottom+4&&b.bottom>a.top-4))break;labelOffset-=36;}
+    this.labelRects.push(box());
     ctx.save();ctx.translate(t.x,t.y);
-    ctx.save();ctx.translate(0,celebrating?-26:0);
+    ctx.save();ctx.translate(0,celebrateOffset+labelOffset);
     const active=g.current===t.id&&g.phase!=='lobby'&&g.phase!=='ended';
     if(active) {
       const bob=Math.sin(this.time*6)*5;
       ctx.fillStyle=teamFlag(t.team).color;ctx.beginPath();ctx.moveTo(-7,-100+bob);ctx.lineTo(7,-100+bob);ctx.lineTo(0,-90+bob);ctx.closePath();ctx.fill();
     }
     const label=t.name;ctx.font='600 11px "PingFang SC", sans-serif';ctx.textAlign='center';
-    const labelWidth=Math.max(58,ctx.measureText(label).width+20);
     ctx.fillStyle='#fbf8ecdd';rr(ctx,-labelWidth/2,-86,labelWidth,21,10);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;ctx.fillText(label,0,-71);
     ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-60,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,-60,46*t.hp/t.maxHP,3,1.5);ctx.fill();
     if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,32,-84,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.fillText('中毒',49,-72);}
@@ -267,7 +273,7 @@ export class Renderer {
       if(['double','homing','transfer','boost'].includes(crate.type)) {ctx.fillStyle=crate.type==='double'?'#e7c081':'#acc4d0';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(crate.type==='double'?'×2':crate.type==='transfer'?'⇄':crate.type==='boost'?'↑':'◎',crate.x,crate.y+9);}
       if(crate.type==='medical') {ctx.fillStyle='#a47158';ctx.fillRect(crate.x-7,crate.y-2,14,4);ctx.fillRect(crate.x-2,crate.y-7,4,14);}
     }
-    g.tanks.filter(t=>g.visible(t)).forEach(t=>this.tank(t));
+    this.labelRects=[];g.tanks.filter(t=>g.visible(t)).forEach(t=>this.tank(t));
     for(const p of g.projectiles) {
       if(p.delay>0||!this.visibleAt(p.x)) continue;
       ctx.strokeStyle=weaponById(p.weapon).color+'90';ctx.lineWidth=p.weapon==='sniper'?2:3;

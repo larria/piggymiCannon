@@ -5,7 +5,7 @@ import { Renderer } from './renderer';
 import { AudioManager } from './audio';
 import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type WeaponId } from './catalog';
 import { icon } from './icons';
-import { chargePower } from './interaction';
+import { chargePower,touchChargePower } from './interaction';
 import {installMobileGestureGuards} from './mobile-gestures';
 import {chooseResultPosition} from './result-layout';
 import { registerSW } from 'virtual:pwa-register';
@@ -40,7 +40,7 @@ let dialogPaused=false;
 let statsRecorded=false;
 let toastTimer=0;let snapshotStatusTimer=0;
 let moveHeld=0;
-let charge:null|{pointer:number|null;startedAt:number;previousPower:number;tank:number}=null;
+let charge:null|{pointer:number|null;startedAt:number;previousPower:number;tank:number;touch:boolean;pointerStartedAt?:number}=null;
 let aimPointer:number|null=null;
 let immersive=false;
 let drawerOpen=false;
@@ -397,36 +397,40 @@ $('#items-tab').addEventListener('click',()=>{activeTab='items';lastInventory=''
 $('#angle').addEventListener('input',e=>{game.setAim(Number((e.target as HTMLInputElement).value),game.active.power);updateUI();});
 $('#power').addEventListener('input',e=>{game.setAim(game.active.angle,Number((e.target as HTMLInputElement).value));updateUI();});
 $('#face-button').addEventListener('click',()=>{game.face(-game.active.direction);updateUI();});
-function startCharge(pointer:number|null) {
+function startCharge(pointer:number|null,event?:PointerEvent) {
   if(!game.humanTurn||game.active.fallVelocity>0||charge) return false;
-  setDrawer(false);charge={pointer,startedAt:performance.now(),previousPower:game.active.power,tank:game.current};
+  setDrawer(false);charge={pointer,startedAt:performance.now(),previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',pointerStartedAt:event?.timeStamp};
   audio.unlock();audio.startCharge();game.setAim(game.active.angle,10);updateUI();return true;
 }
 function cancelCharge() {
   audio.stopCharge();
   if(charge) {game.tanks[charge.tank].power=charge.previousPower;charge=null;}
 }
-function finishCharge(maximum=false) {
+function finishCharge(maximum=false,event?:PointerEvent) {
   if(!charge) return;
   audio.stopCharge();
-  const tank=charge.tank,power=maximum?100:chargePower((performance.now()-charge.startedAt)/1000);charge=null;
+  const seconds=event&&charge.touch&&charge.pointerStartedAt!==undefined?Math.max(0,event.timeStamp-charge.pointerStartedAt)/1000:(performance.now()-charge.startedAt)/1000;
+  const tank=charge.tank,power=maximum?100:(charge.touch?touchChargePower:chargePower)(seconds);charge=null;
   if(game.humanTurn&&game.current===tank) game.setAim(game.active.angle,power);
   if(game.humanTurn&&game.current===tank) game.fire();updateUI();
 }
 const fireButton=$<HTMLButtonElement>('#fire-button');
-fireButton.addEventListener('pointerdown',e=>{if(startCharge(e.pointerId)){e.preventDefault();fireButton.setPointerCapture(e.pointerId);}});
-
-fireButton.addEventListener('pointerup',e=>{if(charge?.pointer===e.pointerId){e.preventDefault();finishCharge();}});
-fireButton.addEventListener('pointercancel',()=>{cancelCharge();updateUI();});
-fireButton.addEventListener('lostpointercapture',()=>{if(charge&&charge.pointer!==null){cancelCharge();updateUI();}});
 const forceBar=$<HTMLButtonElement>('#power-meter');
-forceBar.addEventListener('pointerdown',e=>{if(startCharge(e.pointerId)){e.preventDefault();forceBar.setPointerCapture(e.pointerId);}});
-forceBar.addEventListener('pointerup',e=>{if(charge?.pointer===e.pointerId){e.preventDefault();finishCharge();}});
-forceBar.addEventListener('pointercancel',()=>{cancelCharge();updateUI();});
-forceBar.addEventListener('lostpointercapture',()=>{if(charge&&charge.pointer!==null){cancelCharge();updateUI();}});
+const ownsChargePointer=(e:PointerEvent)=>charge?.pointer===e.pointerId&&(charge.pointerStartedAt===undefined||e.timeStamp>=charge.pointerStartedAt);
+const releaseChargePointer=(e:PointerEvent)=>{if(ownsChargePointer(e)){e.preventDefault();finishCharge(false,e);}};
+const cancelChargePointer=(e:PointerEvent)=>{if(ownsChargePointer(e)){cancelCharge();updateUI();}};
+for(const control of [fireButton,forceBar]){
+  control.addEventListener('pointerdown',e=>{if(startCharge(e.pointerId,e)){e.preventDefault();try{control.setPointerCapture(e.pointerId);}catch{/* Document release also handles unavailable/lost capture. */}}});
+  control.addEventListener('pointerup',releaseChargePointer);
+  control.addEventListener('pointercancel',cancelChargePointer);
+  // Capture loss alone is not cancellation. A document-level release below
+  // completes the same action if the finger lifts outside its original button.
+}
+document.addEventListener('pointerup',releaseChargePointer,true);
+document.addEventListener('pointercancel',cancelChargePointer,true);
 forceBar.addEventListener('contextmenu',e=>e.preventDefault());
 fireButton.addEventListener('contextmenu',e=>e.preventDefault());
-fireButton.addEventListener('click',e=>{if(e.detail===0&&!charge&&game.humanTurn){audio.unlock();game.fire();updateUI();}});
+fireButton.addEventListener('click',e=>{if(e.detail===0&&(e as PointerEvent).pointerType!=='touch'&&!charge&&game.humanTurn){audio.unlock();game.fire();updateUI();}});
 
 let padDrag:number|null=null;
 const aimPad=$<HTMLButtonElement>('#aim-pad');
@@ -487,7 +491,7 @@ let previous=performance.now(),lastUI=0;
 function frame(now:number) {
   const dt=Math.min((now-previous)/1000,0.05);previous=now;
   if(game.humanTurn&&!$<HTMLDialogElement>('#dialog').open) {
-    if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,chargePower((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
+    if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,(charge.touch?touchChargePower:chargePower)((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
     const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
