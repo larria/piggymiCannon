@@ -1,0 +1,29 @@
+{
+  "offline": true,
+  "stars": 35,
+  "weak": 0,
+  "proof": {
+    "version": "2.3.3",
+    "weapon": {
+      "projectile": 1,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "volley": 0,
+      "x": 440.8188875306751,
+      "y": 343.41205277595435,
+      "vx": 226.1084409953464,
+      "vy": -240.69608234988485,
+      "delay": 0,
+      "boost": 1.5,
+      "scale": 1,
+      "fireBoosted": true,
+      "boostSources": {
+        "fire": "item",
+        "rage": 1,
+        "snow": 1
+      },
+      "digBoost": 1
+    },
+    "shots": 1
+  }
+}
