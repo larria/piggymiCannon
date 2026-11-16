@@ -1,0 +1,171 @@
+{
+  "version": "2.3.10",
+  "liveBundleMatchesLocal": true,
+  "offlineBundleMatchesLocal": true,
+  "offlineReload": true,
+  "all100OfflineAudioHashesMatch": true,
+  "cachedAudioURLs": 100,
+  "actualRandomMap": "coast",
+  "mapName": "独木桥",
+  "seed": 52,
+  "actualMapMusicPlayedOffline": true,
+  "fullBgm": [
+    {
+      "name": "bgm-lobby.mp3",
+      "duration": 105.441814,
+      "tailStart": 104.741813,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-setup.mp3",
+      "duration": 239.931791,
+      "tailStart": 239.231791,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-result.mp3",
+      "duration": 238.097415,
+      "tailStart": 237.397415,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-valley.mp3",
+      "duration": 207.029116,
+      "tailStart": 206.329116,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-coast.mp3",
+      "duration": 141.688163,
+      "tailStart": 140.988163,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-moon.mp3",
+      "duration": 318.902857,
+      "tailStart": 318.202857,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-factory.mp3",
+      "duration": 295.427483,
+      "tailStart": 294.727483,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-temple.mp3",
+      "duration": 190.775147,
+      "tailStart": 190.075147,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    },
+    {
+      "name": "bgm-egypt.mp3",
+      "duration": 119.141587,
+      "tailStart": 118.441587,
+      "headPlayed": true,
+      "tailPlayed": true,
+      "nativeLoop": true,
+      "error": null
+    }
+  ],
+  "offlineRanges": [
+    {
+      "name": "bgm-lobby.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/1688180",
+      "hash": "ec30b46ce1aef6814993f0e580a256d3a7305ee14563a1e03b39abcfb1844f68"
+    },
+    {
+      "name": "bgm-setup.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/3839834",
+      "hash": "de2247d50ee5cbb015f8657b92ac77db0383ee80c2d966743333a98bd58afc80"
+    },
+    {
+      "name": "bgm-result.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/3810576",
+      "hash": "795b3a1c0b1865b87f86a6639cedabbab97f873c342ead4bf0d3c228a1be3132"
+    },
+    {
+      "name": "bgm-valley.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/3313623",
+      "hash": "8399bba164a28cc5676629d58ceb3fd182f7141853bf5ec143a89a3be34a7dfb"
+    },
+    {
+      "name": "bgm-coast.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/2267889",
+      "hash": "8d898ba1c08c3770361971eb0f80075f24b4f8cde388eff8bb79cbe67836a713"
+    },
+    {
+      "name": "bgm-moon.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/5103324",
+      "hash": "d6d2db4758bd5f4affba65545921c1b16500a61001dfeab866e2ddbe494ab742"
+    },
+    {
+      "name": "bgm-factory.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/4727997",
+      "hash": "94afdf3c4ae6311ba827223fe565d9d47fac7fc2739b5295d70ed8ad641f1801"
+    },
+    {
+      "name": "bgm-temple.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/3053652",
+      "hash": "85bcc4b8eea6d983600376e7a50e2545cbdbe37b7e92d4d11b97b0d4a024f3c1"
+    },
+    {
+      "name": "bgm-egypt.mp3",
+      "status": 206,
+      "length": 1000,
+      "range": "bytes 1000-1999/1907190",
+      "hash": "0ad2dbad52951219753d443edc58fcdd87041160337d7e5e56eff3f656d1d499"
+    }
+  ],
+  "errors": [],
+  "qaHook": false,
+  "newPortraitsOffline": true,
+  "teamOrder": [
+    "咪猪头",
+    "阿狸",
+    "大猪头爸爸",
+    "小黄鱼妈妈"
+  ],
+  "fullRound": 2,
+  "doubleFireIntervalSeconds": 0.75
+}
