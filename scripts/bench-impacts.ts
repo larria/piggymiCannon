@@ -1,0 +1,22 @@
+import {chromium,webkit} from '@playwright/test';import {writeFileSync} from 'node:fs';import {boot} from '../tests/browser/qa-app';
+const kind=process.env.PIGGY_TEST_BROWSER==='webkit'?'webkit':'chromium',slow=Number(process.env.PIGGY_CPU_RATE??4),browser=await(kind==='webkit'?webkit:chromium).launch(kind==='chromium'?{channel:'chrome'}:{});
+const context=await browser.newContext({baseURL:'http://localhost:4177/piggymiCannon/',viewport:{width:1194,height:834},deviceScaleFactor:2,isMobile:true,hasTouch:true,serviceWorkers:'block'}),page=await context.newPage(),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+try{
+ await boot(page,true,'valley','cannon','bowl');await page.waitForFunction(()=>(window as any).__qa.renderer.backend==='pixi');
+ const cdp=kind==='chromium'?await context.newCDPSession(page):null;if(cdp)await cdp.send('Emulation.setCPUThrottlingRate',{rate:slow});
+ const report=await page.evaluate(async()=>{
+  const results:any[]=[],updates=new WeakMap<any,Function>();
+  for(const map of ['valley','coast','moon','factory','temple','egypt'])for(let sample=0;sample<6;sample++){
+   let q=(window as any).__qa;if(sample===0){const now=Date.now;try{Date.now=()=>1322300+['valley','coast','moon','factory','temple','egypt'].indexOf(map)*100+sample;q.newMatch({...q.game.config,map,mapChoice:map,fog:false,fireLine:false,snow:false,timer:0,slots:q.game.config.slots.map((s:any,i:number)=>({...s,enabled:true,controller:'human',team:i%2,vehicle:i===0?'cannon':'bowl'}))},true);}finally{Date.now=now;}}q=(window as any).__qa;const g=q.game,r=q.renderer;g.wind=0;if(!updates.has(g))updates.set(g,g.update.bind(g));const update=updates.get(g)!;g.update=()=>{};r.follow(false);r.draw(0);await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);r.draw(0);await new Promise(requestAnimationFrame);
+   const timings:Record<string,number>={},restore:(()=>void)[]=[];
+   for(const [obj,name,label] of [[g.land,'removeEllipse','excavate'],[g.land,'rebuild','surface'],[g,'recordBattle','trace'],[r,'rebuildTerrain','raster'],[r,'rebuildStaticTerrain','static'],[r.stage,'sync','upload'],[r.stage.app,'render','gpuSubmit']] as any[]){const original=obj[name];obj[name]=function(...args:any[]){const start=performance.now();try{return original.apply(this,args);}finally{timings[label]=(timings[label]??0)+performance.now()-start;}};restore.push(()=>obj[name]=original);}
+   const x=(map==='valley'?[200,450,700,1150,1400,1650]:[200,450,700,950,1200,1450])[sample],ground=g.ground(x),p=g.launch(g.active,'cannon-normal');if(ground>=960)throw new Error('No ground in impact fixture');g.phase='flying';g.firedBy=g.active.id;Object.assign(p,{x,y:ground-1,vx:0,vy:350,age:.5});g.projectiles=[p];r.focusAt(x,ground-100);
+   const before=r.stage.uploads,oldBlasts=g.blasts.length,start=performance.now();update(1/60);if(g.blasts.length<=oldBlasts)throw new Error('Impact did not explode');const simulation=performance.now()-start,drawStart=performance.now();r.draw(1/60);const draw=performance.now()-drawStart,frame=performance.now()-start;
+   const uploads=r.stage.uploads-before,uploadedBytes=r.stage.uploadedBytesLastSync??(r.staticTerrain.width*r.staticTerrain.height*4),rasterPixels=r.rasterPixelsLastUpdate??1921*960;restore.reverse().forEach(f=>f());const next=await new Promise<number>(resolve=>requestAnimationFrame(()=>resolve(performance.now())));results.push({map,sample,seed:g.config.seed,ground,simulation,draw,frame,nextPaintDelay:next-start,uploads,uploadedBytes,rasterPixels,...timings});for(let step=0;step<16;step++)update(.05);
+  }
+  return results;
+ });
+ const percentile=(a:number[],p:number)=>a.slice().sort((a,b)=>a-b)[Math.floor((a.length-1)*p)];
+ const summary=Object.fromEntries(['simulation','draw','frame','nextPaintDelay','excavate','surface','trace','raster','static','upload','gpuSubmit'].map(key=>{const a=report.map(r=>r[key]??0);return [key,{p50:percentile(a,.5),p95:percentile(a,.95),max:Math.max(...a)}];}));
+ const output=process.env.PIGGY_IMPACT_REPORT??`QA/impact-${kind}.json`;writeFileSync(output,JSON.stringify({formatVersion:1,browser:kind,viewport:[1194,834],dpr:2,cpuThrottle:cdp?slow:1,protocol:'36 seeded ordinary-cannon ground impacts at six separated positions per map; one match per map, fixed settling updates between shots; instrumentation only; not physical iPad measurements',summary,samples:report,errors},null,2)+'\n');console.log(JSON.stringify(summary));await cdp?.detach();
+}finally{await context.close();await browser.close();}

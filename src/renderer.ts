@@ -1,3 +1,4 @@
+import type {TerrainChange} from './terrain';
 import {paintTurnMarker} from './turn-marker';
 import {loadBattleSprites,paintBattleSprite,battleSpriteRevision} from './battle-sprites';
 import type {PixiStage} from './pixi-stage';
@@ -41,6 +42,9 @@ export class Renderer {
   private labelRects:{left:number;right:number;top:number;bottom:number;tank:number}[]=[];
   private portraitHits:{x:number;y:number;id:number}[]=[];
   private staticTerrain=document.createElement('canvas');private staticRevision=-1;private staticRatio=0;
+  private terrainChange:TerrainChange|null=null;private terrainDirtyRegion:TerrainChange|null=null;
+  private coastGrainBounds=new Map<number,{top:number;bottom:number}>();
+  rasterPixelsLastUpdate=0;staticPixelsLastUpdate=0;
   private stage:PixiStage|null=null;private backgroundDirty=true;private terrainDirty=true;
   private invalidated=true;private pausedStamp='';private destroyed=false;
   backend:'canvas'|'pixi'='canvas';frames=0;
@@ -152,40 +156,61 @@ export class Renderer {
   }
   private rebuildTerrain() {
     const g=this.game,p=this.palette,c=this.terrainCanvas;
-    c.width=WORLD_W+1;c.height=WORLD_H;
-    const ctx=c.getContext('2d')!,data=ctx.createImageData(c.width,c.height);
+    const full=this.terrainRevision<0||c.width!==WORLD_W+1||c.height!==WORLD_H;
+    if(full){c.width=WORLD_W+1;c.height=WORLD_H;this.coastGrainBounds.clear();}
+    const changed=full?{from:0,to:WORLD_W,top:0,bottom:WORLD_H-1}:g.land.changedSince(this.terrainRevision)!;
+    const region={from:Math.max(0,changed.from-1),to:Math.min(WORLD_W,changed.to+1),top:Math.max(0,changed.top-1),bottom:Math.min(WORLD_H-1,changed.bottom+9)};
+    // The bridge grain runs from surface to bottom. A changed endpoint moves
+    // the entire stroke, so repaint both its old and new vertical extent.
+    if(g.config.map==='coast')for(let x=96;x<WORLD_W-90;x+=17)if(full||x>=region.from-5&&x<=region.to+5){
+      const old=this.coastGrainBounds.get(x),top=g.ground(x),bottom=g.land.bottom(x);
+      region.top=Math.max(0,Math.min(region.top,top-2,(old?.top??top)-2));
+      region.bottom=Math.min(WORLD_H-1,Math.max(region.bottom,bottom+2,(old?.bottom??bottom)+2));
+    }
+    const width=region.to-region.from+1,height=region.bottom-region.top+1;
+    const ctx=c.getContext('2d')!,data=ctx.createImageData(width,height);
     const rgb=(hex:string)=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
     const soil=rgb(p.soil),light=rgb(p.soilLight),ink=rgb(p.ink),grass=rgb(p.grassLight);
     const stride=g.land.stride,mask=g.land.mask;
-    for(let y=0;y<WORLD_H;y++) for(let x=0;x<=WORLD_W;x++) {
-      const index=y*stride+x;if(!mask[index]) continue;
-      const offset=index*4,top=y===0||!mask[index-stride];
-      const edge=x===0||x===WORLD_W||!mask[index-1]||!mask[index+1]||!mask[index+stride];
-      const shade=clamp((y-250)/350,0,1);
-      const grain=((x*13+y*7)%31===0?7:0)+(Math.sin(x/90+y/20)>0.99?4:0);
-      const permanent=g.land.protectedMask[index];
-      const snowcap=g.config.map==='moon'&&(y<9||!mask[index-stride*9]);
-      const branch=g.config.map==='moon'&&y>720;
-      const color=branch?(top?[192,201,167]:[130,141,111]):permanent?(g.config.map==='factory'?[135,157,157]:[200,177,106]):top?grass:edge?ink:snowcap?[241,247,239]:soil.map((v,i)=>light[i]*(1-shade)+v*shade+grain);
-      data.data[offset]=color[0];data.data[offset+1]=color[1];data.data[offset+2]=color[2];data.data[offset+3]=255;
+    const snow=[241,247,239],branchTop=[192,201,167],branchBody=[130,141,111],permanentColor=g.config.map==='factory'?[135,157,157]:[200,177,106];
+    for(let y=region.top;y<=region.bottom;y++){
+      const shade=clamp((y-250)/350,0,1),base=soil.map((v,i)=>light[i]*(1-shade)+v*shade);
+      for(let x=region.from;x<=region.to;x++) {
+        const index=y*stride+x;if(!mask[index])continue;
+        const offset=((y-region.top)*width+x-region.from)*4,top=y===0||!mask[index-stride];
+        const edge=x===0||x===WORLD_W||!mask[index-1]||!mask[index+1]||!mask[index+stride];
+        const grain=((x*13+y*7)%31===0?7:0)+(Math.sin(x/90+y/20)>0.99?4:0);
+        const permanent=g.land.protectedMask[index],snowcap=g.config.map==='moon'&&(y<9||!mask[index-stride*9]),branch=g.config.map==='moon'&&y>720;
+        const color=branch?(top?branchTop:branchBody):permanent?permanentColor:top?grass:edge?ink:snowcap?snow:base;
+        const tint=color===base?grain:0;
+        data.data[offset]=color[0]+tint;data.data[offset+1]=color[1]+tint;data.data[offset+2]=color[2]+tint;data.data[offset+3]=255;
+      }
     }
-    ctx.putImageData(data,0,0);
+    ctx.putImageData(data,region.from,region.top);
     if(g.config.map==='coast') {
-      ctx.globalCompositeOperation='source-atop';ctx.strokeStyle='#69564775';ctx.lineWidth=2;
-      for(let x=96;x<WORLD_W-90;x+=17) {const top=g.ground(x);ctx.beginPath();ctx.moveTo(x,top+4);ctx.lineTo(x-3,g.land.bottom(x)-2);ctx.stroke();}
-      ctx.globalCompositeOperation='source-over';
+      ctx.save();ctx.beginPath();ctx.rect(region.from,region.top,width,height);ctx.clip();ctx.globalCompositeOperation='source-atop';ctx.strokeStyle='#69564775';ctx.lineWidth=2;
+      for(let x=96;x<WORLD_W-90;x+=17) {const top=g.ground(x),bottom=g.land.bottom(x);ctx.beginPath();ctx.moveTo(x,top+4);ctx.lineTo(x-3,bottom-2);ctx.stroke();this.coastGrainBounds.set(x,{top,bottom});}
+      ctx.restore();
     }
-    this.terrainRevision=g.land.revision;
+    this.terrainRevision=g.land.revision;this.terrainChange=region;this.rasterPixelsLastUpdate=width*height;
   }
   private rebuildStaticTerrain(){
     if(this.staticRevision===this.game.land.revision&&this.staticRatio===this.ratio)return;
     if(this.terrainRevision!==this.game.land.revision)this.rebuildTerrain();
-    const old=this.ctx,c=this.staticTerrain;c.width=(WORLD_W+64)*this.ratio;c.height=WORLD_H*this.ratio;
-    this.ctx=c.getContext('2d')!;this.ctx.scale(this.ratio,this.ratio);this.ctx.translate(32,0);
-    try{this.paintTerrainDecoration();classicDetails(this.ctx,this.game);}finally{this.ctx=old;}
+    const full=this.staticRevision<0||this.staticRatio!==this.ratio;
+    const dirty=this.terrainChange??{from:0,to:WORLD_W,top:0,bottom:WORLD_H-1};
+    const region=full?{from:-32,to:WORLD_W+31,top:0,bottom:WORLD_H-1}:{from:Math.max(-32,dirty.from-32),to:Math.min(WORLD_W+31,dirty.to+32),top:Math.max(0,dirty.top-22),bottom:Math.min(WORLD_H-1,dirty.bottom+22)};
+    // These decorations depend on one distant occupancy test.
+    if(this.game.config.map==='egypt'&&dirty.from<=960&&dirty.to>=960&&dirty.top<=518&&dirty.bottom>=518)region.bottom=Math.max(region.bottom,620);
+    if(this.game.config.map==='temple'&&dirty.from<=960&&dirty.to>=960&&dirty.top<=555&&dirty.bottom>=555){region.from=Math.min(region.from,856);region.to=Math.max(region.to,1092);region.bottom=Math.max(region.bottom,580);}
+    const old=this.ctx,c=this.staticTerrain;if(full){c.width=(WORLD_W+64)*this.ratio;c.height=WORLD_H*this.ratio;}
+    this.ctx=c.getContext('2d')!;this.ctx.setTransform(1,0,0,1,0,0);this.ctx.save();const left=Math.floor((region.from+32)*this.ratio),top=Math.floor(region.top*this.ratio),right=Math.ceil((region.to+33)*this.ratio),bottom=Math.ceil((region.bottom+1)*this.ratio);this.ctx.beginPath();this.ctx.rect(left,top,right-left,bottom-top);this.ctx.clip();this.ctx.clearRect(left,top,right-left,bottom-top);this.ctx.setTransform(this.ratio,0,0,this.ratio,32*this.ratio,0);
+    try{this.paintTerrainDecoration(region);classicDetails(this.ctx,this.game);}finally{this.ctx.restore();this.ctx=old;}
     this.staticRevision=this.game.land.revision;this.staticRatio=this.ratio;this.terrainDirty=true;
+    const previous=this.terrainDirtyRegion;this.terrainDirtyRegion=previous?{from:Math.min(previous.from,region.from),to:Math.max(previous.to,region.to),top:Math.min(previous.top,region.top),bottom:Math.max(previous.bottom,region.bottom)}:region;
+    this.terrainChange=null;this.staticPixelsLastUpdate=(region.to-region.from+1)*(region.bottom-region.top+1);
   }
-  private paintTerrainDecoration() {
+  private paintTerrainDecoration(region?:TerrainChange) {
     const ctx=this.ctx,g=this.game,p=this.palette;
     if(this.terrainRevision!==g.land.revision) this.rebuildTerrain();
     ctx.drawImage(this.terrainCanvas,0,0);
@@ -220,8 +245,8 @@ export class Renderer {
     for(let i=0;i<this.windMotes.length;i++) {
       const mote=this.windMotes[i];
       ctx.save();ctx.translate(mote.x,mote.y);ctx.globalAlpha=mote.alpha;
-      if(g.config.map==='moon'||g.snow) {ctx.fillStyle='#f6f4e5';ctx.beginPath();ctx.arc(0,0,mote.size,0,Math.PI*2);ctx.fill();}
-      else {ctx.rotate(Math.sin(this.time+mote.phase)*0.9+(g.wind>0?0.4:-0.4));ctx.fillStyle=i%3===0?'#caa172':'#a4b78b';ctx.beginPath();ctx.ellipse(0,0,3.8,1.6,0,0,Math.PI*2);ctx.fill();}
+      if(g.config.map==='moon'||g.snow) {ctx.fillStyle='#fffcf0';ctx.strokeStyle='#8aa6a34d';ctx.lineWidth=.7;ctx.beginPath();ctx.arc(0,0,mote.size,0,Math.PI*2);ctx.fill();ctx.stroke();}
+      else {ctx.rotate(Math.sin(this.time+mote.phase)*0.9+Math.sign(g.wind)*0.5);ctx.fillStyle=i%3===0?'#bd915e':'#8da46c';ctx.beginPath();ctx.ellipse(0,0,4.6,2.0,0,0,Math.PI*2);ctx.fill();}
       ctx.restore();
     }
     if(g.fireLine) {
@@ -292,7 +317,7 @@ export class Renderer {
     // draw(0) remains the explicit still-frame API used by snapshots/review.
     if(dt!==0&&g.paused&&!this.camera.animating&&!this.invalidated&&this.pausedStamp===stamp)return;
     this.invalidated=false;this.pausedStamp=g.paused?stamp:'';this.frames++;this.time+=g.paused&&!this.touring?0:dt;
-    if(!this.windMotes.length) {const rng=makeRng(609);this.windMotes=Array.from({length:40},()=>({x:rng()*WORLD_W,y:rng()*WORLD_H,vx:g.wind*13,fall:8+rng()*11,alpha:0.35+rng()*0.3,size:1+rng()*1.6,phase:rng()*10}));}
+    if(!this.windMotes.length) {const rng=makeRng(609);this.windMotes=Array.from({length:40},()=>({x:rng()*WORLD_W,y:rng()*WORLD_H,vx:g.wind*13,fall:8+rng()*11,alpha:0.52+rng()*0.24,size:1.4+rng()*1.6,phase:rng()*10}));}
     if(!g.paused) for(const mote of this.windMotes) {mote.vx+=(g.wind*13-mote.vx)*Math.min(1,dt*2);mote.x=((mote.x+mote.vx*dt)%WORLD_W+WORLD_W)%WORLD_W;mote.y=(mote.y+mote.fall*dt)%WORLD_H;}
     const actor=g.active;let camera=actor.y-this.viewHeight*.5,targetX=actor.x-this.viewWidth*.5;
     if(g.phase==='flying'&&g.projectiles.some(p=>this.visibleAt(p.x)&&p.delay<=0)) camera=Math.min(camera,Math.min(...g.projectiles.filter(p=>this.visibleAt(p.x)&&p.delay<=0).map(p=>p.y))-this.viewHeight*0.3);
@@ -305,7 +330,7 @@ export class Renderer {
     const shakeX=g.shake>0?Math.sin(this.time*88)*g.shake:0,shakeY=g.shake>0?Math.cos(this.time*69)*g.shake*.5:0;
     ctx.translate(shakeX,shakeY);this.rebuildStaticTerrain();
     let gpu=false;
-    try{if(this.stage?.available){this.stage.sync(this.backgroundDirty,this.terrainDirty,this.ratio,this.viewHeight,this.viewWidth);gpu=this.stage.draw(this.offsetX,this.offsetY,shakeX,shakeY,this.viewHeight);this.backgroundDirty=false;this.terrainDirty=false;}}
+    try{if(this.stage?.available){this.stage.sync(this.backgroundDirty,this.terrainDirty,this.ratio,this.viewHeight,this.viewWidth,this.terrainDirtyRegion);gpu=this.stage.draw(this.offsetX,this.offsetY,shakeX,shakeY,this.viewHeight);this.backgroundDirty=false;this.terrainDirty=false;this.terrainDirtyRegion=null;}}
     catch{this.stage?.destroy();this.stage=null;}
     this.backend=gpu?'pixi':'canvas';this.canvas.dataset.renderBackend=this.backend;
     if(!gpu)ctx.drawImage(this.background,0,0,this.viewWidth,this.viewHeight);

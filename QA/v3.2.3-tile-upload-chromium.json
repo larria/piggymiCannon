@@ -1,0 +1,29 @@
+{
+  "delta": {
+    "uploads": 4,
+    "bytes": 1081600,
+    "totalBytes": 7618560,
+    "rasterPixels": 31459,
+    "fullPixels": 1844160,
+    "textures": 33,
+    "maxTexture": 1920
+  },
+  "comparisons": [
+    {
+      "mean": 0.00036089085820895523,
+      "large": 0
+    },
+    {
+      "mean": 0.00036001632462686565,
+      "large": 0
+    },
+    {
+      "mean": 0.00046845848880597014,
+      "large": 0
+    },
+    {
+      "mean": 0.00046845848880597014,
+      "large": 0
+    }
+  ]
+}

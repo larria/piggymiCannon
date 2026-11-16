@@ -1,4 +1,6 @@
 import './style.css';
+import {ImpactProfiler} from './impact-profiler';
+import {snapshotText} from './battle-trace';
 import { Game, WORLD_W, clamp, type Config } from './engine';
 import {TERRAIN_H} from './terrain';
 import { Renderer } from './renderer';
@@ -40,6 +42,7 @@ config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.
 if(config.slots.filter(s=>s.enabled).length<2||new Set(config.slots.filter(s=>s.enabled).map(s=>s.team)).size<2)config.slots=defaultSlots();
 let game=new Game(config,APP_VERSION);config={...game.config};
 let recorder:ReplayRecorder|null=null,playback:ReplayPlayer|null=null;
+let impactProfiler:ImpactProfiler|null=null;
 let replayReturn:{game:Game;config:Config;recorder:ReplayRecorder|null;statsRecorded:boolean;immersive:boolean}|null=null;
 const canControlBattle=()=>game.humanTurn&&!playback;
 const audio=new AudioManager();
@@ -146,7 +149,12 @@ function snapshotFeedback(message:string){
   if(status){status.textContent=message;status.classList.add('visible');window.clearTimeout(snapshotStatusTimer);snapshotStatusTimer=window.setTimeout(()=>status.classList.remove('visible'),2700);}
 }
 async function copyBattleSnapshot(){
-  const payload=game.battleSnapshotText();
+  const profile=impactProfiler?.report(),snapshot=game.battleSnapshot();
+  const playbackInfo=playback?{appVersion:APP_VERSION,recordingVersion:playback.recording.gameVersion,recordingSeed:playback.recording.initial.initial.config.seed,positionSeconds:playback.time,durationSeconds:playback.recording.duration,paused:playback.paused}:null;
+  const exported=Object.assign({},snapshot,profile?{impactPerformance:profile}:{},playbackInfo?{playbackInfo}:{});
+  let payload=snapshotText(exported);
+  if(playbackInfo)payload=payload.replace('以下 JSON 与上述摘要',`当前为录像回放：原局 v${playbackInfo.recordingVersion}，播放器 v${APP_VERSION}，已播放 ${playbackInfo.positionSeconds.toFixed(2)}/${playbackInfo.durationSeconds.toFixed(2)}秒，原局种子 ${playbackInfo.recordingSeed}。\n\n以下 JSON 与上述摘要`);
+  if(profile){const max=Math.max(0,...profile.records.map(r=>r.ms.total));payload=payload.replace('以下 JSON 与上述摘要',`弹着性能（测试版）：${profile.records.length}帧，主线程峰值 ${max.toFixed(2)}ms；详细分段、像素与纹理字节见JSON的impactPerformance。\n\n以下 JSON 与上述摘要`);}
   try {if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');await navigator.clipboard.writeText(payload);snapshotFeedback('已复制对局快照');}
   catch {snapshotFeedback('剪贴板不可用或未获授权，请允许剪贴板访问后重试。');}
 }
@@ -321,7 +329,7 @@ function newMatch(next:Config,start=true) {
   audio.resetEffects();
   audio.setSelectionMusic(false);
   audio.pause(false);
-  config={...next,seed:freshMatchSeed(Date.now(),playedSeeds)};game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
+  config={...next,seed:freshMatchSeed(Date.now(),playedSeeds)};game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);refreshImpactProfiler();statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}
 }
 function togglePause() {
@@ -403,7 +411,7 @@ function startReplay(player:ReplayPlayer){
   if(playback)leaveReplay();
   cancelCharge();moveHeld=0;keys.clear();audio.resetEffects();audio.unlock();
   replayReturn={game,config,recorder,statsRecorded,immersive};playback=player;game=player.game;config={...game.config};recorder=null;
-  renderer.setGame(game);startReplayTour();setImmersive(true);lastPhase='';lastInventory='';audio.pause(false);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));refreshReplayControls();updateUI();
+  renderer.setGame(game);refreshImpactProfiler();startReplayTour();setImmersive(true);lastPhase='';lastInventory='';audio.pause(false);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));refreshReplayControls();updateUI();
   if(player.recording.gameVersion!==APP_VERSION)toast(`录像来自 v${player.recording.gameVersion}，播放结束时会校验结果。`);
 }
 function startReplayTour(){
@@ -413,7 +421,7 @@ function startReplayTour(){
 function leaveReplay(){
   if(!replayReturn)return;
   const previousMatch=replayReturn;playback=null;replayReturn=null;game=previousMatch.game;config=previousMatch.config;recorder=previousMatch.recorder;statsRecorded=previousMatch.statsRecorded;
-  renderer.setGame(game);moveHeld=0;keys.clear();audio.resetEffects();audio.pause(game.paused);setImmersive(previousMatch.immersive);lastPhase='';lastInventory='';refreshReplayControls();updateUI();
+  renderer.setGame(game);refreshImpactProfiler();moveHeld=0;keys.clear();audio.resetEffects();audio.pause(game.paused);setImmersive(previousMatch.immersive);lastPhase='';lastInventory='';refreshReplayControls();updateUI();
 }
 function refreshReplayControls(){
   const panel=$('#replay-controls');panel.classList.toggle('hidden',!playback);if(!playback)return;
@@ -425,7 +433,7 @@ function refreshReplayControls(){
 }
 $('#replay-pause').addEventListener('click',()=>{if(playback){playback.paused=!playback.paused;setReplayAudioPaused(playback.paused);refreshReplayControls();}});
 $('#replay-speed').addEventListener('click',()=>{if(playback){playback.speed=playback.speed===1?2:1;refreshReplayControls();}});
-$('#replay-restart').addEventListener('click',()=>{if(playback){const clip=playback.recording;playback=new ReplayPlayer(clip);game=playback.game;config={...game.config};renderer.setGame(game);startReplayTour();audio.resetEffects();audio.pause(false);lastPhase='';lastInventory='';refreshReplayControls();updateUI();}});
+$('#replay-restart').addEventListener('click',()=>{if(playback){const clip=playback.recording;playback=new ReplayPlayer(clip);game=playback.game;config={...game.config};renderer.setGame(game);refreshImpactProfiler();startReplayTour();audio.resetEffects();audio.pause(false);lastPhase='';lastInventory='';refreshReplayControls();updateUI();}});
 $('#replay-exit').addEventListener('click',leaveReplay);
 
 let lastControlSound=0;
@@ -610,17 +618,19 @@ function updateChargeVisual(power:number){
   const label=String(Math.round(power));if(chargeReadout.textContent!==label)chargeReadout.textContent=label;
 }
 let previous=performance.now(),lastUI=0;
+function refreshImpactProfiler(){impactProfiler?.detach();impactProfiler=import.meta.env.DEV&&new URLSearchParams(location.search).get('impact-profile')==='1'?new ImpactProfiler(game,renderer,audio):null;}
 function frame(now:number) {
   const dt=Math.max(0,Math.min((now-previous)/1000,0.05));previous=now;
   if(document.hidden){requestAnimationFrame(frame);return;}
+  impactProfiler?.beginFrame(now);
   if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open) {
     if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,(charge.touch?touchChargePower:chargePower)((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
     const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
   }
-  if(!renderer.touring){if(playback){if(!$<HTMLDialogElement>('#dialog').open){try{playback.advance(dt);}catch(error){playback.paused=true;toast(`录像播放失败：${(error as Error).message}`);}}}else game.update(dt);}
-  renderer.draw(playback?.paused?0:dt*(playback?.speed??1));dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight,renderer.offsetX,renderer.viewWidth);
+  if(!renderer.touring){if(playback){if(!$<HTMLDialogElement>('#dialog').open){try{playback.advance(dt);}catch(error){playback.paused=true;toast(`录像播放失败：${(error as Error).message}`);}}}else if(impactProfiler)impactProfiler.measure('simulation',()=>game.update(dt));else game.update(dt);}
+  if(impactProfiler)impactProfiler.measure('scene',()=>renderer.draw(playback?.paused?0:dt*(playback?.speed??1)));else renderer.draw(playback?.paused?0:dt*(playback?.speed??1));dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight,renderer.offsetX,renderer.viewWidth);
   const moving=game.movingUntil.findIndex(until=>until>game.elapsed);
   audio.setScene(game.phase==='lobby'?'lobby':game.phase==='ended'?'result':game.config.map);
   audio.updateMovement(moving>=0&&game.phase==='aiming'&&!game.paused&&!playback?.paused,game.tanks[Math.max(0,moving)].x,game.tanks[game.viewer].x,game.tanks[Math.max(0,moving)].vehicleId,game.active.fuel<=0);
@@ -644,9 +654,10 @@ function frame(now:number) {
   if(playback)for(const cue of playback.drainCues()){if(cue.kind==='charge-start')audio.startCharge();if(cue.kind==='charge-stop')audio.stopCharge();if(cue.kind==='charge-power')audio.updateCharge(cue.power!);}
   if(charge||playback?.charging)updateChargeVisual(game.active.power);
   if(now-lastUI>80&&(!game.paused||renderer.touring||playback)) {updateUI();lastUI=now;}
+  impactProfiler?.finishFrame();
   requestAnimationFrame(frame);
 }
-setImmersive(false);renderInventory();updateSound();updateUI();requestAnimationFrame(frame);
+setImmersive(false);renderInventory();updateSound();updateUI();refreshImpactProfiler();requestAnimationFrame(frame);
 let applyingUpdate=false,updateReloadRequested=false;
 let pageWorker=navigator.serviceWorker?.controller??null;
 if('serviceWorker' in navigator){

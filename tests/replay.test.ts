@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {Game} from '../src/engine';import {defaultSlots} from '../src/crew';
 import {ReplayRecorder,ReplayPlayer,saveReplay,readReplays,deleteReplay,REPLAY_STORAGE_KEY,replayDigest,validateReplay} from '../src/replay';
 const ready=(ai=false)=>{const slots=defaultSlots();slots[0].vehicle='missile';slots[1].vehicle='bowl';slots[0].controller=ai?'ai':'human';slots[1].controller=ai?'ai':'human';const g=new Game({slots,map:'factory',mapChoice:'random',seed:52,timer:0,fog:false,fireLine:false},'test-replay');g.start();return g;};
-function play(recording:ReturnType<ReplayRecorder['export']>){const player=new ReplayPlayer(JSON.parse(JSON.stringify(recording)));for(let i=0;i<20000&&!player.done;i++)player.advance(.037);assert.ok(player.done);assert.equal(player.verified,true);return player;}
+function play(recording:ReturnType<ReplayRecorder['export']>){const player=new ReplayPlayer(JSON.parse(JSON.stringify(recording)));for(let i=0;i<20000&&!player.done;i++)player.advance(.08);assert.ok(player.done);assert.equal(player.verified,true);return player;}
 const memory=()=>{let encoded:string|null=null;return {getItem:()=>encoded,setItem:(key:string,value:string)=>{assert.equal(key,REPLAY_STORAGE_KEY);encoded=value;}};};
 test('exact updates and inputs restore seeded terrain, inventory, rounds and current RNG from the start',()=>{
  const g=ready(),recorder=new ReplayRecorder(g);g.setIntroLocked(true);g.update(.05);g.setIntroLocked(false);
@@ -40,4 +40,7 @@ test('a complete four-seat AI battle remains replayable after the diagnostic eve
 test('charge cues reproduce changing power and stop synthesis when a saved prefix ends mid-charge',()=>{
  const g=ready(),recorder=new ReplayRecorder(g);recorder.cue('charge-start');g.setAim(40,10);g.update(.02);g.setAim(40,20);g.update(.03);
  const player=play(recorder.export()),cues=player.drainCues();assert.equal(cues[0].kind,'charge-start');assert.ok(cues.some(c=>c.kind==='charge-power'&&c.power===20));assert.equal(cues.at(-1)?.kind,'charge-stop');assert.equal(player.charging,false);recorder.detach();
+});
+test('unlimited idle capture keeps exact dt in compact bounded blocks instead of allocating one array per frame',()=>{
+ const g=ready(),recorder=new ReplayRecorder(g);for(let i=0;i<60000;i++)g.update(i%2?.016:.017);assert.ok(recorder.bufferBytes<510000);const recording=recorder.export();assert.equal(recording.commands.length,60000);const replay=play(recording);assert.equal(replay.verified,true);recorder.detach();
 });

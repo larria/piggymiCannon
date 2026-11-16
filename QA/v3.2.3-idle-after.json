@@ -1,0 +1,140 @@
+{
+  "formatVersion": 1,
+  "protocol": "120000 exact idle updates (about 33 simulated minutes), actual renderer/media remain running; GC-normalised Chrome heap, not a physical 33-minute hardware soak",
+  "checkpoints": [
+    {
+      "batch": 0,
+      "heap": 6160512,
+      "dom": {
+        "documents": 1,
+        "nodes": 1672,
+        "jsEventListeners": 211
+      },
+      "elapsed": 1.5665999999999993,
+      "phase": "aiming",
+      "turn": 0,
+      "timer": 0,
+      "recorderBytes": 8226,
+      "recordEntries": 3,
+      "windMotes": 40,
+      "textures": 33,
+      "canvases": 13,
+      "particles": 0,
+      "blasts": 0,
+      "texts": 0,
+      "events": 0,
+      "audioBuffers": 37,
+      "audioLoads": 0,
+      "audioSources": 1,
+      "audioClips": 0
+    },
+    {
+      "batch": 1,
+      "heap": 6199832,
+      "dom": {
+        "documents": 1,
+        "nodes": 1672,
+        "jsEventListeners": 211
+      },
+      "elapsed": 501.7165999998724,
+      "phase": "aiming",
+      "turn": 0,
+      "timer": 0,
+      "recorderBytes": 245794,
+      "recordEntries": 32,
+      "windMotes": 40,
+      "textures": 33,
+      "canvases": 13,
+      "particles": 0,
+      "blasts": 0,
+      "texts": 0,
+      "events": 0,
+      "audioBuffers": 37,
+      "audioLoads": 0,
+      "audioSources": 1,
+      "audioClips": 0
+    },
+    {
+      "batch": 2,
+      "heap": 6246948,
+      "dom": {
+        "documents": 1,
+        "nodes": 1672,
+        "jsEventListeners": 211
+      },
+      "elapsed": 1001.8832999994179,
+      "phase": "aiming",
+      "turn": 0,
+      "timer": 0,
+      "recorderBytes": 483362,
+      "recordEntries": 61,
+      "windMotes": 40,
+      "textures": 33,
+      "canvases": 13,
+      "particles": 0,
+      "blasts": 0,
+      "texts": 0,
+      "events": 0,
+      "audioBuffers": 37,
+      "audioLoads": 0,
+      "audioSources": 1,
+      "audioClips": 0
+    },
+    {
+      "batch": 3,
+      "heap": 6224264,
+      "dom": {
+        "documents": 1,
+        "nodes": 1672,
+        "jsEventListeners": 211
+      },
+      "elapsed": 1502.0331999989623,
+      "phase": "aiming",
+      "turn": 0,
+      "timer": 0,
+      "recorderBytes": 729122,
+      "recordEntries": 91,
+      "windMotes": 40,
+      "textures": 33,
+      "canvases": 13,
+      "particles": 0,
+      "blasts": 0,
+      "texts": 0,
+      "events": 0,
+      "audioBuffers": 37,
+      "audioLoads": 0,
+      "audioSources": 1,
+      "audioClips": 0
+    },
+    {
+      "batch": 4,
+      "heap": 6285664,
+      "dom": {
+        "documents": 1,
+        "nodes": 1672,
+        "jsEventListeners": 211
+      },
+      "elapsed": 2002.1998999985067,
+      "phase": "aiming",
+      "turn": 0,
+      "timer": 0,
+      "recorderBytes": 966690,
+      "recordEntries": 120,
+      "windMotes": 40,
+      "textures": 33,
+      "canvases": 13,
+      "particles": 0,
+      "blasts": 0,
+      "texts": 0,
+      "events": 0,
+      "audioBuffers": 37,
+      "audioLoads": 0,
+      "audioSources": 1,
+      "audioClips": 0
+    }
+  ],
+  "frameSample": {
+    "fps": 59.949043311755716
+  },
+  "errors": []
+}

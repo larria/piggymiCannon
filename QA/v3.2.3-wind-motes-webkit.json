@@ -1,0 +1,22 @@
+[
+  {
+    "snow": false,
+    "count": 40,
+    "alphaMin": 0.5243816494382918,
+    "alphaMax": 0.7503322175517678,
+    "sizeMin": 1.409798665344715,
+    "rightDistance": 103.99999999999454,
+    "leftDistance": 211.6916362763086,
+    "rngUnchanged": true
+  },
+  {
+    "snow": true,
+    "count": 40,
+    "alphaMin": 0.5243816494382918,
+    "alphaMax": 0.7503322175517678,
+    "sizeMin": 1.409798665344715,
+    "rightDistance": 103.99999999999454,
+    "leftDistance": 211.6916362763086,
+    "rngUnchanged": true
+  }
+]

@@ -1,0 +1,13 @@
+import {chromium} from '@playwright/test';import {writeFileSync} from 'node:fs';import {boot} from '../tests/browser/qa-app';
+const browser=await chromium.launch({channel:'chrome'}),context=await browser.newContext({baseURL:'http://localhost:4177/piggymiCannon/',viewport:{width:1194,height:834},deviceScaleFactor:2,isMobile:true,hasTouch:true,serviceWorkers:'block'}),page=await context.newPage(),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+try{
+ await boot(page,true,'valley','cannon','bowl');await page.evaluate(()=>{const q=(window as any).__qa;q.newMatch({...q.game.config,map:'valley',mapChoice:'valley',timer:0,fog:false,snow:true,fireLine:false,slots:q.game.config.slots.map((s:any,i:number)=>({...s,enabled:true,controller:'human',team:i%2,vehicle:['cannon','bowl','water','sea'][i]}))},true);});await page.waitForTimeout(1500);
+ const cdp=await context.newCDPSession(page);await cdp.send('Performance.enable');const checkpoints:any[]=[];
+ for(let batch=0;batch<=4;batch++){
+  if(batch)await page.evaluate(async()=>{const g=(window as any).__qa.game;for(let i=0;i<30000;i++){g.update(1/60);if(i%1000===0)await new Promise(r=>setTimeout(r,0));}});
+  await cdp.send('HeapProfiler.collectGarbage');const metrics=await cdp.send('Performance.getMetrics'),heap=metrics.metrics.find(m=>m.name==='JSHeapUsedSize')!.value,dom=await cdp.send('Memory.getDOMCounters');
+  const state=await page.evaluate(()=>{const q=(window as any).__qa,g=q.game,r=q.renderer,a=q.audio;return {elapsed:g.elapsed,phase:g.phase,turn:g.turn,timer:g.config.timer,recorderBytes:q.recorder?.bufferBytes??null,recordEntries:q.recorder?.commands.length??0,windMotes:r.windMotes.length,textures:r.stage.textures.length,canvases:document.querySelectorAll('canvas').length,particles:g.particles.length,blasts:g.blasts.length,texts:g.texts.length,events:g.events.length,audioBuffers:a.buffers.size,audioLoads:a.loading.size,audioSources:a.sources.size,audioClips:a.playingEffects.size};});checkpoints.push({batch,heap,dom,...state});
+ }
+ const frameSample=await page.evaluate(async()=>{const q=(window as any).__qa,r=q.renderer,start=performance.now(),frames=r.frames;await new Promise(r=>setTimeout(r,2000));return {fps:(r.frames-frames)/((performance.now()-start)/1000)};});
+ writeFileSync(process.env.PIGGY_IDLE_REPORT??'QA/idle-memory.json',JSON.stringify({formatVersion:1,protocol:'120000 exact idle updates (about 33 simulated minutes), actual renderer/media remain running; GC-normalised Chrome heap, not a physical 33-minute hardware soak',checkpoints,frameSample,errors},null,2)+'\n');console.log(JSON.stringify({start:checkpoints[0],end:checkpoints.at(-1),frameSample,errors}));
+}finally{await context.close();await browser.close();}

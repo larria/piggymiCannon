@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
-import {build} from 'esbuild';import {execFileSync} from 'node:child_process';import {writeFileSync} from 'node:fs';
+import {build} from 'esbuild';import {execFileSync} from 'node:child_process';import {writeFileSync,readFileSync} from 'node:fs';
 import {boot} from './qa-app';
+const version=JSON.parse(readFileSync('package.json','utf8')).version;
 const oldSource=execFileSync('git',['show','pre-pixi-v3.0.0:src/renderer.ts'],{encoding:'utf8'});
 const oldVehicle=execFileSync('git',['show','pre-pixi-v3.0.0:src/vehicle-art.ts'],{encoding:'utf8'});
 const legacy=build({stdin:{contents:oldSource,resolveDir:process.cwd()+'/src',loader:'ts'},bundle:true,write:false,format:'esm',define:{'import.meta.env.BASE_URL':'"/piggymiCannon/"'},plugins:[{name:'original-vehicle-art',setup(b){b.onLoad({filter:/\/vehicle-art\.ts$/},()=>({contents:oldVehicle,loader:'ts',resolveDir:process.cwd()+'/src'}));}}]}).then(r=>r.outputFiles[0].text);
@@ -39,19 +40,19 @@ test('retained Pixi world matches Canvas in six expanded maps; body sizes and po
   Object.assign(t,original);g.phase=savedPhase;g.projectiles=savedProjectiles;
   c.remove();return cases;
  });
- writeFileSync(`QA/v3.1.0-${browserName}-pixel-comparison.json`,JSON.stringify({formatVersion:1,cases:report,errors},null,2));
+ writeFileSync(`QA/v${version}-${browserName}-pixel-comparison.json`,JSON.stringify({formatVersion:1,cases:report,errors},null,2));
  for(const c of report){expect(c.mean,JSON.stringify(c)).toBeLessThan(.25);expect(c.largeFraction,JSON.stringify(c)).toBeLessThan(c.map.startsWith('vehicle:')?.01:.001);}
  expect(errors).toEqual([]);
 });
 test('Pixi loses and restores context, preserves the fallback and reuses resources across 50 matches',async({page,browserName})=>{
  await boot(page);await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');
  const data=await page.evaluate(()=>{const q=(window as any).__qa,r=q.renderer,stage=r.stage;for(let i=0;i<50;i++){q.newMatch({...q.game.config,map:i%2?'factory':'temple',mapChoice:undefined},true);r.draw(0);}const g=(window as any).__qa.game;g.paused=true;r.invalidate();r.draw(0);const frames=r.frames,dial=q.dashboard.dialFrames;for(let i=0;i<240;i++){r.draw(1/60);q.dashboard.draw(g,g.active,r.offsetY,r.viewHeight);}return {sameStage:r.stage===stage,textures:r.stage.textures.length,canvasCount:document.querySelectorAll('.pixi-battle-layer').length,pauseFrames:r.frames-frames,dialFrames:q.dashboard.dialFrames-dial};});
- expect(data.sameStage).toBe(true);expect(data.textures).toBe(2);expect(data.canvasCount).toBe(1);expect(data.pauseFrames).toBe(0);expect(data.dialFrames).toBeLessThanOrEqual(1);
+ expect(data.sameStage).toBe(true);expect(data.textures).toBe(33);expect(data.canvasCount).toBe(1);expect(data.pauseFrames).toBe(0);expect(data.dialFrames).toBeLessThanOrEqual(1);
  const supported=await page.evaluate(()=>{const r=(window as any).__qa.renderer;const ext=r.stage.app.renderer.gl.getExtension('WEBGL_lose_context');(window as any).__lose=ext;if(ext)ext.loseContext();return Boolean(ext);});expect(supported).toBe(true);
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('canvas');
  await page.waitForTimeout(150);await page.evaluate(()=>(window as any).__lose.restoreContext());
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');
- writeFileSync(`QA/v3.1.0-${browserName}-lifecycle.json`,JSON.stringify({formatVersion:1,...data,realContextRecovery:supported},null,2));
+ writeFileSync(`QA/v${version}-${browserName}-lifecycle.json`,JSON.stringify({formatVersion:1,...data,realContextRecovery:supported},null,2));
 });
 test('fractional canvas height does not cause repeated GPU resize or submission',async({page})=>{
  await boot(page);await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');

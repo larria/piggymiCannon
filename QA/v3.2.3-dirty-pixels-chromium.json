@@ -1,0 +1,290 @@
+[
+  {
+    "map": "valley",
+    "x": 700,
+    "y": 617,
+    "pixels": 21679,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00014845788365749514,
+      "max": 20,
+      "large": 9.188088037634409e-7
+    }
+  },
+  {
+    "map": "valley",
+    "x": 960,
+    "y": 960,
+    "pixels": 1844160,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0,
+      "max": 0,
+      "large": 0
+    }
+  },
+  {
+    "map": "valley",
+    "x": 12,
+    "y": 696,
+    "pixels": 4307,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00006127450980392155,
+      "max": 33,
+      "large": 0.0000011813256048387097
+    }
+  },
+  {
+    "map": "valley",
+    "x": 1900,
+    "y": 635,
+    "pixels": 7776,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00012322744538003372,
+      "max": 34,
+      "large": 0.0000011813256048387097
+    }
+  },
+  {
+    "map": "coast",
+    "x": 700,
+    "y": 593,
+    "pixels": 30644,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00007446726590501795,
+      "max": 19,
+      "large": 0.0000017063592069892474
+    }
+  },
+  {
+    "map": "coast",
+    "x": 960,
+    "y": 594,
+    "pixels": 21244,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00013678257761437897,
+      "max": 26,
+      "large": 0.0000021001344086021505
+    }
+  },
+  {
+    "map": "coast",
+    "x": 12,
+    "y": 591,
+    "pixels": 3953,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.0001180496875329433,
+      "max": 33,
+      "large": 0.0000018376176075268818
+    }
+  },
+  {
+    "map": "coast",
+    "x": 1900,
+    "y": 591,
+    "pixels": 7344,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00010679801154332693,
+      "max": 30,
+      "large": 9.188088037634409e-7
+    }
+  },
+  {
+    "map": "moon",
+    "x": 700,
+    "y": 724,
+    "pixels": 39935,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.0000023626512096774195,
+      "max": 4,
+      "large": 0
+    }
+  },
+  {
+    "map": "moon",
+    "x": 960,
+    "y": 325,
+    "pixels": 54918,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00004817595090791693,
+      "max": 16.25882352941177,
+      "large": 0.0000021001344086021505
+    }
+  },
+  {
+    "map": "moon",
+    "x": 12,
+    "y": 960,
+    "pixels": 1844160,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0,
+      "max": 0,
+      "large": 0
+    }
+  },
+  {
+    "map": "moon",
+    "x": 1900,
+    "y": 960,
+    "pixels": 1844160,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0,
+      "max": 0,
+      "large": 0
+    }
+  },
+  {
+    "map": "factory",
+    "x": 700,
+    "y": 303,
+    "pixels": 31459,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00006765109437592242,
+      "max": 18,
+      "large": 0.0000026251680107526884
+    }
+  },
+  {
+    "map": "factory",
+    "x": 960,
+    "y": 303,
+    "pixels": 30962,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.0000395340007642842,
+      "max": 15,
+      "large": 6.562920026881721e-7
+    }
+  },
+  {
+    "map": "factory",
+    "x": 12,
+    "y": 774,
+    "pixels": 1844160,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0,
+      "max": 0,
+      "large": 0
+    }
+  },
+  {
+    "map": "factory",
+    "x": 1900,
+    "y": 812,
+    "pixels": 1844160,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0,
+      "max": 0,
+      "large": 0
+    }
+  },
+  {
+    "map": "temple",
+    "x": 700,
+    "y": 630,
+    "pixels": 30644,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.000016179270767446766,
+      "max": 16,
+      "large": 7.875504032258065e-7
+    }
+  },
+  {
+    "map": "temple",
+    "x": 960,
+    "y": 555,
+    "pixels": 30510,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00005977147243305926,
+      "max": 16,
+      "large": 0.0000013125840053763442
+    }
+  },
+  {
+    "map": "temple",
+    "x": 12,
+    "y": 960,
+    "pixels": 1844160,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0,
+      "max": 0,
+      "large": 0
+    }
+  },
+  {
+    "map": "temple",
+    "x": 1900,
+    "y": 960,
+    "pixels": 1844160,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0,
+      "max": 0,
+      "large": 0
+    }
+  },
+  {
+    "map": "egypt",
+    "x": 700,
+    "y": 686,
+    "pixels": 25591,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00006805001696579162,
+      "max": 22,
+      "large": 0.000001575100806451613
+    }
+  },
+  {
+    "map": "egypt",
+    "x": 960,
+    "y": 518,
+    "pixels": 11639,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00005775626993068729,
+      "max": 33,
+      "large": 0.0000013125840053763442
+    }
+  },
+  {
+    "map": "egypt",
+    "x": 12,
+    "y": 773,
+    "pixels": 3953,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00003363509382247521,
+      "max": 18,
+      "large": 6.562920026881721e-7
+    }
+  },
+  {
+    "map": "egypt",
+    "x": 1900,
+    "y": 773,
+    "pixels": 7776,
+    "rasterEqual": true,
+    "staticDifference": {
+      "mean": 0.00011452321183849888,
+      "max": 36,
+      "large": 0.000002887684811827957
+    }
+  }
+]

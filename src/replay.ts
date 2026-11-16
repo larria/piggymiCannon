@@ -4,6 +4,8 @@ import {traceClone,type BattleSnapshot} from './battle-trace';
 export const REPLAY_FORMAT=1,REPLAY_STORAGE_KEY='piggy-replays-v1';
 const METHODS=['update','setAim','face','selectWeapon','move','useItem','fire','skipTurn','acceptHandoff','setIntroLocked','setBattleRule','nextTurn'] as const;
 type Command=[number,...any[]];
+type UpdateBlock={steps:Float64Array;length:number};
+type TapeEntry=Command|UpdateBlock;
 type External={paused:boolean;targetX:number;aims:number[][]};
 type ReplayCue={kind:'charge-start'|'charge-stop'|'charge-power';power?:number};
 export interface BattleReplay {
@@ -17,34 +19,49 @@ const external=(g:Game):External=>({paused:g.paused,targetX:g.targetX,aims:g.tan
  * nested AI/physics calls replay through update, not twice as player commands. */
 export class ReplayRecorder {
  readonly initial:BattleSnapshot;readonly id:string;readonly createdAt=Date.now();
- private commands:Command[]=[];private depth=0;private lastExternal:string;
+ private commands:TapeEntry[]=[];private commandCount=0;private depth=0;private lastExternal:External;
  private originals=new Map<string,Function>();private duration=0;private stopped=false;
  private finalDigest='';error='';
  constructor(readonly game:Game){
   this.initial=game.battleSnapshot();this.id=`${this.createdAt}-${game.config.seed>>>0}`;
-  this.lastExternal=JSON.stringify(external(game));
+  this.lastExternal=external(game);
   METHODS.forEach((name,index)=>{
    const original=(game as any)[name] as Function;this.originals.set(name,original);
-   (game as any)[name]=(...args:any[])=>{
+   const invoke=(args:any[])=>{
     const outer=this.depth===0,record=outer&&!this.stopped;
-    if(record){this.sync();if(name!=='update'||!game.paused&&!game.introLocked){this.append([index,...args]);if(name==='update')this.duration+=args[0];}}
+    if(record){this.sync();if(name!=='update'||!game.paused&&!game.introLocked){if(name==='update'){this.appendUpdate(args[0]);this.duration+=args[0];}else this.append([index,...args]);}}
     this.depth++;let result:any;
-    try{result=original.apply(game,args);}finally{this.depth--;if(outer)this.lastExternal=JSON.stringify(external(game));}
-    if(record&&game.phase==='ended'&&game.resultAge>=3){this.finalDigest=replayDigest(game);this.stopped=true;}
+    try{result=original.apply(game,args);}finally{this.depth--;if(outer)this.lastExternal=external(game);}
+    if(record&&game.phase==='ended'&&game.resultAge>=3){this.finalDigest=replayDigest(game);this.stopped=true;this.detach();}
     return result;
    };
+   if(name==='update'){const updateArgs=[0];game.update=(dt:number)=>{updateArgs[0]=dt;return invoke(updateArgs);};}
+   else (game as any)[name]=(...args:any[])=>invoke(args);
   });
  }
- private append(command:Command){
-  if(this.commands.length>=MAX_COMMANDS){this.error='本局录像超过长度上限，无法完整保存。';this.stopped=true;return;}
-  this.commands.push(command);
+ private reserve(){if(this.commandCount>=MAX_COMMANDS){this.error='本局录像超过长度上限，无法完整保存。';this.stopped=true;this.detach();return false;}this.commandCount++;return true;}
+ private append(command:Command){if(this.reserve())this.commands.push(command);}
+ private appendUpdate(dt:number){
+  if(!this.reserve())return;
+  let block=this.commands.at(-1);if(!block||Array.isArray(block)||block.length===block.steps.length){block={steps:new Float64Array(1024),length:0};this.commands.push(block);}
+  block.steps[block.length++]=dt;
  }
- private sync(){const state=external(this.game),encoded=JSON.stringify(state);if(encoded!==this.lastExternal){this.append([-1,state]);this.lastExternal=encoded;}}
+ private rememberExternal(){
+  const state=this.lastExternal;state.paused=this.game.paused;state.targetX=this.game.targetX;
+  for(let i=0;i<this.game.tanks.length;i++){const t=this.game.tanks[i],row=state.aims[i]??(state.aims[i]=[0,0,0,0]);row[0]=t.id;row[1]=t.angle;row[2]=t.power;row[3]=t.direction;}state.aims.length=this.game.tanks.length;
+ }
+ private sync(){
+  const state=this.lastExternal,g=this.game;
+  let changed=g.paused!==state.paused||g.targetX!==state.targetX||g.tanks.length!==state.aims.length;for(let i=0;!changed&&i<g.tanks.length;i++){const t=g.tanks[i],row=state.aims[i];changed=!row||row[0]!==t.id||row[1]!==t.angle||row[2]!==t.power||row[3]!==t.direction;}
+  if(changed){this.append([-1,external(g)]);this.rememberExternal();}
+ }
+ get bufferBytes(){return this.commands.reduce((n,entry)=>n+(Array.isArray(entry)?JSON.stringify(entry).length*2:entry.steps.byteLength),0);}
  cue(kind:'charge-start'|'charge-stop'){if(!this.stopped)this.append([-2,kind]);}
  export():BattleReplay{
   if(this.error)throw Error(this.error);
   if(!this.stopped)this.sync();
-  return traceClone({format:'piggy-battle-replay',formatVersion:REPLAY_FORMAT,gameVersion:this.game.gameVersion,id:this.id,createdAt:this.createdAt,initial:this.initial,commands:this.commands,duration:this.duration,finalDigest:this.stopped?this.finalDigest:replayDigest(this.game)});
+  const commands:Command[]=[];for(const entry of this.commands){if(Array.isArray(entry))commands.push(entry);else for(let i=0;i<entry.length;i++)commands.push([0,entry.steps[i]]);}
+  return traceClone({format:'piggy-battle-replay',formatVersion:REPLAY_FORMAT,gameVersion:this.game.gameVersion,id:this.id,createdAt:this.createdAt,initial:this.initial,commands,duration:this.duration,finalDigest:this.stopped?this.finalDigest:replayDigest(this.game)});
  }
  detach(){for(const [name,original] of this.originals)(this.game as any)[name]=original;this.originals.clear();}
 }
