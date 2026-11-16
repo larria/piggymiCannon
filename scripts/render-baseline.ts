@@ -1,6 +1,7 @@
 import {chromium,webkit} from '@playwright/test';
 import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
 import {resolve} from 'node:path';
 import {boot} from '../tests/browser/qa-app';
 
@@ -35,6 +36,7 @@ try{
   const before=cdp?await cdp.send('Performance.getMetrics'):null;
   const measured=await page.evaluate(async({seconds,scenario})=>{
    const q=(window as any).__qa,g=q.game,r=q.renderer,d=q.dashboard;
+   const beforeFrames=r.frames??0,beforeGPU=r.stage?.frames??0;
    const samples:Record<string,number[]>={simulation:[],scene:[],dashboard:[],terrainRebuild:[],interval:[]};
    const restorers:(()=>void)[]=[];let previous=0,maxProjectiles=0,maxParticles=0,maxBlasts=0;
    for(const [object,key,label] of [[g,'update','simulation'],[r,'draw','scene'],[d,'draw','dashboard'],[r,'rebuildTerrain','terrainRebuild']] as any[]){
@@ -48,7 +50,7 @@ try{
    let longTasks=0;const observer=typeof PerformanceObserver!=='undefined'&&PerformanceObserver.supportedEntryTypes.includes('longtask')?new PerformanceObserver(list=>longTasks+=list.getEntries().length):null;observer?.observe({type:'longtask'});
    const started=performance.now();await new Promise(r=>setTimeout(r,seconds*1000));const elapsed=performance.now()-started;
    restorers.forEach(r=>r());observer?.disconnect();
-   return {samples,elapsedMs:elapsed,longTasks,maxProjectiles,maxParticles,maxBlasts,phase:g.phase,turn:g.turn,round:g.roundNumber,seed:g.config.seed,canvas:{width:r.canvas.width,height:r.canvas.height,ratio:r.ratio},audioBuffers:(q.audio as any).buffers.size};
+   return {samples,elapsedMs:elapsed,longTasks,maxProjectiles,maxParticles,maxBlasts,phase:g.phase,turn:g.turn,round:g.roundNumber,seed:g.config.seed,submittedFrames:r.frames===undefined?samples.scene.length:r.frames-beforeFrames,gpuFrames:r.stage? r.stage.frames-beforeGPU:null,backend:r.backend??'canvas',canvas:{width:r.canvas.width,height:r.canvas.height,ratio:r.ratio,worldHeight:r.viewHeight,gpuScreenHeight:r.stage?.app.screen.height??null},audioBuffers:(q.audio as any).buffers.size};
   },{seconds:scenario==='ace-match'?Math.max(seconds,30):seconds,scenario});
   const after=cdp?await cdp.send('Performance.getMetrics'):null;
   const metrics=(data:any)=>Object.fromEntries(data?.metrics.map((m:any)=>[m.name,m.value])??[]);
@@ -59,7 +61,8 @@ try{
   if(scenario==='settings')await page.locator('[data-action="close"]:visible').first().click();
  }
  const output=resolve(process.env.PIGGY_RENDER_REPORT??`QA/pixi3-${browserName}-baseline.json`);mkdirSync(resolve(output,'..'),{recursive:true});
- const sourceHashes=Object.fromEntries(['main','renderer','engine','dashboard','audio'].map(name=>[name,createHash('sha256').update(readFileSync(`src/${name}.ts`)).digest('hex')]));
- writeFileSync(output,JSON.stringify({formatVersion:1,version:JSON.parse(readFileSync('package.json','utf8')).version,sourceHashes,browser:browserName,browserVersion:browser.version(),recordedAt:new Date().toISOString(),viewport:{width:1194,height:834,dpr:2},method:'Instrumented real app; warmup 1.2s, real rAF and simulation, CPU submission timings (not GPU time or device power). Fixture seeds 310030..310035 via a temporary Date.now override only while creating each match (restored before measuring); multi-double repeats only on valid human aiming turns. No per-frame production changes.',results,errors},null,2)+'\n');
+ const sourceHashes=Object.fromEntries(['main','renderer','engine','dashboard','audio','vehicle-art'].map(name=>[name,createHash('sha256').update(process.env.PIGGY_BASELINE_REF?execFileSync('git',['show',`${process.env.PIGGY_BASELINE_REF}:src/${name}.ts`]):readFileSync(`src/${name}.ts`)).digest('hex')]));
+ if(!process.env.PIGGY_BASELINE_REF)sourceHashes['pixi-stage']=createHash('sha256').update(readFileSync('src/pixi-stage.ts')).digest('hex');
+ writeFileSync(output,JSON.stringify({formatVersion:1,baselineRef:process.env.PIGGY_BASELINE_REF??null,version:JSON.parse(readFileSync('package.json','utf8')).version,sourceHashes,browser:browserName,browserVersion:browser.version(),recordedAt:new Date().toISOString(),viewport:{width:1194,height:834,dpr:2},method:'Instrumented real app; warmup 1.2s, real rAF and simulation, CPU submission timings (not GPU time or device power). Fixture seeds 310030..310035 via a temporary Date.now override only while creating each match (restored before measuring); multi-double repeats only on valid human aiming turns. No per-frame production changes.',results,errors},null,2)+'\n');
  if(errors.length)throw new Error(errors.join('\n'));
 }finally{await browser.close();}

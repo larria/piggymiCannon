@@ -1,4 +1,5 @@
-import {loadBattleSprites,paintBattleSprite} from './battle-sprites';
+import {loadBattleSprites,paintBattleSprite,battleSpriteRevision} from './battle-sprites';
+import type {PixiStage} from './pixi-stage';
 import { Game, WORLD_W, WORLD_H, WATER_Y, clamp, makeRng, type Tank } from './engine';
 import { weaponById,weaponHasTrail,MODERN_TRAIL_ALPHA,MODERN_TRAIL_WIDTH } from './catalog';
 import {projectileDrawScale,projectileRearExtent} from './projectile-art';
@@ -9,7 +10,7 @@ import {vehicleById} from './vehicles';
 import {projectileArt,paintVehicle} from './vehicle-art';
 import {paintCrew} from './crew-art';
 import {teamFlag} from './crew';
-import {crewPortrait} from './crew-portraits';
+import {crewPortrait,crewPortraitRevision} from './crew-portraits';
 import {paintItemCue} from './item-feedback';
 import {classicBackdrop,classicDetails} from './classic-map-art';
 
@@ -30,14 +31,32 @@ export class Renderer {
   private windMotes:{x:number;y:number;vx:number;fall:number;alpha:number;size:number;phase:number}[]=[];
   private manualFocus:number|null=null;
   private labelRects:{left:number;right:number;top:number;bottom:number}[]=[];
-  focusAt(y:number){this.manualFocus=clamp(y-this.viewHeight*.52,-this.viewHeight*.6,WORLD_H-this.viewHeight+90);}
-  follow(){this.manualFocus=null;}
+  private staticTerrain=document.createElement('canvas');private staticRevision=-1;private staticRatio=0;
+  private stage:PixiStage|null=null;private backgroundDirty=true;private terrainDirty=true;
+  private invalidated=true;private pausedStamp='';private destroyed=false;
+  backend:'canvas'|'pixi'='canvas';frames=0;
+  invalidate(){this.invalidated=true;}
+  focusAt(y:number){this.manualFocus=clamp(y-this.viewHeight*.52,-this.viewHeight*.6,WORLD_H-this.viewHeight+90);this.invalidate();}
+  follow(){this.manualFocus=null;this.invalidate();}
   constructor(canvas:HTMLCanvasElement,game:Game) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d')!;this.background=document.createElement('canvas');
     this.background.width=WORLD_W;this.background.height=WORLD_H;this.game=game;this.palette=PALETTES[game.config.map];
     this.resize();void loadBattleSprites();
+    void document.fonts.ready.then(()=>{this.staticRevision=-1;this.invalidate();});
+    if(!new URLSearchParams(location.search).has('canvas'))void this.initializePixi();
   }
-  setGame(game:Game) {this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.windMotes=[];this.manualFocus=null;this.paintBackground();}
+  private async initializePixi(){
+    const layer=document.createElement('canvas');layer.className='pixi-battle-layer';layer.hidden=true;layer.setAttribute('aria-hidden','true');this.canvas.before(layer);
+    let stage:PixiStage|undefined;
+    try{
+      const {PixiStage}=await import('./pixi-stage');if(this.destroyed){layer.remove();return;}
+      this.rebuildStaticTerrain();stage=new PixiStage(layer,()=>{this.invalidate();if(this.stage&&!this.stage.available)this.draw(0);});
+      await stage.init(this.background,this.staticTerrain,this.ratio,this.viewHeight);
+      if(this.destroyed){stage.destroy();return;}this.stage=stage;this.backgroundDirty=true;this.terrainDirty=true;this.invalidate();
+    }catch{stage?.destroy();layer.remove();this.backend='canvas';this.invalidate();}
+  }
+  destroy(){if(this.destroyed)return;this.destroyed=true;this.stage?.destroy();this.stage=null;}
+  setGame(game:Game) {this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.manualFocus=null;this.paintBackground();this.invalidate();}
   resize() {
     this.ratio=Math.min(window.devicePixelRatio||1,2);
     this.viewHeight=Math.max(370,this.canvas.clientHeight/this.canvas.clientWidth*WORLD_W);
@@ -45,6 +64,7 @@ export class Renderer {
     this.canvas.width=WORLD_W*this.ratio;this.canvas.height=this.viewHeight*this.ratio;
     this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);
     this.paintBackground();
+    this.invalidate();
   }
   private mountain(ctx:CanvasRenderingContext2D,base:number,color:string,seed:number,height:number) {
     const rng=makeRng(seed);ctx.beginPath();ctx.moveTo(-60,WORLD_H);ctx.lineTo(-60,base);
@@ -70,6 +90,7 @@ export class Renderer {
     ctx.bezierCurveTo(7,-54,46,-42,47,-14);ctx.bezierCurveTo(85,-21,95,11,61,12);ctx.closePath();ctx.fill();ctx.restore();
   }
   private paintBackground() {
+    this.backgroundDirty=true;
     const ctx=this.background.getContext('2d')!,p=this.palette;
     const gradient=ctx.createLinearGradient(0,0,0,WORLD_H);gradient.addColorStop(0,p.sky);gradient.addColorStop(0.72,p.horizon);
     ctx.fillStyle=gradient;ctx.fillRect(0,0,WORLD_W,WORLD_H);
@@ -139,7 +160,15 @@ export class Renderer {
     }
     this.terrainRevision=g.land.revision;
   }
-  private terrain() {
+  private rebuildStaticTerrain(){
+    if(this.staticRevision===this.game.land.revision&&this.staticRatio===this.ratio)return;
+    if(this.terrainRevision!==this.game.land.revision)this.rebuildTerrain();
+    const old=this.ctx,c=this.staticTerrain;c.width=(WORLD_W+64)*this.ratio;c.height=WORLD_H*this.ratio;
+    this.ctx=c.getContext('2d')!;this.ctx.scale(this.ratio,this.ratio);this.ctx.translate(32,0);
+    try{this.paintTerrainDecoration();classicDetails(this.ctx,this.game);}finally{this.ctx=old;}
+    this.staticRevision=this.game.land.revision;this.staticRatio=this.ratio;this.terrainDirty=true;
+  }
+  private paintTerrainDecoration() {
     const ctx=this.ctx,g=this.game,p=this.palette;
     if(this.terrainRevision!==g.land.revision) this.rebuildTerrain();
     ctx.drawImage(this.terrainCanvas,0,0);
@@ -167,7 +196,9 @@ export class Renderer {
       ctx.fillStyle=p.ink;ctx.beginPath();ctx.ellipse(x,y,19,10,-0.2,Math.PI,Math.PI*2);ctx.fill();
       ctx.fillStyle=p.grass;ctx.beginPath();ctx.ellipse(x+3,y-7,12,9,0,Math.PI,Math.PI*2);ctx.fill();
     }
-    if(g.config.map==='factory')return;
+  }
+  private water(){
+    const ctx=this.ctx,p=this.palette;if(this.game.config.map==='factory')return;
     ctx.fillStyle=p.water+'85';ctx.fillRect(0,WATER_Y,WORLD_W,WORLD_H-WATER_Y);
     ctx.strokeStyle=p.water;ctx.lineWidth=2;ctx.beginPath();
     for(let x=0;x<=WORLD_W;x+=8) ctx.lineTo(x,WATER_Y+Math.sin(x/23+this.time)*2);ctx.stroke();
@@ -243,7 +274,11 @@ export class Renderer {
     // Transfer shells use the angle/charge controls without a predicted path.
   }
   draw(dt:number) {
-    const ctx=this.ctx,g=this.game;this.time+=g.paused?0:dt;
+    const ctx=this.ctx,g=this.game;
+    const stamp=[g.land.revision,g.current,crewPortraitRevision(),battleSpriteRevision()].join(':');
+    // draw(0) remains the explicit still-frame API used by snapshots/review.
+    if(dt!==0&&g.paused&&!this.invalidated&&this.pausedStamp===stamp)return;
+    this.invalidated=false;this.pausedStamp=g.paused?stamp:'';this.frames++;this.time+=g.paused?0:dt;
     if(!this.windMotes.length) {const rng=makeRng(609);this.windMotes=Array.from({length:40},()=>({x:rng()*WORLD_W,y:rng()*WORLD_H,vx:g.wind*13,fall:8+rng()*11,alpha:0.35+rng()*0.3,size:1+rng()*1.6,phase:rng()*10}));}
     if(!g.paused) for(const mote of this.windMotes) {mote.vx+=(g.wind*13-mote.vx)*Math.min(1,dt*2);mote.x=((mote.x+mote.vx*dt)%WORLD_W+WORLD_W)%WORLD_W;mote.y=(mote.y+mote.fall*dt)%WORLD_H;}
     let camera=this.manualFocus??WORLD_H-this.viewHeight;
@@ -251,12 +286,19 @@ export class Renderer {
     if(g.phase==='supply'&&g.crates.some(c=>c.falling)) camera=Math.min(camera,Math.min(...g.crates.filter(c=>c.falling).map(c=>c.y))-this.viewHeight*0.32);
     if(g.phase==='aiming'&&this.manualFocus===null)camera+=clamp((g.active.y-390)*.12,-24,24);
     const targetX=g.phase==='aiming'?clamp((g.active.x-WORLD_W/2)*.02,-10,10):0;this.offsetX+=(targetX-this.offsetX)*Math.min(1,dt*3);
-    this.offsetY+=(camera-this.offsetY)*Math.min(1,dt*5);
+    this.offsetY=g.paused?camera:this.offsetY+(camera-this.offsetY)*Math.min(1,dt*5);
     ctx.save();ctx.clearRect(0,0,WORLD_W,this.viewHeight);
-    if(g.shake>0) ctx.translate(Math.sin(this.time*88)*g.shake,Math.cos(this.time*69)*g.shake*0.5);
-    ctx.drawImage(this.background,0,0,WORLD_W,this.viewHeight);
+    const shakeX=g.shake>0?Math.sin(this.time*88)*g.shake:0,shakeY=g.shake>0?Math.cos(this.time*69)*g.shake*.5:0;
+    ctx.translate(shakeX,shakeY);this.rebuildStaticTerrain();
+    let gpu=false;
+    try{if(this.stage?.available){this.stage.sync(this.backgroundDirty,this.terrainDirty,this.ratio,this.viewHeight);gpu=this.stage.draw(this.offsetX,this.offsetY,shakeX,shakeY,this.viewHeight);this.backgroundDirty=false;this.terrainDirty=false;}}
+    catch{this.stage?.destroy();this.stage=null;}
+    this.backend=gpu?'pixi':'canvas';this.canvas.dataset.renderBackend=this.backend;
+    if(!gpu)ctx.drawImage(this.background,0,0,WORLD_W,this.viewHeight);
     ctx.translate(-this.offsetX,-this.offsetY);
-    this.terrain();classicDetails(ctx,g);this.atmosphere();this.targetAid();
+    if(!gpu)ctx.drawImage(this.staticTerrain,-32,0,WORLD_W+64,WORLD_H);
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=this.palette.grassLight;ctx.lineWidth=3;
+    this.water();this.atmosphere();this.targetAid();
     for(const f of g.fires) {
       for(let i=-Math.floor(f.radius/11);i<=Math.floor(f.radius/11);i++) {
         const x=f.x+i*11,y=g.ground(x,(f.y??0)-20)-1;if(y>=WATER_Y-5) continue;

@@ -1,0 +1,9 @@
+{
+  "formatVersion": 1,
+  "sameStage": true,
+  "textures": 2,
+  "canvasCount": 1,
+  "pauseFrames": 0,
+  "dialFrames": 0,
+  "realContextRecovery": true
+}

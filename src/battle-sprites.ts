@@ -10,6 +10,7 @@ export const BATTLE_SPRITES={
 } as const;
 export type BattleSprite=keyof typeof BATTLE_SPRITES;
 const images=new Map<BattleSprite,HTMLImageElement>();
+export const battleSpriteRevision=()=>images.size;
 let loading:Promise<boolean[]>|undefined;
 /** Decode once, independently of the match, never from a draw call. Failure keeps vector art. */
 export function loadBattleSprites(){

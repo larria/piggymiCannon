@@ -1,0 +1,61 @@
+{
+  "formatVersion": 1,
+  "rounds": 3,
+  "method": "Median of three paired runs; per-frame scene+dashboard CPU submission; each scene 10s, expert 30s, no GPU/power inference.",
+  "rows": [
+    {
+      "scenario": "two-idle",
+      "referenceMeanMs": 0.6793333309888839,
+      "pixiMeanMs": 0.4733333305517832,
+      "meanReductionPercent": 30.323847077727372,
+      "referenceP95Ms": 1.0,
+      "pixiP95Ms": 0.7000000476837158,
+      "p95ReductionPercent": 29.999995231628418
+    },
+    {
+      "scenario": "four-weather",
+      "referenceMeanMs": 0.7891666658719381,
+      "pixiMeanMs": 0.4469217948627948,
+      "meanReductionPercent": 43.367882325719144,
+      "referenceP95Ms": 1.1999999284744263,
+      "pixiP95Ms": 0.7000000476837158,
+      "p95ReductionPercent": 41.66665921608562
+    },
+    {
+      "scenario": "multi-double",
+      "referenceMeanMs": 1.0889999987681707,
+      "pixiMeanMs": 0.8496666693687439,
+      "meanReductionPercent": 21.97734891369607,
+      "referenceP95Ms": 1.6999999284744263,
+      "pixiP95Ms": 1.2000000476837158,
+      "p95ReductionPercent": 29.411758931037635
+    },
+    {
+      "scenario": "paused",
+      "referenceMeanMs": 0.8403333306312561,
+      "pixiMeanMs": 0.05900000015894572,
+      "meanReductionPercent": 92.97897655509807,
+      "referenceP95Ms": 1.399999976158142,
+      "pixiP95Ms": 0.19999992847442627,
+      "p95ReductionPercent": 85.71429057997109
+    },
+    {
+      "scenario": "settings",
+      "referenceMeanMs": 0.7671666655937831,
+      "pixiMeanMs": 0.05016666809717814,
+      "meanReductionPercent": 93.46078624801179,
+      "referenceP95Ms": 1.2000000476837158,
+      "pixiP95Ms": 0.10000002384185791,
+      "p95ReductionPercent": 91.66666501098216
+    },
+    {
+      "scenario": "ace-match",
+      "referenceMeanMs": 0.9387493019061406,
+      "pixiMeanMs": 0.8112290508920253,
+      "meanReductionPercent": 13.584058145788658,
+      "referenceP95Ms": 1.5,
+      "pixiP95Ms": 1.1999999284744263,
+      "p95ReductionPercent": 20.000004768371582
+    }
+  ]
+}

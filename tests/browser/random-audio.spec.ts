@@ -35,7 +35,7 @@ test('real FT2 decoding/playback covers all 13 weapon pairs, movement, common cu
   const media=await page.evaluate(()=>{const a=(window as any).__qa.audio;return {src:a.music.src,duration:a.music.duration,error:a.music.error?.code??null};});expect(media.src).toContain(BGM_TRACKS[scene as keyof typeof BGM_TRACKS]);expect(media.error).toBeNull();const record=JSON.parse(readFileSync('research/FT2_AUDIO_SOURCES.json','utf8')).files.find((r:any)=>r.runtime===BGM_TRACKS[scene as keyof typeof BGM_TRACKS]);expect(Math.abs(media.duration-record.sourceSeconds)).toBeLessThan(.06);
   for(let wrap=0;wrap<2;wrap++)await page.evaluate(async()=>{
    const m=(window as any).__qa.audio.music as HTMLAudioElement;m.pause();
-   await new Promise<void>((resolve,reject)=>{m.onseeked=()=>resolve();m.onerror=()=>reject(new Error('online seek '+m.src));m.currentTime=m.duration-.7;});
+   await new Promise<void>((resolve,reject)=>{const target=m.duration-2;m.onseeked=()=>{if(!m.seeking&&Math.abs(m.currentTime-target)<.08)resolve();};m.onerror=()=>reject(new Error('online seek '+m.src));m.currentTime=target;});
    const tail=m.currentTime;let advanced=false;await m.play();
    await new Promise<void>((resolve,reject)=>{const begin=performance.now(),check=()=>{if(m.currentTime>tail+.02)advanced=true;if(advanced&&!m.seeking&&!m.paused&&m.currentTime<1)resolve();else if(m.error||performance.now()-begin>8000)reject(new Error('online loop '+JSON.stringify({src:m.src,tail,time:m.currentTime,paused:m.paused,seeking:m.seeking,ended:m.ended,ready:m.readyState,network:m.networkState,advanced})));else setTimeout(check,30);};check();});m.onseeked=m.onerror=null;
   });

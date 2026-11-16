@@ -4,11 +4,14 @@ import {paintMapOverview} from './map-preview';
 import {paintVehicle} from './vehicle-art';
 import {vehicleById} from './vehicles';
 import {teamFlag} from './crew';
-import {crewPortrait} from './crew-portraits';
+import {crewPortrait,crewPortraitRevision} from './crew-portraits';
 export class DashboardView {
   private terrain=document.createElement('canvas');private revision=-1;private previousGame:Game|null=null;
+  private dialSignature='';private mapSignature='';dialFrames=0;mapFrames=0;
   constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;}
   draw(game:Game,t:Tank,offset:number,viewHeight:number){
+    const signature=[t.angle,t.direction,t.minAngle,t.maxAngle,game.tankSlope(t)].join('|');
+    if(signature!==this.dialSignature){this.dialSignature=signature;this.dialFrames++;
     const c=this.dial.getContext('2d')!;c.clearRect(0,0,260,260);c.save();c.scale(2,2);
     c.fillStyle='#f6f4e9';c.strokeStyle='#ccd5bd';c.lineWidth=2;c.beginPath();c.arc(65,65,58,0,7);c.fill();c.stroke();
     c.save();c.translate(65,65);c.scale(t.direction,1);
@@ -20,6 +23,10 @@ export class DashboardView {
     for(const a of [t.minAngle,t.maxAngle]){const p=polar(a,52);c.strokeStyle='#c7b58e';c.setLineDash([3,4]);c.beginPath();c.moveTo(0,0);c.lineTo(p.x,p.y);c.stroke();}c.setLineDash([]);
     const p=polar(t.angle,50);c.strokeStyle='#718c5a';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(p.x,p.y);c.stroke();c.fillStyle='#e8a26a';c.beginPath();c.arc(p.x,p.y,3,0,7);c.fill();c.restore();
     c.fillStyle='#8da273';c.beginPath();c.arc(65,65,5,0,7);c.fill();c.fillStyle='#597347';c.font='600 19px "Manrope",sans-serif';c.textAlign='center';c.restore();
+    }
+    const mapSignature=[game.land.revision,game.current,game.viewer,game.fog,game.snow,game.fireLine?.x,Math.round(offset*1024),viewHeight,crewPortraitRevision(),this.map.clientHeight,...game.tanks.flatMap(t=>[t.x,t.y,t.hp,t.team,t.vehicleId,t.crew]),...game.crates.flatMap(c=>[c.x,c.y,c.falling,c.type])].join('|');
+    if(this.previousGame===game&&this.mapSignature===mapSignature)return;
+    this.mapSignature=mapSignature;this.mapFrames++;
     const m=this.map.getContext('2d')!,base=this.terrain.getContext('2d')!;
     if(this.previousGame!==game||this.revision!==game.land.revision){paintMapOverview(base,game,300,168);this.previousGame=game;this.revision=game.land.revision;}
     m.drawImage(this.terrain,0,0);m.strokeStyle='#f9f2d7b0';m.lineWidth=2;m.strokeRect(2,offset/640*168,296,viewHeight/640*168);

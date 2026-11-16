@@ -1,0 +1,42 @@
+{
+  "formatVersion": 1,
+  "method": "60 new matches across six maps, three complete snapshots per match, collectGarbage after each 10-match batch; retained JS heap excludes native/GPU/PCM allocations.",
+  "rows": [
+    {
+      "matches": 10,
+      "heapBytes": 5841256,
+      "textures": 2,
+      "canvases": 1
+    },
+    {
+      "matches": 20,
+      "heapBytes": 5916064,
+      "textures": 2,
+      "canvases": 1
+    },
+    {
+      "matches": 30,
+      "heapBytes": 5941376,
+      "textures": 2,
+      "canvases": 1
+    },
+    {
+      "matches": 40,
+      "heapBytes": 5973120,
+      "textures": 2,
+      "canvases": 1
+    },
+    {
+      "matches": 50,
+      "heapBytes": 5988176,
+      "textures": 2,
+      "canvases": 1
+    },
+    {
+      "matches": 60,
+      "heapBytes": 5989680,
+      "textures": 2,
+      "canvases": 1
+    }
+  ]
+}

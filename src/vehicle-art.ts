@@ -2,6 +2,7 @@ import type {Vehicle} from './vehicles';
 // Shared vector geometry: selection/HUD/minimap and battlefield use the same silhouettes.
 // Original paths, inspired by the traced references in research/VEHICLE_DESIGN.md.
 type Part={d:string;fill:string;stroke?:string;width?:number};
+const paintGeometry=new Map<string,{body:HTMLCanvasElement;mechanism:HTMLCanvasElement}>();
 const wood='#a8885c',iron='#485b57',cream='#ead9ae';
 const part=(d:string,fill:string,stroke=iron,width=1.8):Part=>({d,fill,stroke,width});
 const wheel=(x:number,r=9)=>part(`M${x-r} 10a${r} ${r} 0 1 0 ${r*2} 0a${r} ${r} 0 1 0 -${r*2} 0M${x-r+3} 10h${r*2-6}M${x} ${13-r}v${r*2-6}`,wood);
@@ -45,10 +46,19 @@ export function mechanismParts(v:Vehicle):Part[]{
 const svgParts=(parts:Part[])=>parts.map(p=>`<path d="${p.d}" fill="${p.fill}" stroke="${p.stroke}" stroke-width="${p.width}"/>`).join('');
 export function vehicleIcon(v:Vehicle){return `<svg viewBox="-48 -48 98 75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svgParts(vehicleParts(v))}<g transform="translate(0,-13) rotate(-25)">${svgParts(mechanismParts(v))}</g></svg>`;}
 export function paintVehicle(c:CanvasRenderingContext2D,v:Vehicle,angle:number,time:number,firing:number,moving:boolean){
- const draw=(parts:Part[])=>{for(const p of parts){const path=new Path2D(p.d);c.fillStyle=p.fill;c.strokeStyle=p.stroke??iron;c.lineWidth=p.width??1.8;if(p.fill!=='none')c.fill(path);c.stroke(path);}};
+ const key=v.id+'|'+v.color;let geometry=paintGeometry.get(key);
+ if(!geometry){
+  if(paintGeometry.size>=16)paintGeometry.delete(paintGeometry.keys().next().value!);
+  // 4x baking retains fine lines at the existing DPR2 even after rotation.
+  // Body and firing mechanism remain separate so all continuous transforms
+  // (slope, aim, recoil and motion) run at the original frame frequency.
+  const bake=(parts:Part[])=>{const tile=document.createElement('canvas');tile.width=tile.height=384;const ctx=tile.getContext('2d')!;ctx.scale(4,4);ctx.translate(48,48);ctx.lineJoin='round';ctx.lineCap='round';for(const p of parts){const path=new Path2D(p.d);ctx.fillStyle=p.fill;ctx.strokeStyle=p.stroke??iron;ctx.lineWidth=p.width??1.8;if(p.fill!=='none')ctx.fill(path);ctx.stroke(path);}return tile;};
+  geometry={body:bake(vehicleParts(v)),mechanism:bake(mechanismParts(v))};paintGeometry.set(key,geometry);
+ }
+ const draw=(tile:HTMLCanvasElement)=>c.drawImage(tile,-48,-48,96,96);
  c.save();c.lineJoin='round';c.lineCap='round';
  if(moving)c.translate(0,Math.sin(time*22)*1.2);
- draw(vehicleParts(v));
+ draw(geometry.body);
  c.save();c.translate(0,-13);
  // Release axis is body-relative, identical to Game.aim after parent body rotation.
  c.rotate(-angle*Math.PI/180);
@@ -56,7 +66,7 @@ export function paintVehicle(c:CanvasRenderingContext2D,v:Vehicle,angle:number,t
  else if(v.id==='crossbow')c.scale(1-firing*.09,1);
  else if(v.id==='multi'||v.id==='missile')c.translate(-Math.sin(firing*Math.PI)*3,Math.sin(time*30)*firing);
  else c.translate(-Math.sin(firing*Math.PI)*4,0);
- draw(mechanismParts(v));
+ draw(geometry.mechanism);
  if(firing>0&&(v.id==='multi'||v.id==='missile')){c.fillStyle='#f4c474';c.beginPath();c.ellipse(36,(Math.floor(time*18)%3-1)*8,7*firing,3,0,0,7);c.fill();}
  c.restore();c.restore();
 }

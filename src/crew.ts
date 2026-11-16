@@ -3,7 +3,7 @@ import {validChoice,type VehicleChoice} from './vehicles';
 export type CrewId='mimi'|'dad'|'fox'|'fish';
 export interface Slot {enabled:boolean;crew:CrewId;team:number;controller:'human'|'ai';difficulty:Difficulty;vehicle:VehicleChoice|null}
 export type Seat=Slot;
-export const CREW={mimi:{name:'咪猪头',color:'#dd8e77',paper:'#f4e5db',symbol:'猪'},dad:{name:'大猪头爸爸',color:'#64859d',paper:'#e4edf2',symbol:'爸'},fox:{name:'阿狸',color:'#c56c48',paper:'#f4e4d5',symbol:'狸'},fish:{name:'小黄鱼妈妈',color:'#c5a44d',paper:'#f5efd8',symbol:'鱼'}} as const;
+export const CREW={mimi:{name:'咪猪头',color:'#dd8e77',paper:'#f4e5db',symbol:'猪'},dad:{name:'大猪头',color:'#64859d',paper:'#e4edf2',symbol:'大'},fox:{name:'阿狸',color:'#c56c48',paper:'#f4e4d5',symbol:'狸'},fish:{name:'小黄鱼',color:'#c5a44d',paper:'#f5efd8',symbol:'鱼'}} as const;
 export const CREW_ORDER:CrewId[]=['mimi','dad','fox','fish'];
 export const FLAGS=[{name:'暖桃',letter:'A',color:'#a34c3c',paper:'#f5e5df',shape:'square'},{name:'青苔',letter:'B',color:'#466c44',paper:'#e8eedf',shape:'fork'},{name:'晴空',letter:'C',color:'#386a8c',paper:'#e3edf2',shape:'wave'},{name:'麦穗',letter:'D',color:'#826023',paper:'#f5ecd6',shape:'diamond'}] as const;
 export function teamFlag(team:number){const color=FLAGS[((team%4)+4)%4];return {...color,letter:team<4&&team>=0?color.letter:String(team+1),name:team<4&&team>=0?color.name:`队伍 ${team+1}`};}

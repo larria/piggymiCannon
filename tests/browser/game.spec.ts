@@ -51,7 +51,7 @@ test('dragging aims; hold-and-release fires exactly once and the AI returns the 
   await expect(page.locator('#turn-text')).toHaveText('咪猪头，到你了');
   await page.locator('#log-button').click();
   await expect(page.locator('.battle-log')).toContainText('咪猪头发射了巨石');
-  await expect(page.locator('.battle-log')).toContainText('大猪头爸爸发射了');
+  await expect(page.locator('.battle-log')).toContainText('大猪头发射了');
 });
 
 test('the army drawer selects weapons, and hotseat changes actor without blocking',async({page})=>{
@@ -65,9 +65,9 @@ test('the army drawer selects weapons, and hotseat changes actor without blockin
   const fire=await page.locator('#fire-button').boundingBox();
   await page.mouse.move(fire!.x+fire!.width/2,fire!.y+fire!.height/2);await page.mouse.down();
   await page.waitForTimeout(350);await page.mouse.up();
-  await expect(page.locator('#turn-text')).toContainText('大猪头爸爸',{timeout:20_000});
+  await expect(page.locator('#turn-text')).toContainText('大猪头',{timeout:20_000});
 
-  await expect(page.locator('#turn-text')).toHaveText('大猪头爸爸，到你了');
+  await expect(page.locator('#turn-text')).toHaveText('大猪头，到你了');
 });
 
 test('PWA installs its worker and reloads with icons and audio while offline',async({page,context})=>{
@@ -121,7 +121,7 @@ test('fog hides enemy information for two actions then clears and uses the suppl
   await expect(page.locator('[data-slot-id="1"] .avatar img')).toHaveAttribute('src',/portraits\/dad\.png/);
   await page.screenshot({path:'QA/slots-regression-fog.png'});
   await page.locator('#fire-button').click();
-  await expect(page.locator('#turn-text')).toHaveText('大猪头爸爸正在瞄准…',{timeout:10_000});
+  await expect(page.locator('#turn-text')).toHaveText('大猪头正在瞄准…',{timeout:10_000});
   await expect(page.locator('#hp-1')).toHaveText('950 / 950');
   await expect(page.locator('#energy-value')).toHaveText('950 / 950');
   await expect(page.locator('#instrument-tank')).toHaveText('大腕');

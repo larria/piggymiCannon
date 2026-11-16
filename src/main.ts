@@ -306,7 +306,7 @@ function showDialog(type:string) {
   dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');
   if(type.startsWith('portrait:')) {
     const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name,team=game.tanks[id].team;
-    const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼妈妈！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，爸爸也会打歪。','装甲厚一点，心软一点。','哼哼，轮到爸爸了！','不着急，咱们慢慢瞄。'];
+    const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，大猪头也会打歪。','装甲厚一点，心软一点。','哼哼，轮到大猪头了！','不着急，咱们慢慢瞄。'];
     content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}"><img src="${crewAvatarPath(crew,import.meta.env.BASE_URL)}" alt="${name}大头像"/><span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
     let taps=0;
     $('#portrait-art').addEventListener('click',()=>{
@@ -492,7 +492,11 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());if(e.key===' '&&charge?.pointer===null){e.preventDefault();finishCharge();}});
 window.addEventListener('blur',()=>{keys.clear();moveHeld=0;cancelCharge();});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();moveHeld=0;cancelCharge();}});
+let backgroundGame:Game|null=null,backgroundWasPaused=false;
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){keys.clear();moveHeld=0;cancelCharge();if(backgroundGame!==game){backgroundGame=game;backgroundWasPaused=game.paused;}game.paused=true;audio.setPageHidden(true);}
+  else {if(backgroundGame===game)game.paused=backgroundWasPaused;backgroundGame=null;previous=performance.now();audio.setPageHidden(false);audio.pause(game.paused);renderer.invalidate();updateUI();}
+});
 window.addEventListener('resize',()=>renderer.resize());
 
 // Only the narrow transform / colour-fill changes at display cadence.
@@ -507,7 +511,8 @@ function updateChargeVisual(power:number){
 }
 let previous=performance.now(),lastUI=0;
 function frame(now:number) {
-  const dt=Math.min((now-previous)/1000,0.05);previous=now;
+  const dt=Math.max(0,Math.min((now-previous)/1000,0.05));previous=now;
+  if(document.hidden){requestAnimationFrame(frame);return;}
   if(game.humanTurn&&!$<HTMLDialogElement>('#dialog').open) {
     if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,(charge.touch?touchChargePower:chargePower)((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
     const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);
@@ -535,7 +540,7 @@ function frame(now:number) {
     if(event.type==='crate-land') audio.play('crate-land',event.x,game.tanks[game.viewer].x);
   }
   if(charge)updateChargeVisual(game.active.power);
-  if(now-lastUI>80) {updateUI();lastUI=now;}
+  if(now-lastUI>80&&!game.paused) {updateUI();lastUI=now;}
   requestAnimationFrame(frame);
 }
 setImmersive(false);renderInventory();updateSound();updateUI();requestAnimationFrame(frame);

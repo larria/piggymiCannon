@@ -7,6 +7,7 @@ export class AudioManager {
   private selectionMusic=new Audio(asset(BGM_TRACKS.setup));private selectionActive=false;
   soundEnabled=false;musicEnabled=false;volume=0.65;unlocked=false;
   private paused=false;
+  private pageHidden=false;
   private playingEffects=new Set<HTMLAudioElement>();
   private pausedEffects=new Set<HTMLAudioElement>();
   private scene:AudioScene='lobby';
@@ -24,7 +25,8 @@ export class AudioManager {
   unlock() {this.unlocked=true;try{this.graph();void this.preloadForMatch([]);}catch{/* Optional audio. */}if(this.musicEnabled&&!this.paused) this.start();}
   setMusicEnabled(enabled:boolean) {this.musicEnabled=enabled;if(this.selectionActive){this.music.pause();if(enabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});else this.selectionMusic.pause();}else if(enabled&&this.unlocked&&!this.paused)this.start();else this.music.pause();}
   setSoundEnabled(enabled:boolean) {this.soundEnabled=enabled;if(this.master&&this.context)this.master.gain.setTargetAtTime(enabled?this.volume:0,this.context.currentTime,.02);if(!enabled)this.resetEffects();}
-  private start() {if(this.selectionActive)return;void this.music.play().catch(()=>{});}
+  private start() {if(this.selectionActive||this.pageHidden)return;void this.music.play().catch(()=>{});}
+  setPageHidden(hidden:boolean){this.pageHidden=hidden;if(hidden){this.pause(true);this.selectionMusic.pause();}else if(this.selectionActive&&this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}
   setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.selectionMusic.volume=this.volume*0.55;for(const clip of this.playingEffects)clip.volume=this.volume*.75;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
   setSelectionMusic(active:boolean){if(active===this.selectionActive)return;this.selectionActive=active;if(active){this.music.pause();this.selectionMusic.currentTime=0;if(this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}else this.selectionMusic.pause();}
   pause(paused:boolean) {this.paused=paused;if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();if(this.context)void this.context.suspend().catch(()=>{});for(const clip of this.playingEffects)if(!clip.paused){clip.pause();this.pausedEffects.add(clip);}}else {if(this.context&&this.unlocked)void this.context.resume().catch(()=>{});if(this.musicEnabled&&this.unlocked)this.start();if(this.soundEnabled&&this.unlocked)for(const clip of this.pausedEffects)void clip.play().catch(()=>{});this.pausedEffects.clear();}}
