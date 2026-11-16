@@ -48,7 +48,7 @@ test('real lethal paths name direct hits, mines, fire, gas, falls, out-of-bounds
   if(cause==='fire'){g.fires=[{x:e.x,y:450,radius:40,turns:6,owner:0,weapon:'bowl-special',clock:1}];g.update(.001);}
   if(cause==='gas'){g.gases=[{x:e.x,y:e.y,radius:40,turns:6,owner:0,clock:1}];g.update(.001);}
   if(cause==='fall'){e.y=300;e.fallStart=240;e.fallVelocity=600;for(let i=0;i<80&&e.hp>0;i++)g.update(.01);}
-  if(cause==='out'){e.y=580;g.update(.001);}
+  if(cause==='out'){e.y=960;g.update(.001);}
   if(cause==='sudden'){g.turn=39;g.nextTurn();}
   assert.equal(e.hp,0,cause);const death=entries(g,'death').find(row=>row.data.target===1)!;assert.equal(death.data.cause,cause);assert.equal(death.data.lethal.hpBefore,1);assert.equal(death.data.lethal.hpAfter,0);assert.ok(death.data.damageEvent);assert.match(death.summary,/死亡/);
  }

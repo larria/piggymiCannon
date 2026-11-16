@@ -39,8 +39,8 @@ test('a lethal blast that removes the original land still preserves the land dea
  assert.equal(e.hp,0);assert.ok(g.support(e.x,e.y+18)>=579);assert.equal((e as any).defeat.y,432);assert.equal(e.outOfBounds,false);assert.ok(paintCount(g)>0);
  }
 });
-test('water/out-of-map death and unsupported airborne death leave no corpse; live excavation still falls',()=>{
- for(const out of [true,false]){const g=flat(),e=g.tanks[1];if(out){e.y=580;g.update(.001);}else{g.crater(e.x,450,100,250);e.fallVelocity=50;g.damage(e,99999,0);}
+test('bottom/out-of-map death and unsupported airborne death leave no corpse; live excavation still falls',()=>{
+ for(const out of [true,false]){const g=flat(),e=g.tanks[1];if(out){e.y=960;g.update(.001);}else{g.crater(e.x,450,100,250);e.fallVelocity=50;g.damage(e,99999,0);}
   assert.equal(e.hp,0);assert.equal(e.outOfBounds,true);assert.equal(paintCount(g),0);assert.equal((e as any).defeat,null);
  }
  const live=flat(),e=live.tanks[1],hp=e.hp;live.crater(e.x,450,45,100);assert.ok(e.fallVelocity>0);for(let i=0;i<300&&e.fallVelocity>0;i++)live.update(.01);assert.ok(e.hp<hp);assert.ok(e.hp>0);

@@ -1,0 +1,18 @@
+import {test,expect} from '@playwright/test';import {boot} from './qa-app';import {writeFileSync} from 'node:fs';
+for(const width of [1194,1210])test(`${width} iPad shared tactical icons and finite silent use animations`,async({page,browserName})=>{
+ await page.setViewportSize({width,height:834});await boot(page);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ const ui=await page.locator('#quick-items [data-item]').evaluateAll(els=>els.map(e=>{const b=e.getBoundingClientRect(),s=e.querySelector('svg')!.getBoundingClientRect();return {id:(e as HTMLElement).dataset.item,glyph:(e.querySelector('svg') as SVGElement).dataset.itemGlyph,dx:(b.left+b.right-s.left-s.right)/2,dy:(b.top+b.bottom-s.top-s.bottom)/2,box:s.width,html:e.querySelector('svg')!.innerHTML};}));
+ expect(ui.every(r=>r.id===r.glyph&&Math.abs(r.dx)<1&&Math.abs(r.dy)<1)).toBe(true);expect(new Set(ui.map(r=>r.html)).size).toBe(4);
+ await page.locator('#inventory-toggle').click();await page.locator('#items-tab').click();await expect(page.locator('.item-tile [data-item-glyph]')).toHaveCount(4);
+ const shared=await page.locator('.item-tile [data-item-glyph]').evaluateAll(els=>els.map(e=>({id:(e as SVGElement).dataset.itemGlyph,html:e.innerHTML})));expect(shared.every(r=>ui.find(s=>s.id===r.id)?.html===r.html)).toBe(true);
+ await page.screenshot({path:`QA/v3.1.0-items-backpack-${width}-${browserName}.png`});await page.locator('#arsenal-close').click();
+ // Set up a rapid four-person handoff, each with a real successful use event. Pause only presentation capture.
+ const report=await page.evaluate(()=>{const q=(window as any).__qa;q.newMatch({...q.game.config,map:'factory',mapChoice:'factory',fog:false,fireLine:false,timer:0,slots:q.game.config.slots.map((s:any,i:number)=>({...s,enabled:true,controller:'human',vehicle:'cannon',team:i%2}))},true);const g=(window as any).__qa.game;
+ for(let i=0;i<g.land.mask.length;i++)if(!g.land.protectedMask[i])g.land.mask[i]=0;g.land.rebuild();g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:420+i*270,y:g.ground(420+i*270)-18,fallVelocity:0,hp:t.maxHP-90}));g.wind=0;let samples=0;q.audio.play=()=>samples++;
+ for(const id of ['double','teleport','boost','repair']){if(!g.useItem(id))throw Error(id+' rejected');if(id!=='repair')g.nextTurn();}
+ g.paused=true;g.itemCues.forEach((c:any)=>c.age=.25);q.renderer.focusAt(840,780);q.renderer.draw(.3);q.updateUI();
+ const c=q.renderer.ctx,saved=c.getImageData(0,0,c.canvas.width,c.canvas.height).data;g.itemCues.forEach((c:any)=>c.age=.7);q.renderer.draw(0);const later=c.getImageData(0,0,c.canvas.width,c.canvas.height).data;let pixels=0;for(let i=0;i<saved.length;i+=4)if(saved[i]!==later[i]||saved[i+1]!==later[i+1]||saved[i+2]!==later[i+2])pixels++;
+ g.itemCues.forEach((c:any)=>c.age=.25);q.renderer.draw(0);return {cues:g.itemCues.map((c:any)=>c.item),samples,pixels,events:g.battleSnapshot().events.filter((e:any)=>e.type==='item'||e.type==='teleport-arm').map((e:any)=>e.summary)};});
+ expect(report.cues).toEqual(['double','teleport','boost','repair']);expect(report.samples).toBe(0);expect(report.pixels).toBeGreaterThan(10);await page.screenshot({path:`QA/v3.1.0-items-field-${width}-${browserName}.png`});
+ const ended=await page.evaluate(()=>{const q=(window as any).__qa,g=q.game;const hp=g.active.hp;g.paused=false;for(let i=0;i<23;i++)g.update(.05);return {cues:g.itemCues.length,hp:g.active.hp,oldHP:hp};});expect(ended.cues).toBe(0);expect(ended.hp).toBe(ended.oldHP);expect(errors).toEqual([]);writeFileSync(`QA/v3.1.0-items-${width}-${browserName}.json`,JSON.stringify({ui:ui.map(({html,...r})=>r),shared:shared.map(r=>r.id),report,ended,errors},null,2));
+});

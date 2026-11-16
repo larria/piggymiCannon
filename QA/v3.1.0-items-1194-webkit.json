@@ -1,0 +1,60 @@
+{
+  "ui": [
+    {
+      "id": "double",
+      "glyph": "double",
+      "dx": 0,
+      "dy": 0,
+      "box": 24
+    },
+    {
+      "id": "teleport",
+      "glyph": "teleport",
+      "dx": 0,
+      "dy": 0,
+      "box": 24
+    },
+    {
+      "id": "boost",
+      "glyph": "boost",
+      "dx": 0,
+      "dy": 0,
+      "box": 24
+    },
+    {
+      "id": "repair",
+      "glyph": "repair",
+      "dx": 0,
+      "dy": 0,
+      "box": 24
+    }
+  ],
+  "shared": [
+    "double",
+    "teleport",
+    "boost",
+    "repair"
+  ],
+  "report": {
+    "cues": [
+      "double",
+      "teleport",
+      "boost",
+      "repair"
+    ],
+    "samples": 0,
+    "pixels": 4217,
+    "events": [
+      "咪猪头使用了双发。",
+      "大猪头装填转移弹",
+      "阿狸使用了威力加强。",
+      "小黄鱼使用了补给。"
+    ]
+  },
+  "ended": {
+    "cues": 0,
+    "hp": 920,
+    "oldHP": 920
+  },
+  "errors": []
+}

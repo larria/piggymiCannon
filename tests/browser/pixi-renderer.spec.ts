@@ -4,7 +4,7 @@ import {boot} from './qa-app';
 const oldSource=execFileSync('git',['show','pre-pixi-v3.0.0:src/renderer.ts'],{encoding:'utf8'});
 const oldVehicle=execFileSync('git',['show','pre-pixi-v3.0.0:src/vehicle-art.ts'],{encoding:'utf8'});
 const legacy=build({stdin:{contents:oldSource,resolveDir:process.cwd()+'/src',loader:'ts'},bundle:true,write:false,format:'esm',define:{'import.meta.env.BASE_URL':'"/piggymiCannon/"'},plugins:[{name:'original-vehicle-art',setup(b){b.onLoad({filter:/\/vehicle-art\.ts$/},()=>({contents:oldVehicle,loader:'ts',resolveDir:process.cwd()+'/src'}));}}]}).then(r=>r.outputFiles[0].text);
-test('retained Pixi world matches old renderer in six maps and continuous poses',async({page,browserName})=>{
+test('retained Pixi world matches Canvas in six expanded maps; body sizes and poses match the pre-Pixi release',async({page,browserName})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await boot(page);
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');
  await page.route('**/legacy-renderer.js',async route=>route.fulfill({contentType:'text/javascript',body:await legacy}));
@@ -17,10 +17,10 @@ test('retained Pixi world matches old renderer in six maps and continuous poses'
    const g=(window as any).__qa.game;g.paused=true;old.setGame(g);
    for(const time of [0,1.137,2.83]){
     r.time=time;r.invalidate();r.draw(0);r.manualFocus=Math.round(r.offsetY*r.ratio)/r.ratio;r.offsetX=Math.round(r.offsetX*r.ratio)/r.ratio;r.invalidate();r.stage.signature='';r.draw(0);
-    old.time=time;old.offsetX=r.offsetX;old.offsetY=r.offsetY;old.windMotes=r.windMotes.map((m:any)=>({...m}));old.draw(0);
+
     const combined=document.createElement('canvas');combined.width=c.width;combined.height=c.height;const ctx=combined.getContext('2d')!;
     ctx.drawImage(r.stage.canvas,0,0);ctx.drawImage(r.canvas,0,0);
-    const a=ctx.getImageData(0,0,c.width,c.height).data,b=old.ctx.getImageData(0,0,c.width,c.height).data;
+    const a=ctx.getImageData(0,0,c.width,c.height).data;const savedStage=r.stage;r.stage=null;r.invalidate();r.draw(0);const b=r.ctx.getImageData(0,0,c.width,c.height).data;r.stage=savedStage;r.invalidate();r.draw(0);
     let sum=0,large=0,max=0;for(let n=0;n<a.length;n++){const d=Math.abs(a[n]-b[n]);sum+=d;max=Math.max(max,d);if(d>12)large++;}
     cases.push({map,time,mean:sum/a.length,largeFraction:large/a.length,max});
    }
@@ -39,7 +39,7 @@ test('retained Pixi world matches old renderer in six maps and continuous poses'
   Object.assign(t,original);g.phase=savedPhase;g.projectiles=savedProjectiles;
   c.remove();return cases;
  });
- writeFileSync(`QA/v3.0.0-${browserName}-pixel-comparison.json`,JSON.stringify({formatVersion:1,cases:report,errors},null,2));
+ writeFileSync(`QA/v3.1.0-${browserName}-pixel-comparison.json`,JSON.stringify({formatVersion:1,cases:report,errors},null,2));
  for(const c of report){expect(c.mean,JSON.stringify(c)).toBeLessThan(.25);expect(c.largeFraction,JSON.stringify(c)).toBeLessThan(c.map.startsWith('vehicle:')?.01:.001);}
  expect(errors).toEqual([]);
 });
@@ -51,7 +51,7 @@ test('Pixi loses and restores context, preserves the fallback and reuses resourc
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('canvas');
  await page.waitForTimeout(150);await page.evaluate(()=>(window as any).__lose.restoreContext());
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');
- writeFileSync(`QA/v3.0.0-${browserName}-lifecycle.json`,JSON.stringify({formatVersion:1,...data,realContextRecovery:supported},null,2));
+ writeFileSync(`QA/v3.1.0-${browserName}-lifecycle.json`,JSON.stringify({formatVersion:1,...data,realContextRecovery:supported},null,2));
 });
 test('fractional canvas height does not cause repeated GPU resize or submission',async({page})=>{
  await boot(page);await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');

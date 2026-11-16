@@ -1,6 +1,7 @@
 import {Game} from './legacy-fixture';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {TERRAIN_H} from '../src/terrain';
 import {  WATER_Y, WORLD_W } from '../src/engine.ts';
 import { WEAPONS, MAPS, DIFFICULTIES } from '../src/catalog.ts';
 
@@ -12,7 +13,7 @@ test('all maps generate safe, deterministic deployment and distinct gravity',()=
     const g=ready({map:m.id}),same=ready({map:m.id});
     assert.deepEqual(g.terrain,same.terrain);
     for(const t of g.tanks){assert.ok(t.y<WATER_Y-40);assert.equal(t.hp,150);}
-    assert.ok(g.terrain.every(y=>Number.isFinite(y)&&y>=150&&y<=640));
+    assert.ok(g.terrain.every(y=>Number.isFinite(y)&&y>=150&&y<=TERRAIN_H));
   }
   assert.ok(ready({map:'moon'}).gravity<ready().gravity);
 });
@@ -48,11 +49,11 @@ test('each weapon finishes its flight and produces its advertised projectile pat
     assert.equal(g.projectiles.length,0,w.id);
   }
 });
-test('craters remove terrain permanently, cause fall damage, and water is lethal',()=>{
+test('craters remove terrain permanently, cause fall damage, and crossing the world bottom is lethal',()=>{
   const g=ready(),t=g.active;const old=g.ground(t.x);
   g.crater(t.x,old,65);assert.ok(g.ground(t.x)>old+60);
   run(g,2);assert.ok(t.hp<150);assert.equal(t.y,g.support(t.x,t.y+18)-18);
-  g.crater(t.x,WATER_Y-2,100);run(g,4);assert.equal(t.hp,0);assert.equal(g.phase,'ended');assert.equal(g.winner,1);
+  g.crater(t.x,g.ground(t.x),100,TERRAIN_H);run(g,4);assert.equal(t.hp,0);assert.equal(g.phase,'ended');assert.equal(g.winner,1);
 });
 test('shields still absorb damage and replenished supply respects the one-item limit',()=>{
  const g=ready(),t=g.active;t.items.shield=1;assert.ok(g.useItem('shield'));g.damage(t,25,1);assert.equal(t.hp,150);assert.equal(t.shield,15);

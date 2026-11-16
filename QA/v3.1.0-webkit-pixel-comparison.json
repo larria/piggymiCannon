@@ -1,0 +1,678 @@
+{
+  "formatVersion": 1,
+  "cases": [
+    {
+      "map": "valley",
+      "time": 0,
+      "mean": 0.0008627435737976782,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "valley",
+      "time": 1.137,
+      "mean": 0.0008702580845771145,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "valley",
+      "time": 2.83,
+      "mean": 0.0008701285240464345,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "coast",
+      "time": 0,
+      "mean": 0.0026321517412935323,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "coast",
+      "time": 1.137,
+      "mean": 0.0026359089966832504,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "coast",
+      "time": 2.83,
+      "mean": 0.0026365567993366502,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "moon",
+      "time": 0,
+      "mean": 0.002534981343283582,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "moon",
+      "time": 1.137,
+      "mean": 0.0025343335406301823,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "moon",
+      "time": 2.83,
+      "mean": 0.0025358882669983414,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "factory",
+      "time": 0,
+      "mean": 0.0008172678275290215,
+      "largeFraction": 0,
+      "max": 1
+    },
+    {
+      "map": "factory",
+      "time": 1.137,
+      "mean": 0.0008230980514096186,
+      "largeFraction": 0,
+      "max": 1
+    },
+    {
+      "map": "factory",
+      "time": 2.83,
+      "mean": 0.0008153244195688226,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "temple",
+      "time": 0,
+      "mean": 0.002951388888888889,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "temple",
+      "time": 1.137,
+      "mean": 0.002952943615257048,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "temple",
+      "time": 2.83,
+      "mean": 0.0029585147180762853,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "egypt",
+      "time": 0,
+      "mean": 0.0028920501658374793,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "egypt",
+      "time": 1.137,
+      "mean": 0.002895030058043118,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "egypt",
+      "time": 2.83,
+      "mean": 0.002886997305140962,
+      "largeFraction": 0,
+      "max": 2
+    },
+    {
+      "map": "vehicle:bowl:idle",
+      "time": 1.137,
+      "mean": 0.024230978260869566,
+      "largeFraction": 0.0003641304347826087,
+      "max": 36
+    },
+    {
+      "map": "vehicle:bowl:move",
+      "time": 1.137,
+      "mean": 0.02295516304347826,
+      "largeFraction": 0.000328804347826087,
+      "max": 36
+    },
+    {
+      "map": "vehicle:bowl:fire",
+      "time": 1.137,
+      "mean": 0.020646739130434782,
+      "largeFraction": 0.00029483695652173913,
+      "max": 34
+    },
+    {
+      "map": "vehicle:bowl:hurt",
+      "time": 1.137,
+      "mean": 0.019345108695652175,
+      "largeFraction": 0.0002676630434782609,
+      "max": 36
+    },
+    {
+      "map": "vehicle:bowl:win",
+      "time": 1.137,
+      "mean": 0.026441576086956523,
+      "largeFraction": 0.0003940217391304348,
+      "max": 36
+    },
+    {
+      "map": "vehicle:bowl:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:crossbow:idle",
+      "time": 1.137,
+      "mean": 0.026463315217391304,
+      "largeFraction": 0.0004769021739130435,
+      "max": 37
+    },
+    {
+      "map": "vehicle:crossbow:move",
+      "time": 1.137,
+      "mean": 0.027046195652173914,
+      "largeFraction": 0.0004701086956521739,
+      "max": 38
+    },
+    {
+      "map": "vehicle:crossbow:fire",
+      "time": 1.137,
+      "mean": 0.019269021739130435,
+      "largeFraction": 0.0002730978260869565,
+      "max": 46
+    },
+    {
+      "map": "vehicle:crossbow:hurt",
+      "time": 1.137,
+      "mean": 0.021846467391304348,
+      "largeFraction": 0.0003668478260869565,
+      "max": 34
+    },
+    {
+      "map": "vehicle:crossbow:win",
+      "time": 1.137,
+      "mean": 0.027748641304347826,
+      "largeFraction": 0.0004891304347826087,
+      "max": 37
+    },
+    {
+      "map": "vehicle:crossbow:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:cannon:idle",
+      "time": 1.137,
+      "mean": 0.02431657608695652,
+      "largeFraction": 0.0005013586956521739,
+      "max": 61
+    },
+    {
+      "map": "vehicle:cannon:move",
+      "time": 1.137,
+      "mean": 0.02410869565217391,
+      "largeFraction": 0.0005135869565217391,
+      "max": 60
+    },
+    {
+      "map": "vehicle:cannon:fire",
+      "time": 1.137,
+      "mean": 0.015216032608695652,
+      "largeFraction": 0.00022010869565217391,
+      "max": 33
+    },
+    {
+      "map": "vehicle:cannon:hurt",
+      "time": 1.137,
+      "mean": 0.02005163043478261,
+      "largeFraction": 0.00040353260869565216,
+      "max": 57
+    },
+    {
+      "map": "vehicle:cannon:win",
+      "time": 1.137,
+      "mean": 0.025782608695652173,
+      "largeFraction": 0.0005135869565217391,
+      "max": 61
+    },
+    {
+      "map": "vehicle:cannon:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:beetle:idle",
+      "time": 1.137,
+      "mean": 0.017778532608695653,
+      "largeFraction": 0.00028532608695652176,
+      "max": 34
+    },
+    {
+      "map": "vehicle:beetle:move",
+      "time": 1.137,
+      "mean": 0.018660326086956523,
+      "largeFraction": 0.0003084239130434783,
+      "max": 34
+    },
+    {
+      "map": "vehicle:beetle:fire",
+      "time": 1.137,
+      "mean": 0.018172554347826088,
+      "largeFraction": 0.0002907608695652174,
+      "max": 34
+    },
+    {
+      "map": "vehicle:beetle:hurt",
+      "time": 1.137,
+      "mean": 0.013741847826086957,
+      "largeFraction": 0.0002065217391304348,
+      "max": 34
+    },
+    {
+      "map": "vehicle:beetle:win",
+      "time": 1.137,
+      "mean": 0.018866847826086955,
+      "largeFraction": 0.0002717391304347826,
+      "max": 34
+    },
+    {
+      "map": "vehicle:beetle:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:duke:idle",
+      "time": 1.137,
+      "mean": 0.031476902173913045,
+      "largeFraction": 0.0005951086956521739,
+      "max": 36
+    },
+    {
+      "map": "vehicle:duke:move",
+      "time": 1.137,
+      "mean": 0.03185326086956522,
+      "largeFraction": 0.0006888586956521739,
+      "max": 39
+    },
+    {
+      "map": "vehicle:duke:fire",
+      "time": 1.137,
+      "mean": 0.030483695652173914,
+      "largeFraction": 0.0006059782608695652,
+      "max": 41
+    },
+    {
+      "map": "vehicle:duke:hurt",
+      "time": 1.137,
+      "mean": 0.02678125,
+      "largeFraction": 0.0004986413043478261,
+      "max": 36
+    },
+    {
+      "map": "vehicle:duke:win",
+      "time": 1.137,
+      "mean": 0.03150679347826087,
+      "largeFraction": 0.0005720108695652174,
+      "max": 36
+    },
+    {
+      "map": "vehicle:duke:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:mine:idle",
+      "time": 1.137,
+      "mean": 0.016540760869565217,
+      "largeFraction": 0.0002880434782608696,
+      "max": 31
+    },
+    {
+      "map": "vehicle:mine:move",
+      "time": 1.137,
+      "mean": 0.016936141304347826,
+      "largeFraction": 0.0002608695652173913,
+      "max": 33
+    },
+    {
+      "map": "vehicle:mine:fire",
+      "time": 1.137,
+      "mean": 0.016596467391304347,
+      "largeFraction": 0.00030706521739130437,
+      "max": 32
+    },
+    {
+      "map": "vehicle:mine:hurt",
+      "time": 1.137,
+      "mean": 0.01379211956521739,
+      "largeFraction": 0.00021603260869565219,
+      "max": 30
+    },
+    {
+      "map": "vehicle:mine:win",
+      "time": 1.137,
+      "mean": 0.016141304347826086,
+      "largeFraction": 0.00025815217391304346,
+      "max": 31
+    },
+    {
+      "map": "vehicle:mine:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:missile:idle",
+      "time": 1.137,
+      "mean": 0.021637228260869567,
+      "largeFraction": 0.0004769021739130435,
+      "max": 39
+    },
+    {
+      "map": "vehicle:missile:move",
+      "time": 1.137,
+      "mean": 0.021025815217391303,
+      "largeFraction": 0.0004483695652173913,
+      "max": 40
+    },
+    {
+      "map": "vehicle:missile:fire",
+      "time": 1.137,
+      "mean": 0.02319021739130435,
+      "largeFraction": 0.0005244565217391304,
+      "max": 39
+    },
+    {
+      "map": "vehicle:missile:hurt",
+      "time": 1.137,
+      "mean": 0.017610054347826087,
+      "largeFraction": 0.0003328804347826087,
+      "max": 39
+    },
+    {
+      "map": "vehicle:missile:win",
+      "time": 1.137,
+      "mean": 0.022535326086956523,
+      "largeFraction": 0.000453804347826087,
+      "max": 39
+    },
+    {
+      "map": "vehicle:missile:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:multi:idle",
+      "time": 1.137,
+      "mean": 0.021972826086956523,
+      "largeFraction": 0.00027445652173913043,
+      "max": 33
+    },
+    {
+      "map": "vehicle:multi:move",
+      "time": 1.137,
+      "mean": 0.023164402173913044,
+      "largeFraction": 0.0003451086956521739,
+      "max": 34
+    },
+    {
+      "map": "vehicle:multi:fire",
+      "time": 1.137,
+      "mean": 0.019546195652173914,
+      "largeFraction": 0.0002296195652173913,
+      "max": 42
+    },
+    {
+      "map": "vehicle:multi:hurt",
+      "time": 1.137,
+      "mean": 0.01956929347826087,
+      "largeFraction": 0.00025407608695652173,
+      "max": 30
+    },
+    {
+      "map": "vehicle:multi:win",
+      "time": 1.137,
+      "mean": 0.022313858695652174,
+      "largeFraction": 0.00027581521739130434,
+      "max": 33
+    },
+    {
+      "map": "vehicle:multi:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:laser:idle",
+      "time": 1.137,
+      "mean": 0.024269021739130436,
+      "largeFraction": 0.0003763586956521739,
+      "max": 35
+    },
+    {
+      "map": "vehicle:laser:move",
+      "time": 1.137,
+      "mean": 0.02355298913043478,
+      "largeFraction": 0.000391304347826087,
+      "max": 40
+    },
+    {
+      "map": "vehicle:laser:fire",
+      "time": 1.137,
+      "mean": 0.019373641304347825,
+      "largeFraction": 0.0003315217391304348,
+      "max": 35
+    },
+    {
+      "map": "vehicle:laser:hurt",
+      "time": 1.137,
+      "mean": 0.02017798913043478,
+      "largeFraction": 0.00028125,
+      "max": 35
+    },
+    {
+      "map": "vehicle:laser:win",
+      "time": 1.137,
+      "mean": 0.025605978260869564,
+      "largeFraction": 0.0003926630434782609,
+      "max": 35
+    },
+    {
+      "map": "vehicle:laser:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:water:idle",
+      "time": 1.137,
+      "mean": 0.024740489130434782,
+      "largeFraction": 0.0004347826086956522,
+      "max": 39
+    },
+    {
+      "map": "vehicle:water:move",
+      "time": 1.137,
+      "mean": 0.023862771739130435,
+      "largeFraction": 0.00036277173913043477,
+      "max": 41
+    },
+    {
+      "map": "vehicle:water:fire",
+      "time": 1.137,
+      "mean": 0.02326766304347826,
+      "largeFraction": 0.00044157608695652174,
+      "max": 39
+    },
+    {
+      "map": "vehicle:water:hurt",
+      "time": 1.137,
+      "mean": 0.020706521739130436,
+      "largeFraction": 0.0002880434782608696,
+      "max": 39
+    },
+    {
+      "map": "vehicle:water:win",
+      "time": 1.137,
+      "mean": 0.024849184782608696,
+      "largeFraction": 0.0004144021739130435,
+      "max": 39
+    },
+    {
+      "map": "vehicle:water:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:ion:idle",
+      "time": 1.137,
+      "mean": 0.028370923913043477,
+      "largeFraction": 0.0006059782608695652,
+      "max": 61
+    },
+    {
+      "map": "vehicle:ion:move",
+      "time": 1.137,
+      "mean": 0.028653532608695652,
+      "largeFraction": 0.0006046195652173913,
+      "max": 68
+    },
+    {
+      "map": "vehicle:ion:fire",
+      "time": 1.137,
+      "mean": 0.028150815217391306,
+      "largeFraction": 0.0006657608695652174,
+      "max": 61
+    },
+    {
+      "map": "vehicle:ion:hurt",
+      "time": 1.137,
+      "mean": 0.02476086956521739,
+      "largeFraction": 0.0005,
+      "max": 61
+    },
+    {
+      "map": "vehicle:ion:win",
+      "time": 1.137,
+      "mean": 0.029903532608695653,
+      "largeFraction": 0.0006440217391304347,
+      "max": 61
+    },
+    {
+      "map": "vehicle:ion:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:sea:idle",
+      "time": 1.137,
+      "mean": 0.03458559782608696,
+      "largeFraction": 0.0005543478260869565,
+      "max": 37
+    },
+    {
+      "map": "vehicle:sea:move",
+      "time": 1.137,
+      "mean": 0.036421195652173916,
+      "largeFraction": 0.0006630434782608696,
+      "max": 36
+    },
+    {
+      "map": "vehicle:sea:fire",
+      "time": 1.137,
+      "mean": 0.02649320652173913,
+      "largeFraction": 0.0004592391304347826,
+      "max": 37
+    },
+    {
+      "map": "vehicle:sea:hurt",
+      "time": 1.137,
+      "mean": 0.029509510869565218,
+      "largeFraction": 0.00040353260869565216,
+      "max": 34
+    },
+    {
+      "map": "vehicle:sea:win",
+      "time": 1.137,
+      "mean": 0.033088315217391306,
+      "largeFraction": 0.000514945652173913,
+      "max": 36
+    },
+    {
+      "map": "vehicle:sea:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    },
+    {
+      "map": "vehicle:dragon:idle",
+      "time": 1.137,
+      "mean": 0.02376358695652174,
+      "largeFraction": 0.00040217391304347825,
+      "max": 41
+    },
+    {
+      "map": "vehicle:dragon:move",
+      "time": 1.137,
+      "mean": 0.024039402173913045,
+      "largeFraction": 0.0004375,
+      "max": 40
+    },
+    {
+      "map": "vehicle:dragon:fire",
+      "time": 1.137,
+      "mean": 0.022778532608695654,
+      "largeFraction": 0.0004116847826086957,
+      "max": 35
+    },
+    {
+      "map": "vehicle:dragon:hurt",
+      "time": 1.137,
+      "mean": 0.01837771739130435,
+      "largeFraction": 0.0002880434782608696,
+      "max": 30
+    },
+    {
+      "map": "vehicle:dragon:win",
+      "time": 1.137,
+      "mean": 0.021786684782608697,
+      "largeFraction": 0.0003464673913043478,
+      "max": 41
+    },
+    {
+      "map": "vehicle:dragon:lose",
+      "time": 1.137,
+      "mean": 0,
+      "largeFraction": 0,
+      "max": 0
+    }
+  ],
+  "errors": []
+}

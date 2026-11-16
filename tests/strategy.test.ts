@@ -2,6 +2,7 @@ import {Game} from './legacy-fixture';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FLIGHT_SPEED,WATER_Y,makeRng} from '../src/engine.ts';
+import {TERRAIN_H,WORLD_W} from '../src/terrain';
 import {Terrain} from '../src/terrain.ts';
 import {WEAPONS,DIFFICULTIES,excavation,aiAimOffset} from '../src/catalog.ts';
 import {compareVersions} from '../src/version.ts';
@@ -12,18 +13,18 @@ const run=(g:Game,seconds:number)=>{for(let i=0;i<seconds*120;i++) g.update(1/12
 
 test('bridge and sky terrains have real empty space below solid platforms',()=>{
   const bridge=ready({map:'coast'}),sky=ready({map:'moon'});
-  assert.ok(bridge.land.solid(175,bridge.ground(175)+10));assert.equal(bridge.land.solid(175,570),false);
-  assert.ok(sky.ground(630)<250);assert.equal(sky.land.solid(630,380),false);
-  assert.ok(sky.ground(630,380)>400);assert.ok(sky.land.solid(630,460));
+  assert.ok(bridge.land.solid(175,bridge.ground(175)+10));assert.equal(bridge.land.solid(262,950),false);
+  assert.ok(sky.ground(945)<375);assert.equal(sky.land.solid(945,570),false);
+  assert.ok(sky.ground(945,570)>600);assert.ok(sky.land.solid(945,690));
 });
 test('excavating a bridge foundation drops a full-health enemy for a win',()=>{
-  const g=ready({map:'coast'}),enemy=g.enemy;g.crater(enemy.x,g.ground(enemy.x)+20,65,180);
+  const g=ready({map:'coast'}),enemy=g.enemy;g.crater(enemy.x,g.ground(enemy.x),65,TERRAIN_H);
   run(g,4);assert.equal(enemy.hp,0);assert.equal(g.phase,'ended');assert.equal(g.winner,0);
 });
 test('a falling tank can land on a lower sky island without snapping to an upper floor',()=>{
-  const g=ready({map:'moon'}),t=g.active;t.x=630;t.y=g.ground(630)-18;
-  const lower=g.ground(630,380);g.crater(630,g.ground(630),110,160);run(g,4);
-  assert.ok(t.hp>0&&t.hp<150);assert.ok(Math.abs(t.y+18-lower)<10);assert.ok(t.y+18<WATER_Y);
+  const g=ready({map:'moon'}),t=g.active;t.x=945;t.y=g.ground(945)-18;t.hp=t.maxHP=300;
+  const lower=g.ground(945,570);g.crater(945,g.ground(945),110,250);run(g,4);
+  assert.ok(t.hp>0&&t.hp<300);assert.ok(Math.abs(t.y+18-lower)<10);assert.ok(t.y+18<WATER_Y);
 });
 test('tanks cannot climb steep slopes or cross a narrow pit with a large movement step',()=>{
   const g=ready();g.land=new Terrain();g.terrain=g.land.surface;
@@ -121,7 +122,7 @@ test('fog and fire lines are independently rolled with one in thirty probability
   const g=ready({fog:true,fireLine:true});assert.ok(g.fog&&g.fireLine);
 });
 test('fire-line crossing boosts a shell only once even if it crosses back',()=>{
-  const g=ready({fireLine:true});g.active.x=175;g.active.y=g.ground(175)-18;g.fireLine={x:230,top:0,bottom:570};g.active.angle=5;g.active.power=50;g.fire();
+  const g=ready({fireLine:true});g.active.x=175;g.active.y=g.ground(175)-18;g.fireLine={x:230,top:0,bottom:TERRAIN_H};g.active.angle=5;g.active.power=50;g.fire();
   for(let i=0;i<80&&!g.projectiles[0]?.fireBoosted;i++) g.update(1/120);
   const p=g.projectiles[0];assert.ok(p?.fireBoosted);assert.equal(p.boost,1.5);
   p.x=231;p.vx=-80;g.update(0.04);assert.equal(p.boost,1.5);
@@ -134,7 +135,7 @@ test('supply animation pauses the turn clock and drops on reachable stable groun
     for(let i=0;i<1000&&g.phase==='supply';i++) g.update(1/120);
     assert.equal(g.clock,clock);assert.equal(c.falling,false);assert.ok(g.stablePlatform(c.x));
     assert.ok(g.traversable(g.tanks[0],c.x)!==null);assert.ok(Math.abs(c.x-g.tanks[0].x)<=(g.tanks[0].fuel+36)/0.33);
-    assert.ok(c.x>=40&&c.x<=1240);if(Math.abs(g.wind)>1) assert.ok(Math.abs(c.x-start)>1);
+    assert.ok(c.x>=40&&c.x<=WORLD_W-40);if(Math.abs(g.wind)>1) assert.ok(Math.abs(c.x-start)>1);
     assert.ok(g.log.some(line=>line.includes('已落地')));
   }
 });
@@ -151,7 +152,7 @@ test('the rare homing shell acquires a nearby enemy during its descent',()=>{
   run(g,2);assert.ok(target.hp<150);
 });
 test('terrain tilt rotates body-relative aiming and impact reactions stay distinct',()=>{
-  const g=ready(),t=g.active;t.x=260;t.y=g.support(t.x,g.ground(t.x))-18;
+  const g=walkingCourse(x=>450+(x-200)*.25),t=g.active;t.x=260;t.y=g.support(t.x,g.ground(t.x))-18;
   const slope=g.tankSlope(t);assert.ok(Math.abs(slope)>0.01);
   const muzzle=g.muzzle(t,45),pivot={x:t.x+Math.sin(slope)*13,y:t.y-Math.cos(slope)*13};
   const a=g.aim(t,45);assert.ok(Math.abs(muzzle.x-pivot.x-a.x*31)<0.001);assert.ok(Math.abs(muzzle.y-pivot.y-a.y*31)<0.001);

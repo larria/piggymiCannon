@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 async function start(page:any){
  await page.addInitScript(()=>{Date.now=()=>43;});await page.goto('./');await page.getByRole('button',{name:'进入战场',exact:true}).click();
  await page.locator('[data-choice="bowl"]').click();await page.locator('[data-owner="1"]').click();await page.locator('[data-choice="bowl"]').click();
- await page.locator('input[name="map"][value="coast"]').locator('..').click();await page.locator('#turn-timer').selectOption('0');await page.getByRole('button',{name:'开始对局',exact:true}).click();
+ await page.locator('input[name="map"][value="coast"]').locator('..').click();await page.locator('#turn-timer').selectOption('0');await page.getByRole('button',{name:'开始对局',exact:true}).click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:10000});
 }
 test('mobile default gestures are cancelled without blocking app events or normal form controls',async({page,browserName})=>{
  await start(page);const meta=await page.locator('meta[name="viewport"]').getAttribute('content');expect(meta).toContain('maximum-scale=1.0');expect(meta).toContain('user-scalable=no');

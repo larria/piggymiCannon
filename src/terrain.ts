@@ -1,7 +1,9 @@
-export const WORLD_W=1280;
-export const WORLD_H=600;
-export const WATER_Y=579;
-export const TERRAIN_H=640;
+export const WORLD_W=1920;
+export const WORLD_H=960;
+export const BOTTOM_Y=960;
+/** Legacy API alias; there is no water plane. */
+export const WATER_Y=BOTTOM_Y;
+export const TERRAIN_H=960;
 
 /** Pixel occupancy preserves caves, bridges and multiple platforms in a column. */
 export class Terrain {

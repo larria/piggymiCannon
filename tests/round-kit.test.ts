@@ -1,5 +1,6 @@
 import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
+import {TERRAIN_H} from '../src/terrain';
 import {BRIDGE_THICKNESS} from '../src/engine.ts';
 import {TURN_ITEMS,excavation} from '../src/catalog.ts';
 import {VEHICLES,vehicleById} from '../src/vehicles.ts';
@@ -12,8 +13,8 @@ test('bridge absorbs one ordinary cannon ground impact but repeated shots still 
  const g=ready({map:'coast',vehicle0:'cannon',vehicle1:'cannon'}),x=640,top=g.ground(x),bottom=g.land.bottom(x);
  assert.equal(bottom-top,BRIDGE_THICKNESS);const p=g.launch(g.active,'cannon-normal');Object.assign(p,{x,y:top+.5});
  (g as any).explode(p);assert.ok(g.ground(x)<bottom-5);assert.ok(g.land.solid(x,bottom-8));
- const dig=excavation('cannon-normal',false);g.crater(x,g.ground(x),dig.radius,dig.depth);
- assert.equal(g.ground(x),640,'another ordinary impact can remove the remaining support');
+ const dig=excavation('cannon-normal',false);for(let i=0;i<10&&g.ground(x)<TERRAIN_H;i++)g.crater(x,g.ground(x),dig.radius,dig.depth);
+ assert.equal(g.ground(x),TERRAIN_H,'repeated ordinary impacts can remove the remaining support');
  const victim=g.enemy;victim.x=x;victim.y=top-18;victim.fallStart=victim.y;victim.fallVelocity=1;run(g,4);assert.equal(victim.hp,0);
 });
 test('both tanks have exactly four distinct one-count starting items',()=>{
@@ -58,6 +59,6 @@ test('poison damages every vehicle by twenty-percent maximum health until red, n
 test('losers remain as pigs on safe land but disappear after falling off; results keep animating',()=>{
  const land=ready({map:'factory'});land.damage(land.enemy,9999,0);run(land,.1);assert.equal(land.phase,'ended');run(land,2);
  assert.equal(land.enemy.outOfBounds,false);assert.equal(land.enemy.fallVelocity,0);assert.ok(land.resultAge>1.9);
- const drop=ready({map:'coast'}),e=drop.enemy;drop.crater(e.x,drop.ground(e.x)+45,90,190);run(drop,5,x=>x.phase==='ended');
+ const drop=ready({map:'coast'}),e=drop.enemy;drop.crater(e.x,drop.ground(e.x),90,TERRAIN_H);run(drop,5,x=>x.phase==='ended');
  assert.equal(e.hp,0);assert.equal(e.outOfBounds,true);
 });

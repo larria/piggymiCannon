@@ -21,18 +21,21 @@ import {TURN_ITEMS} from './catalog';
 import {CREW,crewAvatar,crewAvatarPath,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
 import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
+import {itemIcon} from './item-art';
 import {installControlHints} from './control-hints';
 import {paintMapOverview} from './map-preview';
 import {freshMatchSeed} from './match-seed';
 import {updateWindGauge} from './wind-gauge';
+import {DEFAULT_TURN_TIMER,storedTurnTimer,TIMER_PREFERENCE_VERSION} from './turn-timer';
+import {installMapGestures} from './map-gestures';
 const APP_VERSION=__APP_VERSION__;
 
 const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
 const safeRead=(key:string)=>{try{return JSON.parse(localStorage.getItem(key)||'null');}catch{return null;}};
 const save=(key:string,value:unknown)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private browsing can disable storage. */}};
 const saved=safeRead('piggy-settings');
-let config:Config={slots:defaultSlots(),map:'valley',timer:45,seed:Date.now(),...(saved?.config||{})};
-config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:[0,30,45,60].includes(config.timer)?config.timer:45,seed:Date.now(),snow:config.snow,fog:config.fog,fireLine:config.fireLine,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,allowDragon:config.allowDragon};
+let config:Config={slots:defaultSlots(),map:'valley',timer:DEFAULT_TURN_TIMER,seed:Date.now(),...(saved?.config||{})};
+config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:storedTurnTimer(config.timer,saved?.timerPreferenceVersion),seed:Date.now(),snow:config.snow,fog:config.fog,fireLine:config.fireLine,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,allowDragon:config.allowDragon};
 if(config.slots.filter(s=>s.enabled).length<2||new Set(config.slots.filter(s=>s.enabled).map(s=>s.team)).size<2)config.slots=defaultSlots();
 let game=new Game(config,APP_VERSION);config={...game.config};
 const audio=new AudioManager();
@@ -70,8 +73,8 @@ $('#app').innerHTML=`
             <canvas id="battlefield" width="1280" height="600" aria-label="可破坏的炮术战场；使用下方面板或键盘调整角度、力度和移动。空袭与传送可点击战场选择位置。"></canvas>
             <div id="minimap-panel" class="minimap-panel"><div class="minimap-header"><button id="minimap-toggle" aria-label="折叠小地图" aria-expanded="true"><span>小地图</span>${icon('chevron')}</button><button id="minimap-follow" aria-label="恢复战场镜头跟随">跟随</button></div><canvas id="minimap" aria-label="小地图，点击定位视野"></canvas><div id="wind-gauge" class="wind-gauge" role="meter" aria-label="风向与风力" aria-valuemin="-11" aria-valuemax="11" aria-valuenow="0"><span class="wind-area" aria-hidden="true"></span><span class="wind-center" aria-hidden="true"></span><span class="wind-end" aria-hidden="true" hidden></span></div></div><div class="stage-top"><span class="map-chip">${icon('mountain')}<span id="map-label">青苔峡谷</span><span class="map-code" id="map-code">01</span></span><button id="inventory-toggle" class="stage-button stage-extra inventory-toggle" aria-label="展开军火库" aria-expanded="false">${icon('shell')}<span>军火库</span></button><button id="fullscreen-button" class="stage-button stage-extra" title="全屏作战" aria-label="全屏作战">${icon('fullscreen')}</button><button id="layout-button" class="stage-button stage-extra" title="切换标准布局" aria-label="切换标准布局">${icon('shrink')}</button><button id="pause-button" class="stage-button" title="暂停 · Esc" aria-label="暂停游戏">${icon('pause')}</button></div>
             <div id="turn-indicator" class="turn-indicator hidden"><span class="status-dot"></span><span id="turn-text">轮到你了</span><span class="turn-divider"></span><span id="round-text">第 01 回合</span></div>
-            <div id="timer" class="timer hidden">${icon('clock')}<span>45</span><small>s</small></div>
-            <div id="lobby-overlay" class="lobby-overlay"><div class="lobby-tag">FIELD NOTES / 01</div><h2>好风景。<br>也要好准头。</h2><p>调整角度，借一阵风。<br>让下一发，刚好落在对手身旁。</p><button id="start-button" class="button button-dark">进入战场 ${icon('arrow')}</button><span class="lobby-hint">打开槽位，选好队旗，安排炮手</span></div>
+            <div id="timer" class="timer hidden">${icon('clock')}<span>∞</span><small>s</small></div>
+            <section id="lobby-overlay" class="lobby-welcome" aria-label="开局准备"><div class="lobby-copy"><span class="eyebrow">小小炮手 · 大大冒险</span><h1>选好小队，<br>一起开炮。</h1><p>挑一个战场，给每位炮手选好队旗。<br>默认不限时，慢慢瞄准，借一阵好风。</p></div><div class="lobby-actions"><button id="start-button" class="button button-dark">进入战场 ${icon('arrow')}</button><span class="lobby-hint">四个槽位 · 自由组队 · 单人也能开打</span></div></section>
 <div id="game-overlay" class="game-overlay hidden"></div>
             <div class="stage-bottom"><span id="field-note">丘陵地形 · 可破坏环境</span><span>${icon('sun')}<span id="gravity-note">重力 1.0 g</span><button id="stage-version-button" class="version-button" aria-label="点击版本号检查更新">v${APP_VERSION} · 检查更新</button></span></div>
           </div>
@@ -96,6 +99,8 @@ $('#app').innerHTML=`
   <dialog id="dialog"><div class="dialog-shell"><button id="close-dialog" class="dialog-close icon-button" aria-label="关闭">${icon('close')}</button><div id="dialog-content"></div></div></dialog>
 `;
 // Keep the combat chrome on one row and give the action cluster its own compact grid.
+$('.main-shell').prepend($('#lobby-overlay'));
+$('#lobby-overlay').className='lobby-welcome';
 $('.dash-actions').prepend($('.move-buttons'));
 $('#pause-button').insertAdjacentHTML('beforebegin',`<button class="stage-button" data-dialog="settings" aria-label="游戏设置" data-help-name="游戏设置" data-help-description="音效、音乐、自伤、友伤与直接选择暴龙">${icon('settings')}</button>`);
 $('.dashboard').classList.add('compact-dashboard');
@@ -128,7 +133,7 @@ function paintMapChoices(){
 }
 
 function colorNames(message:string){let text=message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');for(const t of [...game.tanks].sort((a,b)=>b.name.length-a.name.length))text=text.replaceAll(t.name,nameMarkup(t.name,t.team));return text;}
-function persistSettings() {save('piggy-settings',{config,soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,volume:audio.volume,balanceVersion:2,audioVersion:2,slotVersion:1});}
+function persistSettings() {save('piggy-settings',{config,soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,volume:audio.volume,balanceVersion:2,audioVersion:2,slotVersion:1,timerPreferenceVersion:TIMER_PREFERENCE_VERSION});}
 function updateSound() {const b=$('#sound-button');b.innerHTML=icon(audio.soundEnabled||audio.musicEnabled?'sound':'mute');b.setAttribute('aria-label','声音设置');b.title='分别设置音效与背景音乐';}
 function snapshotFeedback(message:string){
   toast(message);const status=document.querySelector<HTMLElement>('#snapshot-copy-status');
@@ -147,7 +152,7 @@ function renderInventory() {
   $('#inventory-grid').innerHTML=activeTab==='weapons'?weapons.map(w=>`<button class="inventory-tile ${game.selected===w.id?'selected':''} ${tank.ammo[w.id]<=0?'depleted':''}" data-weapon="${w.id}" title="${w.name}：${w.description}" aria-label="${w.name}，${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]+' 发':'无限弹药'}" aria-pressed="${game.selected===w.id}"><span class="weapon-icon" style="--weapon-color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span class="tile-name">${w.name}</span><span class="ammo-count">${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]:'∞'}</span>${game.selected===w.id?`<span class="selection-tick">${icon('check')}</span>`:''}</button>`).join(''):
     ITEMS.filter(i=>TURN_ITEMS.includes(i.id)).sort((a,b)=>TURN_ITEMS.indexOf(a.id)-TURN_ITEMS.indexOf(b.id)).map(i=>{
       const reason=game.itemUnavailable(i.id),waiting=tank.itemReadyTurn[i.id]-tank.turnsTaken;
-      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${i.id==='teleport'&&game.teleporting?'selected':''}" data-item="${i.id}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="使用${i.name}，剩余 ${tank.items[i.id]} 件${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${icon(i.icon)}</span><span class="tile-name">${i.name}</span><span class="ammo-count">${tank.items[i.id]}</span><span class="item-hint">${reason||'每格一件 · 空槽可拾取同类补给'}</span><span class="item-cost">每回合最多一件</span></button>`;
+      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${i.id==='teleport'&&game.teleporting?'selected':''}" data-item="${i.id}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="使用${i.name}，剩余 ${tank.items[i.id]} 件${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${itemIcon(i.id)}</span><span class="tile-name">${i.name}</span><span class="ammo-count">${tank.items[i.id]}</span><span class="item-hint">${reason||'每格一件 · 空槽可拾取同类补给'}</span><span class="item-cost">每回合最多一件</span></button>`;
     }).join('');
   $('#inventory-grid').classList.toggle('items-grid',activeTab==='items');
   $('#inventory-grid').setAttribute('aria-label',activeTab==='weapons'?'武器清单':'道具清单');
@@ -183,7 +188,7 @@ function updateUI() {
   $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=game.delayEnabled?String(game.delayFor(t,shownWeapon)):'—';
   $('#previous-power').hidden=t.lastPower===null||lobby||game.phase==='ended';$('#previous-power').style.left=t.lastPower===null?'0%':`${t.lastPower}%`;
   const quick=TURN_ITEMS;const quickSignature=quick.map(id=>`${id}:${t.items[id]}:${game.itemUnavailable(id)}`).join('|')+'|'+game.teleporting;
-  if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,i)=>{const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id);return `<button data-item="${id}" class="${id==='teleport'&&game.teleporting?'selected':''}" aria-pressed="${id==='teleport'&&game.teleporting}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+i}${reason?' · '+reason:''}" aria-label="快捷使用${item.name}">${icon(item.icon)}<span>${["双发","转移","加强","补给"][i]}</span><small>${t.items[id]}</small></button>`;}).join('');}
+  if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,i)=>{const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id);return `<button data-item="${id}" class="${id==='teleport'&&game.teleporting?'selected':''}" aria-pressed="${id==='teleport'&&game.teleporting}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+i}${reason?' · '+reason:''}" aria-label="快捷使用${item.name}">${itemIcon(id)}<span>${["双发","转移","加强","补给"][i]}</span><small>${t.items[id]}</small></button>`;}).join('');}
   $('.wait-readout').dataset.helpDescription=!(game.delayEnabled)?'含 AI 的对局按存活槽位轮转，DELAY 排序关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
   $('#pwa-update').classList.toggle('hidden',!pendingUpdate||(!lobby&&game.phase!=='ended'));
   $('.battle-stage').classList.toggle('started',!lobby);
@@ -195,7 +200,7 @@ function updateUI() {
   $('#difficulty-label').textContent=`${game.tanks.length} 名炮手 · ${new Set(game.tanks.map(t=>t.team)).size} 面队旗`;
   const hudSignature=game.tanks.map(t=>`${t.id}:${t.crew}:${t.vehicleId}:${t.controller}:${t.difficulty}:${t.team}`).join('|');
   if(hudSignature!==lastHud){
-    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud team-${tank.team}" data-hud="${tank.id}" data-slot-id="${tank.slot}" style="--flag-ink:${teamFlag(tank.team).color};--flag-paper:${teamFlag(tank.team).paper}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="查看${tank.name}的大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button></span><div class="player-info"><div class="player-name">${flagIcon(tank.team)}${nameMarkup(tank.name,tank.team)}<span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
+    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud team-${tank.team}" data-hud="${tank.id}" data-slot-id="${tank.slot}" style="--flag-ink:${teamFlag(tank.team).color};--flag-paper:${teamFlag(tank.team).paper}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="定位${tank.name}；长按查看大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button></span><div class="player-info"><div class="player-name">${flagIcon(tank.team)}${nameMarkup(tank.name,tank.team)}<span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
   }
   game.tanks.forEach((tank,i)=>{
     $(`#hp-${i}`).innerHTML=`${tank.hp} <small>/ ${tank.maxHP}</small>`;
@@ -216,9 +221,12 @@ function updateUI() {
   if(game.fireLine) $('#field-note').textContent+=` · 火线 +50% · 剩 ${game.fireLineTurnsRemaining} 行动回合`;
   $('#minimap-toggle').dataset.helpDescription=`${MAPS.find(m=>m.id===game.config.map)!.description} ${$('#field-note').textContent} · ${$('#gravity-note').textContent}。轻点折叠或展开，点击地图定位视野。`;
   $('#lobby-overlay').classList.toggle('hidden',!lobby);
+  const lobbyChanged=document.body.classList.contains('lobby-mode')!==lobby;
+  document.body.classList.toggle('lobby-mode',lobby);if(lobbyChanged)requestAnimationFrame(()=>renderer.resize());
   $('#turn-indicator').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff');
   $('#timer').classList.toggle('hidden',lobby||game.phase==='ended'||game.phase==='handoff'||config.timer===0);
   $('#turn-text').innerHTML=colorNames(game.phase==='supply'?'补给正在空降 · 计时暂停':game.phase==='flying'?'炮弹飞行中':game.phase==='resolving'?'观察战场…':game.active.controller==='ai'?`${game.active.name}正在瞄准…`:`${game.active.name}，到你了` );
+  if(renderer.touring){$('#turn-text').innerHTML=colorNames(`开场巡游 · ${game.tanks[renderer.tourPlayer??0]?.name??''}`);}
   $('#turn-indicator').style.setProperty('--flag-ink',teamFlag(game.active.team).color);$('#turn-indicator').style.setProperty('--flag-paper',teamFlag(game.active.team).paper);
   $('#round-text').textContent=game.round>=21?'决胜时刻':`第 ${String(game.round).padStart(2,'0')} 轮`;
   $('#timer span').textContent=String(Math.ceil(Math.max(0,game.clock))).padStart(2,'0');$('#timer').classList.toggle('urgent',game.clock<10);
@@ -227,7 +235,8 @@ function updateUI() {
   angle.min=String(t.minAngle);angle.max=String(t.maxAngle);angle.value=String(t.angle);power.value=String(t.power);
   angle.style.setProperty('--range-fill',`${(t.angle-t.minAngle)/(t.maxAngle-t.minAngle)*100}%`);power.style.setProperty('--range-fill',`${(t.power-10)/90*100}%`);
   angle.disabled=!human;power.disabled=!human;
-  $('.control-deck').classList.toggle('inactive',!human);$<HTMLButtonElement>('#power-meter').disabled=!human||t.fallVelocity>0;$<HTMLButtonElement>('#skip-button').disabled=!human;
+  $('.control-deck').classList.toggle('inactive',!human);$<HTMLButtonElement>('#power-meter').disabled=!human||t.fallVelocity>0;$<HTMLButtonElement>('#skip-button').disabled=!human&&!renderer.touring;
+  $('#skip-button').setAttribute('aria-label',renderer.touring?'跳过开场巡游':'跳过回合');
   document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, #face-button, #aim-pad').forEach(b=>b.disabled=!human);
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
   updateChargeVisual(t.power);
@@ -251,8 +260,8 @@ function updateUI() {
 
 function positionResult(){
   const layer=$('#game-overlay'),card=layer.querySelector<HTMLElement>('.result');if(!card)return;
-  const sx=layer.clientWidth/WORLD_W,sy=layer.clientHeight/renderer.viewHeight;
-  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-50)*sx,y:(t.y-(t.hp>0?124:28)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?154:54)*sy}));
+  const sx=layer.clientWidth/renderer.viewWidth,sy=layer.clientHeight/renderer.viewHeight;
+  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-renderer.offsetX-50)*sx,y:(t.y-(t.hp>0?124:28)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?154:54)*sy}));
   const mapBox=$('#minimap-panel').getBoundingClientRect(),box=layer.getBoundingClientRect();
   const map={x:mapBox.x-box.x,y:mapBox.y-box.y,width:mapBox.width,height:mapBox.height};
   card.style.position='absolute';card.style.width='370px';
@@ -286,7 +295,7 @@ function setDrawer(value:boolean) {
   $('#inventory-toggle').setAttribute('aria-expanded',String(value));
   $('#inventory-toggle').setAttribute('aria-label',value?'关闭军火库':'展开军火库');
 }
-function begin() {audio.unlock();audio.pause(false);game.start();playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
+function begin() {audio.unlock();audio.pause(false);game.start();const openingGame=game;game.paused=true;renderer.startTour(()=>{if(game===openingGame){game.paused=false;renderer.follow();lastPhase='';updateUI();}});playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
 function newMatch(next:Config,start=true) {
   cancelCharge();
   audio.resetEffects();
@@ -297,10 +306,12 @@ function newMatch(next:Config,start=true) {
 }
 function togglePause() {
   if(game.phase==='lobby'||game.phase==='ended'||game.phase==='handoff') return;
+  if(renderer.touring)renderer.finishTour();
   cancelCharge();game.paused=!game.paused;moveHeld=0;keys.clear();audio.pause(game.paused);updateOverlay();updateUI();
 }
 
 function showDialog(type:string) {
+  if(renderer.touring)renderer.finishTour();
   const dialog=$<HTMLDialogElement>('#dialog');
   if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;audio.pause(true);moveHeld=0;keys.clear();}
   dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');
@@ -356,7 +367,7 @@ document.addEventListener('input',e=>{if((e.target as HTMLElement).matches('inpu
 document.addEventListener('change',e=>{if((e.target as HTMLElement).matches('input,select'))audio.play('aim');},true);
 document.addEventListener('click',e=>{
   const target=e.target as HTMLElement;
-  const portrait=target.closest<HTMLElement>('[data-portrait]');if(portrait){showDialog(`portrait:${portrait.dataset.portrait}`);return;}
+  const portrait=target.closest<HTMLElement>('[data-portrait]');if(portrait){if(suppressPortraitClick&&e.detail!==0){suppressPortraitClick=false;return;}focusPlayer(Number(portrait.dataset.portrait));return;}
   const dialogButton=target.closest<HTMLElement>('[data-dialog]');if(dialogButton) {showDialog(dialogButton.dataset.dialog!);return;}
   const action=target.closest<HTMLElement>('[data-action]')?.dataset.action;
   if(action==='close') closeDialog();
@@ -384,12 +395,11 @@ $('#start-button').addEventListener('click',()=>showDialog('setup'));
 $('#new-game').addEventListener('click',()=>showDialog('setup'));
 $('#sound-button').addEventListener('click',()=>showDialog('settings'));
 $('#pause-button').addEventListener('click',togglePause);
-$('#skip-button').addEventListener('click',()=>{cancelCharge();game.skipTurn();updateUI();});
+$('#skip-button').addEventListener('click',()=>{cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();});
 $('#exit-match').addEventListener('click',()=>showDialog('exit'));
 function toggleMinimap(){const collapsed=$('#minimap-panel').classList.toggle('collapsed');$('#minimap-toggle').setAttribute('aria-expanded',String(!collapsed));$('#minimap-toggle').setAttribute('aria-label',collapsed?'展开小地图':'折叠小地图');}
 $('#minimap-toggle').addEventListener('click',toggleMinimap);
 $('#minimap-follow').addEventListener('click',()=>renderer.follow());
-$('#minimap').addEventListener('pointerdown',e=>{const r=$('#minimap').getBoundingClientRect();renderer.focusAt((e.clientY-r.top)/r.height*TERRAIN_H);});
 $('#inventory-toggle').addEventListener('click',()=>{if(immersive) setDrawer(!drawerOpen);else {setImmersive(true);setDrawer(true);}});
 $('#arsenal-close').addEventListener('click',()=>setDrawer(false));
 $('#inventory-backdrop').addEventListener('click',()=>setDrawer(false));
@@ -456,9 +466,9 @@ function bindMove(id:string,direction:number) {
   button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
 }
 bindMove('#move-left',-1);bindMove('#move-right',1);
-function aimOnField(e:PointerEvent,release=false) {
+function aimOnField(e:Pick<PointerEvent,'clientX'|'clientY'>) {
   if(!game.humanTurn) return;
-  const rect=$('#battlefield').getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width*WORLD_W+renderer.offsetX,y=(e.clientY-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY;
+  const rect=$('#battlefield').getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y=(e.clientY-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY;
   if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,WORLD_W-20);
   else {
     const t=game.active,slope=game.tankSlope(t),dx=x-t.x-Math.sin(slope)*13,dy=y-t.y+Math.cos(slope)*13;
@@ -467,11 +477,24 @@ function aimOnField(e:PointerEvent,release=false) {
   updateUI();
 }
 const battlefield=$<HTMLCanvasElement>('#battlefield');
-battlefield.addEventListener('pointerdown',e=>{if(!game.humanTurn) return;e.preventDefault();aimPointer=e.pointerId;battlefield.setPointerCapture(e.pointerId);aimOnField(e);});
-battlefield.addEventListener('pointermove',e=>{if(aimPointer===e.pointerId) aimOnField(e);});
-battlefield.addEventListener('pointerup',e=>{if(aimPointer===e.pointerId){aimOnField(e,true);aimPointer=null;}});
-battlefield.addEventListener('pointercancel',()=>aimPointer=null);
-battlefield.addEventListener('lostpointercapture',()=>aimPointer=null);
+function focusPlayer(id:number){const t=game.tanks[id];if(!t)return;if(renderer.touring)renderer.finishTour(false);renderer.focusAt(t.defeat?.x??t.x,t.defeat?.y??t.y);updateUI();}
+function fieldPoint(p:{x:number;y:number}){const rect=battlefield.getBoundingClientRect();return {x:(p.x-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y:(p.y-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY};}
+let fieldPortrait:number|null=null;
+installMapGestures(battlefield,{
+  press:p=>{const w=fieldPoint(p);fieldPortrait=renderer.portraitAt(w.x,w.y);},
+  start:()=>{if(renderer.touring)renderer.finishTour(false);},
+  pan:(dx,dy)=>{const rect=battlefield.getBoundingClientRect();renderer.panBy(dx/rect.width*renderer.viewWidth,dy/rect.height*renderer.viewHeight);},
+  tap:p=>{if(fieldPortrait!==null)focusPlayer(fieldPortrait);else aimOnField({clientX:p.x,clientY:p.y});},
+  hold:()=>{if(fieldPortrait!==null&&game.tanks[fieldPortrait]){focusPlayer(fieldPortrait);showDialog(`portrait:${fieldPortrait}`);}}
+});
+const mini=$<HTMLCanvasElement>('#minimap');
+const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*WORLD_W,(p.y-rect.top)/rect.height*TERRAIN_H);};
+installMapGestures(mini,{start:()=>{},pan:()=>{},tap:locateMini,hold:()=>{},locate:locateMini});
+let portraitTimer=0,portraitPointer=-1,portraitStart={x:0,y:0},suppressPortraitClick=false;
+document.addEventListener('pointerdown',e=>{const button=(e.target as HTMLElement).closest<HTMLElement>('[data-portrait]');if(!button)return;clearTimeout(portraitTimer);portraitPointer=e.pointerId;portraitStart={x:e.clientX,y:e.clientY};suppressPortraitClick=false;const id=Number(button.dataset.portrait);portraitTimer=window.setTimeout(()=>{suppressPortraitClick=true;if(game.tanks[id]){focusPlayer(id);showDialog(`portrait:${id}`);}},600);},true);
+document.addEventListener('pointermove',e=>{if(e.pointerId===portraitPointer&&Math.hypot(e.clientX-portraitStart.x,e.clientY-portraitStart.y)>7){clearTimeout(portraitTimer);suppressPortraitClick=true;}},true);
+for(const event of ['pointerup','pointercancel'])document.addEventListener(event,()=>clearTimeout(portraitTimer),true);
+window.addEventListener('blur',()=>clearTimeout(portraitTimer));document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(portraitTimer);});
 battlefield.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='l'&&(e.ctrlKey||e.metaKey)&&e.shiftKey&&!(e.target as HTMLElement).matches('input,select,textarea')){e.preventDefault();if(!e.repeat)void copyBattleSnapshot();return;}
@@ -482,9 +505,10 @@ document.addEventListener('keydown',e=>{
   if(key==='escape') {togglePause();return;}
   if(key==='tab'&&game.phase!=='lobby'){e.preventDefault();toggleMinimap();audio.play('click');return;}
   if(key==='c'&&e.ctrlKey){e.preventDefault();renderer.follow();return;}
+  if(key==='f5'&&renderer.touring){e.preventDefault();renderer.finishTour();updateUI();return;}
   if(!game.humanTurn) return;
   if((key==='f3'||key==='f4')&&game.active.vehicleId){e.preventDefault();const v=vehicleById(game.active.vehicleId);if(game.selectWeapon(key==='f3'?v.normal:v.special)) {audio.play('click');updateUI();}return;}
-  if(key==='f5'){e.preventDefault();cancelCharge();game.skipTurn();updateUI();return;}
+  if(key==='f5'){e.preventDefault();cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();return;}
   if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const id=TURN_ITEMS[Number(key.slice(1))-9];if(game.useItem(id))updateUI();else toast(game.itemUnavailable(id)??'当前不能使用');return;}
   if(['arrowleft','arrowright','arrowup','arrowdown'].includes(key)){e.preventDefault();keys.add(key);}
   if(['a','d','w','s','q','e',' '].includes(key)) {e.preventDefault();keys.add(key);}
@@ -519,13 +543,14 @@ function frame(now:number) {
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
   }
-  game.update(dt);renderer.draw(dt);dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight);
+  if(!renderer.touring)game.update(dt);renderer.draw(dt);dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight,renderer.offsetX,renderer.viewWidth);
   const moving=game.movingUntil.findIndex(until=>until>game.elapsed);
   audio.setScene(game.phase==='lobby'?'lobby':game.phase==='ended'?'result':game.config.map);
   audio.updateMovement(moving>=0&&game.phase==='aiming'&&!game.paused,game.tanks[Math.max(0,moving)].x,game.tanks[game.viewer].x,game.tanks[Math.max(0,moving)].vehicleId,game.active.fuel<=0);
   const tracking=game.projectiles.find(p=>p.homing);audio.updateTracking(Boolean(tracking)&&!game.paused&&game.phase==='flying',tracking?.weapon,tracking?.x??0,game.tanks[game.viewer].x);
   if(charge&&(!game.humanTurn||charge.tank!==game.current)) cancelCharge();
   for(const event of game.drainEvents()) {
+    if((event.type==='turn'||event.type==='shot')&&!renderer.touring)renderer.follow(event.type==='turn');
     if(event.type!=='explosion') $('#battle-message').innerHTML=colorNames(event.message);
     if(event.type==='shot') audio.play(event.transfer?'transfer':'shot',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='explosion') audio.play('explosion',event.x,game.tanks[game.viewer].x,event.weapon);
@@ -540,7 +565,7 @@ function frame(now:number) {
     if(event.type==='crate-land') audio.play('crate-land',event.x,game.tanks[game.viewer].x);
   }
   if(charge)updateChargeVisual(game.active.power);
-  if(now-lastUI>80&&!game.paused) {updateUI();lastUI=now;}
+  if(now-lastUI>80&&(!game.paused||renderer.touring)) {updateUI();lastUI=now;}
   requestAnimationFrame(frame);
 }
 setImmersive(false);renderInventory();updateSound();updateUI();requestAnimationFrame(frame);

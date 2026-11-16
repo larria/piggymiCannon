@@ -19,6 +19,7 @@ export function installControlHints(onShow:()=>void){
   document.addEventListener('pointerdown',e=>{
     if(held&&e.pointerId!==pointer)return;
     keyboard=false;hide();shown=false;held=(e.target as HTMLElement).closest<HTMLElement>(selector);pointer=e.pointerId;startX=e.clientX;startY=e.clientY;
+    if(held?.matches('[data-portrait]'))held=null;
     if(held){const target=held;timer=window.setTimeout(()=>{shown=true;show(target);},420);}
   },true);
   document.addEventListener('pointermove',e=>{if(e.pointerId===pointer&&Math.hypot(e.clientX-startX,e.clientY-startY)>10){if(shown&&held){suppressed=held;suppressedPointer=pointer;expires=Infinity;}hide();held=null;}},true);

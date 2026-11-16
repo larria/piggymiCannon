@@ -1,0 +1,314 @@
+[
+  {
+    "id": "shell",
+    "color": "#72866d",
+    "scale": 1.2,
+    "width": 22,
+    "height": 14,
+    "pixels": 234
+  },
+  {
+    "id": "heavy",
+    "color": "#ce8051",
+    "scale": 1,
+    "width": 22,
+    "height": 26,
+    "pixels": 405
+  },
+  {
+    "id": "triple",
+    "color": "#8b9e66",
+    "scale": 1,
+    "width": 25,
+    "height": 10,
+    "pixels": 210
+  },
+  {
+    "id": "cluster",
+    "color": "#b4a164",
+    "scale": 1,
+    "width": 20,
+    "height": 20,
+    "pixels": 352
+  },
+  {
+    "id": "drill",
+    "color": "#729498",
+    "scale": 1,
+    "width": 25,
+    "height": 18,
+    "pixels": 260
+  },
+  {
+    "id": "bounce",
+    "color": "#9791ac",
+    "scale": 1,
+    "width": 16,
+    "height": 16,
+    "pixels": 196
+  },
+  {
+    "id": "napalm",
+    "color": "#d97743",
+    "scale": 1,
+    "width": 22,
+    "height": 23,
+    "pixels": 355
+  },
+  {
+    "id": "ice",
+    "color": "#71a8bb",
+    "scale": 1,
+    "width": 24,
+    "height": 24,
+    "pixels": 305
+  },
+  {
+    "id": "emp",
+    "color": "#aa91b3",
+    "scale": 1,
+    "width": 28,
+    "height": 28,
+    "pixels": 288
+  },
+  {
+    "id": "airstrike",
+    "color": "#7597a7",
+    "scale": 1,
+    "width": 24,
+    "height": 22,
+    "pixels": 242
+  },
+  {
+    "id": "quake",
+    "color": "#a7906f",
+    "scale": 1,
+    "width": 22,
+    "height": 21,
+    "pixels": 343
+  },
+  {
+    "id": "sniper",
+    "color": "#bc7a73",
+    "scale": 1.12,
+    "width": 44,
+    "height": 8,
+    "pixels": 229
+  },
+  {
+    "id": "homing",
+    "color": "#be9159",
+    "scale": 1,
+    "width": 31,
+    "height": 22,
+    "pixels": 272
+  },
+  {
+    "id": "bowl-normal",
+    "color": "#8b7863",
+    "scale": 1,
+    "width": 21,
+    "height": 19,
+    "pixels": 280
+  },
+  {
+    "id": "bowl-special",
+    "color": "#ed6f36",
+    "scale": 1,
+    "width": 33,
+    "height": 20,
+    "pixels": 333
+  },
+  {
+    "id": "crossbow-normal",
+    "color": "#346f72",
+    "scale": 1.12,
+    "width": 41,
+    "height": 14,
+    "pixels": 225
+  },
+  {
+    "id": "crossbow-special",
+    "color": "#60b347",
+    "scale": 1.12,
+    "width": 39,
+    "height": 18,
+    "pixels": 290
+  },
+  {
+    "id": "cannon-normal",
+    "color": "#48566a",
+    "scale": 1,
+    "width": 22,
+    "height": 22,
+    "pixels": 376
+  },
+  {
+    "id": "cannon-special",
+    "color": "#eb4252",
+    "scale": 1.35,
+    "width": 18,
+    "height": 18,
+    "pixels": 264
+  },
+  {
+    "id": "beetle-normal",
+    "color": "#d2cbb0",
+    "scale": 1,
+    "width": 17,
+    "height": 19,
+    "pixels": 255
+  },
+  {
+    "id": "beetle-special",
+    "color": "#df8582",
+    "scale": 1,
+    "width": 26,
+    "height": 20,
+    "pixels": 291
+  },
+  {
+    "id": "duke-normal",
+    "color": "#bb8d38",
+    "scale": 1,
+    "width": 36,
+    "height": 14,
+    "pixels": 343
+  },
+  {
+    "id": "duke-special",
+    "color": "#b2bd29",
+    "scale": 1,
+    "width": 22,
+    "height": 16,
+    "pixels": 308
+  },
+  {
+    "id": "mine-normal",
+    "color": "#777c32",
+    "scale": 1,
+    "width": 16,
+    "height": 24,
+    "pixels": 280
+  },
+  {
+    "id": "mine-special",
+    "color": "#533e35",
+    "scale": 1,
+    "width": 28,
+    "height": 12,
+    "pixels": 250
+  },
+  {
+    "id": "missile-normal",
+    "color": "#b4569e",
+    "scale": 1,
+    "width": 40,
+    "height": 12,
+    "pixels": 386
+  },
+  {
+    "id": "missile-special",
+    "color": "#27b97d",
+    "scale": 1,
+    "width": 32,
+    "height": 22,
+    "pixels": 307
+  },
+  {
+    "id": "multi-normal",
+    "color": "#6672cd",
+    "scale": 1,
+    "width": 29,
+    "height": 16,
+    "pixels": 263
+  },
+  {
+    "id": "multi-special",
+    "color": "#ebb737",
+    "scale": 1,
+    "width": 20,
+    "height": 20,
+    "pixels": 160
+  },
+  {
+    "id": "laser-normal",
+    "color": "#32c9d8",
+    "scale": 1,
+    "width": 30,
+    "height": 14,
+    "pixels": 228
+  },
+  {
+    "id": "laser-special",
+    "color": "#a771e6",
+    "scale": 1,
+    "width": 42,
+    "height": 12,
+    "pixels": 382
+  },
+  {
+    "id": "water-normal",
+    "color": "#42a4e5",
+    "scale": 1,
+    "width": 35,
+    "height": 22,
+    "pixels": 533
+  },
+  {
+    "id": "water-special",
+    "color": "#b096ef",
+    "scale": 1,
+    "width": 22,
+    "height": 20,
+    "pixels": 334
+  },
+  {
+    "id": "ion-normal",
+    "color": "#e878c9",
+    "scale": 1.12,
+    "width": 28,
+    "height": 22,
+    "pixels": 466
+  },
+  {
+    "id": "ion-special",
+    "color": "#a7d2e7",
+    "scale": 1,
+    "width": 36,
+    "height": 14,
+    "pixels": 416
+  },
+  {
+    "id": "sea-normal",
+    "color": "#c83198",
+    "scale": 1,
+    "width": 30,
+    "height": 30,
+    "pixels": 564
+  },
+  {
+    "id": "sea-special",
+    "color": "#427fe3",
+    "scale": 1,
+    "width": 30,
+    "height": 18,
+    "pixels": 416
+  },
+  {
+    "id": "dragon-normal",
+    "color": "#d58a18",
+    "scale": 1,
+    "width": 42,
+    "height": 22,
+    "pixels": 346
+  },
+  {
+    "id": "dragon-special",
+    "color": "#e6d63a",
+    "scale": 1,
+    "width": 30,
+    "height": 18,
+    "pixels": 352
+  }
+]

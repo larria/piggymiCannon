@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "version": "3.1.0",
+  "mechanisms": {
+    "passed": 224,
+    "failed": 0
+  },
+  "chromium": {
+    "uniquePassed": 134,
+    "initialSuitePassed": 117,
+    "repairedOriginalIDs": 11,
+    "repairedRenamedCases": 2,
+    "newItemsAndF5": 3,
+    "newDPR2": 1,
+    "currentFocusedChecksPassed": 24
+  },
+  "webkit": {
+    "passed": 25,
+    "failed": 0
+  },
+  "localProductionOfflinePassed": true,
+  "note": "模拟11寸iPad横屏与DPR2；不冒称实机发热／耗电测量"
+}

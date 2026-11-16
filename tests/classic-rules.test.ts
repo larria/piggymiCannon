@@ -1,6 +1,7 @@
 import {Game} from './legacy-fixture';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {WORLD_W,TERRAIN_H} from '../src/terrain';
 import {WATER_Y} from '../src/engine.ts';
 import {MAPS,ALL_WEAPONS,excavation} from '../src/catalog.ts';
 import {TEMPLE_NODES,templeRail,factoryFloor} from '../src/classic-maps.ts';
@@ -84,25 +85,25 @@ test('wind noticeably shifts impacts and prediction follows actual projectile fl
 
 test('factory has a permanent full-width floor which every weapon excavation preserves',()=>{
  const g=ready({map:'factory'}),floor=g.land.protectedMask.slice();
- for(const w of ALL_WEAPONS){const dig=excavation(w.id,false);g.crater(640,552,dig.radius,dig.depth);}
- g.crater(640,300,1500,1000);
+ for(const w of ALL_WEAPONS){const dig=excavation(w.id,false);g.crater(960,factoryFloor(960),dig.radius,dig.depth);}
+ g.crater(960,450,2000,1500);
  for(let i=0;i<floor.length;i++)if(floor[i])assert.equal(g.land.mask[i],1);
- for(let x=0;x<=1280;x++)assert.equal(g.ground(x),Math.ceil(factoryFloor(x)));
- run(g,4);assert.ok(g.tanks.every(t=>t.y+18<=557&&t.y<WATER_Y));
+ for(let x=0;x<=WORLD_W;x++)assert.equal(g.ground(x),Math.ceil(factoryFloor(x)));
+ run(g,4);assert.ok(g.tanks.every(t=>t.y+18<=817&&t.y<WATER_Y));
 });
 
 test('temple has a four-pixel lower rail, permanent nodes and destructible ordinary tracks',()=>{
- const g=ready({map:'temple'}),x=500,rail=g.ground(x,500);
+ const g=ready({map:'temple'}),x=500,rail=g.ground(x,750);
  assert.equal(g.land.bottom(x,rail)-rail,4);assert.ok(Math.abs(rail-templeRail(x))<1);
- g.crater(x,rail,55,40);assert.equal(g.ground(x,500),640);
- for(const node of TEMPLE_NODES){const top=g.ground(node,500);g.crater(node,top,100,90);assert.equal(g.ground(node,500),top);}
- const safe=g.active;safe.x=350;safe.y=g.ground(350,500)-18;safe.fallVelocity=0;run(g,2);assert.ok(safe.hp>0);assert.ok(safe.y<WATER_Y-18);
+ g.crater(x,rail,55,40);assert.equal(g.ground(x,750),TERRAIN_H);
+ for(const node of TEMPLE_NODES){const top=g.ground(node,750);g.crater(node,top,100,90);assert.equal(g.ground(node,750),top);}
+ const safe=g.active;safe.x=525;safe.y=g.ground(525,750)-18;safe.fallVelocity=0;run(g,2);assert.ok(safe.hp>0);assert.ok(safe.y<WATER_Y-18);
  const victim=g.enemy;victim.x=x;victim.y=rail-18;victim.fallVelocity=1;victim.fallStart=victim.y;run(g,3);assert.equal(victim.hp,0);
 });
 
 test('an explosion on a high platform does not delete an untouched thin lower track',()=>{
- const g=ready({map:'temple'}),x=240,rail=g.ground(x,500);g.crater(x,335,40,35);
- assert.equal(g.ground(x,500),rail);assert.equal(g.land.bottom(x,rail)-rail,4);
+ const g=ready({map:'temple'}),x=240,rail=g.ground(x,750);g.crater(x,503,40,35);
+ assert.equal(g.ground(x,750),rail);assert.equal(g.land.bottom(x,rail)-rail,4);
 });
 
 test('all six maps finish a full AI match without invalid terrain or a stalled action',()=>{

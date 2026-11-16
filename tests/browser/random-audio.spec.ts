@@ -13,11 +13,11 @@ for(const width of [1194,1210])test(`${width} iPad random-map setup resolves see
  await expect.poll(async()=>{const button=await page.locator('#deploy-slots').boundingBox();return button!.y+button!.height;}).toBeLessThan(834);
  await page.screenshot({path:`QA/v2.3.0-random-setup-${width}.png`});await page.getByRole('button',{name:'开始对局',exact:true}).click();
  const map=MAPS[Math.floor(makeRng(52)()*MAPS.length)];await expect(page.locator('#map-label')).toContainText(map.name);
- const state=await page.evaluate(()=>{const g=(window as any).__qa.game,a=(window as any).__qa.audio,s=g.battleSnapshot();return {map:g.config.map,choice:g.config.mapChoice,music:a.music.src,seed:s.initial.config.seed,initial:s.initial.config.map,current:s.current.config.map,name:s.initial.mapName,spawnSafe:g.tanks.every((t:any)=>t.y+18<567&&t.fallVelocity===0)};});
+ const state=await page.evaluate(()=>{const g=(window as any).__qa.game,a=(window as any).__qa.audio,s=g.battleSnapshot();return {map:g.config.map,choice:g.config.mapChoice,music:a.music.src,seed:s.initial.config.seed,initial:s.initial.config.map,current:s.current.config.map,name:s.initial.mapName,spawnSafe:g.tanks.every((t:any)=>t.y+18<930&&t.fallVelocity===0)};});
  expect(state).toMatchObject({map:map.id,choice:'random',seed:52,initial:map.id,current:map.id,name:map.name,spawnSafe:true});expect(state.music).toContain(BGM_TRACKS[map.id]);
  await page.screenshot({path:`QA/v2.3.0-random-combat-${width}.png`});
  // The actual rematch handler must keep random preference and use the fresh seed.
- await page.evaluate(()=>{const q=(window as any).__qa,g=q.game;g.fog=false;g.tanks[1].hp=0;g.nextTurn();Date.now=()=>53;});
+ await page.evaluate(()=>{const q=(window as any).__qa,g=q.game;q.renderer.finishTour();g.fog=false;g.tanks[1].hp=0;g.nextTurn();Date.now=()=>53;});
  await expect(page.locator('[data-action="rematch"]')).toBeVisible({timeout:6000});await page.locator('[data-action="rematch"]').click();
  const next=MAPS[Math.floor(makeRng(53)()*MAPS.length)].id;
  expect(await page.evaluate(()=>{const g=(window as any).__qa.game,s=g.battleSnapshot();return {map:g.config.map,choice:g.config.mapChoice,seed:s.initial.config.seed,oldDeaths:s.critical.length};})).toEqual({map:next,choice:'random',seed:53,oldDeaths:0});

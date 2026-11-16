@@ -5,7 +5,7 @@ import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById,launch
 import {isRaging,redHealthLimit} from './health';
 import {pointHitsTank} from './tank-hitbox';
 import {resolveVehicle,vehicleById,type VehicleId,type VehicleChoice} from './vehicles';
-import { Terrain, WORLD_W, WORLD_H, WATER_Y, TERRAIN_H } from './terrain';
+import { Terrain, WORLD_W, WORLD_H, BOTTOM_Y, TERRAIN_H } from './terrain';
 import {rollWeather} from './weather';
 import {buildClassicMap} from './classic-maps';
 
@@ -15,13 +15,14 @@ import {chooseAIPosition,solveAIShot,type AIShot} from './ai-planner';
 import {BattleTrace,packTerrain,unpackTerrain,snapshotText,traceClone,type BattleSnapshot} from './battle-trace';
 import {MAPS,type MapChoice} from './catalog';
 import {nextNaturalWind,nextWindRound,MAX_WIND_CHANGE,NATURAL_WIND_LIMIT} from './wind-cycle';
-import type {ItemCue} from './item-feedback';
+import {ITEM_CUE_SECONDS,type ItemCue} from './item-feedback';
 import {projectileSpeed} from './ballistics';
-export {WORLD_W,WORLD_H,WATER_Y};
+export {WORLD_W,WORLD_H,BOTTOM_Y};
+export {WATER_Y} from './terrain';
 export const FLIGHT_SPEED=1.8;
 export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
 export const SHOT_WIND_GAIN=3;
-export const BRIDGE_THICKNESS=130;
+export const BRIDGE_THICKNESS=300;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
 export interface Config {slots:Slot[];map:MapId;mapChoice?:MapChoice;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean }
 export interface Tank {
@@ -88,7 +89,7 @@ export class Game {
   aiDecision:{target:number;fromX:number;goalX:number;weapon:WeaponId;intentionalMiss:boolean}|null=null;
 
   constructor(config:Partial<Config>={},readonly gameVersion='development') {
-    this.config={slots:defaultSlots(),map:'valley',timer:45,seed:Date.now(),...config};
+    this.config={slots:defaultSlots(),map:'valley',timer:0,seed:Date.now(),...config};
     if(this.config.slots.length!==4||slotProblem(this.config.slots))throw new Error(slotProblem(this.config.slots)??'需要四个固定槽位');
     this.trace=new BattleTrace(this.config.seed);this.rng=this.diagnosticRng(makeRng(this.config.seed));
     if(this.config.mapChoice==='random'){
@@ -97,25 +98,25 @@ export class Game {
     }else if(this.config.mapChoice&&MAPS.some(m=>m.id===this.config.mapChoice))this.config.map=this.config.mapChoice;
     const weather=rollWeather(this.rng);this.fog=this.config.fog??weather.fog;
     this.fogTurnsRemaining=this.fog?2:0;
-    if(this.config.fireLine??weather.fireLine) this.fireLine={x:450+this.rng()*380,top:50,bottom:550};
+    if(this.config.fireLine??weather.fireLine) this.fireLine={x:WORLD_W*(.35+this.rng()*.3),top:50,bottom:BOTTOM_Y-50};
     this.fireLineTurnsRemaining=this.fireLine?2:0;
     this.generateTerrain();
     const participants=this.config.slots.map((slot,index)=>({...slot,index})).filter(s=>s.enabled);
-    this.tanks=participants.map((seat,i)=>this.createTank(i,175+i*260,seat,seat.index));
+    this.tanks=participants.map((seat,i)=>this.createTank(i,262+i*390,seat,seat.index));
     this.movingUntil=participants.map(()=>0);this.roundPending=this.tanks.map(t=>t.id);
     this.placeStartingTanks();this.heardX=this.tanks.map(t=>Math.round(t.x/90)*90);
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.targetX=this.tanks[1].x;
-    this.trace.initial=traceClone({config:this.config,mapName:MAPS.find(m=>m.id===this.config.map)?.name??this.config.map,slots:this.config.slots.map((s,slot)=>{const id=this.tanks.find(t=>t.slot===slot)?.vehicleId;return {...s,slot,name:CREW[s.crew].name,flag:teamFlag(s.team),difficultyName:DIFFICULTIES.find(d=>d.id===s.difficulty)?.name,vehicleName:id?vehicleById(id).name:'原创炮手'};}),rules:this.traceRules(),deployed:this.traceTanks()});
+    this.trace.initial=traceClone({world:{width:WORLD_W,height:TERRAIN_H,bottomY:BOTTOM_Y},config:this.config,mapName:MAPS.find(m=>m.id===this.config.map)?.name??this.config.map,slots:this.config.slots.map((s,slot)=>{const id=this.tanks.find(t=>t.slot===slot)?.vehicleId;return {...s,slot,name:CREW[s.crew].name,flag:teamFlag(s.team),difficultyName:DIFFICULTIES.find(d=>d.id===s.difficulty)?.name,vehicleName:id?vehicleById(id).name:'原创炮手'};}),rules:this.traceRules(),deployed:this.traceTanks()});
     this.recordBattle('match','新建本局；上一局记录不继承。',{config:this.trace.initial.config,rules:this.trace.initial.rules});
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
   private traceRules(){return {eraDamageVersion:ERA_DAMAGE_VERSION,雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
-    if(t.outOfBounds||t.y+18>=WATER_Y||t.x<0||t.x>WORLD_W)return null;
+    if(t.outOfBounds||t.y+18>=BOTTOM_Y||t.x<0||t.x>WORLD_W)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
-    if(foot>=WATER_Y||(groundedOnly&&(!near||t.fallVelocity>0)))return null;
+    if(foot>=BOTTOM_Y||(groundedOnly&&(!near||t.fallVelocity>0)))return null;
     const y=near?t.y:foot-18,probe={...t,y,fallVelocity:0};
     return {x:t.x,y,slope:this.tankSlope(probe),direction:t.direction};
   }
@@ -123,11 +124,11 @@ export class Game {
     if(t.hp>0||t.deathResolved)return;
     // The outer blast remembers land BEFORE excavation, including nested mines.
     // Once resolved this is a visual marker, never another terrain physics body.
-    const pose=t.outOfBounds||t.y+18>=WATER_Y?null:this.blastGrounded.get(t.id)??this.landPose(t);
+    const pose=t.outOfBounds||t.y+18>=BOTTOM_Y?null:this.blastGrounded.get(t.id)??this.landPose(t);
     t.defeat=pose?{...pose}:null;t.deathResolved=true;t.fallVelocity=0;
     if(!pose)t.outOfBounds=true;
     this.movingUntil[t.id]=0;
-    this.recordBattle('defeat-state',`${t.name}${pose?'立即进入陆地趴地哭泣，位置固定':'不留残骸：落水／出界或无陆地落点'}`,{target:t.id,pose:t.defeat,outOfBounds:t.outOfBounds});
+    this.recordBattle('defeat-state',`${t.name}${pose?'立即进入陆地趴地哭泣，位置固定':'不留残骸：掉穿底边／出界或无陆地落点'}`,{target:t.id,pose:t.defeat,outOfBounds:t.outOfBounds});
     this.emit('defeat',`${t.name}出局了。`,undefined,t.x);
   }
   private traceTanks(){return this.tanks.map(t=>({...t,flag:teamFlag(t.team),red:t.hp>0&&t.hp<=redHealthLimit(t),raging:isRaging(t),slope:this.tankSlope(t),absoluteAngle:this.aim(t).absolute}));}
@@ -166,14 +167,14 @@ export class Game {
   }
   stablePlatform(x:number) {
     const levels=[-20,-10,0,10,20].map(dx=>this.ground(x+dx));
-    return Math.max(...levels)<WATER_Y-12 && Math.max(...levels)-Math.min(...levels)<=28;
+    return Math.max(...levels)<BOTTOM_Y-12 && Math.max(...levels)-Math.min(...levels)<=28;
   }
   tankSlope(t:Tank) {
     if(t.fallVelocity>0) return 0;
     const levels=this.walkLevels(t.x,t.y+18);
     const limit=MAX_CLIMB_ANGLE*Math.PI/180;
     // Ignore a missing tread end or a different lower platform; neither is this body's slope.
-    const offsets=[-16,-8,0,8,16],valid=(i:number)=>levels[i]<WATER_Y&&Math.abs(levels[i]-levels[2])<=MAX_STEP_HEIGHT+Math.abs(offsets[i])*Math.tan(limit);
+    const offsets=[-16,-8,0,8,16],valid=(i:number)=>levels[i]<BOTTOM_Y&&Math.abs(levels[i]-levels[2])<=MAX_STEP_HEIGHT+Math.abs(offsets[i])*Math.tan(limit);
     const left=[0,1,2].find(valid)??2,right=[4,3,2].find(valid)??2,span=offsets[right]-offsets[left];
     return span?clamp(Math.atan2(levels[right]-levels[left],span),-limit,limit):0;
   }
@@ -198,7 +199,7 @@ export class Game {
       const next=this.walkSurface(x+direction*i*2,probe);
       // A gap beyond the requested position is not an uphill wall. The actual
       // route still checks every step and safe callers reject real drops.
-      if(next>=WATER_Y-10||(heights.length&&next-probe>MAX_STEP_HEIGHT))break;
+      if(next>=BOTTOM_Y-10||(heights.length&&next-probe>MAX_STEP_HEIGHT))break;
       probe=next;heights.push(probe);
     }
     if(!heights.length)return false;
@@ -229,7 +230,7 @@ export class Game {
       const center=this.walkSurface(at,previous);
       // A downward unsupported edge is a fall, never an invisible wall. Safe callers
       // (AI, spawning, supplies) keep allowDrop=false and reject that route.
-      if(level-previous>MAX_STEP_HEIGHT||level>=WATER_Y-10){if(allowDrop)return Infinity;return null;}
+      if(level-previous>MAX_STEP_HEIGHT||level>=BOTTOM_Y-10){if(allowDrop)return Infinity;return null;}
       if(previous-level>MAX_STEP_HEIGHT||level-center>MAX_STEP_HEIGHT)return null;
       if(center-level>MAX_STEP_HEIGHT&&!allowDrop)return null;
       if(!this.reasonableSlope(at,level,direction)){
@@ -254,7 +255,7 @@ export class Game {
   private placeStartingTanks(){
     const both:number[]=[],one:number[]=[];
     for(let x=60;x<=WORLD_W-60;x+=8){
-      if(!this.stablePlatform(x)||this.ground(x)>WATER_Y-40)continue;
+      if(!this.stablePlatform(x)||this.ground(x)>BOTTOM_Y-40)continue;
       const probe={...this.tanks[0],x,y:this.ground(x)-18};
       const left=this.traversable(probe,x-60)!==null,right=this.traversable(probe,x+60)!==null;
       if(left||right)one.push(x);if(left&&right)both.push(x);
@@ -277,26 +278,27 @@ export class Game {
     const phase=this.rng()*2;
     if(buildClassicMap(this.land,this.config.map))return;
     for(let x=0;x<=WORLD_W;x++) {
+      const u=x/1.5;
       if(this.config.map==='coast') {
-        if(x<90||x>1190) this.land.column(x,394,TERRAIN_H);
+        if(u<90||u>1190) this.land.column(x,591,TERRAIN_H);
         else {
-          const top=398+Math.sin(x/115)*4;
+          const top=597+Math.sin(u/115)*6;
               this.land.column(x,top,top+BRIDGE_THICKNESS);
         }
       } else if(this.config.map==='moon') {
-        if(x>=70&&x<=410) {const top=355+Math.sin(x/92+phase)*12;this.land.column(x,top,top+140);}
-        if(x>=870&&x<=1210) {const top=333+Math.sin(x/96+phase)*12;this.land.column(x,top,top+140);}
-        if(x>=520&&x<=750) this.land.column(x,439+Math.sin(x/45)*6,550);
-        if(x>=550&&x<=730) this.land.column(x,215+Math.sin(x/50)*5,355);
-      } else if(x<585||x>705) {
-        const top=452+31*Math.sin(x/130+0.25)+14*Math.sin(x/55)
-          -70*Math.exp(-(((x-370)/110)**2))-65*Math.exp(-(((x-940)/120)**2));
-        this.land.column(x,clamp(top,350,535),TERRAIN_H);
+        if(u>=70&&u<=410) {const top=532.5+Math.sin(u/92+phase)*18;this.land.column(x,top,top+210);}
+        if(u>=870&&u<=1210) {const top=499.5+Math.sin(u/96+phase)*18;this.land.column(x,top,top+210);}
+        if(u>=520&&u<=750) this.land.column(x,658.5+Math.sin(u/45)*9,825);
+        if(u>=550&&u<=730) this.land.column(x,322.5+Math.sin(u/50)*7.5,532.5);
+      } else if(u<585||u>705) {
+        const top=452+31*Math.sin(u/130+0.25)+14*Math.sin(u/55)
+          -70*Math.exp(-(((u-370)/110)**2))-65*Math.exp(-(((u-940)/120)**2));
+        this.land.column(x,clamp(top,350,535)*1.5,TERRAIN_H);
       }
     }
     this.land.rebuild();
     // Level just the deployment tread footprint; do not fill the void underneath.
-    for(const center of [175,1105]) {
+    for(const center of [262,1658]) {
       const base=Math.round(this.ground(center));
       const original=Array.from({length:121},(_,i)=>({top:this.ground(center-60+i),bottom:this.land.bottom(center-60+i)}));
       for(let x=center-60;x<=center+60;x++) {
@@ -400,7 +402,7 @@ export class Game {
     if(!Number.isFinite(x)||x<32||x>WORLD_W-32||this.tanks.some(other=>other.id!==t.id&&other.hp>0&&Math.abs(x-other.x)<56)) return false;
     const levels=[-16,-8,0,8,16].map(dx=>this.walkSurface(x+dx,impactY));
     const foot=levels.sort((a,b)=>a-b)[2];
-    if(foot>=WATER_Y-12||Math.max(...levels)-Math.min(...levels)>24)return false;
+    if(foot>=BOTTOM_Y-12||Math.max(...levels)-Math.min(...levels)>24)return false;
     const from={x:t.x,y:t.y};this.burst(t.x,t.y,18,'#a4bfd0');
     t.x=x;t.y=foot-18;t.fallVelocity=0;
     this.heardX[t.id]=Math.round(t.x/90)*90;
@@ -577,14 +579,14 @@ export class Game {
     const event=this.recordBattle('terrain',`挖土(${x.toFixed(2)},${y.toFixed(2)})，半径${radius.toFixed(2)}／深${depth.toFixed(2)}，移除${removed}像素（永久层保留）`,{x,y,radius,depth,removed,source});
     for(const t of this.tanks) if(t.hp>0&&this.support(t.x,t.y+18)-18>t.y+3 && t.fallVelocity===0) { t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{event,source:traceClone(source??null),terrain:{x,y,radius,depth,removed},cause:'地形支撑被破坏'}); }
     for(const c of this.crates) c.y=this.ground(c.x,c.y-5)-14;
-    this.crates=this.crates.filter(c=>c.y<WATER_Y-14);
+    this.crates=this.crates.filter(c=>c.y<BOTTOM_Y-14);
   }
   private excavateImpact(p:Projectile,radius:number,depth:number,directTarget?:number){
     if(radius<=0||depth<=0)return;
     let x=p.x,y=p.y;
     if(directTarget!==undefined){
       const target=this.tanks[directTarget],foot=target.y+18,surface=this.support(target.x,foot);
-      if(surface<WATER_Y&&Math.abs(surface-foot)<=28){
+      if(surface<BOTTOM_Y&&Math.abs(surface-foot)<=28){
         x=clamp(p.x,target.x-16,target.x+16);y=surface;
       }
     }
@@ -689,12 +691,12 @@ export class Game {
       if(t.y<ground-0.5 || t.fallVelocity>0) {
         if(!t.fallVelocity) {t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{cause:'失去地形支撑',action:this.turn+1});}
         t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt;
-        if(t.y>=ground) {
+        if(ground<BOTTOM_Y-18&&t.y>=ground) {
           t.y=ground; const fall=t.y-t.fallStart;t.fallVelocity=0;
           if(fall>48) { const damage=Math.round((fall-35)*0.3);this.damage(t,damage,this.firedBy,true,'fall',undefined,{cause:'fall',weapon:(this.fallOrigins.get(t.id) as any)?.source?.weapon,base:fall-35,factors:[{source:'坠落落差系数',value:.3}],formula:'round((fallDistance - 35) × 0.3)，落差>48',origin:{fallDistance:fall,fallStart:t.fallStart,attributedOwner:this.firedBy,trigger:this.fallOrigins.get(t.id)}});this.float(t.x,t.y-60,'坠落','#bc876c'); }
         }
       }
-      if(t.y+18>=WATER_Y) {t.outOfBounds=true;this.damage(t,t.hp,this.firedBy,true,'fall',undefined,{cause:'out',weapon:(this.fallOrigins.get(t.id) as any)?.source?.weapon,base:t.hp,formula:'到达水面，扣除剩余HP（绕过护盾）',origin:{waterY:WATER_Y,fallStart:t.fallStart,attributedOwner:this.firedBy,trigger:this.fallOrigins.get(t.id)}});this.emit('hit',`${t.name}掉出了战场。`); }
+      if(t.y+18>=BOTTOM_Y) {t.outOfBounds=true;this.damage(t,t.hp,this.firedBy,true,'fall',undefined,{cause:'out',weapon:(this.fallOrigins.get(t.id) as any)?.source?.weapon,base:t.hp,formula:'掉穿地图底边，扣除剩余HP（绕过护盾）',origin:{bottomY:BOTTOM_Y,fallStart:t.fallStart,attributedOwner:this.firedBy,trigger:this.fallOrigins.get(t.id)}});this.emit('hit',`${t.name}掉出了战场。`); }
     }
   }
   private collectCrates() {
@@ -808,7 +810,7 @@ export class Game {
     for(let i=0;i<1000;i++) {
       const target=this.ground(x,y-8)-14;
       vx=(vx+this.wind*2.5*dt)*Math.exp(-0.35*dt);x+=vx*dt;vy=Math.min(250,vy+220*dt);y+=vy*dt;
-      if(x<32||x>WORLD_W-32||y>=WATER_Y-14) return null;
+      if(x<32||x>WORLD_W-32||y>=BOTTOM_Y-14) return null;
       if(y>=target) return {x,y:target};
     }
     return null;
@@ -894,7 +896,7 @@ export class Game {
       fire.radius=Math.min(90,fire.radius+dt*8);fire.x=clamp(fire.x+this.wind*.45*dt,0,WORLD_W);
       fire.y=this.ground(fire.x,(fire.y??0)-12);fire.clock=(fire.clock??0)+dt;
       const slope=Math.abs(this.ground(fire.x-10,fire.y-12)-this.ground(fire.x+10,fire.y-12));
-      if(fire.y>=WATER_Y||slope>Math.tan(35*Math.PI/180)*20){fire.turns=0;continue;}
+      if(fire.y>=BOTTOM_Y||slope>Math.tan(35*Math.PI/180)*20){fire.turns=0;continue;}
       while(fire.clock>=1){fire.clock-=1;for(const tank of this.tanks){
         if(Math.abs(tank.x-fire.x)>=fire.radius||Math.abs(tank.y+18-this.ground(tank.x,fire.y-12))>26)continue;
         const rate=tank.vehicleId==='bowl'||tank.vehicleId==='dragon'?1:tank.vehicleId==='water'?4:2;
@@ -911,7 +913,7 @@ export class Game {
     if(this.paused) return;
     for(const t of this.tanks)if(t.hp<=0&&!t.deathResolved)this.settleDefeat(t);
     dt=Math.min(dt,0.05);this.elapsed+=dt;
-    this.itemCues=this.itemCues.filter(c=>{c.age+=dt;return c.age<1.1;});
+    this.itemCues=this.itemCues.filter(c=>{c.age+=dt;return c.age<ITEM_CUE_SECONDS;});
     this.shake=Math.max(0,this.shake-dt*16);
     this.particles=this.particles.filter(p=>{p.life-=dt;p.vy+=170*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;return p.life>0;});
     this.blasts=this.blasts.filter(b=>{b.life-=dt;return b.life>0;});

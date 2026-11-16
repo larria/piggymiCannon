@@ -1,3 +1,4 @@
+import {WORLD_W,TERRAIN_H} from './terrain';
 import {Application,CanvasSource,Texture,Sprite,Container} from 'pixi.js';
 
 /** GPU retained background/terrain. Continuous vector animation stays in the
@@ -12,8 +13,8 @@ export class PixiStage {
   constructor(readonly canvas:HTMLCanvasElement,private invalidate:()=>void){}
   private onLost=(event:Event)=>{event.preventDefault();this.lost=true;this.canvas.hidden=true;this.invalidate();};
   private onRestored=()=>{this.lost=false;this.signature='';this.invalidate();};
-  async init(background:HTMLCanvasElement,terrain:HTMLCanvasElement,ratio:number,height:number){
-    await this.app.init({canvas:this.canvas,width:1280,height:Math.floor(height*ratio)/ratio,resolution:ratio,autoDensity:false,autoStart:false,sharedTicker:false,preference:['webgl'],antialias:false,backgroundAlpha:0});
+  async init(background:HTMLCanvasElement,terrain:HTMLCanvasElement,ratio:number,height:number,width=1280){
+    await this.app.init({canvas:this.canvas,width,height:Math.floor(height*ratio)/ratio,resolution:ratio,autoDensity:false,autoStart:false,sharedTicker:false,preference:['webgl'],antialias:false,backgroundAlpha:0});
     this.app.stop();
     this.canvas.addEventListener('webglcontextlost',this.onLost);this.canvas.addEventListener('webglcontextrestored',this.onRestored);
     const texture=(resource:HTMLCanvasElement,resolution:number)=>{
@@ -21,15 +22,16 @@ export class PixiStage {
       const t=new Texture({source:new CanvasSource({resource,resolution,autoGenerateMipmaps:false})});this.textures.push(t);this.uploads++;return t;
     };
     this.sky=new Sprite(texture(background,1));this.land=new Sprite(texture(terrain,ratio));this.land.x=-32;
-    this.sky.width=1280;this.sky.height=height;
+    this.sky.width=width;this.sky.height=height;
     this.app.stage.addChild(this.sky,this.world);this.world.addChild(this.land);
   }
   get available(){return !this.disposed&&!this.lost;}
-  sync(backgroundDirty:boolean,terrainDirty:boolean,ratio:number,height:number){
+  sync(backgroundDirty:boolean,terrainDirty:boolean,ratio:number,height:number,width=1280){
     if(backgroundDirty){this.sky.texture.source.update();this.uploads++;}
-    if(terrainDirty){const source=this.land.texture.source;source.resize(undefined,undefined,ratio);source.update();this.land.width=1344;this.land.height=600;this.uploads++;}
+    if(terrainDirty){const source=this.land.texture.source;source.resize(undefined,undefined,ratio);source.update();this.land.width=WORLD_W+64;this.land.height=TERRAIN_H;this.uploads++;}
     const screenHeight=Math.floor(height*ratio)/ratio;
-    if(this.app.renderer.resolution!==ratio||this.app.screen.height!==screenHeight){this.app.renderer.resize(1280,screenHeight,ratio);this.sky.height=height;this.signature='';}
+    const screenWidth=Math.round(width*ratio)/ratio;
+    if(this.app.renderer.resolution!==ratio||this.app.screen.height!==screenHeight||this.app.screen.width!==screenWidth){this.app.renderer.resize(width,screenHeight,ratio);this.sky.width=width;this.sky.height=height;this.signature='';}
     if(backgroundDirty||terrainDirty)this.signature='';
   }
   draw(x:number,y:number,shakeX:number,shakeY:number,height:number){

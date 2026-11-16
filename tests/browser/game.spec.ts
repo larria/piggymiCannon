@@ -1,4 +1,4 @@
-import {boot} from './qa-app';
+import {boot,hold} from './qa-app';
 import { test,expect } from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {Game} from '../legacy-fixture';import {makeRng} from '../../src/engine';
@@ -15,7 +15,7 @@ async function start(page:any,hotseat=false,map='valley',seed=52,timer='0') {
   if(map!=='valley') await page.locator(`input[name="map"][value="${map}"]`).locator('..').click();
   await page.locator('#turn-timer').selectOption(timer);
   await page.getByRole('button',{name:'开始对局',exact:true}).click();
-  await expect(page.locator('body')).toHaveClass(/combat-mode/);
+  await expect(page.locator('body')).toHaveClass(/combat-mode/);await expect(page.locator('#fire-button')).toBeEnabled({timeout:10000});
 }
 
 test('iPad landscape uses the full viewport and left movement turns toward the left',async({page})=>{
@@ -170,7 +170,7 @@ test('airdrop follows its own stage and preserves the full turn clock',async({pa
 test('large avatars open playful portraits and pause the battle clock',async({page})=>{
   await start(page,true,'coast',52,'45');
   const bounds=await page.locator('[data-slot-id="0"] .avatar').boundingBox();expect(bounds!.width).toBeGreaterThanOrEqual(44);
-  await page.locator('[data-slot-id="0"] .portrait-button').click();
+  await hold(page,page.locator('[data-slot-id="0"] .portrait-button'));
   await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/mimi\.png/);
   const clock=await page.locator('#timer span').textContent();await page.waitForTimeout(450);
   await expect(page.locator('#timer span')).toHaveText(clock!);
@@ -178,7 +178,7 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await expect(page.locator('#portrait-saying')).not.toHaveText(saying!);await expect(page.locator('.portrait-heart')).toBeVisible();
   await page.screenshot({path:'QA/slots-regression-portrait-preview.png'});
   await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
-  await page.locator('[data-slot-id="1"] .portrait-button').click();
+  await hold(page,page.locator('[data-slot-id="1"] .portrait-button'));
   await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/dad\.png/);
 });
 test('tank selection is remembered and two weapons switch directly without a dialog',async({page})=>{
@@ -223,7 +223,7 @@ test('追魂弹 produces its own lock sound and persists the tracking event in t
 test('small iPad Pro dashboard fits both 11-inch viewports with useful touch targets',async({page})=>{
   for(const width of [1194,1210]){
     await page.setViewportSize({width,height:834});await start(page,true);
-    await page.waitForTimeout(2900);
+    await page.waitForTimeout(150);
     const deck=await page.locator('.dashboard').boundingBox(),field=await page.locator('#battlefield').boundingBox();
     expect(deck!.y+deck!.height).toBeLessThanOrEqual(834);expect(deck!.height).toBeLessThanOrEqual(142);
     expect(field!.width).toBeGreaterThan(width-30);expect(field!.height).toBeGreaterThan(600);
@@ -327,7 +327,7 @@ test('six map previews fit the small iPad and disclose sourced facts versus Web 
 test('classic factory temple and Egypt render with compact HUD and centered minimap',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  for(const width of [1194,1210])for(const [id,name] of [['factory','钢铁工厂'],['temple','神圣殿堂'],['egypt','古老埃及']]){
-  await page.setViewportSize({width,height:834});await start(page,true,id);await page.waitForTimeout(2900);
+  await page.setViewportSize({width,height:834});await start(page,true,id);await page.waitForTimeout(150);
   await expect(page.locator('#map-label')).toContainText(name);await expect(page.locator('#fire-button')).toBeEnabled();
   const field=await page.locator('#battlefield').boundingBox(),mini=await page.locator('#minimap-panel').boundingBox();
   expect(field!.height).toBeGreaterThan(600);expect(Math.abs(mini!.x+mini!.width/2-width/2)).toBeLessThan(1);

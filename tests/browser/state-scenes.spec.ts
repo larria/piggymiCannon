@@ -38,8 +38,8 @@ test('victory and prone crying animate before and around the result card on both
   await expect(page.locator('.result')).toBeVisible({timeout:5000});await page.screenshot({path:`QA/slots-regression-result-card-${width}x834.png`});
  }
 });
-test('a killed unsupported loser settles off-map and does not leave a wreck or a crying pig in water',async({page})=>{
- await boot(page,true,'coast');await page.evaluate(()=>{const g=(window as any).__qa.game;g.crater(g.enemy.x,400,180,250);g.damage(g.enemy,9999,0);});
+test('a killed unsupported loser settles off-map and does not leave a wreck or a crying pig after falling through the world',async({page})=>{
+ await boot(page,true,'coast');await page.evaluate(()=>{const g=(window as any).__qa.game;g.crater(g.enemy.x,g.ground(g.enemy.x),180,960);g.damage(g.enemy,9999,0);});
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.enemy.outOfBounds)).toBe(true);
  await page.screenshot({path:'QA/slots-regression-defeat-off-map-ipad.png'});
 });

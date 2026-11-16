@@ -27,13 +27,13 @@ export const ITEMS: { id:ItemId; name:string; description:string; count:number; 
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
   { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每局开局携带一件，用掉不会自动恢复；对应补给可填空槽，每回合最多使用一件道具。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
-  { id:'teleport', name:'转移弹', description:'装填后按角度与力度发射，坦克传送到炮弹实际落点，不造成伤害。落点在场外、水中或敌人身上则转移失败。每局携带一件，用掉不会自动恢复；每回合最多使用一件道具。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
+  { id:'teleport', name:'转移弹', description:'装填后按角度与力度发射，坦克传送到炮弹实际落点，不造成伤害。落点掉穿地图底边或在敌人身上则转移失败。每局携带一件，用掉不会自动恢复；每回合最多使用一件道具。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
   { id:'wind', name:'定风装置', description:'风速至少 1.5 m/s 时将本回合风力归零。消耗 2 战术点，冷却 2 回合。', count:1, icon:'wind',cost:2,cooldown:2,unlock:1 },
   {id:'double',name:'双发',description:'本次攻击追加一轮齐射，只算一次行动。每局开局携带一件，用掉不会自动恢复；对应补给可填空槽，每回合最多使用一件道具。',count:1,icon:'triple',cost:0,cooldown:0,unlock:1},
 ];
 export const MAPS: { id:MapId; name:string; sub:string; color:string;description:string }[] = [
   { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75',description:'本作原创峡谷，高地与断崖构成攻防。' },
-  { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；本作加厚桥面，老土单发普通弹落地不能直接挖穿，连续挖掘仍可击落。桥宽、厚度与比例为本作配置。' },
+  { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；本作加厚桥面，300像素厚桥面，飞火单次完整穿透齐射不能直接打穿，连续挖掘仍可击落。桥宽、厚度与比例为本作配置。' },
   { id:'moon', name:'天空之城', sub:'厚雪浮岛 · 多次挖穿', color:'#91aab6',description:'2003 年游侠攻略描述厚雪平台难以打穿。本作采用厚雪多层浮岛；布局、坐标及低重力是 Web 配置。' },
   { id:'factory', name:'钢铁工厂', sub:'永久 Z 形底板 · 钢梁',color:'#8f9998',description:'用户确认底层是永久Z形连续斜面，圆滑折点可移位调角；中层钢梁仍可破，仍会摔伤。参照游侠攻略“不会被打掉下去”，坐标与坡面为本作重绘。' },
   { id:'temple', name:'神圣殿堂', sub:'小蘑菇永久节点 · 易碎薄轨',color:'#bba883',description:'用户确认永久蘑菇节点缩至原尺寸约1/3：圆顶伞盖、窄柄／小基座，可微移调角。非节点薄轨保持4像素且易碎，上层殿堂可破。参照游侠攻略，五节点坐标／弧度为本作重绘，不宣称逐像素复刻。' },

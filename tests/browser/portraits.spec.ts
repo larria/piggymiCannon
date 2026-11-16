@@ -1,3 +1,4 @@
+import {hold} from './qa-app';
 import {test,expect} from '@playwright/test';
 
 test('provided PNG portraits and current names stay consistent across iPad setup, HUD, portraits and turns',async({page})=>{
@@ -27,13 +28,13 @@ test('provided PNG portraits and current names stay consistent across iPad setup
    const img=page.locator(`[data-slot-id="${slot}"] .avatar img`);
    await expect(img).toHaveAttribute('src',`/piggymiCannon/portraits/${id}.png`);
    await expect(img).toHaveJSProperty('naturalWidth',960);
-   await page.locator(`[data-slot-id="${slot}"] .portrait-button`).click();
+   await hold(page,page.locator(`[data-slot-id="${slot}"] .portrait-button`));
    await expect(page.locator('#portrait-art img')).toHaveAttribute('src',`/piggymiCannon/portraits/${id}.png`);
    await expect(page.locator('#portrait-art img')).toHaveJSProperty('naturalWidth',960);
    if(slot===1&&width===1194)await page.screenshot({path:'QA/v2.2.6-dad-portrait-1194.png'});
    await page.locator('[data-action="close"]').click();
   }
-  await page.locator('[data-slot-id="3"] .portrait-button').click();
+  await hold(page,page.locator('[data-slot-id="3"] .portrait-button'));
   await expect(page.locator('.portrait-view h2')).toHaveText('小黄鱼');
   await expect(page.locator('#portrait-saying')).toContainText('小黄鱼');
   await expect(page.locator('#portrait-art img')).toHaveAttribute('src','/piggymiCannon/portraits/fish.png');

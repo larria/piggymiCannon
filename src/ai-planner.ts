@@ -1,7 +1,7 @@
 import {salvoProfile} from './salvo';
 import {impactDamageScale} from './impact-damage';
 import {eraDamageFactor} from './era-damage';
-import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,type Game,type Tank} from './engine';
+import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,BOTTOM_Y,type Game,type Tank} from './engine';
 import {weaponById,launchDamageScale,excavation,type WeaponId} from './catalog';
 import {aimGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
@@ -85,7 +85,7 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
    if(!h.direct&&spec.digDepth>0){
     const dig=excavation(weapon,false),dx=Math.abs(impact.x-t.x),bottom=w.game.land.bottom(t.x,t.y+13);
     const reach=dx<dig.radius?dig.depth*Math.sqrt(1-(dx/dig.radius)**2):0;
-    if(dx<dig.radius-18&&impact.y-reach<=t.y+18&&impact.y+reach>=bottom&&bottom<580)utility+=45;
+    if(dx<dig.radius-18&&impact.y-reach<=t.y+18&&impact.y+reach>=bottom&&bottom<BOTTOM_Y)utility+=45;
    }
   }else if(h.body.eligible)utility-=h.damage*(t.id===w.shooter.id?3:1.8);
  }
