@@ -81,7 +81,7 @@ test('PWA installs its worker and reloads with icons and audio while offline',as
   expect(manifest.name).toBe('咪猪头的疯狂坦克');expect(manifest.orientation).toBe('landscape');
   await context.setOffline(true);await page.reload();
   await expect(page.getByRole('button',{name:'进入战场',exact:true})).toBeVisible();
-  const assets=await page.evaluate(async()=>Promise.all(['icons/icon-512.png','audio/bgm-valley.mp3','portraits/mimi.png','portraits/dad.png','icons/fox-avatar.svg','icons/fish-avatar.svg'].map(async path=>(await fetch(path)).ok)));
+  const assets=await page.evaluate(async()=>Promise.all(['icons/icon-512.png','audio/bgm-valley.mp3','portraits/mimi.png','portraits/dad.png','portraits/fox.png','portraits/fish.png'].map(async path=>(await fetch(path)).ok)));
   expect(assets).toEqual([true,true,true,true,true,true]);
   await context.setOffline(false);
 });

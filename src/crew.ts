@@ -14,6 +14,6 @@ export function normalizeSlots(input:unknown,allowDragon=false):Slot[]{
  return defaults.map((d,i)=>{const s=input[i]??{};return {...d,enabled:s.enabled===true,team:Number.isInteger(s.team)&&s.team>=0?s.team:d.team,controller:s.controller==='human'?'human':'ai',difficulty:DIFFICULTIES.some(x=>x.id===s.difficulty)?s.difficulty:d.difficulty,vehicle:validChoice(s.vehicle,allowDragon)?s.vehicle:'random'};});
 }
 export function slotProblem(slots:Slot[]){const active=slots.filter(s=>s.enabled);return active.length<2?'至少开启两个槽位':active.length>4?'最多四个槽位':new Set(active.map(s=>s.team)).size<2?'至少使用两面不同的队旗':null;}
-export function crewAvatarPath(id:CrewId,base=''){return base+(id==='mimi'||id==='dad'?`portraits/${id}.png`:`icons/${id}-avatar.svg`);}
+export function crewAvatarPath(id:CrewId,base=''){return base+`portraits/${id}.png`;}
 export function crewAvatar(id:CrewId,base=''){return `<img src="${crewAvatarPath(id,base)}" alt="${CREW[id].name}"/>`;}
 export function nameMarkup(name:string,team:number){return `<span class="crew-name" style="color:${teamFlag(team).color}">${name}</span>`;}

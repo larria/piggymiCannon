@@ -1,4 +1,5 @@
-export const WIND_GAUGE_LIMIT=11;
+import {NATURAL_WIND_LIMIT} from './wind-cycle';
+export const WIND_GAUGE_LIMIT=NATURAL_WIND_LIMIT;
 /** Center is calm; signed area grows towards the corresponding edge. */
 export function windGaugeGeometry(wind:number){
  const value=Number.isFinite(wind)?Math.max(-WIND_GAUGE_LIMIT,Math.min(WIND_GAUGE_LIMIT,wind)):0;

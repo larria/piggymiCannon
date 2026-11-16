@@ -1,0 +1,253 @@
+{
+  "AI accuracy report": {
+    "protocol": "v1",
+    "shotsPerLevel": 240,
+    "uniqueSeeds": 240,
+    "criterion": "direct or >=max(30,5% victim maxHP) enemy HP/shield loss in one completed action; all cases retained; no fog; 2v2; self/friendly off",
+    "levels": {
+      "easy": {
+        "effective": 114,
+        "direct": 100,
+        "moved": 0,
+        "nearest": 86,
+        "intentional": 145,
+        "rate": 0.475,
+        "breakdown": {
+          "valley": {
+            "n": 24,
+            "hits": 8
+          },
+          "coast": {
+            "n": 24,
+            "hits": 13
+          },
+          "moon": {
+            "n": 24,
+            "hits": 12
+          },
+          "factory": {
+            "n": 24,
+            "hits": 10
+          },
+          "temple": {
+            "n": 24,
+            "hits": 9
+          },
+          "egypt": {
+            "n": 24,
+            "hits": 10
+          },
+          "flat-90": {
+            "n": 24,
+            "hits": 16
+          },
+          "flat-130": {
+            "n": 24,
+            "hits": 9
+          },
+          "flat-220": {
+            "n": 24,
+            "hits": 14
+          },
+          "flat-600": {
+            "n": 24,
+            "hits": 13
+          }
+        }
+      },
+      "normal": {
+        "effective": 131,
+        "direct": 124,
+        "moved": 0,
+        "nearest": 94,
+        "intentional": 116,
+        "rate": 0.5458333333333333,
+        "breakdown": {
+          "valley": {
+            "n": 24,
+            "hits": 11
+          },
+          "coast": {
+            "n": 24,
+            "hits": 13
+          },
+          "moon": {
+            "n": 24,
+            "hits": 16
+          },
+          "factory": {
+            "n": 24,
+            "hits": 10
+          },
+          "temple": {
+            "n": 24,
+            "hits": 14
+          },
+          "egypt": {
+            "n": 24,
+            "hits": 15
+          },
+          "flat-90": {
+            "n": 24,
+            "hits": 16
+          },
+          "flat-130": {
+            "n": 24,
+            "hits": 11
+          },
+          "flat-220": {
+            "n": 24,
+            "hits": 12
+          },
+          "flat-600": {
+            "n": 24,
+            "hits": 13
+          }
+        }
+      },
+      "hard": {
+        "effective": 163,
+        "direct": 158,
+        "moved": 0,
+        "nearest": 123,
+        "intentional": 79,
+        "rate": 0.6791666666666667,
+        "breakdown": {
+          "valley": {
+            "n": 24,
+            "hits": 16
+          },
+          "coast": {
+            "n": 24,
+            "hits": 20
+          },
+          "moon": {
+            "n": 24,
+            "hits": 13
+          },
+          "factory": {
+            "n": 24,
+            "hits": 14
+          },
+          "temple": {
+            "n": 24,
+            "hits": 8
+          },
+          "egypt": {
+            "n": 24,
+            "hits": 19
+          },
+          "flat-90": {
+            "n": 24,
+            "hits": 17
+          },
+          "flat-130": {
+            "n": 24,
+            "hits": 19
+          },
+          "flat-220": {
+            "n": 24,
+            "hits": 19
+          },
+          "flat-600": {
+            "n": 24,
+            "hits": 18
+          }
+        }
+      },
+      "expert": {
+        "effective": 205,
+        "direct": 199,
+        "moved": 4,
+        "nearest": 154,
+        "intentional": 37,
+        "rate": 0.8541666666666666,
+        "breakdown": {
+          "valley": {
+            "n": 24,
+            "hits": 22
+          },
+          "coast": {
+            "n": 24,
+            "hits": 24
+          },
+          "moon": {
+            "n": 24,
+            "hits": 19
+          },
+          "factory": {
+            "n": 24,
+            "hits": 20
+          },
+          "temple": {
+            "n": 24,
+            "hits": 17
+          },
+          "egypt": {
+            "n": 24,
+            "hits": 21
+          },
+          "flat-90": {
+            "n": 24,
+            "hits": 20
+          },
+          "flat-130": {
+            "n": 24,
+            "hits": 21
+          },
+          "flat-220": {
+            "n": 24,
+            "hits": 21
+          },
+          "flat-600": {
+            "n": 24,
+            "hits": 20
+          }
+        }
+      }
+    }
+  },
+  "AI complete battle report": {
+    "games": 36,
+    "shots": 512,
+    "hits": 388,
+    "direct": 353,
+    "intentional": 86,
+    "intentionalHits": 15,
+    "moves": 70,
+    "unfinished": 0,
+    "rate": 0.7578125,
+    "maps": {
+      "valley": {
+        "games": 6,
+        "shots": 86,
+        "hits": 63
+      },
+      "coast": {
+        "games": 6,
+        "shots": 94,
+        "hits": 73
+      },
+      "moon": {
+        "games": 6,
+        "shots": 108,
+        "hits": 75
+      },
+      "factory": {
+        "games": 6,
+        "shots": 69,
+        "hits": 56
+      },
+      "temple": {
+        "games": 6,
+        "shots": 69,
+        "hits": 53
+      },
+      "egypt": {
+        "games": 6,
+        "shots": 86,
+        "hits": 68
+      }
+    }
+  }
+}

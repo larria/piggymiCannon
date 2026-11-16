@@ -12,6 +12,8 @@ import {aimGeometry} from './aim';
 import {chooseAIPosition,solveAIShot,type AIShot} from './ai-planner';
 import {BattleTrace,packTerrain,unpackTerrain,snapshotText,traceClone,type BattleSnapshot} from './battle-trace';
 import {MAPS,type MapChoice} from './catalog';
+import {nextNaturalWind,nextWindRound,MAX_WIND_CHANGE,NATURAL_WIND_LIMIT} from './wind-cycle';
+import type {ItemCue} from './item-feedback';
 import {projectileSpeed} from './ballistics';
 export {WORLD_W,WORLD_H,WATER_Y};
 export const FLIGHT_SPEED=1.8;
@@ -38,7 +40,7 @@ export interface Blast { x:number;y:number;radius:number;life:number;maxLife:num
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
 export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
-export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'|'defeat'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
+export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'|'defeat'|'wind'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
 export interface Mine {x:number;y:number;owner:number;weapon:WeaponId;boost:number}
 export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;clock?:number}
 interface BoostSources {fire:'item'|'line'|null;rage:number;snow:number;inherited?:number}
@@ -47,7 +49,7 @@ export interface Mine {boostSources?:BoostSources;traceOrigin?:number;traceLaunc
 export interface GameEvent {sequence?:number;time?:number;action?:number}
 interface DamageContext {cause:string;weapon?:WeaponId;projectile?:number;impact?:number;base?:number;factors?:{source:string;value:number}[];formula?:string;dig?:unknown;origin?:unknown}
 const DAMAGE_CAUSES:Record<string,string>={direct:'直接命中',graze:'爆炸擦中／波及',mine:'地雷',fall:'坠落',out:'掉出战场',poison:'毒箭持续伤害',fire:'火烧',gas:'毒气',sudden:'决胜时刻扣血',unknown:'未标注来源'};
-const RESTORE_KEYS=['config','tanks','phase','current','turn','wind','clock','selected','projectiles','blasts','fires','gases','mines','crates','texts','paused','winner','elapsed','resultAge','resolveTime','targetX','teleporting','aiTime','fog','fogTurnsRemaining','fireLine','fireLineTurnsRemaining','movingUntil','volleySequence','volleyTargets','heardX','afterSupply','supplySettling','firedBy','aiMoveGoal','aiPending','aiDecision','fallOrigins','projectileSequence','log'] as const;
+const RESTORE_KEYS=['config','tanks','phase','current','turn','roundNumber','roundPending','windChangeRound','wind','itemCues','clock','selected','projectiles','blasts','fires','gases','mines','crates','texts','paused','winner','elapsed','resultAge','resolveTime','targetX','teleporting','aiTime','fog','fogTurnsRemaining','fireLine','fireLineTurnsRemaining','movingUntil','volleySequence','volleyTargets','heardX','afterSupply','supplySettling','firedBy','aiMoveGoal','aiPending','aiDecision','fallOrigins','projectileSequence','log'] as const;
 export const clamp = (v:number,min:number,max:number) => Math.min(max,Math.max(min,v));
 export function makeRng(seed:number) { let a=seed>>>0; return () => { a+=0x6D2B79F5; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
 
@@ -57,8 +59,9 @@ export class Game {
   terrain=this.land.surface;
   tanks:Tank[] = [];
   phase:Phase = 'lobby';
-  current=0; turn=0; wind=0; clock=45; selected:WeaponId='shell';
+  current=0; turn=0; roundNumber=1; private roundPending:number[]=[]; private windChangeRound=2; wind=0; clock=45; selected:WeaponId='shell';
   projectiles:Projectile[]=[]; particles:Particle[]=[]; blasts:Blast[]=[];
+  itemCues:ItemCue[]=[];
   texts:FloatingText[]=[]; fires:FireZone[]=[]; crates:Crate[]=[];
   events:GameEvent[]=[]; log:string[]=[];
   paused=false; winner:number|null=null; shake=0; elapsed=0;
@@ -97,7 +100,7 @@ export class Game {
     this.generateTerrain();
     const participants=this.config.slots.map((slot,index)=>({...slot,index})).filter(s=>s.enabled);
     this.tanks=participants.map((seat,i)=>this.createTank(i,175+i*260,seat,seat.index));
-    this.movingUntil=participants.map(()=>0);
+    this.movingUntil=participants.map(()=>0);this.roundPending=this.tanks.map(t=>t.id);
     this.placeStartingTanks();this.heardX=this.tanks.map(t=>Math.round(t.x/90)*90);
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.targetX=this.tanks[1].x;
@@ -105,7 +108,7 @@ export class Game {
     this.recordBattle('match','新建本局；上一局记录不继承。',{config:this.trace.initial.config,rules:this.trace.initial.rules});
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
-  private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:Math.floor(this.turn/Math.max(1,this.tanks.length))+1,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
+  private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
   private traceRules(){return {eraDamageVersion:ERA_DAMAGE_VERSION,雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=WATER_Y||t.x<0||t.x>WORLD_W)return null;
@@ -140,7 +143,7 @@ export class Game {
   static fromBattleSnapshot(snapshot:BattleSnapshot){
     if(snapshot.format!=='piggy-battle-snapshot'||snapshot.formatVersion!==1)throw new Error('不支持的快照格式');
     const g=new Game(snapshot.initial.config,snapshot.gameVersion),state=JSON.parse(JSON.stringify(snapshot.current),(_key,v)=>v==='Infinity'?Infinity:v==='-Infinity'?-Infinity:v==='NaN'?NaN:v);
-    for(const key of RESTORE_KEYS)(g as any)[key]=['volleyTargets','fallOrigins'].includes(key)?new Map(state[key]):state[key];
+    for(const key of RESTORE_KEYS)if(key in state)(g as any)[key]=['volleyTargets','fallOrigins'].includes(key)?new Map(state[key]):state[key];
     unpackTerrain(state.terrain.mask,g.land.mask);unpackTerrain(state.terrain.protectedMask,g.land.protectedMask);g.land.rebuild();g.land.revision=state.terrain.revision;
     g.projectiles.forEach(p=>p.trail=[]);g.trace.restore(snapshot);g.rng=g.diagnosticRng(makeRng(snapshot.rng.state));g.events=[];g.particles=[];return g;
   }
@@ -152,7 +155,7 @@ export class Game {
   get gravity() { return this.config.map==='moon'?145:230; }
   get snow(){return this.config.snow===true;}
   get humanTurn() { return this.phase==='aiming' && !this.paused && this.active.hp>0 && this.active.controller==='human'; }
-  get round() { return Math.floor(this.turn/this.tanks.length)+1; }
+  get round() { return this.roundNumber; }
   get viewer() {return this.active.controller==='human'||this.tanks.every(t=>t.controller==='ai')?this.current:this.tanks.find(t=>t.controller==='human'&&t.hp>0&&t.team===this.active.team)?.id??this.tanks.find(t=>t.controller==='human'&&t.hp>0)?.id??this.current;}
   get delayEnabled(){return this.tanks.every(t=>t.controller==='human');}
   ground(x:number,fromY=0) { return this.land.below(x,fromY); }
@@ -305,7 +308,8 @@ export class Game {
   }
   start() {
     if(this.phase!=='lobby') return;
-    this.phase='aiming'; this.wind=(this.rng()-0.5)*22;
+    this.phase='aiming'; this.wind=(this.rng()-0.5)*NATURAL_WIND_LIMIT*2;this.windChangeRound=nextWindRound(this.roundNumber,this.rng);
+    this.recordBattle('wind-start','开局风力；每1–2完整轮次变化，单次最多全风程60%',{wind:this.wind,nextRound:this.windChangeRound,maxDelta:MAX_WIND_CHANGE});
     this.active.turnsTaken=1;
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.emit('turn',`${this.active.name}，轮到你了。`);
@@ -373,6 +377,7 @@ export class Game {
     t.items[id]--;t.tactics-=i.cost;t.itemUsed=true;
     t.itemDelay+=200;
     t.itemReadyTurn[id]=t.turnsTaken+i.cooldown+1;this.teleporting=false;
+    this.itemCues.push({tank:t.id,item:id,age:0});
     this.emit('item',`${t.name}使用了${i.name}${i.cost?`，消耗 ${i.cost} 战术点`:''}。`,undefined,t.x);
     this.recordBattle('item-use',`${t.name}使用${i.name}；HP${t.hp}，护盾${t.shield}，道具等待+200`,{item:id,tank:this.traceTanks().find(e=>e.id===t.id)});
   }
@@ -380,7 +385,7 @@ export class Game {
     if(this.itemUnavailable(id,ai)) return false;
     const t=this.active;
     const before={hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind};
-    if(id==='teleport') {this.teleporting=!this.teleporting;this.recordBattle('teleport-arm',`${t.name}${this.teleporting?'装填':'取消'}转移弹`,{armed:this.teleporting});return true;}
+    if(id==='teleport') {this.teleporting=!this.teleporting;if(this.teleporting)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('teleport-arm',`${t.name}${this.teleporting?'装填':'取消'}转移弹`,{armed:this.teleporting});return true;}
     if(id==='repair') {const gain=Math.round(t.maxHP*35/150);t.hp=Math.min(t.maxHP,t.hp+gain);this.float(t.x,t.y-42,`+${gain}`,'#548166');}
     if(id==='shield') t.shield=Math.round(t.maxHP*40/150);
     if(id==='fuel') t.fuel=Math.min(100,t.fuel+55);
@@ -398,6 +403,7 @@ export class Game {
     t.x=x;t.y=foot-18;t.fallVelocity=0;
     this.heardX[t.id]=Math.round(t.x/90)*90;
     this.burst(t.x,t.y,18,'#a4bfd0');
+    this.itemCues.push({tank:t.id,item:'teleport',age:0});
     this.emit('item',`${t.name}随转移弹抵达落点。`);this.recordBattle('transfer',`${t.name}转移抵达(${t.x.toFixed(2)},${t.y.toFixed(2)})`,{from,to:{x:t.x,y:t.y}});this.collectCrates();return true;
   }
   aim(t:Tank,angle=t.angle){return aimGeometry(angle,this.tankSlope(t),t.direction);}
@@ -736,10 +742,27 @@ export class Game {
     if(!previous.delayCommitted)previous.lastDelay=this.delayFor(previous);
     this.traceTurn('turn-end');
     previous.boost=false;previous.doubleShot=false;
-    // DELAY is a PVP rule. Single-player always hands one complete action to the other side.
-    if(this.delayEnabled){previous.nextActionAt+=previous.lastDelay;this.current=this.tanks.filter(t=>t.hp>0).sort((a,b)=>a.nextActionAt-b.nextActionAt||a.id-b.id)[0].id;}
+    const living=this.tanks.filter(t=>t.hp>0);
+    this.roundPending=this.roundPending.filter(id=>id!==previous.id&&this.tanks[id].hp>0);
+    const completedRound=this.roundPending.length===0;
+    if(completedRound){this.roundNumber++;this.roundPending=living.map(t=>t.id);}
+    if(this.delayEnabled)previous.nextActionAt+=previous.lastDelay;
+    // Teams rotate; within a team DELAY still chooses the next human seat.
+    // Every living teammate acts once before repeating. Individual PVP retains initiative.
+    const teamGame=this.tanks.length>2&&new Set(this.tanks.map(t=>t.team)).size<this.tanks.length;
+    if(teamGame){
+      const pending=living.filter(t=>this.roundPending.includes(t.id));
+      const teams=[...new Set(this.tanks.map(t=>t.team))],at=teams.indexOf(previous.team);
+      const team=Array.from({length:teams.length},(_,n)=>teams[(at+n+1)%teams.length]).find(team=>pending.some(t=>t.team===team))!;
+      this.current=pending.filter(t=>t.team===team).sort((a,b)=>this.delayEnabled?a.nextActionAt-b.nextActionAt||a.id-b.id:a.id-b.id)[0].id;
+    }else if(this.delayEnabled)this.current=living.sort((a,b)=>a.nextActionAt-b.nextActionAt||a.id-b.id)[0].id;
     else {do{this.current=(this.current+1)%this.tanks.length;}while(this.active.hp<=0);}
     this.turn++;
+    if(completedRound&&this.roundNumber>=this.windChangeRound){
+      const from=this.wind;this.wind=nextNaturalWind(from,this.rng);this.windChangeRound=nextWindRound(this.roundNumber,this.rng);
+      this.recordBattle('wind-change',`第${this.roundNumber}完整轮风力变化`,{from,to:this.wind,maxDelta:MAX_WIND_CHANGE,nextRound:this.windChangeRound});
+      this.emit('wind','风向轻轻变了。');
+    }
     if(this.fog&&--this.fogTurnsRemaining<=0){this.fog=false;this.emit('weather','雾气散去了，战场重新可见。');}
     if(this.fireLine&&--this.fireLineTurnsRemaining<=0){this.fireLine=null;this.emit('weather','火线熄灭了，强化通道已关闭。');}
     const preferred=this.active.selectedWeapon;
@@ -751,7 +774,6 @@ export class Game {
     // Status counts decrement after the affected unit has had its full turn.
     if(previous.frozen>0) previous.frozen--;
     if(previous.immobile>0) previous.immobile--;
-    this.wind=(this.rng()-0.5)*(this.turn>=40?42:26);
     this.clock=this.config.timer;this.aiTime=0;this.aiMoveGoal=null;this.aiPending=null;this.aiDecision=null;
     this.traceTurn('turn-start');
     for(const f of this.fires) if(!f.weapon&&Math.abs(this.active.x-f.x)<f.radius&&Math.abs(this.active.y+18-(f.y??this.ground(f.x)))<100) this.damage(this.active,14,f.owner,false,'graze',undefined,{cause:'fire',weapon:'napalm',base:14,formula:'行动开始时旧燃烧区域固定14伤害',origin:f});
@@ -892,6 +914,7 @@ export class Game {
     if(this.paused) return;
     for(const t of this.tanks)if(t.hp<=0&&!t.deathResolved)this.settleDefeat(t);
     dt=Math.min(dt,0.05);this.elapsed+=dt;
+    this.itemCues=this.itemCues.filter(c=>{c.age+=dt;return c.age<1.1;});
     this.shake=Math.max(0,this.shake-dt*16);
     this.particles=this.particles.filter(p=>{p.life-=dt;p.vy+=170*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;return p.life>0;});
     this.blasts=this.blasts.filter(b=>{b.life-=dt;return b.life>0;});

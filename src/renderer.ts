@@ -8,7 +8,9 @@ import {defeatedPig,victoryConfetti} from './result-art';
 import {vehicleById} from './vehicles';
 import {projectileArt,paintVehicle} from './vehicle-art';
 import {paintCrew} from './crew-art';
-import {CREW,teamFlag} from './crew';
+import {teamFlag} from './crew';
+import {crewPortrait} from './crew-portraits';
+import {paintItemCue} from './item-feedback';
 import {classicBackdrop,classicDetails} from './classic-map-art';
 
 interface Palette {sky:string;horizon:string;sun:string;mountains:string[];soil:string;soilLight:string;grass:string;grassLight:string;water:string;ink:string}
@@ -215,24 +217,22 @@ export class Renderer {
     if(isRaging(t)&&!celebrating){ctx.strokeStyle='#d88b50';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-31,-39);ctx.lineTo(-27,-33);ctx.lineTo(-30,-27);ctx.stroke();}
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
-    // Names stay upright even when the tank turns around.
-    ctx.font='600 11px "PingFang SC", sans-serif';
-    const labelWidth=Math.max(58,ctx.measureText(t.name).width+20),celebrateOffset=celebrating?-26:0;
-    let labelOffset=0;
-    const box=()=>({left:t.x-labelWidth/2,right:t.x+Math.max(labelWidth/2,t.poisoned?67:0),top:t.y-86+celebrateOffset+labelOffset,bottom:t.y-55+celebrateOffset+labelOffset});
-    for(let attempt=0;attempt<4;attempt++){const b=box();if(!this.labelRects.some(a=>b.left<a.right+4&&b.right>a.left-4&&b.top<a.bottom+4&&b.bottom>a.top-4))break;labelOffset-=36;}
+    for(const cue of g.itemCues)if(cue.tank===t.id)paintItemCue(ctx,cue,t.x+43,t.y-40,teamFlag(t.team).color);
+    // The portrait stays upright; its frame carries the team colour.
+    const celebrateOffset=celebrating?-26:0;let labelOffset=0;
+    const box=()=>({left:t.x-25,right:t.x+(t.poisoned?76:25),top:t.y-108+celebrateOffset+labelOffset,bottom:t.y-53+celebrateOffset+labelOffset});
+    for(let attempt=0;attempt<4;attempt++){const b=box();if(!this.labelRects.some(a=>b.left<a.right+4&&b.right>a.left-4&&b.top<a.bottom+4&&b.bottom>a.top-4))break;labelOffset-=55;}
     this.labelRects.push(box());
     ctx.save();ctx.translate(t.x,t.y);
     ctx.save();ctx.translate(0,celebrateOffset+labelOffset);
     const active=g.current===t.id&&g.phase!=='lobby'&&g.phase!=='ended';
-    if(active) {
-      const bob=Math.sin(this.time*6)*5;
-      ctx.fillStyle=teamFlag(t.team).color;ctx.beginPath();ctx.moveTo(-7,-100+bob);ctx.lineTo(7,-100+bob);ctx.lineTo(0,-90+bob);ctx.closePath();ctx.fill();
-    }
-    const label=t.name;ctx.font='600 11px "PingFang SC", sans-serif';ctx.textAlign='center';
-    ctx.fillStyle='#fbf8ecdd';rr(ctx,-labelWidth/2,-86,labelWidth,21,10);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;ctx.fillText(label,0,-71);
-    ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-60,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,-60,46*t.hp/t.maxHP,3,1.5);ctx.fill();
-    if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,32,-84,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.fillText('中毒',49,-72);}
+    if(active){const bob=Math.sin(this.time*6)*4;ctx.fillStyle=teamFlag(t.team).color;ctx.beginPath();ctx.moveTo(-6,-119+bob);ctx.lineTo(6,-119+bob);ctx.lineTo(0,-111+bob);ctx.closePath();ctx.fill();}
+    ctx.fillStyle='#fff8e8';ctx.beginPath();ctx.arc(0,-85,21,0,Math.PI*2);ctx.fill();
+    const portrait=crewPortrait(t.crew);
+    ctx.save();ctx.beginPath();ctx.arc(0,-85,19,0,Math.PI*2);ctx.clip();if(portrait)ctx.drawImage(portrait,-20,-105,40,40);ctx.restore();
+    ctx.strokeStyle=teamFlag(t.team).color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-85,20,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-59,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,-59,46*t.hp/t.maxHP,3,1.5);ctx.fill();
+    if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,30,-95,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.textAlign='center';ctx.fillText('中毒',47,-83);}
     ctx.restore();
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}
     if(t.boost) {ctx.fillStyle='#f5cc83';ctx.font='bold 17px sans-serif';ctx.fillText('↑',34,-29);}

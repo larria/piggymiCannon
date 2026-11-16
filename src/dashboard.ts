@@ -3,11 +3,11 @@ import {WORLD_W,WORLD_H} from './engine';
 import {paintMapOverview} from './map-preview';
 import {paintVehicle} from './vehicle-art';
 import {vehicleById} from './vehicles';
-import {CREW_ORDER,crewAvatarPath,teamFlag} from './crew';
+import {teamFlag} from './crew';
+import {crewPortrait} from './crew-portraits';
 export class DashboardView {
-  private portraits=new Map<string,HTMLImageElement>();
   private terrain=document.createElement('canvas');private revision=-1;private previousGame:Game|null=null;
-  constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;for(const id of CREW_ORDER){const img=new Image();img.src=crewAvatarPath(id,import.meta.env.BASE_URL);this.portraits.set(id,img);}}
+  constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;}
   draw(game:Game,t:Tank,offset:number,viewHeight:number){
     const c=this.dial.getContext('2d')!;c.clearRect(0,0,260,260);c.save();c.scale(2,2);
     c.fillStyle='#f6f4e9';c.strokeStyle='#ccd5bd';c.lineWidth=2;c.beginPath();c.arc(65,65,58,0,7);c.fill();c.stroke();
@@ -28,7 +28,7 @@ export class DashboardView {
       const x=tank.x/WORLD_W*300,y=tank.y/640*168;
       m.save();m.translate(x,y);m.strokeStyle=teamFlag(tank.team).color;m.lineWidth=tank.id===game.current?2:1;m.fillStyle='#fff4df';m.beginPath();m.arc(0,0,tank.id===game.current?9:7,0,7);m.fill();m.stroke();
       if(tank.vehicleId){m.save();m.scale(.17,.17);paintVehicle(m,vehicleById(tank.vehicleId),20,0,0,false);m.restore();}
-      const avatar=this.portraits.get(tank.crew);if(avatar?.complete&&avatar.naturalWidth){m.save();m.beginPath();m.arc(0,0,7,0,7);m.clip();m.drawImage(avatar,-7,-7,14,14);m.restore();}m.fillStyle=teamFlag(tank.team).color;m.font='bold 9px sans-serif';m.fillText(String(tank.slot+1),8,-6);m.restore();
+      const avatar=crewPortrait(tank.crew);if(avatar){m.save();m.beginPath();m.arc(0,0,7,0,7);m.clip();m.drawImage(avatar,-7,-7,14,14);m.restore();}m.fillStyle=teamFlag(tank.team).color;m.font='bold 9px sans-serif';m.fillText(String(tank.slot+1),8,-6);m.restore();
     }
     for(const crate of game.crates)if(!game.fog||Math.abs(crate.x-game.tanks[game.viewer].x)<230){m.fillStyle='#e6ba75';m.fillRect(crate.x/WORLD_W*300-2,crate.y/640*168-2,5,5);}
   }

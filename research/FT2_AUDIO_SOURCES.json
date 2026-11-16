@@ -69,10 +69,10 @@
     "stripMetadata": true
   },
   "sourceOriginalBytes": 261293324,
-  "selectedOriginalBytes": 84378923,
+  "selectedOriginalBytes": 84288751,
   "musicBitrate": 128000,
   "effectBitrate": 64000,
-  "totalBytes": 30561813,
+  "totalBytes": 30552993,
   "files": [
     {
       "runtime": "bgm-lobby.mp3",
@@ -2636,35 +2636,6 @@
       ],
       "bytes": 1923,
       "runtimeSHA256": "68528514efa7d847e72b5e1d9acdeda3e115b7c48db4354b9ff547192c58fbf5"
-    },
-    {
-      "runtime": "sfx-item.mp3",
-      "source": "assets/ft2-audio/sfx/Friend.wav",
-      "sourceBytes": 90172,
-      "sourceSHA256": "4bc2d19f34975899f414c60452bc4395c52d31a24c8c189f23453fe44a7ddf48",
-      "durationMode": "bounded-effect",
-      "sourceSeconds": 1.021859,
-      "seconds": 1.021859,
-      "runtimeSeconds": 1.021859,
-      "encodingArguments": [
-        "-t",
-        "1.021859",
-        "-vn",
-        "-map_metadata",
-        "-1",
-        "-af",
-        "loudnorm=I=-20:TP=-2:LRA=9,volume=0.7",
-        "-ac",
-        "1",
-        "-ar",
-        "44100",
-        "-codec:a",
-        "libmp3lame",
-        "-b:a",
-        "64k"
-      ],
-      "bytes": 8820,
-      "runtimeSHA256": "59e0c5574ba49423c74ae0f19627fb299cd99e88334ab004c1c31db44e051186"
     },
     {
       "runtime": "sfx-win.mp3",

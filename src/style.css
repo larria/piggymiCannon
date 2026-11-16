@@ -150,3 +150,5 @@ dialog.setup-dialog{width:min(1040px,calc(100vw - 40px));max-width:1040px}.setup
 .setup-dialog .map-choices{grid-template-columns:repeat(4,minmax(0,1fr))}.random-map-choice .icon{width:22px;height:22px;color:#849770}
 
 .stage-top .map-chip{margin-right:auto}.wind-gauge{position:relative;height:9px;margin-top:4px;border:1px solid #cdd4bd;background:#fffef9;border-radius:2px;overflow:hidden;pointer-events:none;--wind-start:50%;--wind-width:0%;--wind-end:50%}.wind-area{position:absolute;top:0;bottom:0;left:var(--wind-start);width:var(--wind-width);background:#f2d58c}.wind-center,.wind-end{position:absolute;top:0;bottom:0;width:1px;transform:translateX(-.5px)}.wind-center{left:50%;background:#8e967d}.wind-end{left:var(--wind-end);background:#b99a58}.wind-end[hidden]{display:none}.minimap-panel.collapsed{height:auto;min-height:47px;padding-top:34px}.minimap-panel.collapsed .wind-gauge{margin-top:0}
+
+#charge-fill{width:calc(100% - 4px)!important;transform-origin:left center;transform:scaleX(.68);transition:none;will-change:transform}

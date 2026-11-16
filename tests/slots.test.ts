@@ -5,7 +5,8 @@ test('four slots are the only seat source; default is Mimi human A and Dad AI B'
 test('2,3,4 participants and 2,3,4 teams use only enabled slots and skip holes',()=>{
  for(const enabled of [[0,3],[1,2,3],[0,1,2,3]])for(const teams of [2,3,4].filter(n=>n<=enabled.length)){
   const slots=defaultSlots();slots.forEach((s,i)=>{s.enabled=enabled.includes(i);s.team=enabled.indexOf(i)%teams;s.controller='ai';});const g=ready(slots);assert.deepEqual(g.tanks.map(t=>t.slot),enabled);assert.equal(new Set(g.tanks.map(t=>t.team)).size,teams);
-  for(let n=0;n<enabled.length*2;n++){assert.equal(g.active.slot,enabled[n%enabled.length]);g.nextTurn();}
+  const order:number[]=[];for(let n=0;n<enabled.length*2;n++){assert.ok(enabled.includes(g.active.slot));order.push(g.active.slot);g.nextTurn();}
+  for(let n=0;n<order.length;n+=enabled.length)assert.deepEqual([...new Set(order.slice(n,n+enabled.length))].sort(),enabled);
  }
 });
 test('free team IDs, all human delay, all AI and mixed cyclic rotations',()=>{

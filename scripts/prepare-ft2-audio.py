@@ -15,7 +15,7 @@ for scene, choice in SELECTION['maps'].items():
         assert choice['bgmNumber'] in stage['availableBgmNumbers'], (scene, choice)
 BGM = {'lobby': 'GM01.mp3', 'setup': 'GM02.mp3', 'result': 'GM04.mp3',
        **{scene: choice['source'] for scene, choice in SELECTION['maps'].items()}}
-COMMON = {'click': 'Push1.wav', 'select': 'Select1.wav', 'item': 'Friend.wav',
+COMMON = {'click': 'Push1.wav', 'select': 'Select1.wav',
           'win': 'logo.wav', 'turn': 'Turn.wav', 'wind': 'Wind.wav',
           'firewall': 'Firewall.wav', 'lock': 'Homming.wav', 'crate-land': 'BoxLanding.wav',
           'supply': 'heli.wav', 'warning': 'Warring.wav', 'transfer': 'Push3.wav', 'quake': 'quake.wav', 'death': 'Enemy.wav'}

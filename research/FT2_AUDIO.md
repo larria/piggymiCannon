@@ -2,7 +2,7 @@
 
 来源是用户本机 `~/Downloads/ft2逆向/resources/sound/` 提取、并搬入 `assets/ft2-audio/` 的未加密WAV／MP3。现行地图映射从原客户端程序集／配置直接核对，原资源清单用于核实文件；不使用 `supertank-web/` 的规则、地图名称表或音乐映射作为依据；仅用于本项目，未宣称官方授权。
 
-249.19MiB来源素材保持本机原样，并由 `.gitignore` 排除；不进入Git提交、Vite运行时导入或Pages／PWA产物。只提交101个实际使用的压缩MP3。v2.3.8恢复九首BGM完整曲目，采用128kbps立体声；总体积与完整时长校验见下方记录，其余30份原件不采用。来源／运行时SHA-256清单 `FT2_AUDIO_SOURCES.json`记录每个文件的前后大小及参数。可在来源目录存在并安装ffmpeg时运行 `python3 scripts/prepare-ft2-audio.py` 重建。
+249.19MiB来源素材保持本机原样，并由 `.gitignore` 排除；不进入Git提交、Vite运行时导入或Pages／PWA产物。v2.3.9只提交100个实际使用的压缩MP3，移除误作道具音的Friend采样。v2.3.8恢复九首BGM完整曲目，采用128kbps立体声；总体积与完整时长校验见下方记录，其余30份原件不采用。来源／运行时SHA-256清单 `FT2_AUDIO_SOURCES.json`记录每个文件的前后大小及参数。可在来源目录存在并安装ffmpeg时运行 `python3 scripts/prepare-ft2-audio.py` 重建。
 
 ## 本作映射
 
@@ -69,3 +69,11 @@ scripts/verify-audio-quality.py检查全部实际采样率／声道下的解码�
 九首总时长1856.435373秒；运行时101文件共30,561,813字节（29.15MiB），所选原件84,378,923字节，缩减63.78%。92个SFX运行时哈希与v2.3.7逐个一致。脚本已完整重建，清单同时记录SFX编码限制参数。
 
 完整曲目另由audio-range.js在默认预缓存路由前处理同作用域MP3字节Range，从同一完整缓存Blob切片返回206／Content-Range，支持闭区间、后缀与开放尾段，非法范围416；没有另存曲目副本。解决长曲离线跳转／Safari循环读取整份200响应的问题，实际末段前进后再检验循环。
+
+## v2.3.9 道具与移动声音纠正
+
+运行时本来就全部为MP3，WAV仅在忽略的来源目录，不需要再次转码。按现行ffmpeg脚本完整重建后，100个保留音频的SHA-256与v2.3.8逐一相同；九首BGM保留全长／128kbps立体声，91个音效64kbps单声道。仅移除sfx-item.mp3（Friend.wav，8,820字节），Friend不再用于道具、毒伤或补给拾取；道具点击也不触发通用点击声，改用1.1秒纸色图标浮起动画。拾取箱子使用BoxLanding，正式出局的Enemy提示仍只触发一次。上述旧映射表中的Friend用途已作废。
+
+原客户端一手IL证据存于FT2_SFX_EVIDENCE.json，可用独立Python环境运行scripts/audit-ft2-sfx.py重核。SoundManager.InitSound（RVA 0x9b0b0）将Character×100映射moveN，Character×100+1映射UnmoveN；CCharacter.ChangeAction（RVA 0xa960c）中动作8以循环参数1播放前者，动作9播放后者并停止前者。复核证明moveN作为循环是正确的，本作问题是任何松手都追加了UnmoveN，听起来像移动力耗尽；v2.3.9普通松手／暂停只停循环，只有燃料耗尽才播放UnmoveN。13台载具逐一验证开始／持续／松手／耗尽；素材组与本作载具的既有分配不宣称为所有历史原版版本的编号事实。
+
+来源原件保留本机且不提交，无新增WAV产物。完整长曲、Range离线支持与既有响度／哈希／压缩参数不变；本版正式构建体积及离线核对见QA/v2.3.9-verification.md。

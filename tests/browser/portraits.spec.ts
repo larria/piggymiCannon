@@ -36,7 +36,7 @@ test('provided PNG portraits and Mom name stay consistent across iPad setup, HUD
   await page.locator('[data-slot-id="3"] .portrait-button').click();
   await expect(page.locator('.portrait-view h2')).toHaveText('小黄鱼妈妈');
   await expect(page.locator('#portrait-saying')).toContainText('小黄鱼妈妈');
-  await expect(page.locator('#portrait-art img')).toHaveAttribute('src','/piggymiCannon/icons/fish-avatar.svg');
+  await expect(page.locator('#portrait-art img')).toHaveAttribute('src','/piggymiCannon/portraits/fish.png');
   await page.locator('[data-action="close"]').click();
   for(let i=0;i<3;i++)await page.locator('#skip-button').click();
   await expect(page.locator('#turn-text .crew-name')).toHaveText('小黄鱼妈妈');

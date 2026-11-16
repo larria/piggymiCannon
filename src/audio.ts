@@ -76,8 +76,8 @@ export class AudioManager {
     gain.gain.cancelScheduledValues(now);gain.gain.setTargetAtTime(0.0001,now,0.012);
     for(const oscillator of oscillators) {oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};oscillator.stop(now+0.06);}
   }
-  updateMovement(active:boolean,sourceX=0,viewerX=0,vehicle:VehicleId|null='cannon') {
-    if(!active||!this.soundEnabled||!this.unlocked||this.paused) {this.stopMovement(!this.paused&&this.soundEnabled&&this.unlocked);return;}
+  updateMovement(active:boolean,sourceX=0,viewerX=0,vehicle:VehicleId|null='cannon',exhausted=false) {
+    if(!active||!this.soundEnabled||!this.unlocked||this.paused) {this.stopMovement(exhausted&&!this.paused&&this.soundEnabled&&this.unlocked);return;}
     try {
       const {c,output}=this.graph();
       const id=vehicle??'cannon';if(this.movingVehicle!==id){this.stopMovement();this.movingVehicle=id;}
@@ -114,6 +114,7 @@ export class AudioManager {
   }
   stopTracking(){if(!this.tracking||!this.context)return;const t=this.tracking;this.tracking=null;t.gain.gain.setTargetAtTime(.0001,this.context.currentTime,.02);t.oscillator.stop(this.context.currentTime+.07);t.oscillator.onended=()=>{t.oscillator.disconnect();t.gain.disconnect();t.pan.disconnect();};}
   play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer'|'turn'|'wind'|'firewall'|'supply'|'warning'|'death',sourceX?:number,viewerX=0,weapon?:WeaponId) {
+    if(type==='item')return; // Item feedback is animation only, including preload/fallback paths.
     if(!this.soundEnabled||!this.unlocked||(this.paused&&type!=='click'&&type!=='aim')) return;
     if(type==='click'||type==='win'||(type==='aim'&&this.paused)) {
       const audio=new Audio(asset(`sfx-${type==='aim'?'select':type}.mp3`));audio.volume=this.volume*.75;this.playingEffects.add(audio);audio.onended=()=>{this.playingEffects.delete(audio);this.pausedEffects.delete(audio);};void audio.play().catch(()=>this.playingEffects.delete(audio));return;
@@ -161,8 +162,7 @@ export class AudioManager {
         }
         return;
       }
-      if(type==='item') {tone(530,920,0.3,0.24);tone(790,1350,0.32,0.12);}
-      else if(type==='crate-land') {noise(0.28,0.55,1600);tone(140,55,0.25,0.38,'triangle');}
+      if(type==='crate-land') {noise(0.28,0.55,1600);tone(140,55,0.25,0.38,'triangle');}
       else if(type==='shot') {noise(0.22,0.65,2600);tone(190,65,0.19,0.4,'triangle');}
       else {noise(0.82,1.1,2300);noise(0.09,0.42,6500);tone(115,32,0.7,0.68);tone(65,26,0.5,0.26,'triangle');}
     } catch { /* Audio is optional; browsers without Web Audio can still play. */ }

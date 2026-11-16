@@ -1,0 +1,36 @@
+{
+  "formatVersion": 1,
+  "source": "用户指定头像图片；仅本项目使用",
+  "portraits": {
+    "fox": {
+      "sourceFile": "aa4c0d5f-ede6-4230-83d0-5818c3f5aa17.png",
+      "sourceSHA256": "602276cfe55c4f270e8067018acea5589f17c406e49e4ef02a2240343b5682b5",
+      "runtime": "public/portraits/fox.png",
+      "runtimeSHA256": "b6f58f035db39b90517ea41b5362daf7479350910bbab50e1b543420f7a3ebcb",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "runtimeDimensions": [
+        512,
+        512
+      ],
+      "transform": "Pillow LANCZOS equal aspect resize, no crop"
+    },
+    "fish": {
+      "sourceFile": "8f404303-7549-4b7a-b35f-60088158377d.png",
+      "sourceSHA256": "ddb4bb3fc11551dca5cd1fbaba5ba9e59b35500ad470bc310073c3e790854224",
+      "runtime": "public/portraits/fish.png",
+      "runtimeSHA256": "b810c25fd021eb8893d980717744a9595979af60df2bfd69066b3f505c1878c6",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "runtimeDimensions": [
+        512,
+        512
+      ],
+      "transform": "Pillow LANCZOS equal aspect resize, no crop"
+    }
+  }
+}

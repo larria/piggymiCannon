@@ -39,7 +39,7 @@ test('all formations deploy distinct safe actors and solo allies/opponents have 
  }
 });
 test('team victory waits for all opponents, actors skip dead seats, pure hotseat has no handoff phase',()=>{
- const g=flat({formation:'2v2'});g.damage(g.tanks[1],9999,0);g.nextTurn();assert.notEqual(g.phase,'ended');assert.equal(g.current,2);g.nextTurn();assert.equal(g.current,3);assert.equal(g.humanTurn,false);g.damage(g.tanks[3],9999,0);g.nextTurn();assert.equal(g.phase,'ended');assert.equal(g.winner,0);
+ const g=flat({formation:'2v2'});g.damage(g.tanks[1],9999,0);g.nextTurn();assert.notEqual(g.phase,'ended');assert.equal(g.current,3);assert.equal(g.humanTurn,false);g.nextTurn();assert.equal(g.current,2);g.damage(g.tanks[3],9999,0);g.nextTurn();assert.equal(g.phase,'ended');assert.equal(g.winner,0);
  const p=flat({mode:'hotseat',formation:'2v2'});assert.ok(p.tanks.every(t=>t.controller==='human'));p.nextTurn();assert.equal(p.phase,'aiming');assert.equal(p.humanTurn,true);assert.equal(p.current,1);
 });
 test('AI and mixed cooperation use cyclic alive-seat turns; every AI fires once per action',()=>{

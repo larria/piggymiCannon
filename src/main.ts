@@ -230,9 +230,9 @@ function updateUI() {
   $('.control-deck').classList.toggle('inactive',!human);$<HTMLButtonElement>('#power-meter').disabled=!human||t.fallVelocity>0;$<HTMLButtonElement>('#skip-button').disabled=!human;
   document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, #face-button, #aim-pad').forEach(b=>b.disabled=!human);
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
-  $('#charge-fill').style.width=`${t.power}%`;
+  updateChargeVisual(t.power);
   $('#fire-button').classList.toggle('charging',Boolean(charge));
-  $('#fire-button').style.setProperty('--charge',`${t.power}%`);
+
   $('#fire-title').textContent=charge?'蓄力中':'开火';
   $('#fire-subtitle').textContent=charge?'松手或蓄满发射':'按住 / SPACE';
   $('#fuel-value').textContent=String(Math.floor(t.fuel));$('#move-note').textContent=t.immobile?'紫冻水 · 暂时不能移动':t.frozen?'冰冻中 · 移动耗油加倍':t.vehicleId?`本回合最多移动 ${Math.round(t.moveDistance)}m`:'长按移动 · 每回合补充 18';
@@ -348,7 +348,7 @@ let lastControlSound=0;
 function controlSound(target:HTMLElement) {
   const control=target.closest<HTMLElement>('button,a,select,summary,.choice-card,.weather-choice')??target.closest<HTMLElement>('canvas');
   if(!control||control.matches(':disabled')) return;
-  audio.unlock();audio.play('click');
+  audio.unlock();if(!control.closest('[data-item]'))audio.play('click');
 }
 document.addEventListener('pointerdown',e=>controlSound(e.target as HTMLElement),true);
 document.addEventListener('click',e=>{if(e.detail===0) controlSound(e.target as HTMLElement);},true);
@@ -495,6 +495,16 @@ window.addEventListener('blur',()=>{keys.clear();moveHeld=0;cancelCharge();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();moveHeld=0;cancelCharge();}});
 window.addEventListener('resize',()=>renderer.resize());
 
+// Only the narrow transform / colour-fill changes at display cadence.
+const chargeFill=$('#charge-fill'),chargeFire=$('#fire-button'),chargeReadout=$('#power-value');
+let chargeVisualPower=-1;
+function updateChargeVisual(power:number){
+  if(power===chargeVisualPower)return;chargeVisualPower=power;
+  // Constants are created before the initial updateUI call at the foot of this file.
+  chargeFill.style.transform=`scaleX(${power/100})`;
+  chargeFire.style.setProperty('--charge',`${power}%`);
+  const label=String(Math.round(power));if(chargeReadout.textContent!==label)chargeReadout.textContent=label;
+}
 let previous=performance.now(),lastUI=0;
 function frame(now:number) {
   const dt=Math.min((now-previous)/1000,0.05);previous=now;
@@ -507,24 +517,24 @@ function frame(now:number) {
   game.update(dt);renderer.draw(dt);dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight);
   const moving=game.movingUntil.findIndex(until=>until>game.elapsed);
   audio.setScene(game.phase==='lobby'?'lobby':game.phase==='ended'?'result':game.config.map);
-  audio.updateMovement(moving>=0&&game.phase==='aiming'&&!game.paused,game.tanks[Math.max(0,moving)].x,game.tanks[game.viewer].x,game.tanks[Math.max(0,moving)].vehicleId);
+  audio.updateMovement(moving>=0&&game.phase==='aiming'&&!game.paused,game.tanks[Math.max(0,moving)].x,game.tanks[game.viewer].x,game.tanks[Math.max(0,moving)].vehicleId,game.active.fuel<=0);
   const tracking=game.projectiles.find(p=>p.homing);audio.updateTracking(Boolean(tracking)&&!game.paused&&game.phase==='flying',tracking?.weapon,tracking?.x??0,game.tanks[game.viewer].x);
   if(charge&&(!game.humanTurn||charge.tank!==game.current)) cancelCharge();
   for(const event of game.drainEvents()) {
     if(event.type!=='explosion') $('#battle-message').innerHTML=colorNames(event.message);
     if(event.type==='shot') audio.play(event.transfer?'transfer':'shot',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='explosion') audio.play('explosion',event.x,game.tanks[game.viewer].x,event.weapon);
-    if(event.type==='weather'){toast(event.message);audio.play(event.message.includes('火线')?'firewall':'wind');}
-    if(event.type==='turn'){audio.play('turn');if(Math.abs(game.wind)>=1)audio.play('wind');}
+    if(event.type==='weather'){toast(event.message);if(event.message.includes('火线'))audio.play('firewall');}
+    if(event.type==='turn')audio.play('turn');
+    if(event.type==='wind')audio.play('wind');
     if(event.type==='timeout')audio.play('warning');
-    if(event.type==='poison')audio.play('item',event.x,game.tanks[game.viewer].x);
     if(event.type==='win') audio.play('win');
     if(event.type==='defeat')audio.play('death',event.x,game.tanks[game.viewer].x);
-    if(event.type==='crate') audio.play(event.message.includes('空降')?'supply':'item',event.x,game.tanks[game.viewer].x);
-    if(event.type==='item') audio.play('item',event.x,game.tanks[game.viewer].x);
+    if(event.type==='crate') audio.play(event.message.includes('空降')?'supply':'crate-land',event.x,game.tanks[game.viewer].x);
     if(event.type==='lock') audio.play('lock',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='crate-land') audio.play('crate-land',event.x,game.tanks[game.viewer].x);
   }
+  if(charge)updateChargeVisual(game.active.power);
   if(now-lastUI>80) {updateUI();lastUI=now;}
   requestAnimationFrame(frame);
 }
