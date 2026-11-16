@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {Game,FLIGHT_SPEED} from '../src/engine';import {defaultSlots} from '../src/crew';import {landings} from './salvo-fixture';import {impactDamageScale} from '../src/impact-damage';import {DOUBLE_SHOT_INTERVAL,salvoProfile} from '../src/salvo';import {weaponById} from '../src/catalog';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {Game,FLIGHT_SPEED} from './legacy-fixture';import {defaultSlots} from '../src/crew';import {landings} from './salvo-fixture';import {impactDamageScale} from '../src/impact-damage';import {DOUBLE_SHOT_INTERVAL,salvoProfile} from '../src/salvo';import {weaponById} from '../src/catalog';
 function ready(){const slots=defaultSlots().map(s=>({...s,controller:'human' as const,vehicle:'cannon' as const}));const g=new Game({slots,seed:52,timer:0,fog:false,fireLine:false});g.start();g.wind=0;return g;}
 test('Multi normal/special spread at ordinary angles and only headwind high arcs focus, mirrored for left aim',()=>{
  for(const w of ['multi-normal','multi-special'] as const)for(const direction of [-1,1]){

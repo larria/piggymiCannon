@@ -1,0 +1,24 @@
+{
+  "before": {
+    "paints": 40,
+    "uploads": 44,
+    "frames": 26
+  },
+  "stopped": {
+    "paints": 40,
+    "uploads": 44,
+    "frames": 26
+  },
+  "after": {
+    "paints": 40,
+    "uploads": 44
+  },
+  "milliseconds": 0,
+  "maxMilliseconds": 0,
+  "tileCount": 19,
+  "largestTexture": 512,
+  "world": [
+    4500,
+    1782
+  ]
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {WORLD_W,TERRAIN_H} from '../src/terrain';
-import {Game,WATER_Y} from '../src/engine';import {defaultSlots} from '../src/crew';import {factoryFloor,templeCap,templeNode,templeRail,TEMPLE_NODES} from '../src/classic-maps';
+import {Game,WATER_Y} from './legacy-fixture';import {defaultSlots} from '../src/crew';import {factoryFloor,templeCap,templeNode,templeRail,TEMPLE_NODES} from '../src/classic-maps';
 import {ALL_WEAPONS,excavation} from '../src/catalog';import {solveAIShot,safeAIPositions,predictAIImpact} from '../src/ai-planner';
 function ready(map:'factory'|'temple',seed=52){const slots=defaultSlots();slots.forEach(s=>Object.assign(s,{controller:'human',vehicle:'cannon'}));const g=new Game({slots,map,seed,timer:0,fog:false,fireLine:false});g.start();return g;}
 function permanentOnly(g:Game){for(let i=0;i<g.land.mask.length;i++)if(!g.land.protectedMask[i])g.land.mask[i]=0;g.land.rebuild();}

@@ -1,0 +1,388 @@
+{
+  "states": [
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.88330000000001,
+      "elapsed": 0.11669999999999983,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.78330000000002,
+      "elapsed": 0.21669999999999986,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.66670000000003,
+      "elapsed": 0.3332999999999993,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.53330000000003,
+      "elapsed": 0.4667,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.41670000000004,
+      "elapsed": 0.5832999999999996,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.30000000000005,
+      "elapsed": 0.7000000000000004,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.20000000000005,
+      "elapsed": 0.8000000000000005,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.08330000000006,
+      "elapsed": 0.9167000000000004,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 43.94990000000006,
+      "elapsed": 1.0500999999999998,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 43.83330000000007,
+      "elapsed": 1.1667,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 43.71670000000008,
+      "elapsed": 1.2832999999999992,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 43.3834000000001,
+      "elapsed": 1.6166000000000007,
+      "shots": 0,
+      "paused": false,
+      "blocked": false
+    }
+  ],
+  "camera": {
+    "zoom": 1,
+    "width": 1280,
+    "x": 364,
+    "actor": 1004
+  }
+}

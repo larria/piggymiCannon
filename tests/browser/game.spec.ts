@@ -1,7 +1,7 @@
 import {boot,hold} from './qa-app';
 import { test,expect } from '@playwright/test';
 import {readFileSync} from 'node:fs';
-import {Game} from '../legacy-fixture';import {makeRng} from '../../src/engine';
+import {Game,regressionConfig} from '../legacy-fixture';import {makeRng,Game as NativeGame} from '../../src/engine';
 import {rollWeather} from '../../src/weather';
 const APP_VERSION=JSON.parse(readFileSync(new URL('../../package.json',import.meta.url),'utf8')).version;
 
@@ -210,11 +210,19 @@ test('追魂弹 produces its own lock sound and persists the tracking event in t
  await page.locator('[data-owner="0"]').click();await page.locator('[data-choice="missile"]').click();
  await page.getByRole('button',{name:'开始对局',exact:true}).click();await page.locator('#weapon-special').click();
  // Replan against the seeded random deployment instead of aiming at old fixed spawns.
- const plan=new Game({seed:53,timer:0,mode:'hotseat',map:'valley',vehicle0:'missile',vehicle1:'bowl'});plan.start();
- let aim={angle:45,power:50,score:Infinity};
- for(let angle=20;angle<=45;angle++)for(let power=20;power<=95;power++){const hit=plan.predict(angle,power,'missile-special'),score=Math.abs(hit.x-plan.enemy.x)+Math.abs(hit.y-plan.enemy.y)*.5;if(score<aim.score)aim={angle,power,score};}
- await page.locator('#angle').evaluate((el:any,angle)=>{el.value=String(angle);el.dispatchEvent(new Event('input',{bubbles:true}));},aim.angle);
- const fire=await page.locator('#fire-button').boundingBox();await page.mouse.move(fire!.x+fire!.width/2,fire!.y+fire!.height/2);await page.mouse.down();await page.waitForTimeout((aim.power-10)/36*1000);await page.mouse.up();
+ const plan=new NativeGame(regressionConfig({seed:53,timer:0,mode:'hotseat',map:'valley',vehicle0:'missile',vehicle1:'bowl',fog:false,fireLine:false,snow:false}));plan.start();
+ let aim:{angle:number;power:number}|undefined;
+ // A direct low shot can hit before descending guidance. Search for an actual
+ // legal arc that locks, rather than requiring every direct hit to lock.
+ search:for(const angle of [45,40,35,30,25,20])for(let power=20;power<=95;power+=5){
+   const trial=new NativeGame(plan.config);trial.start();trial.selectWeapon('missile-special');trial.setAim(angle,power);trial.fire();
+   for(let i=0;i<1200&&trial.phase==='flying';i++){
+     trial.update(1/120);if(trial.events.some(e=>e.type==='lock')){aim={angle,power};break search;}
+   }
+ }
+ expect(aim).toBeTruthy();
+ await page.locator('#angle').evaluate((el:any,angle)=>{el.value=String(angle);el.dispatchEvent(new Event('input',{bubbles:true}));},aim!.angle);
+ const fire=await page.locator('#fire-button').boundingBox();await page.mouse.move(fire!.x+fire!.width/2,fire!.y+fire!.height/2);await page.mouse.down();await page.waitForTimeout((aim!.power-10)/36*1000);await page.mouse.up();
  await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});await page.locator('#log-button').click();
  await expect(page.locator('.battle-log')).toContainText('追魂弹锁定目标');
  const tones=await page.evaluate(()=>(window as any).toneStarts);expect(tones.some((value:number)=>Math.abs(value-776)<1)).toBe(true);
@@ -318,8 +326,8 @@ test('six map previews fit the small iPad and disclose sourced facts versus Web 
   const close=await page.getByRole('button',{name:'开始对局',exact:true}).boundingBox();expect(close!.y+close!.height).toBeLessThanOrEqual(814);
   await page.screenshot({path:`QA/slots-regression-map-selection-${width}x834.png`});
   await page.locator('input[name="map"][value="temple"]').locator('..').click();await page.locator('.map-notes summary').click();
-  await expect(page.locator('#map-choice-note')).toContainText('用户确认');await expect(page.locator('#map-choice-note')).toContainText('本作重绘');
-  await page.locator('input[name="map"][value="egypt"]').locator('..').click();await expect(page.locator('#map-choice-note')).toContainText('未取得原版地形细节');
+  await expect(page.locator('#map-choice-note')).toContainText('用户确认');await expect(page.locator('#map-choice-note')).toContainText('本作紧凑尺寸');
+  await page.locator('input[name="map"][value="egypt"]').locator('..').click();await expect(page.locator('#map-choice-note')).toContainText('原占用轮廓');
   await page.screenshot({path:`QA/slots-regression-map-evidence-${width}x834.png`});
  }
 });

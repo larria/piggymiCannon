@@ -29,7 +29,7 @@ test('all four prone identities share the battle/result path, while bottom exits
  await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.tanks.forEach((t:any)=>g.damage(t,99999,t.id,true,'fall'));});
  const portraits=[];for(let id=0;id<4;id++){const pixels=await page.evaluate(id=>(window as any).__corpsePixels(id),id);expect(pixels.opaque).toBeGreaterThan(150);portraits.push(pixels.hash);}expect(new Set(portraits).size).toBe(4);
  await page.evaluate(()=>(window as any).__qa.game.phase='ended');for(let id=0;id<4;id++)expect((await page.evaluate(id=>(window as any).__corpsePixels(id),id)).hash).toBe(portraits[id]);
- await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.tanks[1].y=960;g.damage(g.tanks[1],99999,0);});expect((await page.evaluate(()=>(window as any).__corpsePixels(1))).opaque).toBe(0);
+ await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.tanks[1].y=g.bottomY;g.damage(g.tanks[1],99999,0);});expect((await page.evaluate(()=>(window as any).__corpsePixels(1))).opaque).toBe(0);
 });
 test('a first 2v2 death does not show results; the final death preserves the three-second celebration',async({page})=>{
  await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.damage(g.tanks[1],99999,0);g.nextTurn();(window as any).__qa.updateUI();});await expect(page.locator('.result')).not.toBeVisible();

@@ -1,0 +1,430 @@
+{
+  "states": [
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 1,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 2,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 3,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": true,
+      "player": 0,
+      "clock": 45,
+      "elapsed": 0,
+      "shots": 0,
+      "paused": false,
+      "blocked": true,
+      "overlayHidden": true
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.916999999999994,
+      "elapsed": 0.083,
+      "shots": 0,
+      "paused": false,
+      "blocked": false,
+      "overlayHidden": true
+    },
+    {
+      "tour": false,
+      "player": null,
+      "clock": 44.81499999999999,
+      "elapsed": 0.18500000000000003,
+      "shots": 0,
+      "paused": false,
+      "blocked": false,
+      "overlayHidden": true
+    }
+  ],
+  "camera": {
+    "zoom": 1,
+    "width": 1280,
+    "x": 2028,
+    "actor": 2668
+  }
+}

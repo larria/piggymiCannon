@@ -1,0 +1,110 @@
+[
+  {
+    "map": "valley",
+    "fraction": 0.2,
+    "mean": 0.0011631296641791045,
+    "largeFraction": 0
+  },
+  {
+    "map": "valley",
+    "fraction": 0.5,
+    "mean": 0.0003725513059701493,
+    "largeFraction": 0
+  },
+  {
+    "map": "valley",
+    "fraction": 0.8,
+    "mean": 0.0002649836753731343,
+    "largeFraction": 0
+  },
+  {
+    "map": "coast",
+    "fraction": 0.2,
+    "mean": 0.0005640741604477612,
+    "largeFraction": 0
+  },
+  {
+    "map": "coast",
+    "fraction": 0.5,
+    "mean": 0.00041948460820895523,
+    "largeFraction": 0
+  },
+  {
+    "map": "coast",
+    "fraction": 0.8,
+    "mean": 0.0003605993470149254,
+    "largeFraction": 0
+  },
+  {
+    "map": "moon",
+    "fraction": 0.2,
+    "mean": 0.00026381763059701494,
+    "largeFraction": 0
+  },
+  {
+    "map": "moon",
+    "fraction": 0.5,
+    "mean": 0.00032241138059701494,
+    "largeFraction": 0
+  },
+  {
+    "map": "moon",
+    "fraction": 0.8,
+    "mean": 0.0002609025186567164,
+    "largeFraction": 0
+  },
+  {
+    "map": "factory",
+    "fraction": 0.2,
+    "mean": 0.00034077658582089553,
+    "largeFraction": 0
+  },
+  {
+    "map": "factory",
+    "fraction": 0.5,
+    "mean": 0.0004250233208955224,
+    "largeFraction": 0
+  },
+  {
+    "map": "factory",
+    "fraction": 0.8,
+    "mean": 0.0003611823694029851,
+    "largeFraction": 0
+  },
+  {
+    "map": "temple",
+    "fraction": 0.2,
+    "mean": 0.00035360307835820894,
+    "largeFraction": 0
+  },
+  {
+    "map": "temple",
+    "fraction": 0.5,
+    "mean": 0.0004556319962686567,
+    "largeFraction": 0
+  },
+  {
+    "map": "temple",
+    "fraction": 0.8,
+    "mean": 0.0003244519589552239,
+    "largeFraction": 0
+  },
+  {
+    "map": "egypt",
+    "fraction": 0.2,
+    "mean": 0.00029734141791044774,
+    "largeFraction": 0
+  },
+  {
+    "map": "egypt",
+    "fraction": 0.5,
+    "mean": 0.0003034631529850746,
+    "largeFraction": 0
+  },
+  {
+    "map": "egypt",
+    "fraction": 0.8,
+    "mean": 0.00026469216417910447,
+    "largeFraction": 0
+  }
+]

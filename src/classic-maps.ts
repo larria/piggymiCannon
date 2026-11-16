@@ -28,10 +28,10 @@ export function buildClassicMap(land:Terrain,map:MapId){
   };
   if(map==='factory'){
     for(let x=0;x<=WORLD_W;x++)land.column(x,factoryFloor(x),TERRAIN_H,true);
-    beam(60,450,310,36);beam(830,1220,310,36);
-    beam(310,640,x=>310+(x-310)*.3,30);beam(590,1030,410,36);
+    beam(60,450,310,30);beam(830,1220,310,30);
+    beam(450,780,x=>310+(x-450)*.3,30);beam(590,1030,410,36);
     beam(820,1040,x=>410+(x-820)*.5,30);
-    beam(410,870,202,33);beam(410,630,x=>202+(x-410)*.49,30);
+    beam(410,870,202,30);beam(410,630,x=>202+(x-410)*.49,30);
     beam(420,440,334,114);beam(1010,1030,434,177);
   }else if(map==='temple'){
     beam(50,445,335,13.5);beam(835,1230,335,13.5);

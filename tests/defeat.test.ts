@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game} from '../src/engine';import {defaultSlots} from '../src/crew';import {defeatedPig} from '../src/result-art';
+import {Game} from './legacy-fixture';import {defaultSlots} from '../src/crew';import {defeatedPig} from '../src/result-art';
 // Node checks routing/visibility. Browser checks below use genuine Canvas paths.
 (globalThis as any).Path2D=class {};
-function flat(){const slots=defaultSlots();slots.forEach((s,i)=>Object.assign(s,{enabled:true,team:i%2,controller:'human',vehicle:'cannon'}));const g=new Game({slots,map:'valley',seed:52,timer:0,fog:false,fireLine:false});g.start();g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.wind=0;g.tanks.forEach((t,i)=>Object.assign(t,{x:[200,650,70,1130][i],y:432,fallVelocity:0}));return g;}
+function flat(){const slots=defaultSlots();slots.forEach((s,i)=>Object.assign(s,{enabled:true,team:i%2,controller:'human',vehicle:'cannon'}));const g=new Game({slots,map:'valley',seed:52,timer:0,fallDamage:true,fog:false,fireLine:false});g.start();g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.wind=0;g.tanks.forEach((t,i)=>Object.assign(t,{x:[200,650,70,1130][i],y:432,fallVelocity:0}));return g;}
 function paintCount(g:Game,id=1){let count=0;const c=new Proxy({},{get:(_t,key)=>key==='createLinearGradient'?()=>({addColorStop(){}}):()=>{count++;},set:()=>true});defeatedPig(c as any,g.tanks[id],2,0);return count;}
 test('mid-match lethal impact immediately establishes a crying pose without ending or cutting the volley',()=>{
  const g=flat(),e=g.tanks[1];e.hp=1;g.fire();const shot=g.projectiles[0];Object.assign(shot,{x:e.x,y:e.y-10,vx:0,vy:1,age:.5});g.update(.001);

@@ -1,10 +1,10 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game,makeRng} from '../src/engine';import {defaultSlots} from '../src/crew';import {vehicleById} from '../src/vehicles';
+import {Game,makeRng} from './legacy-fixture';import {defaultSlots} from '../src/crew';import {vehicleById} from '../src/vehicles';
 import {snapshotText,packTerrain,unpackTerrain,TRACE_LIMIT,TRACE_BYTE_LIMIT} from '../src/battle-trace';
 import {readFileSync} from 'node:fs';
 function flat(vehicle:any='cannon',rules={}){
  const slots=defaultSlots();slots.forEach((s,i)=>Object.assign(s,{enabled:true,team:i%2,controller:'human',vehicle:i===0?vehicle:'cannon'}));
- const g=new Game({slots,seed:52,map:'valley',timer:0,fog:false,fireLine:false,...rules},'test-version');g.start();g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();
+ const g=new Game({slots,seed:52,map:'valley',timer:0,fallDamage:true,fog:false,fireLine:false,...rules},'test-version');g.start();g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();
  g.wind=0;g.tanks.forEach((t,i)=>Object.assign(t,{x:[200,650,70,1150][i],y:432,fallVelocity:0}));return g;
 }
 const entries=(g:Game,type:string)=>g.battleSnapshot().events.filter(e=>e.type===type);

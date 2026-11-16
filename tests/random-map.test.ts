@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {Game,makeRng} from '../src/engine';
+import {Game,makeRng} from './legacy-fixture';
 import {MAPS} from '../src/catalog';
 
 test('random map consumes the recorded seeded draw, reaches every map, and stays replayable',()=>{

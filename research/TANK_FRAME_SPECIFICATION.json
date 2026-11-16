@@ -1,0 +1,816 @@
+{
+  "formatVersion": 1,
+  "mapping": "双武器Round/角度/Move与属性分组交叉识别，非按名单顺序。char13属性255为全属性超级角色；char14为古代属性128的扩展角色，未纳入本作十三载具。",
+  "frames": "CCharacterDefine.ModeImage[Stand]=0; ModeCount[Stand]=1; RunAnimation/RebuildSpriteListChar步长5，所以待机参考为0..4，非全296帧中位数",
+  "characters": {
+    "bowl": {
+      "sourceCharacter": 1,
+      "width": 114,
+      "height": 117,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 114,
+          "h": 117,
+          "x": -30,
+          "y": -99,
+          "size": 5586,
+          "c_size1": 2286,
+          "m_size": 11172
+        },
+        {
+          "image": 0,
+          "w": 111,
+          "h": 108,
+          "x": -42,
+          "y": -93,
+          "size": 5508,
+          "c_size1": 2583,
+          "m_size": 11016
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 93,
+          "x": -54,
+          "y": -90,
+          "size": 5418,
+          "c_size1": 2139,
+          "m_size": 10836
+        },
+        {
+          "image": 0,
+          "w": 108,
+          "h": 99,
+          "x": -69,
+          "y": -84,
+          "size": 5364,
+          "c_size1": 2202,
+          "m_size": 10728
+        },
+        {
+          "image": 0,
+          "w": 114,
+          "h": 114,
+          "x": -81,
+          "y": -87,
+          "size": 5532,
+          "c_size1": 2292,
+          "m_size": 11064
+        }
+      ]
+    },
+    "crossbow": {
+      "sourceCharacter": 2,
+      "width": 108,
+      "height": 102,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 90,
+          "h": 102,
+          "x": -30,
+          "y": -81,
+          "size": 3984,
+          "c_size1": 1779,
+          "m_size": 7968
+        },
+        {
+          "image": 0,
+          "w": 90,
+          "h": 93,
+          "x": -39,
+          "y": -78,
+          "size": 3990,
+          "c_size1": 1734,
+          "m_size": 7980
+        },
+        {
+          "image": 0,
+          "w": 93,
+          "h": 69,
+          "x": -57,
+          "y": -66,
+          "size": 3852,
+          "c_size1": 1566,
+          "m_size": 7704
+        },
+        {
+          "image": 0,
+          "w": 108,
+          "h": 78,
+          "x": -75,
+          "y": -60,
+          "size": 4080,
+          "c_size1": 1689,
+          "m_size": 8160
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 90,
+          "x": -78,
+          "y": -60,
+          "size": 3888,
+          "c_size1": 1788,
+          "m_size": 7776
+        }
+      ]
+    },
+    "cannon": {
+      "sourceCharacter": 3,
+      "width": 117,
+      "height": 120,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 84,
+          "h": 120,
+          "x": -27,
+          "y": -96,
+          "size": 5022,
+          "c_size1": 1809,
+          "m_size": 10044
+        },
+        {
+          "image": 0,
+          "w": 90,
+          "h": 114,
+          "x": -39,
+          "y": -99,
+          "size": 4926,
+          "c_size1": 1899,
+          "m_size": 9852
+        },
+        {
+          "image": 0,
+          "w": 99,
+          "h": 93,
+          "x": -48,
+          "y": -90,
+          "size": 4818,
+          "c_size1": 1788,
+          "m_size": 9636
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 84,
+          "x": -57,
+          "y": -81,
+          "size": 4668,
+          "c_size1": 1419,
+          "m_size": 9336
+        },
+        {
+          "image": 0,
+          "w": 117,
+          "h": 78,
+          "x": -69,
+          "y": -72,
+          "size": 4788,
+          "c_size1": 1626,
+          "m_size": 9576
+        }
+      ]
+    },
+    "beetle": {
+      "sourceCharacter": 4,
+      "width": 105,
+      "height": 102,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 96,
+          "h": 102,
+          "x": -27,
+          "y": -78,
+          "size": 5022,
+          "c_size1": 1803,
+          "m_size": 10044
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 93,
+          "x": -42,
+          "y": -81,
+          "size": 5052,
+          "c_size1": 1668,
+          "m_size": 10104
+        },
+        {
+          "image": 0,
+          "w": 96,
+          "h": 75,
+          "x": -48,
+          "y": -69,
+          "size": 4866,
+          "c_size1": 1686,
+          "m_size": 9732
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 87,
+          "x": -69,
+          "y": -72,
+          "size": 5004,
+          "c_size1": 1878,
+          "m_size": 10008
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 96,
+          "x": -72,
+          "y": -69,
+          "size": 5274,
+          "c_size1": 1941,
+          "m_size": 10548
+        }
+      ]
+    },
+    "duke": {
+      "sourceCharacter": 5,
+      "width": 111,
+      "height": 96,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 87,
+          "h": 96,
+          "x": -24,
+          "y": -69,
+          "size": 4086,
+          "c_size1": 1938,
+          "m_size": 8172
+        },
+        {
+          "image": 0,
+          "w": 96,
+          "h": 84,
+          "x": -36,
+          "y": -66,
+          "size": 4002,
+          "c_size1": 1914,
+          "m_size": 8004
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 63,
+          "x": -54,
+          "y": -60,
+          "size": 3780,
+          "c_size1": 1584,
+          "m_size": 7560
+        },
+        {
+          "image": 0,
+          "w": 111,
+          "h": 72,
+          "x": -69,
+          "y": -57,
+          "size": 3912,
+          "c_size1": 1515,
+          "m_size": 7824
+        },
+        {
+          "image": 0,
+          "w": 111,
+          "h": 81,
+          "x": -72,
+          "y": -57,
+          "size": 4104,
+          "c_size1": 1716,
+          "m_size": 8208
+        }
+      ]
+    },
+    "missile": {
+      "sourceCharacter": 6,
+      "width": 111,
+      "height": 114,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 111,
+          "h": 114,
+          "x": -30,
+          "y": -93,
+          "size": 5406,
+          "c_size1": 2724,
+          "m_size": 10812
+        },
+        {
+          "image": 0,
+          "w": 108,
+          "h": 114,
+          "x": -39,
+          "y": -99,
+          "size": 5436,
+          "c_size1": 2886,
+          "m_size": 10872
+        },
+        {
+          "image": 0,
+          "w": 96,
+          "h": 96,
+          "x": -48,
+          "y": -93,
+          "size": 5358,
+          "c_size1": 2529,
+          "m_size": 10716
+        },
+        {
+          "image": 0,
+          "w": 96,
+          "h": 105,
+          "x": -57,
+          "y": -90,
+          "size": 5448,
+          "c_size1": 3018,
+          "m_size": 10896
+        },
+        {
+          "image": 0,
+          "w": 108,
+          "h": 114,
+          "x": -81,
+          "y": -90,
+          "size": 5622,
+          "c_size1": 2697,
+          "m_size": 11244
+        }
+      ]
+    },
+    "multi": {
+      "sourceCharacter": 7,
+      "width": 123,
+      "height": 123,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 108,
+          "h": 123,
+          "x": -27,
+          "y": -93,
+          "size": 6066,
+          "c_size1": 2106,
+          "m_size": 12132
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 117,
+          "x": -42,
+          "y": -96,
+          "size": 6108,
+          "c_size1": 2091,
+          "m_size": 12216
+        },
+        {
+          "image": 0,
+          "w": 108,
+          "h": 90,
+          "x": -60,
+          "y": -87,
+          "size": 5430,
+          "c_size1": 1941,
+          "m_size": 10860
+        },
+        {
+          "image": 0,
+          "w": 123,
+          "h": 105,
+          "x": -84,
+          "y": -84,
+          "size": 5868,
+          "c_size1": 2118,
+          "m_size": 11736
+        },
+        {
+          "image": 0,
+          "w": 123,
+          "h": 108,
+          "x": -93,
+          "y": -75,
+          "size": 5970,
+          "c_size1": 2055,
+          "m_size": 11940
+        }
+      ]
+    },
+    "laser": {
+      "sourceCharacter": 8,
+      "width": 117,
+      "height": 108,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 117,
+          "h": 93,
+          "x": -21,
+          "y": -87,
+          "size": 4602,
+          "c_size1": 1941,
+          "m_size": 9204
+        },
+        {
+          "image": 0,
+          "w": 114,
+          "h": 81,
+          "x": -36,
+          "y": -84,
+          "size": 4464,
+          "c_size1": 1926,
+          "m_size": 8928
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 75,
+          "x": -51,
+          "y": -84,
+          "size": 4272,
+          "c_size1": 1710,
+          "m_size": 8544
+        },
+        {
+          "image": 0,
+          "w": 96,
+          "h": 93,
+          "x": -57,
+          "y": -90,
+          "size": 4302,
+          "c_size1": 1851,
+          "m_size": 8604
+        },
+        {
+          "image": 0,
+          "w": 96,
+          "h": 108,
+          "x": -69,
+          "y": -90,
+          "size": 4518,
+          "c_size1": 1899,
+          "m_size": 9036
+        }
+      ]
+    },
+    "mine": {
+      "sourceCharacter": 9,
+      "width": 105,
+      "height": 105,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 96,
+          "h": 105,
+          "x": -30,
+          "y": -84,
+          "size": 5370,
+          "c_size1": 2010,
+          "m_size": 10740
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 105,
+          "x": -42,
+          "y": -90,
+          "size": 5358,
+          "c_size1": 1986,
+          "m_size": 10716
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 93,
+          "x": -54,
+          "y": -90,
+          "size": 5280,
+          "c_size1": 1791,
+          "m_size": 10560
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 96,
+          "x": -66,
+          "y": -81,
+          "size": 5268,
+          "c_size1": 1725,
+          "m_size": 10536
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 96,
+          "x": -75,
+          "y": -69,
+          "size": 5238,
+          "c_size1": 1857,
+          "m_size": 10476
+        }
+      ]
+    },
+    "ion": {
+      "sourceCharacter": 10,
+      "width": 105,
+      "height": 99,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 105,
+          "h": 84,
+          "x": -45,
+          "y": -81,
+          "size": 4230,
+          "c_size1": 1878,
+          "m_size": 8460
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 90,
+          "x": -51,
+          "y": -87,
+          "size": 4104,
+          "c_size1": 1869,
+          "m_size": 8208
+        },
+        {
+          "image": 0,
+          "w": 93,
+          "h": 90,
+          "x": -51,
+          "y": -87,
+          "size": 4152,
+          "c_size1": 1725,
+          "m_size": 8304
+        },
+        {
+          "image": 0,
+          "w": 78,
+          "h": 90,
+          "x": -51,
+          "y": -84,
+          "size": 4248,
+          "c_size1": 1701,
+          "m_size": 8496
+        },
+        {
+          "image": 0,
+          "w": 78,
+          "h": 99,
+          "x": -54,
+          "y": -78,
+          "size": 4236,
+          "c_size1": 1866,
+          "m_size": 8472
+        }
+      ]
+    },
+    "water": {
+      "sourceCharacter": 11,
+      "width": 120,
+      "height": 111,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 114,
+          "h": 93,
+          "x": -33,
+          "y": -90,
+          "size": 5298,
+          "c_size1": 1854,
+          "m_size": 10596
+        },
+        {
+          "image": 0,
+          "w": 120,
+          "h": 96,
+          "x": -48,
+          "y": -99,
+          "size": 5250,
+          "c_size1": 1890,
+          "m_size": 10500
+        },
+        {
+          "image": 0,
+          "w": 117,
+          "h": 87,
+          "x": -60,
+          "y": -96,
+          "size": 5136,
+          "c_size1": 1695,
+          "m_size": 10272
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 96,
+          "x": -63,
+          "y": -96,
+          "size": 5184,
+          "c_size1": 1569,
+          "m_size": 10368
+        },
+        {
+          "image": 0,
+          "w": 96,
+          "h": 111,
+          "x": -72,
+          "y": -93,
+          "size": 5370,
+          "c_size1": 1788,
+          "m_size": 10740
+        }
+      ]
+    },
+    "sea": {
+      "sourceCharacter": 12,
+      "width": 126,
+      "height": 129,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 126,
+          "h": 123,
+          "x": -30,
+          "y": -93,
+          "size": 5826,
+          "c_size1": 2382,
+          "m_size": 11652
+        },
+        {
+          "image": 0,
+          "w": 117,
+          "h": 111,
+          "x": -42,
+          "y": -96,
+          "size": 5622,
+          "c_size1": 2319,
+          "m_size": 11244
+        },
+        {
+          "image": 0,
+          "w": 99,
+          "h": 99,
+          "x": -48,
+          "y": -96,
+          "size": 5844,
+          "c_size1": 2283,
+          "m_size": 11688
+        },
+        {
+          "image": 0,
+          "w": 120,
+          "h": 111,
+          "x": -69,
+          "y": -99,
+          "size": 5586,
+          "c_size1": 2253,
+          "m_size": 11172
+        },
+        {
+          "image": 0,
+          "w": 123,
+          "h": 129,
+          "x": -84,
+          "y": -99,
+          "size": 5694,
+          "c_size1": 2370,
+          "m_size": 11388
+        }
+      ]
+    },
+    "dragon": {
+      "sourceCharacter": 13,
+      "width": 114,
+      "height": 108,
+      "standFrames": [
+        {
+          "image": 0,
+          "w": 102,
+          "h": 108,
+          "x": -33,
+          "y": -87,
+          "size": 5862,
+          "c_size1": 2466,
+          "m_size": 11724
+        },
+        {
+          "image": 0,
+          "w": 102,
+          "h": 99,
+          "x": -45,
+          "y": -90,
+          "size": 5718,
+          "c_size1": 2232,
+          "m_size": 11436
+        },
+        {
+          "image": 0,
+          "w": 108,
+          "h": 93,
+          "x": -63,
+          "y": -90,
+          "size": 5586,
+          "c_size1": 2022,
+          "m_size": 11172
+        },
+        {
+          "image": 0,
+          "w": 114,
+          "h": 105,
+          "x": -72,
+          "y": -87,
+          "size": 5736,
+          "c_size1": 2166,
+          "m_size": 11472
+        },
+        {
+          "image": 0,
+          "w": 105,
+          "h": 102,
+          "x": -78,
+          "y": -75,
+          "size": 5706,
+          "c_size1": 2223,
+          "m_size": 11412
+        }
+      ]
+    }
+  },
+  "measuredCurrentArtwork": [
+    {
+      "id": "bowl",
+      "width": 65,
+      "height": 60
+    },
+    {
+      "id": "crossbow",
+      "width": 65,
+      "height": 61
+    },
+    {
+      "id": "cannon",
+      "width": 67,
+      "height": 40
+    },
+    {
+      "id": "beetle",
+      "width": 74,
+      "height": 57
+    },
+    {
+      "id": "duke",
+      "width": 72.5,
+      "height": 65
+    },
+    {
+      "id": "mine",
+      "width": 74,
+      "height": 66
+    },
+    {
+      "id": "missile",
+      "width": 74,
+      "height": 55.75
+    },
+    {
+      "id": "multi",
+      "width": 70,
+      "height": 45
+    },
+    {
+      "id": "laser",
+      "width": 76,
+      "height": 58
+    },
+    {
+      "id": "water",
+      "width": 65.75,
+      "height": 55
+    },
+    {
+      "id": "ion",
+      "width": 69,
+      "height": 50.25
+    },
+    {
+      "id": "sea",
+      "width": 71,
+      "height": 68
+    },
+    {
+      "id": "dragon",
+      "width": 77,
+      "height": 68
+    }
+  ],
+  "geometry": "载具本体路径在4倍密度Canvas测量实际包围宽度，以待机0..4帧最大宽/本体测量宽统一缩放；绕脚下锚点同步缩放显示、碰撞、炮口。原图集不是运行时资源。"
+}

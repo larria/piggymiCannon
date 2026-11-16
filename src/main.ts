@@ -21,6 +21,7 @@ import {TURN_ITEMS} from './catalog';
 import {CREW,crewAvatar,crewAvatarPath,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
 import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
+import {bodyScale} from './tank-geometry';
 import {itemIcon} from './item-art';
 import {installControlHints} from './control-hints';
 import {paintMapOverview} from './map-preview';
@@ -35,7 +36,7 @@ const safeRead=(key:string)=>{try{return JSON.parse(localStorage.getItem(key)||'
 const save=(key:string,value:unknown)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private browsing can disable storage. */}};
 const saved=safeRead('piggy-settings');
 let config:Config={slots:defaultSlots(),map:'valley',timer:DEFAULT_TURN_TIMER,seed:Date.now(),...(saved?.config||{})};
-config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:storedTurnTimer(config.timer,saved?.timerPreferenceVersion),seed:Date.now(),snow:config.snow,fog:config.fog,fireLine:config.fireLine,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,allowDragon:config.allowDragon};
+config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:storedTurnTimer(config.timer,saved?.timerPreferenceVersion),seed:Date.now(),snow:config.snow,fog:config.fog,fireLine:config.fireLine,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,fallDamage:!!config.fallDamage,allowDragon:config.allowDragon};
 if(config.slots.filter(s=>s.enabled).length<2||new Set(config.slots.filter(s=>s.enabled).map(s=>s.team)).size<2)config.slots=defaultSlots();
 let game=new Game(config,APP_VERSION);config={...game.config};
 const audio=new AudioManager();
@@ -247,12 +248,12 @@ function updateUI() {
   $('#fuel-value').textContent=String(Math.floor(t.fuel));$('#move-note').textContent=t.immobile?'紫冻水 · 暂时不能移动':t.frozen?'冰冻中 · 移动耗油加倍':t.vehicleId?`本回合最多移动 ${Math.round(t.moveDistance)}m`:'长按移动 · 每回合补充 18';
   if(t.immobile>0){$<HTMLButtonElement>('#move-left').disabled=true;$<HTMLButtonElement>('#move-right').disabled=true;}
   $<HTMLButtonElement>('#fire-button').disabled=!human||t.fallVelocity>0;
-  $('#fire-note').textContent=game.phase==='supply'?'空投阶段不消耗回合时间':lobby?'先进入战场':game.phase==='flying'||game.phase==='resolving'?'欣赏这条抛物线':game.paused?'游戏已暂停':game.phase==='ended'?'下一局见':game.phase==='handoff'?'交给下一位队长':!human?'等待对手行动':game.teleporting?'转移弹已装填 · 蓄力发射':t.doubleShot?'双发装填已就绪':t.boost?'强化炮弹已就绪':`${weaponById(game.selected).name}已就绪`;
+  $('#fire-note').textContent=game.phase==='supply'?'空投阶段不消耗回合时间':lobby?'先进入战场':game.phase==='flying'||game.phase==='resolving'?'欣赏这条抛物线':game.introLocked?'开场巡游 · 正在展示炮手位置':game.paused?'游戏已暂停':game.phase==='ended'?'下一局见':game.phase==='handoff'?'交给下一位队长':!human?'等待对手行动':game.teleporting?'转移弹已装填 · 蓄力发射':t.doubleShot?'双发装填已就绪':t.boost?'强化炮弹已就绪':`${weaponById(game.selected).name}已就绪`;
   $<HTMLButtonElement>('#pause-button').disabled=lobby||game.phase==='ended'||game.phase==='handoff';
   $('#pause-button').innerHTML=icon(game.paused?'play':'pause');$('#pause-button').setAttribute('aria-label',game.paused?'继续游戏':'暂停游戏');
   const signature=`${activeTab}|${t.vehicleId}|${game.selected}|${game.current}|${game.teleporting}|${t.itemUsed}|${t.tactics}|${ITEMS.map(i=>game.itemUnavailable(i.id)).join(',')}|${JSON.stringify(t.ammo)}|${JSON.stringify(t.items)}`;
   if(signature!==lastInventory) {renderInventory();lastInventory=signature;}
-  const phaseKey=game.phase==='ended'?(game.resultAge<3?'ending-animation':'ending-result'):game.phase;
+  const phaseKey=game.phase==='ended'?(game.resultAge<3?'ending-animation':'ending-result'):`${game.phase}:${game.introLocked}:${game.paused}`;
   $('#game-overlay').classList.toggle('result-overlay',game.phase==='ended');
   if(lastPhase!==phaseKey) {updateOverlay();lastPhase=phaseKey;}
   if(game.phase==='ended'&&game.resultAge>=3)positionResult();
@@ -261,7 +262,7 @@ function updateUI() {
 function positionResult(){
   const layer=$('#game-overlay'),card=layer.querySelector<HTMLElement>('.result');if(!card)return;
   const sx=layer.clientWidth/renderer.viewWidth,sy=layer.clientHeight/renderer.viewHeight;
-  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-renderer.offsetX-50)*sx,y:(t.y-(t.hp>0?124:28)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?154:54)*sy}));
+  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-renderer.offsetX-50*bodyScale(t))*sx,y:(t.y+18-((t.hp>0?124:28)+18)*bodyScale(t)-renderer.offsetY)*sy,width:100*bodyScale(t)*sx,height:(t.hp>0?154:54)*bodyScale(t)*sy}));
   const mapBox=$('#minimap-panel').getBoundingClientRect(),box=layer.getBoundingClientRect();
   const map={x:mapBox.x-box.x,y:mapBox.y-box.y,width:mapBox.width,height:mapBox.height};
   card.style.position='absolute';card.style.width='370px';
@@ -272,6 +273,7 @@ function positionResult(){
 
 function updateOverlay() {
   const el=$('#game-overlay');
+  if(game.introLocked){el.classList.add('hidden');el.innerHTML='';return;}
   if(game.paused&&!$<HTMLDialogElement>('#dialog').open) {
     el.classList.remove('hidden');el.innerHTML=`<div class="overlay-card"><span class="overlay-symbol">${icon('pause')}</span><div class="eyebrow">先歇一会儿</div><h2>风也在等你。</h2><p>战场已暂停，随时回来继续。</p><button class="button button-dark" data-action="resume">继续对局 ${icon('play')}</button><button class="text-button" data-dialog="settings">声音设置</button><button class="text-button" data-dialog="setup">重新部署</button></div>`;
   } else if(game.phase==='ended') {
@@ -295,7 +297,13 @@ function setDrawer(value:boolean) {
   $('#inventory-toggle').setAttribute('aria-expanded',String(value));
   $('#inventory-toggle').setAttribute('aria-label',value?'关闭军火库':'展开军火库');
 }
-function begin() {audio.unlock();audio.pause(false);game.start();const openingGame=game;game.paused=true;renderer.startTour(()=>{if(game===openingGame){game.paused=false;renderer.follow();lastPhase='';updateUI();}});playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}
+function begin() {
+  audio.unlock();audio.pause(false);game.start();const openingGame=game;
+  const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');
+  game.setIntroLocked(true);renderer.startTour(()=>{if(game===openingGame){game.setIntroLocked(false);renderer.follow();lastPhase='';updateUI();if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}});
+  playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));
+  if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();
+}
 function newMatch(next:Config,start=true) {
   cancelCharge();
   audio.resetEffects();
@@ -344,11 +352,12 @@ function showDialog(type:string) {
   } else if(type==='log') {
     content.innerHTML=`<span class="eyebrow">战场里的那些瞬间</span><h2>作战记录。</h2><p class="dialog-intro">最近 24 条事件 · 当前第 ${game.round} 轮</p><ol class="battle-log">${game.log.length?game.log.map((line,i)=>`<li><span>${String(game.log.length-i).padStart(2,'0')}</span>${colorNames(line)}</li>`).join(''):'<li>战场很安静。第一发炮弹会写下故事。</li>'}</ol><button class="button button-dark dialog-primary" data-action="close">返回对局 ${icon('arrow')}</button>`;
   } else {
-    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>随实际地图切换，大厅与结算各有配乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','队友之间可造成伤害'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="settings-note">${icon('music')}<p>地图配乐和炮火等采样来自你提供的原版素材；蓄力等音效保留合成。开关和音量会保存在这台设备。</p></div><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
+    dialog.classList.add('settings-dialog');
+    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>随实际地图切换，大厅与结算各有配乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','队友之间可造成伤害'],['fallDamage','坠落伤害','关闭时落地不扣血；掉穿底边仍出局'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="settings-note">${icon('music')}<p>地图配乐和炮火等采样来自你提供的原版素材；蓄力等音效保留合成。开关和音量会保存在这台设备。</p></div><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
     $('#copy-battle-snapshot').addEventListener('click',copyBattleSnapshot);
     $('#effects-toggle').addEventListener('click',()=>{audio.unlock();audio.setSoundEnabled(!audio.soundEnabled);$('#effects-toggle').classList.toggle('on',audio.soundEnabled);$('#effects-toggle').setAttribute('aria-checked',String(audio.soundEnabled));updateSound();persistSettings();});
     $('#music-toggle').addEventListener('click',()=>{audio.unlock();audio.setMusicEnabled(!audio.musicEnabled);$('#music-toggle').classList.toggle('on',audio.musicEnabled);$('#music-toggle').setAttribute('aria-checked',String(audio.musicEnabled));updateSound();persistSettings();});
-    content.querySelectorAll<HTMLButtonElement>('[data-setting]').forEach(b=>b.addEventListener('click',()=>{const key=b.dataset.setting as 'selfDamage'|'friendlyFire'|'allowDragon';config[key]=!config[key];game.setBattleRule(key,!!config[key]);b.classList.toggle('on',!!config[key]);b.setAttribute('aria-checked',String(!!config[key]));persistSettings();}));
+    content.querySelectorAll<HTMLButtonElement>('[data-setting]').forEach(b=>b.addEventListener('click',()=>{const key=b.dataset.setting as 'selfDamage'|'friendlyFire'|'allowDragon'|'fallDamage';config[key]=!config[key];game.setBattleRule(key,!!config[key]);b.classList.toggle('on',!!config[key]);b.setAttribute('aria-checked',String(!!config[key]));persistSettings();}));
     $('#volume').addEventListener('input',e=>{audio.setVolume(Number((e.target as HTMLInputElement).value)/100);$('#volume-percent').textContent=`${Math.round(audio.volume*100)}%`;persistSettings();});
   }
   if(!dialog.open) dialog.showModal();paintProjectilePreviews(dialog);
@@ -469,9 +478,9 @@ bindMove('#move-left',-1);bindMove('#move-right',1);
 function aimOnField(e:Pick<PointerEvent,'clientX'|'clientY'>) {
   if(!game.humanTurn) return;
   const rect=$('#battlefield').getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y=(e.clientY-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY;
-  if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,WORLD_W-20);
+  if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,game.worldWidth-20);
   else {
-    const t=game.active,slope=game.tankSlope(t),dx=x-t.x-Math.sin(slope)*13,dy=y-t.y+Math.cos(slope)*13;
+    const t=game.active,slope=game.tankSlope(t),dx=x-t.x-Math.sin(slope)*(31*bodyScale(t)-18),dy=y-t.y-Math.cos(slope)*(18-31*bodyScale(t));
     const aim=relativeAimForVector(dx,dy,slope,t.direction);game.face(aim.direction);game.setAim(aim.relative,t.power);
   }
   updateUI();
@@ -488,7 +497,7 @@ installMapGestures(battlefield,{
   hold:()=>{if(fieldPortrait!==null&&game.tanks[fieldPortrait]){focusPlayer(fieldPortrait);showDialog(`portrait:${fieldPortrait}`);}}
 });
 const mini=$<HTMLCanvasElement>('#minimap');
-const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*WORLD_W,(p.y-rect.top)/rect.height*TERRAIN_H);};
+const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*game.worldWidth,(p.y-rect.top)/rect.height*game.worldHeight);};
 installMapGestures(mini,{start:()=>{},pan:()=>{},tap:locateMini,hold:()=>{},locate:locateMini});
 let portraitTimer=0,portraitPointer=-1,portraitStart={x:0,y:0},suppressPortraitClick=false;
 document.addEventListener('pointerdown',e=>{const button=(e.target as HTMLElement).closest<HTMLElement>('[data-portrait]');if(!button)return;clearTimeout(portraitTimer);portraitPointer=e.pointerId;portraitStart={x:e.clientX,y:e.clientY};suppressPortraitClick=false;const id=Number(button.dataset.portrait);portraitTimer=window.setTimeout(()=>{suppressPortraitClick=true;if(game.tanks[id]){focusPlayer(id);showDialog(`portrait:${id}`);}},600);},true);

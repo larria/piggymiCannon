@@ -1,0 +1,2215 @@
+{
+  "formatVersion": 2,
+  "source": "用户本机 ~/Downloads/ft2 原客户端资源，镜像在忽略的 assets/ft2-mapdata/；不读取复刻项目，未宣称官方授权",
+  "codec": "LE i32 width/height; idx=y*width+x; 2 bits per cell; bitmap Y down; logical grid scale=3",
+  "decodedFiles": 20,
+  "numbering": "CMap.InitMap/MapUtil.setNormalStage 的 stageN 编号与 Language map_name 文案交叉，BGM使用另行确证矩阵",
+  "materialNote": "CMap.Memset IL 0x59..0x72: only Get(x,y)==1 is Set(x,y,0). Values 3 survive excavation; factory floor and temple nodes use 3. Value 2 absent in these resources.",
+  "adoption": "五张经典图选用派生占用轮廓与原逻辑宽，纸色绘图不变；关键薄层、永久节点和Z折点保留本作单位尺寸，并按真实炮击校验，不宣称全原公式/逐像素复刻。",
+  "maps": [
+    {
+      "file": "stageN_10f_bk",
+      "sha256": "663e0db01cc993531a5e1d5cd4c5d99cf57b68e7b5e9e7cc37bfbcaf611629e8",
+      "gridWidth": 1536,
+      "gridHeight": 676,
+      "logicalWidth": 4608,
+      "logicalHeight": 2028,
+      "bytes": 259592,
+      "materialCounts": [
+        984307,
+        50291,
+        0,
+        3738
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                229,
+                235
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                643,
+                649
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                20,
+                30
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                460,
+                466
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                618,
+                621
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                621,
+                643
+              ],
+              "material": 3
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                25,
+                35
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                174,
+                326
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                636,
+                642
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                20,
+                33
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                460,
+                466
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                618,
+                623
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                623,
+                642
+              ],
+              "material": 3
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                229,
+                235
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                643,
+                649
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_10f_001.png",
+        "sha256": "516a8835646e4855c81334f46828a5f99e42591d4200600d8395419f1146ef3a",
+        "width": 4096,
+        "height": 1803,
+        "rowMajorYDownIoU": 0.0717480602464628,
+        "xMajorYUpIoU": 0.004895667505434876
+      }
+    },
+    {
+      "file": "stageN_11f_bk",
+      "sha256": "b47b4699e5c3c635911878059bdaf1c70387c430ad64fc14a7dfca48b73278b0",
+      "gridWidth": 1500,
+      "gridHeight": 173,
+      "logicalWidth": 4500,
+      "logicalHeight": 519,
+      "bytes": 64883,
+      "materialCounts": [
+        68427,
+        191073,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 150,
+          "runs": [
+            {
+              "yDown": [
+                36,
+                173
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 375,
+          "runs": [
+            {
+              "yDown": [
+                84,
+                173
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 750,
+          "runs": [
+            {
+              "yDown": [
+                25,
+                173
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1125,
+          "runs": [
+            {
+              "yDown": [
+                48,
+                173
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1350,
+          "runs": [
+            {
+              "yDown": [
+                4,
+                173
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_11f_000.png",
+        "sha256": "2de55960accad9c960b89caf686694351fae3787ad6d39d03a121bae8609aaf7",
+        "width": 4096,
+        "height": 472,
+        "rowMajorYDownIoU": 0.985781281438794,
+        "xMajorYUpIoU": 0.6280019963963355
+      }
+    },
+    {
+      "file": "stageN_12f_bk",
+      "sha256": "1d2d4f516d6e01342e303358ea388d9ea90eabd47160a31c54c26053b6c3b57f",
+      "gridWidth": 1536,
+      "gridHeight": 800,
+      "logicalWidth": 4608,
+      "logicalHeight": 2400,
+      "bytes": 307208,
+      "materialCounts": [
+        1076164,
+        152636,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                284,
+                387
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                280,
+                363
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                644,
+                680
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                288,
+                328
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                413,
+                473
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                694,
+                748
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                415,
+                502
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_12f_000.png",
+        "sha256": "cffbc2c70fc56db25130eafaa6c5b45d9ce62d179985b58e33beac6cb2bb4873",
+        "width": 4096,
+        "height": 2133,
+        "rowMajorYDownIoU": 0.9350117920916414,
+        "xMajorYUpIoU": 0.056631354302210064
+      }
+    },
+    {
+      "file": "stageN_13f_bk",
+      "sha256": "87ec9f3562a23a374efa07d451f5d003c3a90d51aa86724bdb3cb00c667885d0",
+      "gridWidth": 1523,
+      "gridHeight": 802,
+      "logicalWidth": 4569,
+      "logicalHeight": 2406,
+      "bytes": 305370,
+      "materialCounts": [
+        944838,
+        276608,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 152,
+          "runs": [
+            {
+              "yDown": [
+                147,
+                305
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 380,
+          "runs": [
+            {
+              "yDown": [
+                412,
+                550
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 761,
+          "runs": [
+            {
+              "yDown": [
+                319,
+                668
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1142,
+          "runs": [
+            {
+              "yDown": [
+                405,
+                410
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                411,
+                526
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1370,
+          "runs": [
+            {
+              "yDown": [
+                145,
+                303
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_13f_000.png",
+        "sha256": "94346eb2de856b20433426e9a9ca04628edb8ed0a929a46f3181796421e25b9b",
+        "width": 4096,
+        "height": 2157,
+        "rowMajorYDownIoU": 0.9730741358324363,
+        "xMajorYUpIoU": 0.1487870421196654
+      }
+    },
+    {
+      "file": "stageN_14f_bk",
+      "sha256": "3ba4fa98dd284df1b5ad6dfca80b0f653b13bcd0c6f621f3dddd2bb9b6843759",
+      "gridWidth": 1536,
+      "gridHeight": 469,
+      "logicalWidth": 4608,
+      "logicalHeight": 1407,
+      "bytes": 180104,
+      "materialCounts": [
+        404444,
+        315940,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                33,
+                328
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                131,
+                171
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                271,
+                299
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                397,
+                425
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                174,
+                215
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                315,
+                343
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                441,
+                469
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                131,
+                171
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                271,
+                299
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                397,
+                425
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                34,
+                328
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_14f_000.png",
+        "sha256": "0c87342c2de2e8be7f78517138a4da9ac3d89951ea58c1874f6d720e51556539",
+        "width": 4096,
+        "height": 1251,
+        "rowMajorYDownIoU": 0.8993683299600616,
+        "xMajorYUpIoU": 0.297105365474339
+      }
+    },
+    {
+      "file": "stageN_15f_bk",
+      "sha256": "fcd7710cd4c34f772b2f74550a89e5cda7d62c313845f2e655d525659d37531a",
+      "gridWidth": 1536,
+      "gridHeight": 457,
+      "logicalWidth": 4608,
+      "logicalHeight": 1371,
+      "bytes": 175496,
+      "materialCounts": [
+        440725,
+        261227,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                0,
+                82
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                130,
+                192
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                313,
+                424
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                220,
+                302
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                443,
+                454
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                92,
+                175
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                231,
+                294
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                225,
+                303
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                448,
+                454
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                0,
+                80
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                130,
+                192
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                322,
+                425
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_15f_000.png",
+        "sha256": "a346dfd3011d7150970485e189b0fd69143075ddacf113767460910d9472c61e",
+        "width": 4096,
+        "height": 1219,
+        "rowMajorYDownIoU": 0.9456728715509315,
+        "xMajorYUpIoU": 0.22108321916796736
+      }
+    },
+    {
+      "file": "stageN_16f_bk",
+      "sha256": "0d7491d950301cfb823589a0d5bcbc4a51f180782bf0b2e435fe1a64fe3dd1dd",
+      "gridWidth": 1536,
+      "gridHeight": 670,
+      "logicalWidth": 4608,
+      "logicalHeight": 2010,
+      "bytes": 257288,
+      "materialCounts": [
+        902082,
+        127038,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                155,
+                250
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                113,
+                186
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                119,
+                149
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                231,
+                261
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                637,
+                654
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                2,
+                75
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                43,
+                138
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_16f_000.png",
+        "sha256": "9a7000b452b3880dc11b1efcf0cec4d5254f9b2c6d796d8f5f38b5c7100c5ef1",
+        "width": 4096,
+        "height": 1787,
+        "rowMajorYDownIoU": 0.9384155124653739,
+        "xMajorYUpIoU": 0.06930584136427538
+      }
+    },
+    {
+      "file": "stageN_17f_bk",
+      "sha256": "0f689c72e1bf78904116f98460a5e4416255d047e13bd9f1e636e42105160d9e",
+      "gridWidth": 1536,
+      "gridHeight": 400,
+      "logicalWidth": 4608,
+      "logicalHeight": 1200,
+      "bytes": 153608,
+      "materialCounts": [
+        432156,
+        182244,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                134,
+                240
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                133,
+                240
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                134,
+                240
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                132,
+                240
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                133,
+                240
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_17f_000.png",
+        "sha256": "f66d48e26da79a4d8e93a02662aa0bd2f205f2155bcfe843cd59ce550167694a",
+        "width": 4096,
+        "height": 1067,
+        "rowMajorYDownIoU": 0.9703998338684685,
+        "xMajorYUpIoU": 0.18371857946221218
+      }
+    },
+    {
+      "file": "stageN_18f_bk",
+      "sha256": "dbafb8f823402b53cfb17843f7901f75ed7b6012668cf3aa22c4bdb3941b8b04",
+      "gridWidth": 1536,
+      "gridHeight": 753,
+      "logicalWidth": 4608,
+      "logicalHeight": 2259,
+      "bytes": 289160,
+      "materialCounts": [
+        880717,
+        275891,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                318,
+                369
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                652,
+                753
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                294,
+                303
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                306,
+                350
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                617,
+                753
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                342,
+                352
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                354,
+                399
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                659,
+                753
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                232,
+                244
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                246,
+                298
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                498,
+                563
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                80,
+                92
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                95,
+                150
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                436,
+                513
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_18f_000.png",
+        "sha256": "53d75eb9f50d67aa810a27982a671b4413b88fa358123d7fc1510e9b9a38e559",
+        "width": 4096,
+        "height": 2008,
+        "rowMajorYDownIoU": 0.9459368646261559,
+        "xMajorYUpIoU": 0.1273595493342709
+      }
+    },
+    {
+      "file": "stageN_19f_bk",
+      "sha256": "16a49b78aa84dc45431b58d6b2cdf9efcddfbf796772cd759d06fc16ddf15732",
+      "gridWidth": 1800,
+      "gridHeight": 337,
+      "logicalWidth": 5400,
+      "logicalHeight": 1011,
+      "bytes": 151658,
+      "materialCounts": [
+        186655,
+        419945,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 180,
+          "runs": [
+            {
+              "yDown": [
+                117,
+                337
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 450,
+          "runs": [
+            {
+              "yDown": [
+                146,
+                337
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 900,
+          "runs": [
+            {
+              "yDown": [
+                138,
+                337
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1350,
+          "runs": [
+            {
+              "yDown": [
+                103,
+                337
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1620,
+          "runs": [
+            {
+              "yDown": [
+                3,
+                337
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_19f_000.png",
+        "sha256": "8581786902fccec161a17625632e118f5e766cc49f35ad4158e6de2c01e0ee00",
+        "width": 4096,
+        "height": 767,
+        "rowMajorYDownIoU": 0.9889645362679597,
+        "xMajorYUpIoU": 0.5470606660646281
+      }
+    },
+    {
+      "file": "stageN_1f_bk",
+      "sha256": "5872ce91c086918d5c3c8b4ac2b23eb8c548bbc7c43e390ce85ae6e609caedd9",
+      "gridWidth": 1536,
+      "gridHeight": 318,
+      "logicalWidth": 4608,
+      "logicalHeight": 954,
+      "bytes": 122120,
+      "materialCounts": [
+        315996,
+        172452,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                171,
+                318
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                213,
+                318
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                182,
+                251
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                90,
+                129
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                214,
+                278
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                293,
+                318
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                136,
+                277
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                298,
+                300
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_1f_bk_visual.png",
+        "sha256": "3afcde8214511d5a23c8d59c98641ce9ec9abb1a93fc847fb913f6166501ce8b",
+        "width": 1536,
+        "height": 318,
+        "rowMajorYDownIoU": 0.35306112421383645,
+        "xMajorYUpIoU": 0.35306112421383645
+      }
+    },
+    {
+      "file": "stageN_20f_bk",
+      "sha256": "b01c4d2ea969eb936e5248deb172734eaab3e7536de13e541b801552adb0fa3b",
+      "gridWidth": 1998,
+      "gridHeight": 525,
+      "logicalWidth": 5994,
+      "logicalHeight": 1575,
+      "bytes": 262246,
+      "materialCounts": [
+        857355,
+        191595,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 199,
+          "runs": [
+            {
+              "yDown": [
+                163,
+                200
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                342,
+                382
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 499,
+          "runs": [
+            {
+              "yDown": [
+                44,
+                114
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                119,
+                122
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                128,
+                130
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                259,
+                300
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 999,
+          "runs": [
+            {
+              "yDown": [
+                22,
+                59
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                369,
+                414
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                473,
+                475
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                482,
+                484
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1498,
+          "runs": [
+            {
+              "yDown": [
+                201,
+                235
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                472,
+                516
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1798,
+          "runs": [
+            {
+              "yDown": [
+                223,
+                262
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                265,
+                301
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                412,
+                449
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_20f_000.png",
+        "sha256": "2100d335b7a00286cdbdd866e7db093d455d200cc2683b48dfeca21c0003c5ee",
+        "width": 4096,
+        "height": 1076,
+        "rowMajorYDownIoU": 0.8833496237828268,
+        "xMajorYUpIoU": 0.11003290769811874
+      }
+    },
+    {
+      "file": "stageN_2f_bk",
+      "sha256": "19bf402e5f212cf7a20e0cb808d82bc87bbe35c2cc971ae55f1a01f6f4a0dd26",
+      "gridWidth": 1536,
+      "gridHeight": 666,
+      "logicalWidth": 4608,
+      "logicalHeight": 1998,
+      "bytes": 255752,
+      "materialCounts": [
+        942795,
+        80181,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                498,
+                524
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                651,
+                659
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                496,
+                530
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                655,
+                660
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                413,
+                428
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                643,
+                656
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                506,
+                537
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                656,
+                660
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                468,
+                473
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                506,
+                539
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                651,
+                658
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_2f_000.png",
+        "sha256": "dfd6a08968771fc605dbf36dd37633acc71d36d2a4c9992dd27afe2498eb5b2f",
+        "width": 4096,
+        "height": 1776,
+        "rowMajorYDownIoU": 0.8264122939921462,
+        "xMajorYUpIoU": 0.04310664523990323
+      }
+    },
+    {
+      "file": "stageN_3f_bk",
+      "sha256": "ce127d4d97dd72b1ca3f56ac57b0afb7dc875fb7597592ac6c39f09d5efd50b7",
+      "gridWidth": 1536,
+      "gridHeight": 696,
+      "logicalWidth": 4608,
+      "logicalHeight": 2088,
+      "bytes": 267272,
+      "materialCounts": [
+        879657,
+        189399,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                173,
+                179
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                561,
+                696
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                267,
+                300
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                532,
+                696
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                97,
+                103
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                332,
+                367
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                552,
+                696
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                270,
+                288
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                577,
+                592
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                635,
+                696
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                366,
+                372
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                589,
+                696
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_3f_000.png",
+        "sha256": "eb831248c9bfc1563618d8607c3800f5e19dce3d0222186db229ef275513a50e",
+        "width": 4096,
+        "height": 1856,
+        "rowMajorYDownIoU": 0.9461860109606287,
+        "xMajorYUpIoU": 0.10148836788473066
+      }
+    },
+    {
+      "file": "stageN_4f_bk",
+      "sha256": "1adea07d36f62d79a261bed0eab3d0b06996b12c515d45af5ab26db788bb345b",
+      "gridWidth": 1500,
+      "gridHeight": 594,
+      "logicalWidth": 4500,
+      "logicalHeight": 1782,
+      "bytes": 222758,
+      "materialCounts": [
+        757943,
+        72126,
+        0,
+        60931
+      ],
+      "sampleColumns": [
+        {
+          "x": 150,
+          "runs": [
+            {
+              "yDown": [
+                159,
+                191
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                285,
+                325
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                538,
+                584
+              ],
+              "material": 3
+            }
+          ]
+        },
+        {
+          "x": 375,
+          "runs": [
+            {
+              "yDown": [
+                290,
+                325
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                555,
+                593
+              ],
+              "material": 3
+            }
+          ]
+        },
+        {
+          "x": 750,
+          "runs": [
+            {
+              "yDown": [
+                2,
+                35
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                368,
+                405
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                555,
+                593
+              ],
+              "material": 3
+            }
+          ]
+        },
+        {
+          "x": 1125,
+          "runs": [
+            {
+              "yDown": [
+                57,
+                61
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                289,
+                325
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                552,
+                588
+              ],
+              "material": 3
+            }
+          ]
+        },
+        {
+          "x": 1350,
+          "runs": [
+            {
+              "yDown": [
+                158,
+                193
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                289,
+                325
+              ],
+              "material": 1
+            },
+            {
+              "yDown": [
+                544,
+                590
+              ],
+              "material": 3
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_4f_000.png",
+        "sha256": "4d58fdeb9ea1d54b564e88d3b38074386b97db7ea28b43f5a860809fb9296bab",
+        "width": 4096,
+        "height": 1622,
+        "rowMajorYDownIoU": 0.9125180882363026,
+        "xMajorYUpIoU": 0.08707261833760178
+      }
+    },
+    {
+      "file": "stageN_5f_bk",
+      "sha256": "c6ad6fcf9f4d45fcd901d955934ff345a60617a830cc89b25a3940d956297486",
+      "gridWidth": 1536,
+      "gridHeight": 314,
+      "logicalWidth": 4608,
+      "logicalHeight": 942,
+      "bytes": 120584,
+      "materialCounts": [
+        187639,
+        294665,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                140,
+                314
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                80,
+                286
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                75,
+                286
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                79,
+                286
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                140,
+                314
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_5f_000.png",
+        "sha256": "fed7d0b3612e308f0837a6f7880f42c3949be3af40173b1a8cbf9eaf52f6ac0d",
+        "width": 4096,
+        "height": 837,
+        "rowMajorYDownIoU": 0.9802626763983793,
+        "xMajorYUpIoU": 0.44487623245675784
+      }
+    },
+    {
+      "file": "stageN_6f_bk",
+      "sha256": "09538941907b1631243906f6c66ef714ea5ebfca02cec2c5794f113cdbfe553f",
+      "gridWidth": 1824,
+      "gridHeight": 317,
+      "logicalWidth": 5472,
+      "logicalHeight": 951,
+      "bytes": 144560,
+      "materialCounts": [
+        310902,
+        267306,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 182,
+          "runs": [
+            {
+              "yDown": [
+                47,
+                197
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 456,
+          "runs": [
+            {
+              "yDown": [
+                157,
+                306
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 912,
+          "runs": [
+            {
+              "yDown": [
+                84,
+                227
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1368,
+          "runs": [
+            {
+              "yDown": [
+                159,
+                306
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1641,
+          "runs": [
+            {
+              "yDown": [
+                49,
+                200
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_6f_000.png",
+        "sha256": "4e2316d77d95ba90d7c4d38cb3a2daab90bd1f6bb548e00f0aa01bec51dba17d",
+        "width": 4096,
+        "height": 712,
+        "rowMajorYDownIoU": 0.9735759995046638,
+        "xMajorYUpIoU": 0.30300028134400675
+      }
+    },
+    {
+      "file": "stageN_7f_bk",
+      "sha256": "dc1d9d6463fa6315451da07949a18958322890419f57c458fda644db9af6430e",
+      "gridWidth": 2048,
+      "gridHeight": 269,
+      "logicalWidth": 6144,
+      "logicalHeight": 807,
+      "bytes": 137736,
+      "materialCounts": [
+        158715,
+        392197,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 204,
+          "runs": [
+            {
+              "yDown": [
+                80,
+                269
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 512,
+          "runs": [
+            {
+              "yDown": [
+                67,
+                269
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1024,
+          "runs": [
+            {
+              "yDown": [
+                20,
+                269
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1536,
+          "runs": [
+            {
+              "yDown": [
+                68,
+                269
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1843,
+          "runs": [
+            {
+              "yDown": [
+                80,
+                269
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_7f_000.png",
+        "sha256": "f9eb6be444640d2dfa74b8f9354065932bf3ff24cb72f36bda4fa7d1f73b8f1f",
+        "width": 4096,
+        "height": 538,
+        "rowMajorYDownIoU": 0.9858505980001308,
+        "xMajorYUpIoU": 0.5949202260279365
+      }
+    },
+    {
+      "file": "stageN_8f_bk",
+      "sha256": "39dc396506bc6a25d5c1b86437a3bda6e8aa9464e66504f762a2ac02815c6320",
+      "gridWidth": 1536,
+      "gridHeight": 238,
+      "logicalWidth": 4608,
+      "logicalHeight": 714,
+      "bytes": 91400,
+      "materialCounts": [
+        179686,
+        185882,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                34,
+                188
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                30,
+                123
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                29,
+                126
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                23,
+                126
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                20,
+                201
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_8f_000.png",
+        "sha256": "5132ef76b257941cc4fbaf89846e13fe101ac769518b0d810586cd792e411939",
+        "width": 4096,
+        "height": 635,
+        "rowMajorYDownIoU": 0.9733366845748636,
+        "xMajorYUpIoU": 0.276543276787166
+      }
+    },
+    {
+      "file": "stageN_9f_bk",
+      "sha256": "942ecd172fe113378e846080584527d890216e7ac8097e494c0160baaa76f84f",
+      "gridWidth": 1536,
+      "gridHeight": 429,
+      "logicalWidth": 4608,
+      "logicalHeight": 1287,
+      "bytes": 164744,
+      "materialCounts": [
+        391874,
+        267070,
+        0,
+        0
+      ],
+      "sampleColumns": [
+        {
+          "x": 153,
+          "runs": [
+            {
+              "yDown": [
+                32,
+                203
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "runs": [
+            {
+              "yDown": [
+                237,
+                399
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "runs": [
+            {
+              "yDown": [
+                273,
+                423
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1152,
+          "runs": [
+            {
+              "yDown": [
+                243,
+                405
+              ],
+              "material": 1
+            }
+          ]
+        },
+        {
+          "x": 1382,
+          "runs": [
+            {
+              "yDown": [
+                39,
+                210
+              ],
+              "material": 1
+            }
+          ]
+        }
+      ],
+      "foregroundComparison": {
+        "file": "stageN_9f_000.png",
+        "sha256": "4858acb7a115d399411fdb38797ed51ddf22268edb95f1597c2eaa14dd89df91",
+        "width": 4096,
+        "height": 1144,
+        "rowMajorYDownIoU": 0.9709729725799298,
+        "xMajorYUpIoU": 0.2565280475424503
+      }
+    }
+  ]
+}

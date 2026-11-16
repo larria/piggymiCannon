@@ -1,5 +1,5 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {Game,makeRng} from '../src/engine';import {defaultSlots,crewAvatarPath} from '../src/crew';import {nextNaturalWind,MAX_WIND_CHANGE} from '../src/wind-cycle';
+import {Game,makeRng} from './legacy-fixture';import {defaultSlots,crewAvatarPath} from '../src/crew';import {nextNaturalWind,MAX_WIND_CHANGE} from '../src/wind-cycle';
 function game(teams=[0,0,1,1],controller:'human'|'ai'='ai'){
  const slots=defaultSlots();slots.forEach((s,i)=>Object.assign(s,{enabled:true,team:teams[i],controller,vehicle:i===1?'mine':'cannon'}));
  const g=new Game({slots,seed:52,map:'factory',timer:0,fog:false,fireLine:false});g.start();return g;

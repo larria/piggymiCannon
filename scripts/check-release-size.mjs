@@ -33,7 +33,7 @@ try{
   if(seen.has(e.url)){if(seen.get(e.url)!==e.revision)throw new Error(`预缓存同URL版本冲突：${e.url}`);duplicateExactEntries++;continue;}
   seen.set(e.url,e.revision);uniquePrecacheBytes+=byPath.get(path);
  }
- const forbidden=contents.filter(f=>/(^|\/)(\.workbuddy|ft2-audio|ft2-bullets|ft2-extra)(\/|$)/.test(relative(build,f.path).split(sep).join('/')));
+ const forbidden=contents.filter(f=>/(^|\/)(\.workbuddy|ft2-audio|ft2-bullets|ft2-extra|ft2-mapdata)(\/|$)/.test(relative(build,f.path).split(sep).join('/')));
  if(forbidden.length)throw new Error('来源目录或私有目录混入构建产物');
  const version=existsSync(resolve(build,'version.json'))?JSON.parse(readFileSync(resolve(build,'version.json'),'utf8')).version:'fixture';
  const result={formatVersion:1,version,limitBytes:limit,limitUnit:'MB (1,000,000 bytes)',distBytes,allocatedDistBytes,precacheBytes:uniquePrecacheBytes,manifestBytesIncludingDuplicates:precacheBytes,distFiles:contents.length,precacheEntries:entries.length,uniquePrecacheEntries:seen.size,uniquePrecacheBytes,duplicateExactEntries,sourceDirectoriesIncluded:false,passed:distBytes<=limit&&allocatedDistBytes<=limit&&precacheBytes<=limit};

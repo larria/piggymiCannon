@@ -11,7 +11,7 @@ const run=(g:Game,seconds:number,until?:(g:Game)=>boolean)=>{for(let i=0;i<secon
 
 test('bridge absorbs one ordinary cannon ground impact but repeated shots still excavate through',()=>{
  const g=ready({map:'coast',vehicle0:'cannon',vehicle1:'cannon'}),x=640,top=g.ground(x),bottom=g.land.bottom(x);
- assert.equal(bottom-top,BRIDGE_THICKNESS);const p=g.launch(g.active,'cannon-normal');Object.assign(p,{x,y:top+.5});
+ assert.equal(bottom-top,BRIDGE_THICKNESS);g.active.x=170;g.active.y=g.ground(170)-18;const p=g.launch(g.active,'cannon-normal');Object.assign(p,{x,y:top+.5});
  (g as any).explode(p);assert.ok(g.ground(x)<bottom-5);assert.ok(g.land.solid(x,bottom-8));
  const dig=excavation('cannon-normal',false);for(let i=0;i<10&&g.ground(x)<TERRAIN_H;i++)g.crater(x,g.ground(x),dig.radius,dig.depth);
  assert.equal(g.ground(x),TERRAIN_H,'repeated ordinary impacts can remove the remaining support');
