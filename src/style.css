@@ -185,3 +185,15 @@ dialog,.arsenal{scrollbar-gutter:stable}
 #slot-settings .slot-setting.wide{grid-column:auto;gap:5px}
 #slot-settings .slot-setting.wide small{display:block;margin:2px 0 0}
 @media(max-width:480px){#dialog.settings-dialog .combat-settings{grid-template-columns:1fr}}
+
+/* Small, local replay library; live controls keep their existing space. */
+.lobby-actions .replay-library-button{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:11px;color:#6a7e60;padding:3px 12px;min-height:28px}
+.replay-library-button .icon{width:13px;height:13px}
+.replay-list{display:grid;gap:12px;max-height:440px;overflow-y:auto;padding:2px 4px 2px 0;margin:18px 0}
+.replay-entry{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #dde3d3;border-radius:10px;background:#f4f5eb}
+.replay-entry>div{flex:1;min-width:0}.replay-entry strong{display:block;font-size:14px;color:#486044}.replay-entry small,.replay-entry span{display:block;font-size:10px;line-height:1.7;color:#7d8970;overflow-wrap:anywhere}.replay-entry span{margin-top:4px}
+.replay-entry .button{flex:none;min-height:34px;padding:6px 14px;font-size:11px}.replay-entry .text-button{flex:none;font-size:10px;padding:6px;color:#a07660}.replay-empty{padding:22px 10px;font-size:12px;line-height:1.8;color:#7b876c}
+.replay-controls{display:flex;align-items:center;gap:9px;min-height:34px;padding:5px 13px;background:#f4f2e7;border:1px solid #dce1cf;border-radius:8px;color:#627553;font-size:11px}
+.replay-controls.hidden{display:none}.replay-controls #replay-status{flex:1}.replay-controls #replay-time{font-variant-numeric:tabular-nums;color:#859075;white-space:nowrap}.replay-controls button{border:1px solid #d1dbc4;border-radius:6px;background:#fffdf4;color:#536a49;font:inherit;padding:5px 10px;white-space:nowrap;min-height:28px}.replay-controls button:disabled{opacity:.45}.replay-controls button:not(:disabled):hover{background:#e9efdf}
+.snapshot-controls{flex-wrap:wrap;gap:6px}.snapshot-controls .snapshot-copy-status{flex:1}
+@media(max-width:600px){.replay-controls{gap:4px;padding:4px;font-size:10px;flex-wrap:wrap}.replay-controls button{padding:5px 7px}.replay-entry{padding:10px;gap:8px}.replay-entry .button{padding:6px 10px}}

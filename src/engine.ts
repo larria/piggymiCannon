@@ -1,6 +1,7 @@
 import {addSkyBranch,SKY_UPPER_THICKNESS} from './sky-map';
 import {OBSERVATION_SECONDS,OBSERVATION_PRIORITY,type ObservationKind,type ShotObservation} from './shot-observation';
 import {salvoProfile,DOUBLE_SHOT_INTERVAL} from './salvo';
+import {permanentPiercingContact,PIERCING_SECTIONS,PIERCING_INTERVAL,piercingDamageScale} from './piercing';
 import {impactDamageScale,FULL_BLAST_DISTANCE} from './impact-damage';
 import {eraDamageFactor,ERA_DAMAGE_VERSION} from './era-damage';
 import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById,launchDamageScale, weaponHasTrail,MODERN_TRAIL_POINTS,MODERN_TRAIL_LENGTH, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
@@ -476,7 +477,7 @@ export class Game {
   private traceProjectile(p:Projectile,parent?:number){
     p.traceId=++this.projectileSequence;p.traceParent=parent;
     const owner=this.tanks[p.owner];p.traceLaunch??={action:this.turn+1,time:this.elapsed,owner:p.owner,name:owner?.name,vehicle:owner?.vehicleId,hp:owner?.hp,maxHP:owner?.maxHP,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:owner?.angle,absolute:owner?this.aim(owner).absolute:null,power:owner?.power,wind:this.wind,rngIndex:this.trace.rngIndex};
-    this.recordBattle('projectile-start',`${this.tanks[p.owner]?.name??p.owner}的${weaponById(p.weapon).name}第${p.traceId}弹${p.delay?'（延迟追加）':''}`,{projectile:p.traceId,parent,owner:p.owner,weapon:p.weapon,volley:p.volley,x:p.x,y:p.y,vx:p.vx,vy:p.vy,delay:p.delay,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,boostSources:p.boostSources,digBoost:p.digBoost,aimOffsetX:p.aimOffsetX,aimOffsetY:p.aimOffsetY});return p;
+    this.recordBattle('projectile-start',`${this.tanks[p.owner]?.name??p.owner}的${weaponById(p.weapon).name}第${p.traceId}弹${p.delay?'（延迟追加）':''}`,{projectile:p.traceId,parent,owner:p.owner,weapon:p.weapon,volley:p.volley,x:p.x,y:p.y,vx:p.vx,vy:p.vy,delay:p.delay,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,boostSources:p.boostSources,digBoost:p.digBoost,aimOffsetX:p.aimOffsetX,aimOffsetY:p.aimOffsetY,penetrations:p.penetrations,hitCooldown:p.hitCooldown});return p;
   }
   private projectileHit(p:Projectile) {
     if(p.age<0.09) return undefined;
@@ -533,6 +534,13 @@ export class Game {
       }
     }
     p.vy+=g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(effect==='pierce'&&!p.transfer){
+      const contact=permanentPiercingContact(this.land,oldX,oldY,p.x,p.y);
+      if(contact){
+        p.x=contact.x;p.y=contact.y;p.vx=0;p.vy=0;
+        if(contact.entered)this.recordBattle('projectile-blocked',`第${p.traceId??'?'}弹被永久地形挡住，剩余弹段在接触处逐段爆炸`,{projectile:p.traceId,weapon:p.weapon,owner:p.owner,x:p.x,y:p.y,penetrations:p.penetrations,remaining:PIERCING_SECTIONS-p.penetrations});
+      }
+    }
     if(effect==='helix') {
       const speed=Math.max(1,Math.hypot(p.vx,p.vy)),offset=Math.sin(p.age*17+p.phase)*18*Math.min(1,p.age*5);
       p.weaveX=-p.vy/speed*offset;p.weaveY=p.vx/speed*offset;p.x+=p.weaveX;p.y+=p.weaveY;
@@ -578,9 +586,9 @@ export class Game {
         this.burst(p.x,p.y,8,'#c3bed2');return false;
       }
       this.explode(p,hitTank?.id);
-      if(effect==='pierce'&&p.penetrations<3) {
+      if(effect==='pierce'&&p.penetrations<PIERCING_SECTIONS-1) {
         // A new remaining section continues from the impact, rather than teleporting the same shell.
-        this.projectiles.push(this.traceProjectile({...p,penetrations:p.penetrations+1,trail:[],hitCooldown:.025},p.traceId));
+        this.projectiles.push(this.traceProjectile({...p,penetrations:p.penetrations+1,trail:[],hitCooldown:PIERCING_INTERVAL},p.traceId));
       }
       return true;
     }
@@ -611,7 +619,8 @@ export class Game {
     const direct=directTarget!==undefined;
     const w=weaponById(p.weapon), radius=w.radius;
     this.observe('ground',null,{x:p.x,y:p.y});
-    const impact=this.recordBattle('impact',`第${p.traceId}弹 ${this.tanks[p.owner]?.name??p.owner}的${w.name}${direct?`直接命中${this.tanks[directTarget!]?.name}`:'命中地形／爆炸波及'}；(${p.x.toFixed(2)},${p.y.toFixed(2)})`,{projectile:p.traceId,parent:p.traceParent,owner:p.owner,weapon:p.weapon,directTarget,x:p.x,y:p.y,age:p.age,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,sources:p.boostSources});
+    const section=w.effect==='pierce'?p.penetrations+1:undefined;
+    const impact=this.recordBattle('impact',`第${p.traceId}弹 ${this.tanks[p.owner]?.name??p.owner}的${w.name}${section?`第${section}/${PIERCING_SECTIONS}段`:''}${direct?`直接命中${this.tanks[directTarget!]?.name}`:'命中地形／爆炸波及'}；(${p.x.toFixed(2)},${p.y.toFixed(2)})`,{projectile:p.traceId,parent:p.traceParent,owner:p.owner,weapon:p.weapon,directTarget,x:p.x,y:p.y,age:p.age,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,sources:p.boostSources,section});
     const damageGeometry=this.tanks.map(t=>({tank:t,distance:Math.hypot(t.x-p.x,t.y-p.y),scale:impactDamageScale(t,p.x,p.y,this.tankSlope(t),radius,directTarget===t.id)}));
     const color=w.color;
     this.blasts.push({x:p.x,y:p.y,radius,life:0.65,maxLife:0.65,color,weapon:p.weapon});
@@ -627,10 +636,11 @@ export class Game {
       if(p.weapon==='ice') {t.frozen=2;this.float(t.x,t.y-65,'冻结 ×2','#79aebe');this.recordBattle('status',`${t.name}冻结2次行动`,{target:t.id,weapon:p.weapon,impact,frozen:2});}
       const mineScale=w.effect==='mine'?(!p.mineArmed?1/3:t.vehicleId==='mine'?.5:1):1;
       const era=eraDamageFactor(this.tanks[p.owner]?.vehicleId,t.vehicleId);
-      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*era.value*distanceScale);
+      const sectionScale=w.effect==='pierce'?piercingDamageScale(p.penetrations):1;
+      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*era.value*distanceScale*sectionScale);
       const sources=p.boostSources??{fire:p.fireBoosted?'line':null,rage:p.rage?1.5:1,snow:1},fire=sources.fire?1.5:1,known=fire*sources.rage*sources.snow;
-      const factors=[era,{source:'弹体scale（实际实现）',value:p.scale},{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:distanceScale}];
-      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base:w.damage,factors,formula:'round(base × scale × boost × mineScale × distanceScale × eraScale)',dig:{...dig,digBoost:p.digBoost,source:p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:w.damage,fullDamageArea:{blastDistance:FULL_BLAST_DISTANCE,directCore:{xRadius:23,yRadius:32,yCenter:-9}},dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
+      const factors=[era,{source:'弹体scale（实际实现）',value:p.scale},...(w.effect==='pierce'?[{source:`飞火第${p.penetrations+1}/${PIERCING_SECTIONS}段递减（本作参数）`,value:sectionScale}]:[]),{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:distanceScale}];
+      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base:w.damage,factors,formula:'round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)',dig:{...dig,digBoost:p.digBoost,source:p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,section,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:w.damage,fullDamageArea:{blastDistance:FULL_BLAST_DISTANCE,directCore:{xRadius:23,yRadius:32,yCenter:-9}},dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
       if(w.effect==='poison'&&damage>0&&t.hp>redHealthLimit(t)) {
         const fresh=!t.poisoned;t.poisoned=true;t.poisonOwner=p.owner;
         if(fresh){this.float(t.x,t.y-95,'中毒','#6c994b',t.id);this.emit('poison',`${t.name}中了毒箭，自己的行动结束时结算毒伤。`,undefined,t.x,p.weapon);}
@@ -837,9 +847,14 @@ export class Game {
     const p=this.launch(tank,weapon,angle,power),points:{x:number;y:number}[]=[];
     const dt=1/90;let direct=false;
     for(let i=0;i<maxTime/dt;i++) {
+      const oldX=p.x,oldY=p.y;
       p.vx+=this.wind*SHOT_WIND_GAIN*(weapon==='sniper'?0.25:1)*dt;
       p.vy+=this.gravity*(weapon==='sniper'?0.27:weaponById(weapon).gravity??1)*dt;
       p.x+=p.vx*dt;p.y+=p.vy*dt;
+      if(weaponById(weapon).effect==='pierce'){
+        const contact=permanentPiercingContact(this.land,oldX,oldY,p.x,p.y);
+        if(contact){p.x=contact.x;p.y=contact.y;}
+      }
       if(i%6===0) points.push({x:p.x,y:p.y});
       direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&this.canDamage(t,p.owner)&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
       if(p.x<0||p.x>WORLD_W||p.y>WORLD_H||this.land.solid(p.x,p.y)||direct) break;

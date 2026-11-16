@@ -30,7 +30,16 @@ try{
  await page.locator('.battle-stage [data-dialog="settings"]').click();await page.locator('#copy-battle-snapshot').click();const payload=await page.evaluate(()=>window.__releaseSnapshot),snapshot=JSON.parse(payload.match(/```json\n([\s\S]*?)\n```/)[1]);
  check(snapshot.gameVersion===version&&snapshot.initial.config.map==='temple'&&snapshot.initial.world.width===1920&&snapshot.initial.world.height===960,'线上快照缺少实际版本／地图／新边界');
  await page.locator('#close-dialog').click();await page.screenshot({path:`QA/v${version}-live-offline-1194.png`,scale:'css'});
+ let offlineReplayVerified=false,localReplayBytes=0;
+ if(await page.locator('[data-action="save-replay"]').count()||version.split('.').map(Number).reduce((n,v)=>n*1000+v,0)>=3002002){
+  await page.locator('#fire-button').press('Enter');await page.waitForTimeout(500);await page.locator('.battle-stage [data-dialog="settings"]').click();await page.locator('[data-action="save-replay"]').click();
+  await page.waitForFunction(()=>document.querySelector('#toast').textContent.includes('已保存本局录像'));
+  localReplayBytes=await page.evaluate(()=>new TextEncoder().encode(localStorage.getItem('piggy-replays-v1')).length);
+  await page.locator('#close-dialog').click();await page.locator('#exit-match').click();await page.locator('[data-action="leave-match"]').click();await page.locator('[data-dialog="replays"]').click();await page.locator('[data-play-replay]').first().click();await page.keyboard.press('F5');
+  await page.waitForFunction(()=>document.querySelector('#replay-status').textContent==='播放完毕 · 已校验',null,{timeout:15000});
+  offlineReplayVerified=true;check(await page.locator('#fire-button').isDisabled(),'录像播放仍允许开炮');await page.screenshot({path:`QA/v${version}-live-offline-replay-1194.png`,scale:'css'});
+ }
  const state=await page.evaluate(()=>({backend:document.querySelector('#battlefield').dataset.renderBackend,version:document.querySelector('#stage-version-button').textContent,map:document.querySelector('#map-label').textContent,productionWithoutQA:!('__qa' in window),timerHidden:document.querySelector('#timer').classList.contains('hidden')}));check(state.productionWithoutQA&&state.timerHidden&&state.version.includes(version),'生产接口／不限时／版本异常');check(errors.length===0,errors.join('\n'));
- writeFileSync(reportFile,JSON.stringify({formatVersion:1,version,base,verifiedAt:new Date().toISOString(),liveBundleMatchesLocal:true,offlineReload:true,offlinePixi:true,allOfflineAudioHashesMatch:true,audioFiles:files.length,precacheURLs:precache.length,range,actualMap:snapshot.initial.config.map,mapName:snapshot.initial.mapName,seed:snapshot.initial.config.seed,world:snapshot.initial.world,snapshotFormatVersion:snapshot.formatVersion,actualMapMusicPlayedOffline:true,independentSwitchesEnabled:true,...state,errors},null,2)+'\n');
+ writeFileSync(reportFile,JSON.stringify({formatVersion:1,version,base,verifiedAt:new Date().toISOString(),liveBundleMatchesLocal:true,offlineReload:true,offlinePixi:true,allOfflineAudioHashesMatch:true,audioFiles:files.length,precacheURLs:precache.length,range,actualMap:snapshot.initial.config.map,mapName:snapshot.initial.mapName,seed:snapshot.initial.config.seed,world:snapshot.initial.world,snapshotFormatVersion:snapshot.formatVersion,actualMapMusicPlayedOffline:true,independentSwitchesEnabled:true,offlineReplayVerified,localReplayBytes,...state,errors},null,2)+'\n');
  console.log(`v${version} 线上入口与本地一致；离线Pixi、${files.length}音频、完整曲尾、地图与快照通过`);
 }finally{await context.close();await browser.close();}

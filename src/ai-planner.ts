@@ -1,4 +1,5 @@
 import {salvoProfile} from './salvo';
+import {permanentPiercingContact} from './piercing';
 import {impactDamageScale} from './impact-damage';
 import {eraDamageFactor} from './era-damage';
 import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,BOTTOM_Y,type Game,type Tank} from './engine';
@@ -31,7 +32,7 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
  for(let i=0;i<12/dt;i++){
   age+=dt;
   if(spec.effect==='helix'){x-=wx;y-=wy;}
-  const oldX=x;
+  const oldX=x,oldY=y;
   vx+=orbital?0:g.wind*SHOT_WIND_GAIN*(weapon==='sniper'?.25:1)*dt;
   if((spec.effect==='homing'||weapon==='homing')&&(vy>0||lock)){
    if(!lock&&age>.18&&y>g.ground(x)-130){
@@ -41,6 +42,10 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
    if(lock){const a=Math.atan2(lock.tank.y+aimOffsetY-y,lock.tank.x+aimOffsetX-x),s=Math.max(250,Math.hypot(vx,vy)),blend=Math.min(1,dt*5);vx+=(Math.cos(a)*s-vx)*blend;vy+=(Math.sin(a)*s-vy)*blend;}
   }
   vy+=(orbital?0:g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*dt;x+=vx*dt;y+=vy*dt;
+  if(spec.effect==='pierce'){
+   const contact=permanentPiercingContact(g.land,oldX,oldY,x,y);
+   if(contact){x=contact.x;y=contact.y;vx=0;vy=0;}
+  }
   if(spec.effect==='helix'){const s=Math.max(1,Math.hypot(vx,vy)),o=Math.sin(age*17+phase)*18*Math.min(1,age*5);wx=-vy/s*o;wy=vx/s*o;x+=wx;y+=wy;}
   if(g.fireLine&&boost===1&&(oldX-g.fireLine.x)*(x-g.fireLine.x)<=0&&y>=g.fireLine.top&&y<=g.fireLine.bottom)boost=1.5;
   if(age>=.09)direct=w.bodies.find(b=>b.eligible&&Math.abs(b.tank.x-x)<50&&Math.abs(b.tank.y-y)<62&&pointHitsTank(b.tank,x,y,b.slope));
