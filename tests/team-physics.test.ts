@@ -5,6 +5,7 @@ import {aimGeometry} from '../src/aim';import {defaultSlots} from '../src/crew';
 const ready=(c:any={})=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,vehicle0:'bowl',vehicle1:'cannon',...c});g.start();return g;};
 const flat=(c:any={})=>{const g=ready(c);g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=150+i*275;t.y=432;});g.wind=0;return g;};
 const run=(g:Game,n:number)=>{for(let i=0;i<n*120;i++)g.update(1/120);};
+const finishSupply=(g:Game)=>{for(let i=0;i<240&&g.phase==='supply';i++)g.update(1/120);assert.notEqual(g.phase,'supply');};
 const near=(a:number,b:number)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 test('body-relative angles derive signs for both facings and unbounded absolute angles',()=>{
  for(const slope of [-Math.PI/3,-.4,0,.4,Math.PI/3])for(const d of [-1,1])for(const a of [0,25,45,90,175]){
@@ -44,7 +45,7 @@ test('team victory waits for all opponents, actors skip dead seats, pure hotseat
 });
 test('AI and mixed cooperation use cyclic alive-seat turns; every AI fires once per action',()=>{
  const g=flat({formation:'2v2'});g.tanks.forEach(t=>t.hp=t.maxHP=100000);
- for(let i=0;i<8;i++){const actor=g.active;assert.equal(actor.id,i%4);if(actor.controller==='human'){g.fire();}else{run(g,1.85);assert.equal(actor.shots,Math.floor(i/4)+1);}assert.equal(g.fire(true),false);g.projectiles=[];g.nextTurn();if(g.phase==='supply'){g.crates=[];run(g,.5);}}
+ for(let i=0;i<8;i++){const actor=g.active;assert.equal(actor.id,i%4);if(actor.controller==='human'){g.fire();}else{run(g,1.85);assert.equal(actor.shots,Math.floor(i/4)+1);}assert.equal(g.fire(true),false);g.projectiles=[];g.nextTurn();if(g.phase==='supply'){g.crates=[];finishSupply(g);}}
  const coop=flat({mode:'hotseat',formation:'2v2',seats:defaultSeats('2v2','hotseat').map(s=>({...s,controller:s.team===0?'human':'ai'}))});for(let i=0;i<8;i++){assert.equal(coop.current,i%4);coop.nextTurn();}
 });
 test('self/friendly damage defaults off across blasts, statuses, hazards and guidance; fall always hurts',()=>{
@@ -84,7 +85,7 @@ test('an active actor eliminated by terrain or hazards cannot fire and is handed
 test('all four crew slots retain consumed stock and their selected guns independently',()=>{
  const seats=defaultSeats('2v2','hotseat').map(s=>({...s,vehicle:'water' as const})),g=flat({mode:'hotseat',formation:'2v2',seats});
  for(let i=0;i<4;i++){assert.equal(g.current,i);g.selectWeapon('water-special');g.useItem('double');g.skipTurn();}
- for(let i=0;i<4;i++){assert.equal(g.current,i);assert.equal(g.selected,'water-special');assert.equal(g.active.items.double,0);g.skipTurn();if(g.phase==='supply'){g.crates=[];run(g,.5);}}
+ for(let i=0;i<4;i++){assert.equal(g.current,i);assert.equal(g.selected,'water-special');assert.equal(g.active.items.double,0);g.skipTurn();if(g.phase==='supply'){g.crates=[];finishSupply(g);}}
 });
 test('touch aiming inverts body rotation without flipping facing at >90 or negative absolute elevations',async()=>{
  const {relativeAimForVector}=await import('../src/aim');

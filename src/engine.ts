@@ -20,6 +20,7 @@ import {MAPS,type MapChoice} from './catalog';
 import {nextNaturalWind,nextWindRound,MAX_WIND_CHANGE,NATURAL_WIND_LIMIT} from './wind-cycle';
 import {ITEM_CUE_SECONDS,type ItemCue} from './item-feedback';
 import {projectileSpeed} from './ballistics';
+import {modernSupplyTiming,SUPPLY_APPROACH_SECONDS,SUPPLY_LANDING_SECONDS,type SupplyObservation} from './supply-camera';
 export {WORLD_W,WORLD_H,BOTTOM_Y};
 export {WATER_Y} from './terrain';
 export const FLIGHT_SPEED=1.8;
@@ -71,6 +72,7 @@ export class Game {
   texts:FloatingText[]=[]; fires:FireZone[]=[]; crates:Crate[]=[];
   events:GameEvent[]=[]; log:string[]=[];
   introLocked=false;observation:ShotObservation|null=null;paused=false; winner:number|null=null; shake=0; elapsed=0;
+  supplyObservation:SupplyObservation|null=null;
   targetX=1000; teleporting=false; aiTime=0; resolveTime=0;resolveHazardTime=0;
   fog=false;fogTurnsRemaining=0;fireLineTurnsRemaining=0;fireLine:{x:number;top:number;bottom:number}|null=null;
   movingUntil=[0,0];
@@ -141,6 +143,8 @@ export class Game {
   }
   battleSnapshot():BattleSnapshot {
     const current:Record<string,any>={};for(const key of RESTORE_KEYS){const value=(this as any)[key];current[key]=value instanceof Map?[...value]:key==='projectiles'?this.projectiles.map(({trail,...p})=>p):value;}
+    // Old recordings retain both their original supply timing and digest shape.
+    if(modernSupplyTiming(this.gameVersion))current.supplyObservation=this.supplyObservation;
     current.terrain={mask:packTerrain(this.land.mask),protectedMask:packTerrain(this.land.protectedMask),revision:this.land.revision};
     current.annotatedTanks=this.traceTanks();
     return this.trace.snapshot(this.gameVersion,current);
@@ -151,6 +155,7 @@ export class Game {
     if(snapshot.format!=='piggy-battle-snapshot'||snapshot.formatVersion!==1)throw new Error('不支持的快照格式');
     const g=new Game(snapshot.initial.config,snapshot.gameVersion),state=JSON.parse(JSON.stringify(snapshot.current),(_key,v)=>v==='Infinity'?Infinity:v==='-Infinity'?-Infinity:v==='NaN'?NaN:v);
     for(const key of RESTORE_KEYS)if(key in state)(g as any)[key]=['volleyTargets','fallOrigins'].includes(key)?new Map(state[key]):state[key];
+    if(modernSupplyTiming(g.gameVersion)&&state.supplyObservation)g.supplyObservation=state.supplyObservation;
     unpackTerrain(state.terrain.mask,g.land.mask);unpackTerrain(state.terrain.protectedMask,g.land.protectedMask);g.land.rebuild();g.land.revision=state.terrain.revision;
     g.land.changes.length=0;
     g.projectiles.forEach(p=>p.trail=[]);g.trace.restore(snapshot);g.rng=g.diagnosticRng(makeRng(snapshot.rng.state));g.events=[];g.particles=[];return g;
@@ -829,7 +834,9 @@ export class Game {
       }
     }
     this.afterSupply='aiming';
-    this.phase=this.crates.some(c=>c.falling)?'supply':this.afterSupply;this.supplySettling=0.35;
+    this.phase=this.crates.some(c=>c.falling)?'supply':this.afterSupply;
+    this.supplySettling=modernSupplyTiming(this.gameVersion)?SUPPLY_LANDING_SECONDS:.35;
+    this.supplyObservation=this.phase==='supply'&&modernSupplyTiming(this.gameVersion)?{approach:SUPPLY_APPROACH_SECONDS,crates:this.crates.flatMap((c,i)=>c.falling?[i]:[])}:null;
     this.emit('turn',`${this.active.name}，轮到你了。`);
   }
   predictSupply(startX:number) {
@@ -958,8 +965,10 @@ export class Game {
     if(this.phase==='lobby'||this.phase==='handoff') return;
     this.updateTanks(dt);
     if(this.phase==='supply') {
+      let dropDt=dt;
+      if(this.supplyObservation?.approach){const wait=Math.min(dropDt,this.supplyObservation.approach);this.supplyObservation.approach-=wait;dropDt-=wait;if(dropDt<=0)return;}
       for(const c of this.crates) if(c.falling) {
-        const steps=Math.ceil(dt/(1/120)),step=dt/steps;
+        const steps=Math.ceil(dropDt/(1/120)),step=dropDt/steps;
         for(let i=0;i<steps&&c.falling;i++) {
           const target=this.ground(c.x,c.y-8)-14;
           c.vx=((c.vx??0)+this.wind*2.5*step)*Math.exp(-0.35*step);
@@ -967,7 +976,7 @@ export class Game {
           if(c.y>=target) {c.y=target;c.falling=false;this.burst(c.x,c.y+13,15,'#d9c29a');this.emit('crate-land','补给箱已落地。',undefined,c.x);}
         }
       }
-      if(!this.crates.some(c=>c.falling)) {this.supplySettling-=dt;if(this.supplySettling<=0) {this.phase=this.afterSupply;this.emit('turn',`${this.active.name}，轮到你了。`);}}
+      if(!this.crates.some(c=>c.falling)) {this.supplySettling-=dropDt;if(this.supplySettling<=0) {this.phase=this.afterSupply;this.supplyObservation=null;this.emit('turn',`${this.active.name}，轮到你了。`);}}
       return;
     }
     // Additional settled viewing time must not add extra fire/gas damage.

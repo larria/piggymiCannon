@@ -3,7 +3,8 @@ import {paintTurnMarker} from './turn-marker';
 import {loadBattleSprites,paintBattleSprite,battleSpriteRevision} from './battle-sprites';
 import type {PixiStage} from './pixi-stage';
 import {BattleCamera,BATTLE_ZOOM,BATTLE_VIEW_WIDTH} from './camera';
-import { Game, WORLD_W, WORLD_H, BOTTOM_Y, clamp, makeRng, type Tank } from './engine';
+import {supplyCameraTarget} from './supply-camera';
+import { Game, WORLD_W, WORLD_H, BOTTOM_Y, clamp, makeRng, type Tank,type Crate } from './engine';
 import { weaponById,weaponHasTrail,MODERN_TRAIL_ALPHA,MODERN_TRAIL_WIDTH } from './catalog';
 import {projectileDrawScale,projectileRearExtent} from './projectile-art';
 import { breathingPose } from './feedback';
@@ -33,6 +34,16 @@ export class Renderer {
   game:Game; palette:Palette; ratio=1;time=0;viewHeight=WORLD_H;viewWidth=WORLD_W;
   readonly zoom=BATTLE_ZOOM;
   private camera=new BattleCamera();
+  private supplyCrates:Crate[]=[];private supplyPhase=false;private supplyStarted=0;
+  private supplyView(){
+    const g=this.game;
+    if(g.phase!=='supply'){if(this.supplyPhase){this.supplyCrates=[];this.supplyPhase=false;}return null;}
+    if(!this.supplyPhase){this.supplyStarted=g.elapsed;this.supplyPhase=true;this.supplyCrates=g.crates.filter(c=>c.falling);}
+    if(g.supplyObservation)this.supplyCrates=g.supplyObservation.crates.map(i=>g.crates[i]).filter((c):c is Crate=>!!c);
+    // A legacy snapshot saved during settling has no presentation indices.
+    if(!this.supplyCrates.length)this.supplyCrates=[...g.crates];
+    return supplyCameraTarget(this.supplyCrates,g.active,this.viewWidth,this.viewHeight,g.elapsed-this.supplyStarted);
+  }
   private reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
   get offsetX(){return this.camera.x;}set offsetX(v:number){this.camera.x=v;}
   get offsetY(){return this.camera.y;}set offsetY(v:number){this.camera.y=v;}
@@ -51,7 +62,7 @@ export class Renderer {
   invalidate(){this.invalidated=true;}
   focusAt(x:number,y?:number){this.camera.center(y===undefined?this.offsetX+this.viewWidth/2:x,y??x);this.invalidate();}
   panBy(dx:number,dy:number){this.camera.pan(dx,dy);this.invalidate();}
-  follow(recenter=true){this.camera.follow();if(recenter){this.camera.center(this.game.active.x,this.game.active.y,true);this.camera.manual=null;}this.invalidate();}
+  follow(recenter=true){this.camera.follow();if(recenter){const supply=this.supplyView();this.camera.center(supply?supply.x+this.viewWidth/2:this.game.active.x,supply?supply.y+this.viewHeight/2:this.game.active.y,true);this.camera.manual=null;}this.invalidate();}
   get touring(){return this.camera.touring;}
   get tourPlayer(){return this.camera.tourPlayer;}
   startTour(done:()=>void){const points=this.game.tanks.map(t=>({x:t.x,y:t.y,id:t.id}));points.push({...points[this.game.current]});this.camera.startTour(points,done,matchMedia('(prefers-reduced-motion: reduce)').matches);this.invalidate();}
@@ -75,7 +86,7 @@ export class Renderer {
     }catch{stage?.destroy();layer.remove();this.backend='canvas';this.invalidate();}
   }
   destroy(){if(this.destroyed)return;this.destroyed=true;this.stage?.destroy();this.stage=null;}
-  setGame(game:Game) {this.camera.reset();this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.paintBackground();this.invalidate();}
+  setGame(game:Game) {this.camera.reset();this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.paintBackground();this.invalidate();}
   resize() {
     this.ratio=Math.min(window.devicePixelRatio||1,2)*this.zoom;
     this.viewWidth=BATTLE_VIEW_WIDTH;
@@ -314,18 +325,21 @@ export class Renderer {
   draw(dt:number) {
     const ctx=this.ctx,g=this.game;
     const stamp=[g.land.revision,g.current,crewPortraitRevision(),battleSpriteRevision()].join(':');
+    const cameraMoving=this.camera.animating&&(!g.paused||this.touring||!!this.camera.manual);
     // draw(0) remains the explicit still-frame API used by snapshots/review.
-    if(dt!==0&&g.paused&&!this.camera.animating&&!this.invalidated&&this.pausedStamp===stamp)return;
+    if(dt!==0&&g.paused&&!cameraMoving&&!this.invalidated&&this.pausedStamp===stamp)return;
     this.invalidated=false;this.pausedStamp=g.paused?stamp:'';this.frames++;this.time+=g.paused&&!this.touring?0:dt;
     if(!this.windMotes.length) {const rng=makeRng(609);this.windMotes=Array.from({length:40},()=>({x:rng()*WORLD_W,y:rng()*WORLD_H,vx:g.wind*13,fall:8+rng()*11,alpha:0.52+rng()*0.24,size:1.4+rng()*1.6,phase:rng()*10}));}
     if(!g.paused) for(const mote of this.windMotes) {mote.vx+=(g.wind*13-mote.vx)*Math.min(1,dt*2);mote.x=((mote.x+mote.vx*dt)%WORLD_W+WORLD_W)%WORLD_W;mote.y=(mote.y+mote.fall*dt)%WORLD_H;}
     const actor=g.active;let camera=actor.y-this.viewHeight*.5,targetX=actor.x-this.viewWidth*.5;
+    const enteringSupply=g.phase==='supply'&&!this.supplyPhase,supply=this.supplyView();
+    if(enteringSupply&&!this.camera.manual&&!this.touring)this.follow();
     if(g.phase==='flying'&&g.projectiles.some(p=>this.visibleAt(p.x)&&p.delay<=0)) camera=Math.min(camera,Math.min(...g.projectiles.filter(p=>this.visibleAt(p.x)&&p.delay<=0).map(p=>p.y))-this.viewHeight*0.3);
-    if(g.phase==='supply'&&g.crates.some(c=>c.falling)) camera=Math.min(camera,Math.min(...g.crates.filter(c=>c.falling).map(c=>c.y))-this.viewHeight*0.32);
+    if(supply){camera=supply.y;targetX=supply.x;}
     const flying=g.projectiles.filter(p=>p.delay<=0&&this.visibleAt(p.x));
     if(g.phase==='flying'&&flying.length)targetX=flying.reduce((x,p)=>x+p.x,0)/flying.length-this.viewWidth*.5;
     if(g.phase==='resolving'&&g.observation){const falling=g.tanks.find(t=>t.hp>0&&t.fallVelocity>0),t=falling??(g.observation.target===null?null:g.tanks[g.observation.target]),point=t?(t.defeat??t):g.observation.point;if(point){targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}}
-    this.camera.update(dt,{x:targetX,y:camera});
+    this.camera.update(g.paused&&!this.touring&&!this.camera.manual?0:dt,{x:targetX,y:camera});
     ctx.save();ctx.clearRect(0,0,this.viewWidth,this.viewHeight);
     const shakeX=g.shake>0?Math.sin(this.time*88)*g.shake:0,shakeY=g.shake>0?Math.cos(this.time*69)*g.shake*.5:0;
     ctx.translate(shakeX,shakeY);this.rebuildStaticTerrain();
@@ -350,15 +364,16 @@ export class Renderer {
       paintBattleSprite(ctx,'gas',this.time*.3,gas.x-gas.radius,gas.y-43,gas.radius*2,54,.48,true);ctx.restore();
     }
     for(const mine of g.mines) if((mine.owner===g.viewer||g.snow)&&this.visibleAt(mine.x)) {ctx.fillStyle=weaponById(mine.weapon).color;ctx.beginPath();ctx.ellipse(mine.x,mine.y,9,4,0,0,7);ctx.fill();ctx.fillStyle='#eeb58a';ctx.fillRect(mine.x-2,mine.y-5,4,2);}
+    this.labelRects=[];this.portraitHits=[];g.tanks.filter(t=>g.visible(t)).forEach(t=>this.tank(t));
+    // Visible pickups sit in front of the chassis, including drops at a player’s feet.
     for(const crate of g.crates) {
-      if(!this.visibleAt(crate.x)&&!crate.falling) continue;
+      if(!this.visibleAt(crate.x)&&!crate.falling&&!(g.phase==='supply'&&this.supplyCrates.includes(crate))) continue;
       if(crate.falling) {ctx.strokeStyle='#f6f1dfaa';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(crate.x-14,crate.y-10);ctx.lineTo(crate.x-27,crate.y-48);ctx.moveTo(crate.x+14,crate.y-10);ctx.lineTo(crate.x+27,crate.y-48);ctx.stroke();ctx.fillStyle='#ead9b8cc';ctx.beginPath();ctx.ellipse(crate.x,crate.y-48,36,20,0,Math.PI,Math.PI*2);ctx.fill();}
       ctx.fillStyle='#b29469';rr(ctx,crate.x-14,crate.y-10,28,25,3);ctx.fill();ctx.strokeStyle='#ead7aa';ctx.lineWidth=2;ctx.stroke();
       ctx.fillStyle='#e9d9b5';ctx.fillRect(crate.x-2,crate.y-10,4,25);
       if(['double','homing','transfer','boost'].includes(crate.type)) {ctx.fillStyle=crate.type==='double'?'#e7c081':'#acc4d0';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(crate.type==='double'?'×2':crate.type==='transfer'?'⇄':crate.type==='boost'?'↑':'◎',crate.x,crate.y+9);}
       if(crate.type==='medical') {ctx.fillStyle='#a47158';ctx.fillRect(crate.x-7,crate.y-2,14,4);ctx.fillRect(crate.x-2,crate.y-7,4,14);}
     }
-    this.labelRects=[];this.portraitHits=[];g.tanks.filter(t=>g.visible(t)).forEach(t=>this.tank(t));
     for(const p of g.projectiles) {
       if(p.delay>0||!this.visibleAt(p.x)) continue;
       if(!p.fireBoosted&&!p.transfer&&weaponHasTrail(p.weapon)&&p.trail.length>1){ctx.save();const first=p.trail[0],last=p.trail[p.trail.length-1],weapon=weaponById(p.weapon),color=weapon.color,rear=projectileRearExtent(weapon.shape??p.weapon,4-p.penetrations),angle=Math.atan2(p.vy,p.vx);ctx.translate(-Math.cos(angle)*rear,-Math.sin(angle)*rear);const fade=ctx.createLinearGradient(first.x,first.y,last.x,last.y);fade.addColorStop(0,color+'00');fade.addColorStop(1,color);ctx.strokeStyle=fade;ctx.globalAlpha=MODERN_TRAIL_ALPHA;ctx.lineWidth=MODERN_TRAIL_WIDTH;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();p.trail.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.stroke();ctx.restore();}
