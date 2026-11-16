@@ -1,3 +1,5 @@
+import {salvoProfile,DOUBLE_SHOT_INTERVAL} from './salvo';
+import {impactDamageScale,FULL_BLAST_DISTANCE} from './impact-damage';
 import {eraDamageFactor,ERA_DAMAGE_VERSION} from './era-damage';
 import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById,launchDamageScale, weaponHasTrail,MODERN_TRAIL_POINTS,MODERN_TRAIL_LENGTH, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
 import {isRaging,redHealthLimit} from './health';
@@ -437,25 +439,20 @@ export class Game {
     const spec=weaponById(id);
     t.lastDelay=this.delayFor(t,transfer?undefined:id);t.delayCommitted=true;
     if(transfer)this.projectiles=[{...this.launch(t,'shell'),transfer:true,scale:1,boost:1,fireBoosted:false,rage:false,digBoost:1}];
-    else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>({...this.launch(t,id,t.angle+(i-(spec.shots!-1)/2)*(spec.spread??3)),phase:i*Math.PI*2/spec.shots!}));
+    else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>(()=>{const profile=salvoProfile(t.vehicleId,id,i,spec.shots!),p=this.launch(t,id,t.angle+profile.angle);p.vx*=profile.vx;p.vy*=profile.vy;p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;p.phase=i*Math.PI*2/spec.shots!;return p;})());
     else if(id==='triple') this.projectiles=[-5,0,5].map(d=>this.launch(t,id,t.angle+d));
     else if(id==='airstrike') this.projectiles=[-38,0,38].map(d=>({...this.launch(t,id),x:clamp(this.targetX+d,20,WORLD_W-20),y:-40-Math.abs(d),vx:0,vy:190}));
     else this.projectiles=[this.launch(t,id)];
-    if(!transfer&&(t.vehicleId==='multi'||t.vehicleId==='dragon')){
-      const count=this.projectiles.length;
-      this.projectiles.forEach((p,i)=>{
-        const rank=(i-(count-1)/2)/Math.max(1,(count-1)/2),speed=1+rank*.025;
-        p.vx*=speed;p.vy*=speed;
-        if(spec.effect==='homing'){p.aimOffsetX=rank*20;p.aimOffsetY=Math.sin(i*2.4)*12;}
-      });
-    }
+    // Preserve the old carrier spread for legacy bonus salvos; Multi's own
+    // normal/special pair above already uses its new shared velocity profile.
+    if(!transfer&&!(spec.shots&&spec.shots>1)&&(t.vehicleId==='multi'||t.vehicleId==='dragon'))this.projectiles.forEach((p,i)=>{const profile=salvoProfile(t.vehicleId,id,i,this.projectiles.length);p.vx*=profile.vx;p.vy*=profile.vy;if(spec.effect==='homing'){p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;}});
     if(!transfer&&spec.homingMode==='volley') {
       const volley=++this.volleySequence,impact=this.predict(t.angle,t.power,id,12,t);
       this.volleyTargets.set(volley,{x:impact.x,y:impact.y,target:null});
       this.projectiles.forEach(p=>p.volley=volley);
     }
-    if(t.doubleShot) this.projectiles.push(...this.projectiles.map((p,i)=>({...p,trail:[],delay:0.35,echo:i===0})));
-    this.recordBattle('fire-action',`${t.name}发射${transfer?'转移弹':spec.name}，${this.projectiles.length}枚；相对${t.angle.toFixed(2)}°／绝对${this.aim(t).absolute.toFixed(2)}°，力度${t.power.toFixed(2)}，等待${t.lastDelay}`,{owner:t.id,weapon:transfer?'shell':id,selectedWeapon:id,transfer,relative:t.angle,absolute:this.aim(t).absolute,power:t.power,direction:t.direction,position:{x:t.x,y:t.y},slope:this.tankSlope(t),projectileCount:this.projectiles.length,doubleShot:t.doubleShot,delay:t.lastDelay,ammo:t.ammo[id],rules:this.traceRules()});
+    if(t.doubleShot) this.projectiles.push(...this.projectiles.map((p,i)=>({...p,trail:[],delay:DOUBLE_SHOT_INTERVAL*FLIGHT_SPEED,echo:i===0})));
+    this.recordBattle('fire-action',`${t.name}发射${transfer?'转移弹':spec.name}，${this.projectiles.length}枚；相对${t.angle.toFixed(2)}°／绝对${this.aim(t).absolute.toFixed(2)}°，力度${t.power.toFixed(2)}，等待${t.lastDelay}`,{owner:t.id,weapon:transfer?'shell':id,selectedWeapon:id,transfer,relative:t.angle,absolute:this.aim(t).absolute,power:t.power,direction:t.direction,position:{x:t.x,y:t.y},slope:this.tankSlope(t),projectileCount:this.projectiles.length,doubleShot:t.doubleShot,doubleShotIntervalSeconds:t.doubleShot?DOUBLE_SHOT_INTERVAL:0,delay:t.lastDelay,ammo:t.ammo[id],rules:this.traceRules()});
     this.projectiles.forEach(p=>this.traceProjectile(p));
     t.boost=false;t.doubleShot=false;this.heardX[t.id]=Math.round(t.x/90)*90;
     this.emit('shot',`${t.name}发射了${transfer?'转移弹':weaponById(id).name}。`,undefined,t.x,transfer?'shell':id,transfer);
@@ -600,6 +597,7 @@ export class Game {
     const direct=directTarget!==undefined;
     const w=weaponById(p.weapon), radius=w.radius;
     const impact=this.recordBattle('impact',`第${p.traceId}弹 ${this.tanks[p.owner]?.name??p.owner}的${w.name}${direct?`直接命中${this.tanks[directTarget!]?.name}`:'命中地形／爆炸波及'}；(${p.x.toFixed(2)},${p.y.toFixed(2)})`,{projectile:p.traceId,parent:p.traceParent,owner:p.owner,weapon:p.weapon,directTarget,x:p.x,y:p.y,age:p.age,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,sources:p.boostSources});
+    const damageGeometry=this.tanks.map(t=>({tank:t,distance:Math.hypot(t.x-p.x,t.y-p.y),scale:impactDamageScale(t,p.x,p.y,this.tankSlope(t),radius,directTarget===t.id)}));
     const color=w.color;
     this.blasts.push({x:p.x,y:p.y,radius,life:0.65,maxLife:0.65,color,weapon:p.weapon});
     this.burst(p.x,p.y,Math.round(radius*0.6),color);
@@ -607,18 +605,17 @@ export class Game {
     const dig=excavation(p.weapon,direct);
     dig.radius*=p.digBoost;dig.depth*=p.digBoost;
     this.excavateImpact(p,dig.radius,dig.depth,directTarget);
-    for(const t of this.tanks) {
-      const distance=Math.hypot(t.x-p.x,t.y-p.y);
+    for(const {tank:t,distance,scale:distanceScale} of damageGeometry) {
       if(directTarget!==t.id&&distance>radius+26) continue;
       if(!this.canDamage(t,p.owner)){this.recordBattle('damage-blocked',`${t.name}未受伤：${t.id===p.owner?'自伤':'友伤'}关闭`,{target:t.id,owner:p.owner,weapon:p.weapon,projectile:p.traceId,impact,rules:this.traceRules()});continue;}
       if(p.weapon==='emp') {const before={shield:t.shield,fuel:t.fuel};t.shield=0;t.fuel=Math.max(0,t.fuel-35);this.float(t.x,t.y-65,'脉冲','#ac88bc');this.recordBattle('status',`${t.name}被脉冲移除护盾${before.shield}，燃料−35（伤害计算前）`,{target:t.id,weapon:p.weapon,impact,before,after:{shield:t.shield,fuel:t.fuel}});}
       if(p.weapon==='ice') {t.frozen=2;this.float(t.x,t.y-65,'冻结 ×2','#79aebe');this.recordBattle('status',`${t.name}冻结2次行动`,{target:t.id,weapon:p.weapon,impact,frozen:2});}
       const mineScale=w.effect==='mine'?(!p.mineArmed?1/3:t.vehicleId==='mine'?.5:1):1;
       const era=eraDamageFactor(this.tanks[p.owner]?.vehicleId,t.vehicleId);
-      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*era.value*(directTarget===t.id||distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)));
+      const damage=Math.round(w.damage*p.scale*p.boost*mineScale*era.value*distanceScale);
       const sources=p.boostSources??{fire:p.fireBoosted?'line':null,rage:p.rage?1.5:1,snow:1},fire=sources.fire?1.5:1,known=fire*sources.rage*sources.snow;
-      const factors=[era,{source:'弹体scale（实际实现）',value:p.scale},{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:directTarget===t.id||distance<=28?1:clamp(1-(distance-28)/(radius+8),0.1,1)}];
-      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base:w.damage,factors,formula:'round(base × scale × boost × mineScale × distanceScale × eraScale)',dig:{...dig,digBoost:p.digBoost,source:p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:w.damage,dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
+      const factors=[era,{source:'弹体scale（实际实现）',value:p.scale},{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:distanceScale}];
+      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base:w.damage,factors,formula:'round(base × scale × boost × mineScale × distanceScale × eraScale)',dig:{...dig,digBoost:p.digBoost,source:p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:w.damage,fullDamageArea:{blastDistance:FULL_BLAST_DISTANCE,directCore:{xRadius:23,yRadius:32,yCenter:-9}},dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
       if(w.effect==='poison'&&damage>0&&t.hp>redHealthLimit(t)) {
         const fresh=!t.poisoned;t.poisoned=true;t.poisonOwner=p.owner;
         if(fresh){this.float(t.x,t.y-95,'中毒','#6c994b',t.id);this.emit('poison',`${t.name}中了毒箭，自己的行动结束时结算毒伤。`,undefined,t.x,p.weapon);}

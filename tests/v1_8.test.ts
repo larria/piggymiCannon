@@ -45,7 +45,7 @@ test('direct head impacts excavate under the feet; orbital excavation is full-si
 });
 test('all multi and dragon volleys have distinct impact positions, including nine independent guidance endpoints',()=>{
  for(const vehicle of ['multi','dragon'] as const)for(const slot of ['normal','special'] as const){
-  const id=`${vehicle}-${slot}` as const,g=flat({vehicle0:vehicle,mode:'hotseat'});g.selectWeapon(id);g.active.angle=45;g.active.power=45;g.fire();
+  const id=`${vehicle}-${slot}` as const,g=flat({vehicle0:vehicle,mode:'hotseat'});g.selectWeapon(id);g.active.angle=45;g.active.power=vehicle==='multi'?35:45;g.fire();
   const initial=g.projectiles.length;assert.equal(initial,slot==='normal'?3:9);
   if(id==='dragon-special'){
    const e=g.enemy;g.projectiles.forEach((p,i)=>Object.assign(p,{x:e.x-70+i*12,y:e.y-75,vx:50,vy:140,age:.5}));g.update(.01);
@@ -81,7 +81,7 @@ test('all nine golden missiles actually hit distinct points while retaining inde
  const g=flat({vehicle0:'dragon',vehicle1:'cannon',mode:'hotseat'});g.land.protectedMask.set(g.land.mask);g.enemy.hp=g.enemy.maxHP=100000;
  g.selectWeapon('dragon-special');g.active.angle=45;g.active.power=45;g.fire();const seen=new Set(),points:{x:number;y:number}[]=[];
  for(let i=0;i<1800&&g.phase!=='handoff';i++){g.update(1/120);for(const blast of g.blasts)if(!seen.has(blast)){seen.add(blast);points.push({x:blast.x,y:blast.y});}}
- assert.equal(points.length,9);assert.equal(g.tanks[1].hp,100000-9*130);assert.equal(g.drainEvents().filter(e=>e.type==='lock').length,9);
+ assert.equal(points.length,9);const loss=g.battleSnapshot().events.filter(e=>e.type==='damage'&&e.data.target===1).reduce((n,e)=>n+e.data.actual,0);assert.equal(g.tanks[1].hp,100000-loss);assert.ok(loss>9*130*.85&&loss<=9*130);assert.equal(g.drainEvents().filter(e=>e.type==='lock').length,9);
  assert.equal(new Set(points.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`)).size,9);
  assert.ok(Math.max(...points.map(p=>p.x))-Math.min(...points.map(p=>p.x))>10);
 });

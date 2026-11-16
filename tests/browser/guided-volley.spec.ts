@@ -6,7 +6,7 @@ for(const width of [1194,1210])test(`${width} iPad: golden volley disappears on 
   const q=(window as any).__qa;q.newMatch({...q.game.config,map:'valley',timer:0,fog:false,fireLine:false,selfDamage:false,friendlyFire:false,slots:q.game.config.slots.map((s:any,i:number)=>({...s,enabled:true,controller:'human',vehicle:i===0?'dragon':'cannon',team:i%2}))},true);
   const g=(window as any).__qa.game;g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.wind=0;
   g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:[200,650,70,1150][i],y:432,fallVelocity:0,shield:0}));
-  const target=g.tanks[1];target.hp=130;g.selectWeapon('dragon-special');g.active.angle=45;
+  const target=g.tanks[1];target.hp=80;g.selectWeapon('dragon-special');g.active.angle=45;
   let best=Infinity;for(let power=10;power<=100;power+=.5){const d=Math.abs(g.predict(45,power,'dragon-special',12,g.active).x-target.x);if(d<best){best=d;g.active.power=power;}}
   // Run a real volley from muzzle to impact. Pause after the real killing damage
   // to inspect the blast and same-frame cancellation, without fabricating hits.

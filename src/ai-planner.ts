@@ -1,3 +1,5 @@
+import {salvoProfile} from './salvo';
+import {impactDamageScale} from './impact-damage';
 import {eraDamageFactor} from './era-damage';
 import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,type Game,type Tank} from './engine';
 import {weaponById,launchDamageScale,excavation,type WeaponId} from './catalog';
@@ -20,10 +22,10 @@ function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetI
 // Read-only flight model. Same integration order, wind, gravity, collision grace,
 // homing turn rate and helix offset as live projectiles. It never changes RNG,
 // terrain, HP, ammo, weather, particles or the live volley-lock map.
-export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0){
+export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0,verticalScale=speedScale){
  const {game:g,shooter:t,slope}=w,spec=weaponById(weapon),v=aimGeometry(angle,slope,t.direction);
  const speed=projectileSpeed(power,weapon==='sniper'?2:spec.speed??1,g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*speedScale;
- let x=t.x+Math.sin(slope)*13+v.x*31,y=t.y-Math.cos(slope)*13+v.y*31,vx=v.x*speed,vy=v.y*speed;
+ let x=t.x+Math.sin(slope)*13+v.x*31,y=t.y-Math.cos(slope)*13+v.y*31,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
  let age=0,wx=0,wy=0,lock:Body|undefined,boost=t.boost?1.5:1,orbital=false;
  let direct:Body|undefined,landed=false;
  for(let i=0;i<12/dt;i++){
@@ -50,7 +52,7 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
  }
  const hits=w.bodies.map(b=>{
   const d=Math.hypot(b.tank.x-x,b.tank.y-y),hit=direct?.tank.id===b.tank.id;
-  const scale=hit||d<=28?1:clamp(1-(d-28)/(spec.radius+8),.1,1);
+  const scale=impactDamageScale(b.tank,x,y,b.slope,spec.radius,hit);
   const mine=spec.effect==='mine'?1/3:1;
   const rage=t.vehicleId==='sea'&&t.hp<t.maxHP*.5?1.5:1,snow=t.vehicleId==='water'&&g.snow?1.25:1;
   const damage=landed&&b.eligible&&(hit||d<=spec.radius+26)?Math.round(spec.damage*launchDamageScale(!!t.vehicleId,weapon)*boost*rage*snow*mine*scale*eraDamageFactor(t.vehicleId,b.tank.vehicleId).value):0;
@@ -63,9 +65,8 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
  const count=spec.shots??(weapon==='triple'?3:1);
  const samples=dt===1/180&&count>1?[0,Math.floor((count-1)/2),count-1]:[Math.floor((count-1)/2)];
  const rays=samples.flatMap(i=>{
-  const rank=(i-(count-1)/2)/Math.max(1,(count-1)/2),spread=spec.spread??(weapon==='triple'?5:0);
-  const scattered=w.shooter.vehicleId==='multi'||w.shooter.vehicleId==='dragon';
-  const p=count===1?impact:traceAIShot(w,angle+(i-(count-1)/2)*spread,power,weapon,dt,i*Math.PI*2/count,scattered?1+rank*.025:1,scattered&&spec.effect==='homing'?rank*20:0,scattered&&spec.effect==='homing'?Math.sin(i*2.4)*12:0);
+  const profile=salvoProfile(w.shooter.vehicleId,weapon,i,count);
+  const p=count===1?impact:traceAIShot(w,angle+profile.angle,power,weapon,dt,i*Math.PI*2/count,profile.vx,profile.aimX,profile.aimY,profile.vy);
   return p.hits.map(h=>({...h,damage:h.damage*count/samples.length}));
  });
  const combined=new Map<number,typeof rays[number]>();

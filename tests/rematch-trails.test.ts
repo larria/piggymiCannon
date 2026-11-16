@@ -27,7 +27,7 @@ test('double salvos keep independent histories for modern trails and all-era sta
  for(const v of VEHICLES)for(const weapon of [v.normal,v.special])for(const boosted of [false,true]){
   const g=new Game({seed:52,fog:false,fireLine:false});g.start();g.active.vehicleId=v.id;g.active.ammo[weapon]=Infinity;g.active.boost=boosted;g.active.doubleShot=true;g.active.selectedWeapon=weapon;g.selected=weapon;g.active.angle=45;g.active.power=80;
   assert.ok(g.fire());const projectiles=[...g.projectiles];assert.equal(projectiles.length,(ALL_WEAPONS.find(w=>w.id===weapon)!.shots??1)*2);
-  projectiles.forEach((p,i)=>{p.x=300+i*3;p.y=70;p.vx=10;p.vy=-10;});for(let n=0;n<50;n++)g.update(.01);
+  projectiles.forEach((p,i)=>{p.x=300+i*3;p.y=70;p.vx=10;p.vy=-10;});for(let n=0;n<100;n++)g.update(.01);
   assert.ok(projectiles.every(p=>(p.trail.length>0)===(boosted||v.era==='现代系')));if(!boosted)assert.ok(projectiles.every(p=>p.trail.length<=MODERN_TRAIL_POINTS));assert.equal(new Set(projectiles.map(p=>p.trail)).size,projectiles.length);
  }
 });
