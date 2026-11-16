@@ -19,5 +19,13 @@
     "failed": 0
   },
   "localProductionOfflinePassed": true,
-  "note": "模拟11寸iPad横屏与DPR2；不冒称实机发热／耗电测量"
+  "note": "模拟11寸iPad横屏与DPR2；不冒称实机发热／耗电测量",
+  "liveProductionOfflinePassed": true,
+  "deployment": {
+    "implementationCommit": "aa72366",
+    "pagesCommit": "41b62f3ef63cdf804bc217f541f2f346e5d259f5",
+    "run": 43821054914,
+    "status": "success",
+    "url": "https://larria.github.io/piggymiCannon/"
+  }
 }
