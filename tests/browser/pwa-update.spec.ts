@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';import {readFileSync,writeFileSync} from 'node:fs';
+const version=JSON.parse(readFileSync('package.json','utf8')).version;
 test('fresh and reopened clients each reload once after a user-requested waiting update',async({page,browserName})=>{
  await page.goto('./');await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
  const sw=readFileSync('dist/sw.js','utf8'),results=[];
@@ -11,7 +12,7 @@ test('fresh and reopened clients each reload once after a user-requested waiting
    expect(reloads).toBe(1);page.off('framenavigated',navigation);await expect.poll(()=>page.evaluate(()=>navigator.serviceWorker.controller?.state)).toBe('activated');results.push({initiallyUncontrolled:n===1,userButton:true,reloads,activated:true});
   }
  }finally{writeFileSync('dist/sw.js',sw);}
- writeFileSync(`QA/v2.3.6-pwa-button-${browserName}.json`,JSON.stringify(results,null,2));
+ writeFileSync(`QA/v${version}-pwa-button-${browserName}.json`,JSON.stringify(results,null,2));
 });
 test('another client activating a prepared worker does not reload a running battle',async({page,browserName})=>{
  await page.goto('./');await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);await page.reload();
@@ -21,5 +22,5 @@ test('another client activating a prepared worker does not reload a running batt
   await page.evaluate(async()=>{(window as any).__pendingWorker.postMessage({type:'SKIP_WAITING'});});await expect.poll(()=>page.evaluate(async()=>!(await navigator.serviceWorker.getRegistration())?.waiting)).toBe(true);await expect.poll(()=>page.evaluate(async()=>(await navigator.serviceWorker.getRegistration())?.active?.state)).toBe('activated');await page.waitForTimeout(300);expect(await page.evaluate(()=>performance.timeOrigin)).toBe(initial);await expect(page.locator('#round-text')).toHaveText(round!);await expect(page.locator('#battlefield')).toBeVisible();await expect(page.locator('.result')).toHaveCount(0);
   await page.locator('#exit-match').click();await page.getByRole('button',{name:'回到演习场',exact:true}).click();await expect(page.locator('#apply-update')).toBeVisible();await Promise.all([page.waitForEvent('load'),page.locator('#apply-update').click()]);expect(await page.evaluate(()=>performance.timeOrigin)).toBeGreaterThan(initial);
  }finally{writeFileSync('dist/sw.js',sw);}
- writeFileSync(`QA/v2.3.6-pwa-battle-${browserName}.json`,JSON.stringify({reloaded:false,roundPreserved:true,updateButtonHiddenDuringBattle:true,userReloadAfterLeavingBattle:true},null,2));
+ writeFileSync(`QA/v${version}-pwa-battle-${browserName}.json`,JSON.stringify({reloaded:false,roundPreserved:true,updateButtonHiddenDuringBattle:true,userReloadAfterLeavingBattle:true},null,2));
 });

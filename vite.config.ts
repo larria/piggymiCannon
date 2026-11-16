@@ -1,7 +1,16 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'node:fs';
+import {createHash} from 'node:crypto';
 const version=JSON.parse(readFileSync(new URL('./package.json',import.meta.url),'utf8')).version;
+// A changed portrait must not silently ship with an old validation/cache key.
+const portraitSource=readFileSync(new URL('./src/portrait-assets.ts',import.meta.url),'utf8');
+const portraits=JSON.parse(portraitSource.slice(portraitSource.indexOf('{'),portraitSource.lastIndexOf('}')+1));
+for(const spec of Object.values(portraits) as {file:string;bytes:number;width:number;height:number;sha256:string;revision:string}[]){
+ const bytes=readFileSync(new URL('./public/'+spec.file,import.meta.url));
+ if(bytes.length!==spec.bytes||bytes.readUInt32BE(16)!==spec.width||bytes.readUInt32BE(20)!==spec.height||createHash('sha256').update(bytes).digest('hex')!==spec.sha256||createHash('md5').update(bytes).digest('hex')!==spec.revision)throw Error('头像清单与原图不一致：'+spec.file);
+}
+
 
 export default defineConfig(({mode}) => ({
   base: mode === 'pages' ? '/piggymiCannon/' : '/',

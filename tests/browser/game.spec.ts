@@ -117,8 +117,8 @@ test('fog hides enemy information for two actions then clears and uses the suppl
   await start(page,false,'valley',seed);
   await expect(page.locator('#map-label')).toContainText('浓雾');
   await expect(page.locator('#hp-1')).toHaveText('950 / 950');
-  await expect(page.locator('[data-slot-id="0"] .avatar img')).toHaveAttribute('src',/portraits\/mimi\.png/);
-  await expect(page.locator('[data-slot-id="1"] .avatar img')).toHaveAttribute('src',/portraits\/dad\.png/);
+  await expect(page.locator('[data-slot-id="0"] .avatar img')).toHaveAttribute('data-portrait-primary',/portraits\/mimi\.png/);
+  await expect(page.locator('[data-slot-id="1"] .avatar img')).toHaveAttribute('data-portrait-primary',/portraits\/dad\.png/);
   await page.screenshot({path:'QA/slots-regression-fog.png'});
   await page.locator('#fire-button').click();
   await expect(page.locator('#turn-text')).toHaveText('大猪头正在瞄准…',{timeout:10_000});
@@ -171,7 +171,7 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await start(page,true,'coast',52,'45');
   const bounds=await page.locator('[data-slot-id="0"] .avatar').boundingBox();expect(bounds!.width).toBeGreaterThanOrEqual(44);
   await hold(page,page.locator('[data-slot-id="0"] .portrait-button'));
-  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/mimi\.png/);
+  await expect(page.locator('#portrait-art img')).toHaveAttribute('data-portrait-primary',/portraits\/mimi\.png/);
   const clock=await page.locator('#timer span').textContent();await page.waitForTimeout(450);
   await expect(page.locator('#timer span')).toHaveText(clock!);
   const saying=await page.locator('#portrait-saying').textContent();await page.locator('#portrait-art').click();
@@ -179,7 +179,7 @@ test('large avatars open playful portraits and pause the battle clock',async({pa
   await page.screenshot({path:'QA/slots-regression-portrait-preview.png'});
   await page.locator('#close-dialog').click();await expect(page.locator('#fire-button')).toBeEnabled();
   await hold(page,page.locator('[data-slot-id="1"] .portrait-button'));
-  await expect(page.locator('#portrait-art img')).toHaveAttribute('src',/portraits\/dad\.png/);
+  await expect(page.locator('#portrait-art img')).toHaveAttribute('data-portrait-primary',/portraits\/dad\.png/);
 });
 test('tank selection is remembered and two weapons switch directly without a dialog',async({page})=>{
  await start(page);

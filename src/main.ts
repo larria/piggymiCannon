@@ -4,6 +4,7 @@ import {snapshotText} from './battle-trace';
 import { Game, WORLD_W, clamp, type Config } from './engine';
 import {TERRAIN_H} from './terrain';
 import { Renderer } from './renderer';
+import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,portraitDiagnostics} from './crew-portraits';
 import { AudioManager } from './audio';
 import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type WeaponId } from './catalog';
 import { icon } from './icons';
@@ -20,7 +21,7 @@ import {DashboardView} from './dashboard';
 import {guideMarkup} from './guide';
 import {isRedHealth,isRaging} from './health';
 import {TURN_ITEMS} from './catalog';
-import {CREW,crewAvatar,crewAvatarPath,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
+import {CREW,crewAvatar,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
 import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
 import {itemIcon} from './item-art';
@@ -151,8 +152,10 @@ function snapshotFeedback(message:string){
 async function copyBattleSnapshot(){
   const profile=impactProfiler?.report(),snapshot=game.battleSnapshot();
   const playbackInfo=playback?{appVersion:APP_VERSION,recordingVersion:playback.recording.gameVersion,recordingSeed:playback.recording.initial.initial.config.seed,positionSeconds:playback.time,durationSeconds:playback.recording.duration,paused:playback.paused}:null;
-  const exported=Object.assign({},snapshot,profile?{impactPerformance:profile}:{},playbackInfo?{playbackInfo}:{});
+  const portraits=portraitDiagnostics();
+  const exported=Object.assign({},snapshot,{portraitResources:portraits},profile?{impactPerformance:profile}:{},playbackInfo?{playbackInfo}:{});
   let payload=snapshotText(exported);
+  payload=payload.replace('以下 JSON 与上述摘要',`头像资源：${portraits.originals}/4 原图，${portraits.usable}/4 可用；加载与备用来源见 JSON 的 portraitResources。\n\n以下 JSON 与上述摘要`);
   if(playbackInfo)payload=payload.replace('以下 JSON 与上述摘要',`当前为录像回放：原局 v${playbackInfo.recordingVersion}，播放器 v${APP_VERSION}，已播放 ${playbackInfo.positionSeconds.toFixed(2)}/${playbackInfo.durationSeconds.toFixed(2)}秒，原局种子 ${playbackInfo.recordingSeed}。\n\n以下 JSON 与上述摘要`);
   if(profile){const max=Math.max(0,...profile.records.map(r=>r.ms.total));payload=payload.replace('以下 JSON 与上述摘要',`弹着性能（测试版）：${profile.records.length}帧，主线程峰值 ${max.toFixed(2)}ms；详细分段、像素与纹理字节见JSON的impactPerformance。\n\n以下 JSON 与上述摘要`);}
   try {if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');await navigator.clipboard.writeText(payload);snapshotFeedback('已复制对局快照');}
@@ -349,7 +352,7 @@ function showDialog(type:string) {
   if(type.startsWith('portrait:')) {
     const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name,team=game.tanks[id].team;
     const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，大猪头也会打歪。','装甲厚一点，心软一点。','哼哼，轮到大猪头了！','不着急，咱们慢慢瞄。'];
-    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}"><img src="${crewAvatarPath(crew,import.meta.env.BASE_URL)}" alt="${name}大头像"/><span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
+    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}">${crewAvatar(crew,import.meta.env.BASE_URL)}<span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
     let taps=0;
     $('#portrait-art').addEventListener('click',()=>{
       $('#portrait-saying').innerHTML=colorNames(sayings[++taps%sayings.length]);
@@ -378,8 +381,13 @@ function showDialog(type:string) {
     content.innerHTML=`<span class="eyebrow">战场里的那些瞬间</span><h2>作战记录。</h2><p class="dialog-intro">最近 24 条事件 · 当前第 ${game.round} 轮</p><ol class="battle-log">${game.log.length?game.log.map((line,i)=>`<li><span>${String(game.log.length-i).padStart(2,'0')}</span>${colorNames(line)}</li>`).join(''):'<li>战场很安静。第一发炮弹会写下故事。</li>'}</ol><button class="button button-dark dialog-primary" data-action="close">返回对局 ${icon('arrow')}</button>`;
   } else {
     dialog.classList.add('settings-dialog');
-    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>随实际地图切换，大厅与结算各有配乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','队友之间可造成伤害'],['fallDamage','坠落伤害','关闭时落地不扣血；掉穿底边仍出局'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="settings-note">${icon('music')}<p>地图配乐和炮火等采样来自你提供的原版素材；蓄力等音效保留合成。开关和音量会保存在这台设备。</p></div><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
+    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>随实际地图切换，大厅与结算各有配乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','队友之间可造成伤害'],['fallDamage','坠落伤害','关闭时落地不扣血；掉穿底边仍出局'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="settings-note">${icon('music')}<p>地图配乐和炮火等采样来自你提供的原版素材；蓄力等音效保留合成。开关和音量会保存在这台设备。</p></div><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="repair-portraits" class="snapshot-copy">修复头像</button><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
     $('#copy-battle-snapshot').addEventListener('click',copyBattleSnapshot);
+    $('#repair-portraits').addEventListener('click',async()=>{
+      const button=$<HTMLButtonElement>('#repair-portraits');button.disabled=true;button.textContent='正在恢复…';
+      try{const result=await repairCrewPortraits();toast(result.assets.some(a=>a.error)?'已保留可用头像；原图暂不可用，联网后可重试。':`原头像已恢复（${result.originals}/4）。`);}
+      finally{button.disabled=false;button.textContent='修复头像';}
+    });
     $('#effects-toggle').addEventListener('click',()=>{audio.unlock();audio.setSoundEnabled(!audio.soundEnabled);$('#effects-toggle').classList.toggle('on',audio.soundEnabled);$('#effects-toggle').setAttribute('aria-checked',String(audio.soundEnabled));updateSound();persistSettings();});
     $('#music-toggle').addEventListener('click',()=>{audio.unlock();audio.setMusicEnabled(!audio.musicEnabled);$('#music-toggle').classList.toggle('on',audio.musicEnabled);$('#music-toggle').setAttribute('aria-checked',String(audio.musicEnabled));updateSound();persistSettings();});
     content.querySelectorAll<HTMLButtonElement>('[data-setting]').forEach(b=>b.addEventListener('click',()=>{const key=b.dataset.setting as 'selfDamage'|'friendlyFire'|'allowDragon'|'fallDamage';config[key]=!config[key];game.setBattleRule(key,!!config[key]);b.classList.toggle('on',!!config[key]);b.setAttribute('aria-checked',String(!!config[key]));persistSettings();}));
@@ -559,6 +567,7 @@ function aimOnField(e:Pick<PointerEvent,'clientX'|'clientY'>) {
   }
   updateUI();
 }
+installCrewPortraits();
 const battlefield=$<HTMLCanvasElement>('#battlefield');
 function focusPlayer(id:number){const t=game.tanks[id];if(!t)return;if(renderer.touring)renderer.finishTour(false);renderer.focusAt(t.defeat?.x??t.x,t.defeat?.y??t.y);updateUI();}
 function fieldPoint(p:{x:number;y:number}){const rect=battlefield.getBoundingClientRect();return {x:(p.x-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y:(p.y-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY};}
@@ -663,6 +672,7 @@ let pageWorker=navigator.serviceWorker?.controller??null;
 if('serviceWorker' in navigator){
   void navigator.serviceWorker.ready.then(reg=>{pageWorker??=reg.active;});
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    void retryUnavailableCrewPortraits();
     const current=navigator.serviceWorker.controller;
     if(!pageWorker){pageWorker=current;return;}
     if(current&&current!==pageWorker&&!applyingUpdate){pendingUpdate=true;updateUI();}
@@ -675,7 +685,7 @@ const updateSW=registerSW({
   onNeedReload:()=>{},
   onNeedRefresh(){pendingUpdate=true;updateUI();toast(game.phase==='lobby'||game.phase==='ended'?'新版本已准备好，点击「更新游戏」即可安装。':'新版本已准备好，本局结束后可更新。');},
   onRegisteredSW(_url,registration){swRegistration=registration;},
-  onOfflineReady(){toast('离线缓存已就绪，断网也可以开战。');},
+  onOfflineReady(){void retryUnavailableCrewPortraits();toast('离线缓存已就绪，断网也可以开战。');},
   onRegisterError(error){console.warn('Offline cache registration failed',error);},
 });
 $('#apply-update').addEventListener('click',async()=>{

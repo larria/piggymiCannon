@@ -1,0 +1,49 @@
+{
+  "version": "3.2.4",
+  "method": "poison real Workbox precache PNG responses, offline reload; then repair cache without reload",
+  "broken": [
+    {
+      "name": "咪猪头",
+      "loaded": false,
+      "width": 0
+    },
+    {
+      "name": "大猪头",
+      "loaded": false,
+      "width": 0
+    },
+    {
+      "name": "阿狸",
+      "loaded": false,
+      "width": 0
+    },
+    {
+      "name": "小黄鱼",
+      "loaded": true,
+      "width": 512
+    }
+  ],
+  "afterCacheRestored": [
+    {
+      "name": "咪猪头",
+      "loaded": false,
+      "width": 0
+    },
+    {
+      "name": "大猪头",
+      "loaded": false,
+      "width": 0
+    },
+    {
+      "name": "阿狸",
+      "loaded": false,
+      "width": 0
+    },
+    {
+      "name": "小黄鱼",
+      "loaded": true,
+      "width": 512
+    }
+  ],
+  "repairAvailable": 0
+}

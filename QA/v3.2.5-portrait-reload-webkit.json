@@ -1,0 +1,13 @@
+{
+  "reloads": 4,
+  "allOriginalsRecovered": true,
+  "cancelledDuringNavigation": [
+    "/localhost:4177/piggymiCannon/sw.js due to access control checks.",
+    "Context is stopped",
+    "/localhost:4177/piggymiCannon/portraits/mimi.png due to access control checks.",
+    "/localhost:4177/piggymiCannon/portraits/dad.png due to access control checks.",
+    "/localhost:4177/piggymiCannon/portraits/mimi.png due to access control checks.",
+    "/localhost:4177/piggymiCannon/portraits/dad.png due to access control checks."
+  ],
+  "activePageErrors": []
+}

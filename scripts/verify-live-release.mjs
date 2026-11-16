@@ -5,6 +5,9 @@ const version=process.argv[2]??JSON.parse(readFileSync('package.json')).version;
 const base=process.argv[3]??'https://larria.github.io/piggymiCannon/';
 const reportFile=process.argv[4]??`QA/v${version}-live-verification.json`;
 const hash=b=>createHash('sha256').update(b).digest('hex');
+const portraitSource=readFileSync('src/portrait-assets.ts','utf8');
+const portraitSpecs=JSON.parse(portraitSource.slice(portraitSource.indexOf('{'),portraitSource.lastIndexOf('}')+1));
+const portraitFiles=Object.entries(portraitSpecs).map(([id,s])=>({id,...s}));
 const files=readdirSync('dist/audio').filter(n=>n.endsWith('.mp3')).map(name=>({name,hash:hash(readFileSync(resolve('dist/audio',name)))}));
 const browser=await chromium.launch({channel:'chrome',headless:true});
 const context=await browser.newContext({viewport:{width:1194,height:834},deviceScaleFactor:2,isMobile:true,hasTouch:true});
@@ -21,10 +24,12 @@ try{
  const precache=await page.evaluate(async()=>{const names=await caches.keys(),keys=[];for(const name of names)if(name.includes('precache')){const c=await caches.open(name);keys.push(...(await c.keys()).map(r=>r.url));}return [...new Set(keys)];});
  await context.setOffline(true);await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'进入战场',exact:true}).waitFor();
  const offline=await page.evaluate(async files=>Promise.all(files.map(async f=>{const r=await fetch('audio/'+f.name),b=await r.arrayBuffer();const actual=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b))).map(v=>v.toString(16).padStart(2,'0')).join('');return {name:f.name,ok:r.ok&&actual===f.hash};})),files);check(offline.every(r=>r.ok),'离线音频缺失或哈希不一致');
+ const offlinePortraits=await page.evaluate(async specs=>Promise.all(specs.map(async s=>{const r=await fetch(s.file),data=await r.arrayBuffer();const actual=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data))).map(v=>v.toString(16).padStart(2,'0')).join('');return {id:s.id,ok:r.ok&&actual===s.sha256};})),portraitFiles);check(offlinePortraits.every(r=>r.ok),'离线头像缺失或哈希不一致');
  const range=await page.evaluate(async()=>{const r=await fetch('audio/bgm-temple.mp3',{headers:{Range:'bytes=-4096'}});return {status:r.status,bytes:(await r.arrayBuffer()).byteLength,range:r.headers.get('content-range')};});check(range.status===206&&range.bytes===4096,'离线完整配乐曲尾范围响应异常');
  await page.getByRole('button',{name:'进入战场',exact:true}).click();await page.locator('[data-choice="cannon"]').click();await page.locator('[data-controller="1"]').selectOption('human');await page.locator('input[name="map"][value="temple"]').locator('..').click();
  for(const key of ['musicEnabled','soundEnabled']){const button=page.locator(`[data-setup-setting="${key}"]`);if(await button.getAttribute('aria-checked')!=='true')await button.click();}
  check(await page.locator('#turn-timer').inputValue()==='0','新默认回合不是不限时');
+ await page.waitForFunction(specs=>specs.every(s=>{const image=document.querySelector('#slot-roster img[data-crew-portrait="'+s.id+'"]');return image&&['cache','network'].includes(image.dataset.portraitSource)&&image.complete&&image.naturalWidth===s.width&&image.naturalHeight===s.height;}),portraitFiles,{timeout:20000});
  await page.getByRole('button',{name:'开始对局',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#battlefield').dataset.renderBackend==='pixi',null,{timeout:20000});await page.locator('#fire-button:enabled').waitFor({timeout:15000});
  await page.waitForFunction(()=>window.__releaseMedia.some(a=>a.src.includes('bgm-temple.mp3')&&!a.paused&&a.currentTime>.2),null,{timeout:15000});
  await page.locator('.battle-stage [data-dialog="settings"]').click();await page.locator('#copy-battle-snapshot').click();const payload=await page.evaluate(()=>window.__releaseSnapshot),snapshot=JSON.parse(payload.match(/```json\n([\s\S]*?)\n```/)[1]);
@@ -39,7 +44,8 @@ try{
   await page.waitForFunction(()=>document.querySelector('#replay-status').textContent==='播放完毕 · 已校验',null,{timeout:15000});
   offlineReplayVerified=true;check(await page.locator('#fire-button').isDisabled(),'录像播放仍允许开炮');await page.screenshot({path:`QA/v${version}-live-offline-replay-1194.png`,scale:'css'});
  }
+ const portraitBackup=await page.evaluate(async()=>{let files=0,bytes=0;for(const name of await caches.keys())if(name.startsWith('piggy-portrait-thumbs')){const cache=await caches.open(name);for(const key of await cache.keys()){files++;bytes+=(await(await cache.match(key)).arrayBuffer()).byteLength;}}return {files,bytes};});check(portraitBackup.files===4&&portraitBackup.bytes<=320000,'小头像备份数量／大小异常');
  const state=await page.evaluate(()=>({backend:document.querySelector('#battlefield').dataset.renderBackend,version:document.querySelector('#stage-version-button').textContent,map:document.querySelector('#map-label').textContent,productionWithoutQA:!('__qa' in window),timerHidden:document.querySelector('#timer').classList.contains('hidden')}));check(state.productionWithoutQA&&state.timerHidden&&state.version.includes(version),'生产接口／不限时／版本异常');check(errors.length===0,errors.join('\n'));
- writeFileSync(reportFile,JSON.stringify({formatVersion:1,version,base,verifiedAt:new Date().toISOString(),liveBundleMatchesLocal:true,offlineReload:true,offlinePixi:true,allOfflineAudioHashesMatch:true,audioFiles:files.length,precacheURLs:precache.length,range,actualMap:snapshot.initial.config.map,mapName:snapshot.initial.mapName,seed:snapshot.initial.config.seed,world:snapshot.initial.world,snapshotFormatVersion:snapshot.formatVersion,actualMapMusicPlayedOffline:true,independentSwitchesEnabled:true,offlineReplayVerified,localReplayBytes,...state,errors},null,2)+'\n');
- console.log(`v${version} 线上入口与本地一致；离线Pixi、${files.length}音频、完整曲尾、地图与快照通过`);
+ writeFileSync(reportFile,JSON.stringify({formatVersion:1,version,base,verifiedAt:new Date().toISOString(),liveBundleMatchesLocal:true,offlineReload:true,offlinePixi:true,allOfflineAudioHashesMatch:true,audioFiles:files.length,precacheURLs:precache.length,range,actualMap:snapshot.initial.config.map,mapName:snapshot.initial.mapName,seed:snapshot.initial.config.seed,world:snapshot.initial.world,snapshotFormatVersion:snapshot.formatVersion,actualMapMusicPlayedOffline:true,allFourPortraitsDecodedOffline:true,allOfflinePortraitHashesMatch:true,portraitBackup,independentSwitchesEnabled:true,offlineReplayVerified,localReplayBytes,...state,errors},null,2)+'\n');
+ console.log(`v${version} 线上入口与本地一致；离线Pixi、4头像、${files.length}音频、完整曲尾、地图与快照通过`);
 }finally{await context.close();await browser.close();}
