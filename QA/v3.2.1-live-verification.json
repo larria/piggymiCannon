@@ -1,0 +1,33 @@
+{
+  "formatVersion": 1,
+  "version": "v3.2.1",
+  "base": "https://larria.github.io/piggymiCannon/",
+  "verifiedAt": "2026-11-16T10:48:02.103Z",
+  "liveBundleMatchesLocal": true,
+  "offlineReload": true,
+  "offlinePixi": true,
+  "allOfflineAudioHashesMatch": true,
+  "audioFiles": 100,
+  "precacheURLs": 141,
+  "range": {
+    "status": 206,
+    "bytes": 4096,
+    "range": "bytes 3049556-3053651/3053652"
+  },
+  "actualMap": "temple",
+  "mapName": "神圣殿堂",
+  "seed": 3824716486,
+  "world": {
+    "width": 1920,
+    "height": 960,
+    "bottomY": 960
+  },
+  "snapshotFormatVersion": 1,
+  "actualMapMusicPlayedOffline": true,
+  "independentSwitchesEnabled": true,
+  "backend": "pixi",
+  "map": "神圣殿堂",
+  "productionWithoutQA": true,
+  "timerHidden": true,
+  "errors": []
+}
