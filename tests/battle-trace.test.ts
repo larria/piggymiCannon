@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Game,makeRng} from './legacy-fixture';import {defaultSlots} from '../src/crew';import {vehicleById} from '../src/vehicles';
+import {Game,makeRng} from '../src/engine';import {defaultSlots} from '../src/crew';import {vehicleById} from '../src/vehicles';
 import {snapshotText,packTerrain,unpackTerrain,TRACE_LIMIT,TRACE_BYTE_LIMIT} from '../src/battle-trace';
 import {readFileSync} from 'node:fs';
 function flat(vehicle:any='cannon',rules={}){

@@ -1,0 +1,24 @@
+{
+  "world": [
+    1920,
+    960
+  ],
+  "view": 1280,
+  "zoom": 1,
+  "backend": "pixi",
+  "tanks": [
+    {
+      "x": 340,
+      "y": 504
+    },
+    {
+      "x": 1572,
+      "y": 476
+    }
+  ],
+  "snapshot": {
+    "width": 1920,
+    "height": 960,
+    "bottomY": 960
+  }
+}

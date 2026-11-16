@@ -1,6 +1,5 @@
 // Migration of old mechanic TEST RIGS only. Production has no mode/formation generation.
-import {Game as EngineGame} from '../src/engine';import {Terrain} from '../src/terrain';import {legacyTerrain} from './legacy-terrain';
-import {defaultSlots} from '../src/crew';
+import {Game as EngineGame} from '../src/engine';import {defaultSlots} from '../src/crew';
 export function regressionConfig(input:any={}){
  const {mode,formation,seats,vehicle0,vehicle1,difficulty,...rest}=input;
  if(rest.slots)return {fallDamage:true,...rest};
@@ -10,6 +9,4 @@ export function regressionConfig(input:any={}){
  if(seats){slots.forEach((s,i)=>{s.enabled=i<seats.length;if(seats[i])Object.assign(s,seats[i]);});}
  return {fallDamage:true,...rest,slots};
 }
-export class Game extends EngineGame{constructor(input:any={},version='test'){super(regressionConfig(input),version);this.land=new Terrain();this.terrain=this.land.surface;legacyTerrain(this);this.tanks.forEach(t=>t.bodyScale=1);(this as any).placeStartingTanks();if(this.tanks.some((t,i)=>this.tanks.slice(0,i).some(e=>Math.abs(e.x-t.x)<90))){const pool=[];for(let x=60;x<this.worldWidth-60;x+=8)if(this.stablePlatform(x))pool.push(x);const chosen:number[]=[];for(const t of this.tanks){const x=pool.find(x=>chosen.every(at=>Math.abs(at-x)>=90));if(x!==undefined){t.x=x;t.y=this.ground(x)-18;chosen.push(x);}}}}}
-
-export * from '../src/engine';
+export class Game extends EngineGame{constructor(input:any={}){super(regressionConfig(input));}}

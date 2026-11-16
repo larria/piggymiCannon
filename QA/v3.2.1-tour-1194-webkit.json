@@ -1,0 +1,30 @@
+{
+  "paused": false,
+  "locked": true,
+  "clock": 45,
+  "elapsed": 0,
+  "touring": true,
+  "fog": true,
+  "visible": [
+    true,
+    true,
+    true,
+    true
+  ],
+  "drawn": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "fire": false,
+  "move": false,
+  "item": false,
+  "world": [
+    1920,
+    960
+  ],
+  "viewWidth": 1280,
+  "bodyScaled": false,
+  "overlay": ""
+}

@@ -108,8 +108,8 @@ test('celebration keeps a continuous head torso and legs at both jump peaks',asy
   for(const [i,time]of [Math.PI/12,Math.PI/4].entries()){
    const connected=await page.evaluate(time=>{
     const q=(window as any).__qa,r=q.renderer,t=q.game.tanks[0];r.time=time;r.draw(0);
-    const scale=r.ratio,w=Math.round(200*scale),h=Math.round(220*scale);
-    const data=r.ctx.getImageData(Math.round((t.x-r.offsetX-100)*scale),Math.round((t.y-r.offsetY-150)*scale),w,h).data;
+    const scale=r.ratio,w=Math.round(100*scale),h=Math.round(110*scale);
+    const data=r.ctx.getImageData(Math.round((t.x-r.offsetX-50)*scale),Math.round((t.y-r.offsetY-80)*scale),w,h).data;
     const skin=new Uint8Array(w*h),seen=new Uint32Array(w*h);
     for(let p=0;p<w*h;p++){const o=p*4,[red,green,blue]=[data[o],data[o+1],data[o+2]];skin[p]=Number(red>185&&green>125&&blue>95&&red-green>25&&green-blue>5);}
     let largest={area:0,height:0},component=0;
@@ -123,7 +123,7 @@ test('celebration keeps a continuous head torso and legs at both jump peaks',asy
     // rather than expecting the helmet to be part of a skin-colored component.
     const tilt=Math.sin(time*8)*.16,jump=Math.abs(Math.sin(time*8))*13;
     const slope=q.game.tankSlope(t);
-    const at=(x:number,y:number)=>{let px=(-10+x*Math.cos(tilt)-y*Math.sin(tilt))*t.direction,py=-13+x*Math.sin(tilt)+y*Math.cos(tilt)-jump;const body=t.bodyScale??1;px*=body;py=18+(py-18)*body;return Math.round((150+px*Math.sin(slope)+py*Math.cos(slope))*scale)*w+Math.round((100+px*Math.cos(slope)-py*Math.sin(slope))*scale);};
+    const at=(x:number,y:number)=>{const px=(-10+x*Math.cos(tilt)-y*Math.sin(tilt))*t.direction,py=-13+x*Math.sin(tilt)+y*Math.cos(tilt)-jump;return Math.round((80+px*Math.sin(slope)+py*Math.cos(slope))*scale)*w+Math.round((50+px*Math.cos(slope)-py*Math.sin(slope))*scale);};
     const cheek=seen[at(0,-14)],belly=seen[at(0,3)];
     return {area:largest.area/(scale*scale),headAndBodyConnected:cheek>0&&cheek===belly};
    },time);

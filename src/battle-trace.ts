@@ -35,9 +35,9 @@ export function snapshotText(snapshot:BattleSnapshot){
 }
 /** Occupancy RLE, falling back to a bounded bitset for fragmented terrain. */
 export function packTerrain(mask:Uint8Array){
- const runs=[mask[0]],maxRuns=100_000;let length=0,value=mask[0];
+ const runs=[mask[0]],maxRuns=10_000;let length=0,value=mask[0];
  for(const v of mask){if(v===value)length++;else{runs.push(length);value=v;length=1;if(runs.length>maxRuns)break;}}
- if(runs.length<=maxRuns&&runs.length*7<Math.ceil(mask.length/8)*4/3){runs.push(length);return {encoding:'rle' as const,length:mask.length,data:runs};}
+ if(runs.length<=maxRuns){runs.push(length);return {encoding:'rle' as const,length:mask.length,data:runs};}
  const bits=new Uint8Array(Math.ceil(mask.length/8));for(let i=0;i<mask.length;i++)if(mask[i])bits[i>>3]|=1<<(i&7);
  let binary='';for(let i=0;i<bits.length;i+=8192)binary+=String.fromCharCode(...bits.subarray(i,i+8192));return {encoding:'bits' as const,length:mask.length,data:btoa(binary)};
 }

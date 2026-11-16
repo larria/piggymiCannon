@@ -21,7 +21,6 @@ import {TURN_ITEMS} from './catalog';
 import {CREW,crewAvatar,crewAvatarPath,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup} from './crew';
 import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
-import {bodyScale} from './tank-geometry';
 import {itemIcon} from './item-art';
 import {installControlHints} from './control-hints';
 import {paintMapOverview} from './map-preview';
@@ -262,7 +261,7 @@ function updateUI() {
 function positionResult(){
   const layer=$('#game-overlay'),card=layer.querySelector<HTMLElement>('.result');if(!card)return;
   const sx=layer.clientWidth/renderer.viewWidth,sy=layer.clientHeight/renderer.viewHeight;
-  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-renderer.offsetX-50*bodyScale(t))*sx,y:(t.y+18-((t.hp>0?124:28)+18)*bodyScale(t)-renderer.offsetY)*sy,width:100*bodyScale(t)*sx,height:(t.hp>0?154:54)*bodyScale(t)*sy}));
+  const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-renderer.offsetX-50)*sx,y:(t.y-(t.hp>0?124:28)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?154:54)*sy}));
   const mapBox=$('#minimap-panel').getBoundingClientRect(),box=layer.getBoundingClientRect();
   const map={x:mapBox.x-box.x,y:mapBox.y-box.y,width:mapBox.width,height:mapBox.height};
   card.style.position='absolute';card.style.width='370px';
@@ -478,9 +477,9 @@ bindMove('#move-left',-1);bindMove('#move-right',1);
 function aimOnField(e:Pick<PointerEvent,'clientX'|'clientY'>) {
   if(!game.humanTurn) return;
   const rect=$('#battlefield').getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y=(e.clientY-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY;
-  if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,game.worldWidth-20);
+  if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,WORLD_W-20);
   else {
-    const t=game.active,slope=game.tankSlope(t),dx=x-t.x-Math.sin(slope)*(31*bodyScale(t)-18),dy=y-t.y-Math.cos(slope)*(18-31*bodyScale(t));
+    const t=game.active,slope=game.tankSlope(t),dx=x-t.x-Math.sin(slope)*13,dy=y-t.y+Math.cos(slope)*13;
     const aim=relativeAimForVector(dx,dy,slope,t.direction);game.face(aim.direction);game.setAim(aim.relative,t.power);
   }
   updateUI();
@@ -497,7 +496,7 @@ installMapGestures(battlefield,{
   hold:()=>{if(fieldPortrait!==null&&game.tanks[fieldPortrait]){focusPlayer(fieldPortrait);showDialog(`portrait:${fieldPortrait}`);}}
 });
 const mini=$<HTMLCanvasElement>('#minimap');
-const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*game.worldWidth,(p.y-rect.top)/rect.height*game.worldHeight);};
+const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*WORLD_W,(p.y-rect.top)/rect.height*TERRAIN_H);};
 installMapGestures(mini,{start:()=>{},pan:()=>{},tap:locateMini,hold:()=>{},locate:locateMini});
 let portraitTimer=0,portraitPointer=-1,portraitStart={x:0,y:0},suppressPortraitClick=false;
 document.addEventListener('pointerdown',e=>{const button=(e.target as HTMLElement).closest<HTMLElement>('[data-portrait]');if(!button)return;clearTimeout(portraitTimer);portraitPointer=e.pointerId;portraitStart={x:e.clientX,y:e.clientY};suppressPortraitClick=false;const id=Number(button.dataset.portrait);portraitTimer=window.setTimeout(()=>{suppressPortraitClick=true;if(game.tanks[id]){focusPlayer(id);showDialog(`portrait:${id}`);}},600);},true);

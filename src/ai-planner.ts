@@ -1,5 +1,3 @@
-import {flightCollision} from './flight-collision';
-import {bodyScale,bodyClearance,bodyBroadPhase} from './tank-geometry';
 import {salvoProfile} from './salvo';
 import {impactDamageScale} from './impact-damage';
 import {eraDamageFactor} from './era-damage';
@@ -26,14 +24,14 @@ function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetI
 // terrain, HP, ammo, weather, particles or the live volley-lock map.
 export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0,verticalScale=speedScale){
  const {game:g,shooter:t,slope}=w,spec=weaponById(weapon),v=aimGeometry(angle,slope,t.direction);
- const speed=g.shotSpeed(t,weapon,power)*speedScale;
- const muzzle=g.muzzle(t,angle);let x=muzzle.x,y=muzzle.y,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
+ const speed=projectileSpeed(power,weapon==='sniper'?2:spec.speed??1,g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*speedScale;
+ let x=t.x+Math.sin(slope)*13+v.x*31,y=t.y-Math.cos(slope)*13+v.y*31,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
  let age=0,wx=0,wy=0,lock:Body|undefined,boost=t.boost?1.5:1,orbital=false;
  let direct:Body|undefined,landed=false;
  for(let i=0;i<12/dt;i++){
   age+=dt;
   if(spec.effect==='helix'){x-=wx;y-=wy;}
-  const oldX=x,oldY=y;
+  const oldX=x;
   vx+=orbital?0:g.wind*SHOT_WIND_GAIN*(weapon==='sniper'?.25:1)*dt;
   if((spec.effect==='homing'||weapon==='homing')&&(vy>0||lock)){
    if(!lock&&age>.18&&y>g.ground(x)-130){
@@ -45,12 +43,12 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
   vy+=(orbital?0:g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*dt;x+=vx*dt;y+=vy*dt;
   if(spec.effect==='helix'){const s=Math.max(1,Math.hypot(vx,vy)),o=Math.sin(age*17+phase)*18*Math.min(1,age*5);wx=-vy/s*o;wy=vx/s*o;x+=wx;y+=wy;}
   if(g.fireLine&&boost===1&&(oldX-g.fireLine.x)*(x-g.fireLine.x)<=0&&y>=g.fireLine.top&&y<=g.fireLine.bottom)boost=1.5;
-  const collision=flightCollision(g.land,{x:oldX,y:oldY},{x,y},w.bodies,age);direct=collision?.body as Body|undefined;if(collision){x=collision.x;y=collision.y;}
+  if(age>=.09)direct=w.bodies.find(b=>b.eligible&&Math.abs(b.tank.x-x)<50&&Math.abs(b.tank.y-y)<62&&pointHitsTank(b.tank,x,y,b.slope));
   if(g.land.solid(x,y)||direct){
    if(spec.effect==='orbital'&&!orbital){y=-50;vx=0;vy=680;orbital=true;age=0;direct=undefined;continue;}
    landed=true;break;
   }
-  if(x< -50||x>g.worldWidth+50||y>g.worldHeight+70)break;
+  if(x< -50||x>WORLD_W+50||y>WORLD_H+70)break;
  }
  const hits=w.bodies.map(b=>{
   const d=Math.hypot(b.tank.x-x,b.tank.y-y),hit=direct?.tank.id===b.tank.id;
@@ -87,7 +85,7 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
    if(!h.direct&&spec.digDepth>0){
     const dig=excavation(weapon,false),dx=Math.abs(impact.x-t.x),bottom=w.game.land.bottom(t.x,t.y+13);
     const reach=dx<dig.radius?dig.depth*Math.sqrt(1-(dx/dig.radius)**2):0;
-    if(dx<dig.radius-18&&impact.y-reach<=t.y+18&&impact.y+reach>=bottom&&bottom<w.game.bottomY)utility+=45;
+    if(dx<dig.radius-18&&impact.y-reach<=t.y+18&&impact.y+reach>=bottom&&bottom<BOTTOM_Y)utility+=45;
    }
   }else if(h.body.eligible)utility-=h.damage*(t.id===w.shooter.id?3:1.8);
  }
@@ -135,7 +133,7 @@ export function safeAIPositions(game:Game,tank:Tank,targets?:Tank[],travelLimit=
   if(distance<4)continue;const x=tank.x+direction*distance,foot=game.traversable(tank,x);
   if(foot===null||!Number.isFinite(foot))continue;
   const lo=Math.min(tank.x,x),hi=Math.max(tank.x,x);
-  if(game.tanks.some(actual=>{const t=targets?.find(t=>t.id===actual.id)??actual;return t.id!==tank.id&&t.hp>0&&Math.abs(t.y-tank.y)<42*Math.max(bodyScale(t),bodyScale(tank))&&t.x>lo-bodyClearance(t,tank)&&t.x<hi+bodyClearance(t,tank);}))continue;
+  if(game.tanks.some(actual=>{const t=targets?.find(t=>t.id===actual.id)??actual;return t.id!==tank.id&&t.hp>0&&Math.abs(t.y-tank.y)<42&&t.x>lo-56&&t.x<hi+56;}))continue;
   if(game.fires.some(f=>Math.abs(f.x-x)<f.radius&&game.canDamage(tank,f.owner))||game.gases.some(f=>Math.abs(f.x-x)<f.radius&&Math.abs(f.y-(foot-18))<50&&game.canDamage(tank,f.owner)))continue;
   if(game.fires.some(f=>game.canDamage(tank,f.owner)&&Math.abs(f.x-tank.x)>=f.radius&&f.x+f.radius>lo&&f.x-f.radius<hi&&Math.abs((f.y??game.ground(f.x))-foot)<40))continue;
   if(game.gases.some(f=>game.canDamage(tank,f.owner)&&Math.abs(f.x-tank.x)>=f.radius&&f.x+f.radius>lo&&f.x-f.radius<hi&&Math.abs(f.y-(foot-18))<50))continue;

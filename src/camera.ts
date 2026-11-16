@@ -5,12 +5,12 @@ const clamp=(v:number,min:number,max:number)=>Math.max(min,Math.min(max,v));
 type Point={x:number;y:number;id?:number};
 /** Presentation only: no game clock, RNG, terrain or aiming state. */
 export class BattleCamera {
-  x=0;y=0;width=1280;height=600;worldWidth=WORLD_W;worldHeight=TERRAIN_H;manual:Point|null=null;
+  x=0;y=0;width=1280;height=600;manual:Point|null=null;
   private tween:{from:Point;to:Point;time:number;duration:number}|null=null;
   private tour:{points:Point[];index:number;time:number;reduced:boolean;done:()=>void;from:Point}|null=null;
-  configure(width:number,height:number,worldWidth=WORLD_W,worldHeight=TERRAIN_H){this.width=width;this.height=height;this.worldWidth=worldWidth;this.worldHeight=worldHeight;this.x=this.boundX(this.x);this.y=this.boundY(this.y);}
-  private boundX(x:number){return clamp(x,0,Math.max(0,this.worldWidth-this.width));}
-  private boundY(y:number){return clamp(y,-Math.max(this.worldHeight,this.height),Math.max(0,this.worldHeight-this.height));}
+  configure(width:number,height:number){this.width=width;this.height=height;this.x=this.boundX(this.x);this.y=this.boundY(this.y);}
+  private boundX(x:number){return clamp(x,0,Math.max(0,WORLD_W-this.width));}
+  private boundY(y:number){return clamp(y,-Math.max(TERRAIN_H,this.height),Math.max(0,TERRAIN_H-this.height));}
   target(x:number,y:number){return {x:this.boundX(x-this.width*.5),y:this.boundY(y-this.height*.5)};}
   get touring(){return this.tour!==null;}
   get tourPlayer(){return this.tour?.points[this.tour.index]?.id??null;}

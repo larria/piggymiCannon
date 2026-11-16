@@ -20,7 +20,7 @@ export const templeNode=(node:number)=>{
  return {radius:(center?104:edge?96:72)*scale,rise:(center?32:28)*scale,stem:stem*scale,rim:7*scale,stemStart:6*scale,baseWidth:(stem+3)*scale,baseTop:rail+(566-oldRail)*scale,bottom:rail+(574-oldRail)*scale};
 };
 export function templeCap(x:number,node:number){const {radius,rise}=templeNode(node),u=(x-node)/radius;return templeRail(x)-rise*Math.max(0,1-u*u)**2;}
-/** Expanded original layouts; protected ramp/cap geometry and thin rails keep their unit sizes. */
+/** Self-drawn 3.1 layouts; protected ramps/caps and thin rails keep their game-unit sizes. */
 export function buildClassicMap(land:Terrain,map:MapId){
   if(!['factory','temple','egypt'].includes(map))return false;
   const beam=(from:number,to:number,y:number|((x:number)=>number),thickness:number,permanent=false)=>{
@@ -32,7 +32,7 @@ export function buildClassicMap(land:Terrain,map:MapId){
     beam(450,780,x=>310+(x-450)*.3,30);beam(590,1030,410,36);
     beam(820,1040,x=>410+(x-820)*.5,30);
     beam(410,870,202,30);beam(410,630,x=>202+(x-410)*.49,30);
-    beam(420,440,334,114);beam(1010,1030,434,177);
+    beam(420,440,330,120);beam(1010,1030,434,177);
   }else if(map==='temple'){
     beam(50,445,335,13.5);beam(835,1230,335,13.5);
     beam(400,535,420,12);beam(745,880,420,12);beam(550,730,365,66);

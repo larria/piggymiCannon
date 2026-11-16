@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';import {boot} from './qa-app';
 async function arrange(page:any){
  await boot(page);await page.evaluate(()=>{
-  const q=(window as any).__qa;q.newMatch({...q.game.config,map:'valley',timer:0,fog:false,fireLine:false,slots:q.game.config.slots.map((s:any,i:number)=>({...s,enabled:true,controller:'human',vehicle:'cannon',team:i%2}))},true);
+  const q=(window as any).__qa;q.newMatch({...q.game.config,map:'valley',timer:0,fallDamage:true,fog:false,fireLine:false,slots:q.game.config.slots.map((s:any,i:number)=>({...s,enabled:true,controller:'human',vehicle:'cannon',team:i%2}))},true);
   const g=(window as any).__qa.game;g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.wind=0;g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:[200,650,70,1130][i],y:432,fallVelocity:0}));
   const update=g.update.bind(g);let frozen=false;g.update=(dt:number)=>{if(!frozen)update(dt);};g.freezeQA=()=>frozen=true;g.resumeQA=()=>frozen=false;
   (window as any).__corpsePixels=async(id:number)=>{
@@ -29,7 +29,7 @@ test('all four prone identities share the battle/result path, while bottom exits
  await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.tanks.forEach((t:any)=>g.damage(t,99999,t.id,true,'fall'));});
  const portraits=[];for(let id=0;id<4;id++){const pixels=await page.evaluate(id=>(window as any).__corpsePixels(id),id);expect(pixels.opaque).toBeGreaterThan(150);portraits.push(pixels.hash);}expect(new Set(portraits).size).toBe(4);
  await page.evaluate(()=>(window as any).__qa.game.phase='ended');for(let id=0;id<4;id++)expect((await page.evaluate(id=>(window as any).__corpsePixels(id),id)).hash).toBe(portraits[id]);
- await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.tanks[1].y=g.bottomY;g.damage(g.tanks[1],99999,0);});expect((await page.evaluate(()=>(window as any).__corpsePixels(1))).opaque).toBe(0);
+ await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.tanks[1].y=960;g.damage(g.tanks[1],99999,0);});expect((await page.evaluate(()=>(window as any).__corpsePixels(1))).opaque).toBe(0);
 });
 test('a first 2v2 death does not show results; the final death preserves the three-second celebration',async({page})=>{
  await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.damage(g.tanks[1],99999,0);g.nextTurn();(window as any).__qa.updateUI();});await expect(page.locator('.result')).not.toBeVisible();

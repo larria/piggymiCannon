@@ -1,4 +1,3 @@
-import {skyBranch,SKY_BRANCH_FROM,SKY_BRANCH_TO} from './sky-map';
 import {WORLD_W} from './terrain';
 import type {Game} from './engine';
 import {TEMPLE_NODES,templeRail,templeCap,templeNode,factoryFloor} from './classic-maps';
@@ -20,10 +19,7 @@ export function classicBackdrop(c:CanvasRenderingContext2D,map:string,color:stri
 }
 export function classicDetails(c:CanvasRenderingContext2D,g:Game){
   c.save();
-  if(g.config.map==='moon'){
-    c.strokeStyle='#ced8b2';c.lineWidth=1;let begun=false;c.beginPath();
-    for(let x=SKY_BRANCH_FROM;x<=SKY_BRANCH_TO;x++){const y=Math.ceil(skyBranch(x));if(g.land.solid(x,y)){begun?c.lineTo(x,y+.5):c.moveTo(x,y+.5);begun=true;}else begun=false;}c.stroke();
-  }else if(g.config.map==='factory'){
+  if(g.config.map==='factory'){
     c.fillStyle='#c9d5d3';for(let x=48;x<WORLD_W;x+=56)for(const y of [474,622,factoryFloor(x)+9])if(g.land.solid(x,y)){c.beginPath();c.arc(x,y,2.3,0,7);c.fill();}
     c.strokeStyle='#d2c182';c.lineWidth=2;c.beginPath();for(let x=0;x<=WORLD_W;x+=2){const y=factoryFloor(x)+2;x?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
     c.strokeStyle='#99a9aa';c.lineWidth=1.5;for(let x=0;x<WORLD_W;x+=44){const y=factoryFloor(x)+14;c.beginPath();c.moveTo(x,y);c.lineTo(x+12,y+9);c.stroke();}

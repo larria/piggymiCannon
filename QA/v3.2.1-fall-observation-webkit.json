@@ -1,0 +1,12 @@
+{
+  "afterHit": 808,
+  "landed": {
+    "y": 702,
+    "hp": 808,
+    "remaining": 1.7916666666666667,
+    "current": 0,
+    "kind": "fall"
+  },
+  "waiting": 0,
+  "clock": 45
+}
