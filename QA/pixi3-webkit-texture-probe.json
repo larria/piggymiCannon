@@ -1,0 +1,200 @@
+{
+  "formatVersion": 1,
+  "version": "8.23.0",
+  "ticker": false,
+  "comparisons": [
+    {
+      "id": "bowl",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9322,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "crossbow",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9124,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "cannon",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 7657,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "beetle",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 14589,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "duke",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 13114,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "mine",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 15583,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "missile",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 13087,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "multi",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 10604,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "laser",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 10832,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "water",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 11784,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "ion",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9724,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "sea",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9621,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "dragon",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 14825,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    }
+  ],
+  "uploads": 13,
+  "benchmarks": [
+    {
+      "count": 4,
+      "mode": "paths",
+      "frames": 120,
+      "elapsedMs": 1983,
+      "meanSubmitMs": 0.21666666666666667,
+      "p95SubmitMs": 1,
+      "maxSubmitMs": 1,
+      "uploads": 13
+    },
+    {
+      "count": 4,
+      "mode": "cached-canvas",
+      "frames": 120,
+      "elapsedMs": 1975,
+      "meanSubmitMs": 0.041666666666666664,
+      "p95SubmitMs": 0,
+      "maxSubmitMs": 1,
+      "uploads": 13
+    },
+    {
+      "count": 4,
+      "mode": "pixi",
+      "frames": 120,
+      "elapsedMs": 2001,
+      "meanSubmitMs": 0.20833333333333334,
+      "p95SubmitMs": 1,
+      "maxSubmitMs": 1,
+      "uploads": 13
+    },
+    {
+      "count": 100,
+      "mode": "paths",
+      "frames": 120,
+      "elapsedMs": 1983,
+      "meanSubmitMs": 2.6,
+      "p95SubmitMs": 4,
+      "maxSubmitMs": 4,
+      "uploads": 13
+    },
+    {
+      "count": 100,
+      "mode": "cached-canvas",
+      "frames": 120,
+      "elapsedMs": 1983,
+      "meanSubmitMs": 0.15833333333333333,
+      "p95SubmitMs": 1,
+      "maxSubmitMs": 1,
+      "uploads": 13
+    },
+    {
+      "count": 100,
+      "mode": "pixi",
+      "frames": 120,
+      "elapsedMs": 1984,
+      "meanSubmitMs": 0.1,
+      "p95SubmitMs": 1,
+      "maxSubmitMs": 1,
+      "uploads": 13
+    }
+  ],
+  "emptyRejected": true,
+  "lifecycle": {
+    "skipped": true,
+    "resumed": true
+  },
+  "disposed": {
+    "textures": 0,
+    "sources": 0,
+    "render": false,
+    "destroyed": true
+  },
+  "errors": [],
+  "note": "Isolated static vehicle proof; 100 sprites is synthetic stress, actual game has <=4 tanks. Timings measure CPU submission only. This case injects lifecycle events; the separate context-recovery report exercises real GPU loss. Production fallback switching remains unimplemented."
+}

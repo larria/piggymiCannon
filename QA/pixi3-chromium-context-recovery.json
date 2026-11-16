@@ -1,0 +1,125 @@
+{
+  "formatVersion": 1,
+  "supported": true,
+  "skippedDrawWhileLost": true,
+  "comparisons": [
+    {
+      "id": "bowl",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9347,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "crossbow",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9206,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "cannon",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 7689,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "beetle",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 14590,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "duke",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 13134,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "mine",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 15584,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "missile",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 13099,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "multi",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 10600,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "laser",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 10884,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "water",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 11784,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "ion",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9750,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "sea",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 9656,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    },
+    {
+      "id": "dragon",
+      "width": 320,
+      "height": 320,
+      "opaquePixels": 14856,
+      "maxChannelError": 0,
+      "meanChannelError": 0,
+      "largeErrorFraction": 0
+    }
+  ],
+  "scope": "Real WEBGL_lose_context loss/restore; same live renderer and retained CPU texture sources. Production fallback switching is not yet implemented."
+}

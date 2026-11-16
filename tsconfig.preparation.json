@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", "tools/pixi3-lab", "scripts/render-baseline.ts", "tests/preparation", "playwright.preparation.config.ts"]
+}
