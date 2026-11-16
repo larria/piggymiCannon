@@ -197,3 +197,19 @@ dialog,.arsenal{scrollbar-gutter:stable}
 .replay-controls.hidden{display:none}.replay-controls #replay-status{flex:1}.replay-controls #replay-time{font-variant-numeric:tabular-nums;color:#859075;white-space:nowrap}.replay-controls button{border:1px solid #d1dbc4;border-radius:6px;background:#fffdf4;color:#536a49;font:inherit;padding:5px 10px;white-space:nowrap;min-height:28px}.replay-controls button:disabled{opacity:.45}.replay-controls button:not(:disabled):hover{background:#e9efdf}
 .snapshot-controls{flex-wrap:wrap;gap:6px}.snapshot-controls .snapshot-copy-status{flex:1}
 @media(max-width:600px){.replay-controls{gap:4px;padding:4px;font-size:10px;flex-wrap:wrap}.replay-controls button{padding:5px 7px}.replay-entry{padding:10px;gap:8px}.replay-entry .button{padding:6px 10px}}
+
+/* Add a dedicated vertical angle pair; retain every existing action target. */
+.compact-dashboard,.combat-mode .compact-dashboard{grid-template-columns:164px minmax(0,1fr) 204px}
+.compact-dashboard .dash-actions,.combat-mode .compact-dashboard .dash-actions{grid-template-columns:44px 44px 44px 60px;grid-template-rows:44px 44px}
+.compact-dashboard .angle-nudges{display:contents}
+.compact-dashboard .angle-nudge{position:relative;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;display:grid;place-items:center;border:1px solid #c9d5bb;border-radius:8px;background:#e9eee1;color:#5c7550;touch-action:none;-webkit-touch-callout:none}
+.compact-dashboard .angle-nudge .icon{width:21px;height:21px}.compact-dashboard .angle-nudge small{position:absolute;right:4px;bottom:2px;font-size:8px;font-weight:600;color:#738567;line-height:10px;pointer-events:none}
+.compact-dashboard .angle-nudge:not(:disabled):hover{background:#e1e9d5}.compact-dashboard .angle-nudge.is-held{background:#d7e3c8;border-color:#97ad81;box-shadow:inset 0 1px 2px #61784c20}.compact-dashboard .angle-nudge:disabled{opacity:.42}
+.compact-dashboard #angle-up{grid-column:3;grid-row:1}.compact-dashboard #angle-down{grid-column:3;grid-row:2}.compact-dashboard #fire-button{grid-column:4;grid-row:1/3}
+@media(max-width:700px){
+ .compact-dashboard,.combat-mode .compact-dashboard{grid-template-columns:164px minmax(0,1fr)}
+ .compact-dashboard .dash-actions,.combat-mode .compact-dashboard .dash-actions{grid-column:1/3;grid-template-columns:44px 44px 44px minmax(60px,1fr);grid-template-rows:44px 44px}
+ .compact-dashboard .dash-toolbar{flex-wrap:wrap;height:auto;min-height:44px}.compact-dashboard .quick-items{flex-wrap:wrap;max-width:100%;margin-left:0;gap:4px}.compact-dashboard .quick-items button{width:44px;height:44px;flex:none}
+ .compact-dashboard #skip-button{grid-column:1;grid-row:2}.compact-dashboard #exit-match{grid-column:2;grid-row:2}
+ .compact-dashboard #fire-button{width:100%;min-height:92px;grid-column:4;grid-row:1/3}
+}

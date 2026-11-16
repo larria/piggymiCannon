@@ -10,6 +10,7 @@ import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type Weapo
 import { icon } from './icons';
 import { chargePower,touchChargePower } from './interaction';
 import {installMobileGestureGuards} from './mobile-gestures';
+import {installAngleNudges} from './angle-nudges';
 import {chooseResultPosition} from './result-layout';
 import { registerSW } from 'virtual:pwa-register';
 import {applyWaitingUpdate} from './pwa-update';
@@ -112,6 +113,8 @@ $('.lobby-actions').insertAdjacentHTML('beforeend',`<button class="text-button r
 $('.dashboard').insertAdjacentHTML('beforebegin',`<div id="replay-controls" class="replay-controls hidden" aria-label="录像播放控制"><span id="replay-status" role="status">录像播放</span><span id="replay-time"></span><button id="replay-pause">暂停</button><button id="replay-speed">1×</button><button id="replay-restart">重播</button><button id="replay-exit">退出录像</button></div>`);
 $('#lobby-overlay').className='lobby-welcome';
 $('.dash-actions').prepend($('.move-buttons'));
+$('.dash-actions').insertAdjacentHTML('beforeend',`<div class="angle-nudges" role="group" aria-label="射击角度微调"><button type="button" id="angle-up" class="angle-nudge" aria-label="抬高炮口 1 度，长按连续调整" title="抬高 · 1°">${icon('up')}<small aria-hidden="true">1°</small></button><button type="button" id="angle-down" class="angle-nudge" aria-label="压低炮口 1 度，长按连续调整" title="压低 · 1°">${icon('down')}<small aria-hidden="true">1°</small></button></div>`);
+const angleNudges=installAngleNudges($('#angle-up'),$('#angle-down'),{enabled:()=>canControlBattle()&&!$<HTMLDialogElement>('#dialog').open,actor:()=>game.active,step:(direction,steps)=>{const t=game.active,target=clamp(t.angle+direction*steps,t.minAngle,t.maxAngle);if(target!==t.angle){game.setAim(target,t.power);updateUI();}}});
 $('#pause-button').insertAdjacentHTML('beforebegin',`<button class="stage-button" data-dialog="settings" aria-label="游戏设置" data-help-name="游戏设置" data-help-description="音效、音乐、自伤、友伤与直接选择暴龙">${icon('settings')}</button>`);
 $('.dashboard').classList.add('compact-dashboard');
 const logButton=$('#log-button');logButton.classList.add('stage-button');logButton.innerHTML=icon('book');logButton.title='战斗记录';$('#pause-button').before(logButton);
@@ -255,7 +258,7 @@ function updateUI() {
   angle.disabled=!human;power.disabled=!human;
   $('.control-deck').classList.toggle('inactive',!human);$<HTMLButtonElement>('#power-meter').disabled=!human||t.fallVelocity>0;$<HTMLButtonElement>('#skip-button').disabled=!human&&!renderer.touring;
   $('#skip-button').setAttribute('aria-label',renderer.touring?'跳过开场巡游':'跳过回合');
-  document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, #face-button, #aim-pad').forEach(b=>b.disabled=!human);
+  document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, .angle-nudge, #face-button, #aim-pad').forEach(b=>b.disabled=!human);if(!human)angleNudges.cancel();
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
   updateChargeVisual(t.power);
   $('#fire-button').classList.toggle('charging',Boolean(charge||playback?.charging));
@@ -631,7 +634,7 @@ function refreshImpactProfiler(){impactProfiler?.detach();impactProfiler=import.
 function frame(now:number) {
   const dt=Math.max(0,Math.min((now-previous)/1000,0.05));previous=now;
   if(document.hidden){requestAnimationFrame(frame);return;}
-  impactProfiler?.beginFrame(now);
+  impactProfiler?.beginFrame(now);angleNudges.update(now);
   if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open) {
     if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,(charge.touch?touchChargePower:chargePower)((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
     const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);

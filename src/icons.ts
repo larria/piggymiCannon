@@ -20,6 +20,8 @@ const paths: Record<string,string> = {
   mute:'<path d="M4 9v6h4l5 4V5L8 9H4Zm13 1 5 5m0-5-5 5"/>',
   settings:'<path d="m10 2 4 0 1 3 3 1 3-1 2 4-2 2v3l2 2-2 4-3-1-3 1-1 3h-4l-1-3-3-1-3 1-2-4 2-2v-3L1 9l2-4 3 1 3-1 1-3Z"/><circle cx="12" cy="12" r="3"/>',
   arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
+  up:'<path d="m5 15 7-7 7 7"/>',
+  down:'<path d="m5 9 7 7 7-7"/>',
   left:'<path d="m14 5-7 7 7 7"/>',
   right:'<path d="m10 5 7 7-7 7"/>',
   angle:'<path d="M3 21h18M3 21 18 3M10 21c0-4-2-7-4-8"/>',

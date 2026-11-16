@@ -1,0 +1,57 @@
+{
+  "userRequestedReloads": 1,
+  "activated": true,
+  "offlineFallback": [
+    {
+      "id": "mimi",
+      "source": "fallback",
+      "visible": true,
+      "width": 150
+    },
+    {
+      "id": "dad",
+      "source": "fallback",
+      "visible": true,
+      "width": 150
+    },
+    {
+      "id": "fox",
+      "source": "fallback",
+      "visible": true,
+      "width": 150
+    },
+    {
+      "id": "fish",
+      "source": "cache",
+      "visible": true,
+      "width": 512
+    }
+  ],
+  "onlineRestored": [
+    {
+      "id": "mimi",
+      "source": "network",
+      "visible": true,
+      "width": 960
+    },
+    {
+      "id": "dad",
+      "source": "network",
+      "visible": true,
+      "width": 960
+    },
+    {
+      "id": "fox",
+      "source": "network",
+      "visible": true,
+      "width": 512
+    },
+    {
+      "id": "fish",
+      "source": "cache",
+      "visible": true,
+      "width": 512
+    }
+  ],
+  "inPlaceRecovery": true
+}

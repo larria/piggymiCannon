@@ -1,4 +1,5 @@
-import {test,expect} from '@playwright/test';import {boot} from './qa-app';import {writeFileSync} from 'node:fs';
+import {test,expect} from '@playwright/test';import {boot} from './qa-app';import {writeFileSync,readFileSync} from 'node:fs';
+const version=JSON.parse(readFileSync('package.json','utf8')).version;
 test.use({deviceScaleFactor:2});
 async function prepare(page:any,multi=false){
  await boot(page);
@@ -26,18 +27,18 @@ for(const width of [1194,1210])test(`iPad ${width}: remote crate and parachute s
  await page.setViewportSize({width,height:834});await prepare(page);await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');expect(await page.evaluate(()=>(window as any).__qa.renderer.ratio)).toBe(2);
  const states=await step(page,350,180);checkVisible(states);expect(states.at(-1).boxes[0].x-states.at(-1).x).toBeLessThan(states.at(-1).w);
  await expect(page.locator('#game-overlay')).toHaveClass(/hidden/);await expect(page.locator('#fire-button')).toBeDisabled();
- await page.screenshot({path:`QA/v3.2.4-supply-falling-${width}-${browserName}.png`,scale:'css'});
+ await page.screenshot({path:`QA/v${version}-supply-falling-${width}-${browserName}.png`,scale:'css'});
  const landing=await page.evaluate(()=>{const q=(window as any).__qa,g=q.game,r=q.renderer;while(g.crates.some((c:any)=>c.falling)){(window as any).__supplyStep(1/60);r.draw(1/60);}q.updateUI();return {time:g.elapsed,phase:g.phase,x:r.offsetX,y:r.offsetY};});expect(landing.phase).toBe('supply');
  const hold=await step(page,35);checkVisible(hold);expect(hold.at(-1).phase).toBe('supply');
  const order=await page.evaluate(()=>{const r=(window as any).__qa.renderer,result:string[]=[],tank=r.tank,rect=r.ctx.roundRect;r.tank=function(...args:any[]){result.push('tank');return tank.apply(this,args);};r.ctx.roundRect=function(...args:any[]){if(args[2]===28&&args[3]===25)result.push('crate');return rect.apply(this,args);};r.draw(0);r.tank=tank;r.ctx.roundRect=rect;return result;});expect(order.lastIndexOf('crate')).toBeGreaterThan(order.lastIndexOf('tank'));
- await page.screenshot({path:`QA/v3.2.4-supply-landed-${width}-${browserName}.png`,scale:'css'});
+ await page.screenshot({path:`QA/v${version}-supply-landed-${width}-${browserName}.png`,scale:'css'});
  const rest=await step(page,120);const firstAiming=rest.find((s:any)=>s.phase==='aiming');expect(firstAiming.elapsed-landing.time).toBeGreaterThan(.9);expect(rest.filter((s:any)=>s.phase==='supply').every((s:any)=>s.clock===45)).toBe(true);expect(firstAiming.clock).toBe(45);
  const final=rest.at(-1),actor=await page.evaluate(()=>(window as any).__qa.game.active.x);expect(final.x).toBeCloseTo(Math.max(0,Math.min(640,actor-640)),0);expect(final.x).toBeLessThan(1);await expect(page.locator('#fire-button')).toBeEnabled();
- writeFileSync(`QA/v3.2.4-supply-${width}-${browserName}.json`,JSON.stringify({states,landing,hold,rest},null,2));
+ writeFileSync(`QA/v${version}-supply-${width}-${browserName}.json`,JSON.stringify({states,landing,hold,rest},null,2));
 });
 test('multiple drops are all visible and fog does not hide the observed landed item',async({page,browserName})=>{
  await prepare(page,true);const states=await step(page,400,200);checkVisible(states);
- await page.screenshot({path:`QA/v3.2.4-supply-multiple-${browserName}.png`,scale:'css'});
+ await page.screenshot({path:`QA/v${version}-supply-multiple-${browserName}.png`,scale:'css'});
  const landed=await page.evaluate(()=>{const q=(window as any).__qa,g=q.game,r=q.renderer;g.fog=true;while(g.crates.some((c:any)=>c.falling)){(window as any).__supplyStep(1/60);r.draw(1/60);}let drawn=0;const original=r.ctx.roundRect;r.ctx.roundRect=function(...args:any[]){if(args[2]===28&&args[3]===25)drawn++;return original.apply(this,args);};r.draw(0);r.ctx.roundRect=original;return {drawn,phase:g.phase,count:g.crates.length};});expect(landed.phase).toBe('supply');expect(landed.drawn).toBe(landed.count);expect(landed.count).toBe(2);
 });
 test('manual minimap location wins; follow targets supply; pause freezes camera and display timer',async({page})=>{
