@@ -44,3 +44,7 @@ test('charge cues reproduce changing power and stop synthesis when a saved prefi
 test('unlimited idle capture keeps exact dt in compact bounded blocks instead of allocating one array per frame',()=>{
  const g=ready(),recorder=new ReplayRecorder(g);for(let i=0;i<60000;i++)g.update(i%2?.016:.017);assert.ok(recorder.bufferBytes<510000);const recording=recorder.export();assert.equal(recording.commands.length,60000);const replay=play(recording);assert.equal(replay.verified,true);recorder.detach();
 });
+
+test('new pre-charge ring cue replays the wait before sound/charging, and stops cleanly without altering simulation',()=>{
+ const g=ready(),r=new ReplayRecorder(g);r.cue('charge-wait');g.update(.04);g.update(.04);g.update(.02);r.cue('charge-start');g.update(.03);r.cue('charge-stop');const player=new ReplayPlayer(r.export());player.advance(.05);assert.equal(player.waiting,true);assert.equal(player.charging,false);assert.equal(player.waitingStartedAt,0);player.advance(.1);assert.equal(player.waiting,false);assert.equal(player.charging,false);assert.equal(player.verified,true);r.detach();
+});

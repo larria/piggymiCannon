@@ -5,7 +5,7 @@ async function prepare(page:any,multi=false){
  await boot(page);
  await page.evaluate(multi=>{
   let q=(window as any).__qa;q.newMatch({...q.game.config,map:'factory',mapChoice:'factory',timer:45,fog:false,fireLine:false,slots:q.game.config.slots.map((s:any)=>({...s,controller:'human',vehicle:'cannon'}))},true);q=(window as any).__qa;q.recorder.detach();const g=q.game,r=q.renderer;
-  g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:i?100:1700,y:g.ground(i?100:1700)-18,fallVelocity:0}));g.firstSupplyChecked=true;g.nextSupplyAction=8;g.turn=7;g.nextTurn();
+  g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:i?100:1700,y:g.ground(i?100:1700)-18,fallVelocity:0}));g.turn=9;g.nextTurn();
   if(g.phase!=='supply')throw Error('No delivery');const c=g.crates.find((c:any)=>c.falling);Object.assign(c,{x:multi?420:1700,y:-50,vx:0,vy:80,type:'medical'});
   if(multi){g.crates.push({x:1420,y:-50,vx:0,vy:80,type:'double',falling:true});g.supplyObservation.crates=[0,1];}
   // Controlled simulation steps, with the actual renderer and main event handler.
@@ -50,7 +50,7 @@ test('manual minimap location wins; follow targets supply; pause freezes camera 
 });
 test('natural turn event starts supply framing and restores actor framing without a jump',async({page})=>{
  await page.addInitScript(()=>{Date.now=()=>52;});await boot(page);
- await page.evaluate(()=>{const q=(window as any).__qa,g=q.game;q.recorder.detach();g.config.timer=45;g.clock=45;g.tanks.forEach((t:any,i:number)=>Object.assign(t,{controller:'human',x:i?100:1700,y:g.ground(i?100:1700)-18,fallVelocity:0}));g.firstSupplyChecked=true;g.nextSupplyAction=8;g.turn=7;g.nextTurn();});
+ await page.evaluate(()=>{const q=(window as any).__qa,g=q.game;q.recorder.detach();g.config.timer=45;g.clock=45;g.tanks.forEach((t:any,i:number)=>Object.assign(t,{controller:'human',x:i?100:1700,y:g.ground(i?100:1700)-18,fallVelocity:0}));g.turn=9;g.nextTurn();});
  const result=await page.evaluate(()=>new Promise<any>(resolve=>{const states:any[]=[];let landed:number|undefined;function sample(){const q=(window as any).__qa,g=q.game,r=q.renderer;if(g.phase==='supply'){const c=g.crates.find((c:any)=>c.falling)??g.crates.at(-1);if(!c.falling&&landed===undefined)landed=g.elapsed;states.push({phase:g.phase,approach:g.supplyObservation?.approach,elapsed:g.elapsed,clock:g.clock,x:r.offsetX,y:r.offsetY,w:r.viewWidth,h:r.viewHeight,boxes:[{x:c.x,y:c.y,falling:c.falling}]});requestAnimationFrame(sample);}else resolve({states,landed,ended:g.elapsed});}requestAnimationFrame(sample);}));
  expect(result.states.length).toBeGreaterThan(60);checkVisible(result.states);expect(result.ended-result.landed).toBeGreaterThan(.85);expect(result.states.every((s:any)=>s.clock===45)).toBe(true);await expect(page.locator('#fire-button')).toBeEnabled();
 });

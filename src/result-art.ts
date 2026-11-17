@@ -1,6 +1,6 @@
 import type {Tank} from './engine';
 import {paintCrew} from './crew-art';
-/** One fixed defeated-character path during battle and final celebration. */
+/** One shared defeated-character path during battle and final celebration. */
 export function defeatedPig(c:CanvasRenderingContext2D,t:Tank,time:number,_slope?:number){
   const pose=t.defeat;
   if(t.hp>0||t.outOfBounds||!pose)return false;

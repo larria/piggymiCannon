@@ -1,4 +1,5 @@
 import {RESTORE_FRACTION,restoreRadius,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
+import {modernBackpack,backpackSlots,takeBackpackItem,putBackpackItem,SUPPLY_INTERVAL_ACTIONS} from './backpack';
 import {calibrationProfile,calibrationDisturbed,advanceCalibration,type AICalibration} from './ai-calibration';
 import {addSkyBranch,SKY_UPPER_THICKNESS} from './sky-map';
 import {OBSERVATION_SECONDS,OBSERVATION_PRIORITY,type ObservationKind,type ShotObservation} from './shot-observation';
@@ -42,7 +43,7 @@ export interface Tank {
   selectedWeapon:WeaponId;lastPower:number|null;poisonOwner?:number;actionTime:number;movedThisTurn:number;itemDelay:number;delayCommitted:boolean;outOfBounds:boolean;
 }
 export interface DefeatPose {x:number;y:number;slope:number;direction:number}
-export interface Tank {aiCalibration?:AICalibration;defeat?:DefeatPose|null;deathResolved?:boolean}
+export interface Tank {aiCalibration?:AICalibration;defeat?:DefeatPose|null;deathResolved?:boolean;itemSlots?:(ItemId|null)[];parachute?:{projectile?:number;startedAt:number}|null}
 export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean;aimOffsetX?:number;aimOffsetY?:number }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
 export interface Blast { healing?:boolean;x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
@@ -76,6 +77,7 @@ export class Game {
   introLocked=false;observation:ShotObservation|null=null;paused=false; winner:number|null=null; shake=0; elapsed=0;
   supplyObservation:SupplyObservation|null=null;
   restoring=false;private firstSupplyChecked=false;private nextSupplyAction=8;
+  private armedItemSlot:number|null=null;
   targetX=1000; teleporting=false; aiTime=0; resolveTime=0;resolveHazardTime=0;
   weatherObservation:WeatherObservation|null=null;private weatherNextRound=2;private weatherCooldownUntil=0;private weatherSnow=false;
   fog=false;fogTurnsRemaining=0;fireLineTurnsRemaining=0;fireLine:{x:number;top:number;bottom:number}|null=null;
@@ -133,12 +135,13 @@ export class Game {
   private settleDefeat(t:Tank) {
     if(t.hp>0||t.deathResolved)return;
     // The outer blast remembers land BEFORE excavation, including nested mines.
-    // Once resolved this is a visual marker, never another terrain physics body.
+    // This remains an untargetable visual marker; new matches let it fall with terrain.
     const pose=t.outOfBounds||t.y+18>=BOTTOM_Y?null:this.blastGrounded.get(t.id)??this.landPose(t);
     t.defeat=pose?{...pose}:null;t.deathResolved=true;t.fallVelocity=0;
+    if(t.parachute)t.parachute=null;
     if(!pose)t.outOfBounds=true;
     this.movingUntil[t.id]=0;
-    this.recordBattle('defeat-state',`${t.name}${pose?'立即进入陆地趴地哭泣，位置固定':'不留残骸：掉穿底边／出界或无陆地落点'}`,{target:t.id,pose:t.defeat,outOfBounds:t.outOfBounds});
+    this.recordBattle('defeat-state',`${t.name}${pose?(modernBackpack(this.gameVersion)?'立即进入陆地趴地哭泣，随地形下落':'立即进入陆地趴地哭泣，位置固定'):'不留残骸：掉穿底边／出界或无陆地落点'}`,{target:t.id,pose:t.defeat,outOfBounds:t.outOfBounds});
     this.emit('defeat',`${t.name}出局了。`,undefined,t.x);
   }
   private traceTanks(){return this.tanks.map(t=>({...t,flag:teamFlag(t.team),red:t.hp>0&&t.hp<=redHealthLimit(t),raging:isRaging(t),slope:this.tankSlope(t),absoluteAngle:this.aim(t).absolute}));}
@@ -150,6 +153,7 @@ export class Game {
     // Old recordings retain both their original supply timing and digest shape.
     if(modernSupplyTiming(this.gameVersion))current.supplyObservation=this.supplyObservation;
     if(modernWeather(this.gameVersion))Object.assign(current,{restoring:this.restoring,firstSupplyChecked:this.firstSupplyChecked,nextSupplyAction:this.nextSupplyAction,weatherObservation:this.weatherObservation,weatherNextRound:this.weatherNextRound,weatherCooldownUntil:this.weatherCooldownUntil,weatherSnow:this.weatherSnow});
+    if(modernBackpack(this.gameVersion))current.armedItemSlot=this.armedItemSlot;
     current.terrain={mask:packTerrain(this.land.mask),protectedMask:packTerrain(this.land.protectedMask),revision:this.land.revision};
     current.annotatedTanks=this.traceTanks();
     return this.trace.snapshot(this.gameVersion,current);
@@ -162,6 +166,7 @@ export class Game {
     for(const key of RESTORE_KEYS)if(key in state)(g as any)[key]=['volleyTargets','fallOrigins'].includes(key)?new Map(state[key]):state[key];
     if(modernSupplyTiming(g.gameVersion)&&state.supplyObservation)g.supplyObservation=state.supplyObservation;
     if(modernWeather(g.gameVersion))for(const key of ['restoring','firstSupplyChecked','nextSupplyAction','weatherObservation','weatherNextRound','weatherCooldownUntil','weatherSnow'] as const)if(key in state)(g as any)[key]=state[key];
+    if(modernBackpack(g.gameVersion))g.armedItemSlot=state.armedItemSlot??null;
     unpackTerrain(state.terrain.mask,g.land.mask);unpackTerrain(state.terrain.protectedMask,g.land.protectedMask);g.land.rebuild();g.land.revision=state.terrain.revision;
     g.land.changes.length=0;
     g.projectiles.forEach(p=>p.trail=[]);g.trace.restore(snapshot);g.rng=g.diagnosticRng(makeRng(snapshot.rng.state));g.events=[];g.particles=[];return g;
@@ -265,6 +270,7 @@ export class Game {
     return {id,slot,crew:seat.crew,team:seat.team,controller:seat.controller,difficulty:seat.difficulty,name:CREW[seat.crew].name,x,y:this.ground(x)-18,hp:v?.hp??150,shield:0,fuel:100,angle:clamp(48,v?.minAngle??5,v?.maxAngle??175),power:68,direction:id===0?1:-1,
       ammo,
       items:Object.fromEntries(ITEMS.map(i=>[i.id,TURN_ITEMS.includes(i.id)?1:0])) as Record<ItemId,number>,
+      ...(modernBackpack(this.gameVersion)?{itemSlots:[...TURN_ITEMS],parachute:null}:{}),
       frozen:0,boost:false,itemUsed:false,fallVelocity:0,fallStart:0,shots:0,damage:0,tactics:2,turnsTaken:0,
       itemReadyTurn:Object.fromEntries(ITEMS.map(i=>[i.id,0])) as Record<ItemId,number>,doubleShot:false,reaction:null,vehicleId,maxHP:v?.hp??150,minAngle:v?.minAngle??5,maxAngle:v?.maxAngle??175,moveSpeed:v?v.movement*1.35:70,moveDistance:v?v.movement*3:100/0.33,nextActionAt:0,lastDelay:v?.waiting??560,poisoned:false,immobile:0,selectedWeapon:v?.normal??'shell',lastPower:null,actionTime:0,movedThisTurn:0,itemDelay:0,delayCommitted:false,outOfBounds:false};
   }
@@ -353,7 +359,7 @@ export class Game {
   selectWeapon(id:WeaponId) {
     if(!this.humanTurn||!weaponById(id)||(this.active.ammo[id]??0)<=0) return false;
     if(this.active.vehicleId) {const v=vehicleById(this.active.vehicleId);if(id!==v.normal&&id!==v.special&&id!=='homing') return false;}
-    this.selected=id;this.active.selectedWeapon=id;this.teleporting=false;this.restoring=false;this.recordBattle('weapon',`${this.active.name}选择${weaponById(id).name}`,{weapon:id});return true;
+    this.selected=id;this.active.selectedWeapon=id;this.teleporting=false;this.restoring=false;this.armedItemSlot=null;this.recordBattle('weapon',`${this.active.name}选择${weaponById(id).name}`,{weapon:id});return true;
   }
   move(direction:number,dt:number,ai=false) {
     if(this.paused||this.introLocked||this.weatherObservation||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||this.active.fallVelocity>0||this.active.immobile>0||!Number.isFinite(dt)||dt<=0||!Number.isFinite(direction)||!direction) return false;
@@ -376,11 +382,20 @@ export class Game {
     this.collectCrates();this.triggerMines(t);return true;
   }
   face(direction:number) { if(this.humanTurn){if(direction!==this.active.direction)this.recordBattle('face',`${this.active.name}转向${direction<0?'左':'右'}`,{direction});this.active.direction=direction;} }
-  itemUnavailable(id:ItemId,ai=false):string|null {
+  backpack(t=this.active):(ItemId|null)[]{return modernBackpack(this.gameVersion)?backpackSlots(t):TURN_ITEMS.map(id=>t.items[id]>0?id:null);}
+  itemArmed(slot:number){const id=this.backpack()[slot];return (id==='teleport'&&this.teleporting||id==='repair'&&this.restoring)&&(!modernBackpack(this.gameVersion)||this.armedItemSlot===null||this.armedItemSlot===slot);}
+  itemUnavailable(id:ItemId,ai=false,slot?:number):string|null {
     const t=this.active,i=itemById(id);
     if(this.phase!=='aiming'||this.paused||this.introLocked||this.weatherObservation||(!ai&&!this.humanTurn)) return '等待自己的回合';
     if(t.fallVelocity>0) return '坠落中不能使用';
     if(t.itemUsed&&!modernWeather(this.gameVersion)) return '本回合已用过道具';
+    if(modernBackpack(this.gameVersion)){
+      const slots=this.backpack(t);
+      if(slot!==undefined&&slots[slot]!==id)return '这个槽位没有该道具';
+      if(slot!==undefined&&this.armedItemSlot!==null&&this.armedItemSlot!==slot&&(id==='teleport'&&this.teleporting||id==='repair'&&this.restoring))return '已装填另一槽位的弹，请先取消装填';
+      if(id==='teleport'&&this.restoring||id==='repair'&&this.teleporting)return '转移弹与恢复弹不能同时装填，请先取消已装填的弹';
+      if(id==='teleport'&&t.boost||id==='boost'&&this.teleporting)return '转移弹与威力加强不能同时使用';
+    }
     if(t.items[id]<=0) return i.count===0?'仅空投获得':'库存已用完';
     if(t.turnsTaken<i.unlock) return `第 ${i.unlock} 回合解锁`;
     const wait=TURN_ITEMS.includes(id)?0:t.itemReadyTurn[id]-t.turnsTaken;
@@ -395,30 +410,52 @@ export class Game {
     return null;
   }
   private itemName(id:ItemId){return id==='repair'&&!modernWeather(this.gameVersion)?'补给':itemById(id).name;}
-  private consumeItem(id:ItemId) {
+  private consumeItem(id:ItemId,slot?:number) {
     const t=this.active,i=itemById(id);
-    t.items[id]--;t.tactics-=i.cost;t.itemUsed=true;
+    if(modernBackpack(this.gameVersion)&&TURN_ITEMS.includes(id))takeBackpackItem(t,id,slot);else t.items[id]--;
+    t.tactics-=i.cost;t.itemUsed=true;
     t.itemDelay+=200;
     t.itemReadyTurn[id]=t.turnsTaken+i.cooldown+1;if(!modernWeather(this.gameVersion))this.teleporting=false;
     this.itemCues.push({tank:t.id,item:id,age:0});
     this.emit('item',`${t.name}使用了${this.itemName(id)}${i.cost?`，消耗 ${i.cost} 战术点`:''}。`,undefined,t.x);
     this.recordBattle('item-use',`${t.name}使用${this.itemName(id)}；HP${t.hp}，护盾${t.shield}，道具等待+200`,{item:id,tank:this.traceTanks().find(e=>e.id===t.id)});
   }
-  useItem(id:ItemId,ai=false) {
-    if(this.itemUnavailable(id,ai)) return false;
+  useItem(id:ItemId,ai=false,slot?:number) {
+    if(this.itemUnavailable(id,ai,slot)) return false;
     const t=this.active;
     const before={hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind};
-    if(id==='teleport') {this.teleporting=!this.teleporting;this.restoring=false;if(this.teleporting)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('teleport-arm',`${t.name}${this.teleporting?'装填':'取消'}转移弹`,{armed:this.teleporting});return true;}
-    if(id==='repair'&&modernWeather(this.gameVersion)){this.restoring=!this.restoring;this.teleporting=false;if(this.restoring)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('restore-arm',`${t.name}${this.restoring?'装填':'取消'}恢复弹`,{armed:this.restoring});return true;}
+    if(id==='teleport') {this.teleporting=!this.teleporting;this.restoring=false;this.armedItemSlot=this.teleporting?(slot??this.backpack(t).indexOf(id)):null;if(this.teleporting)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('teleport-arm',`${t.name}${this.teleporting?'装填':'取消'}转移弹`,{armed:this.teleporting});return true;}
+    if(id==='repair'&&modernWeather(this.gameVersion)){this.restoring=!this.restoring;this.teleporting=false;this.armedItemSlot=this.restoring?(slot??this.backpack(t).indexOf(id)):null;if(this.restoring)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('restore-arm',`${t.name}${this.restoring?'装填':'取消'}恢复弹`,{armed:this.restoring});return true;}
     if(id==='repair') {const gain=Math.round(t.maxHP*35/150);t.hp=Math.min(t.maxHP,t.hp+gain);this.float(t.x,t.y-42,`+${gain}`,'#548166');}
     if(id==='shield') t.shield=Math.round(t.maxHP*40/150);
     if(id==='fuel') t.fuel=Math.min(100,t.fuel+55);
     if(id==='boost') t.boost=true;
     if(id==='double') t.doubleShot=true;
     if(id==='wind') this.wind=0;
-    this.consumeItem(id);this.recordBattle('item-effect',`${t.name}道具${this.itemName(id)}生效：HP${before.hp}→${t.hp}，护盾${before.shield}→${t.shield}`,{item:id,before,after:{hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind}});return true;
+    this.consumeItem(id,slot);this.recordBattle('item-effect',`${t.name}道具${this.itemName(id)}生效：HP${before.hp}→${t.hp}，护盾${before.shield}→${t.shield}`,{item:id,before,after:{hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind}});return true;
   }
-  private transferTo(t:Tank,x:number,impactY:number) {
+  private transferTo(t:Tank,x:number,impactY:number,projectile?:number) {
+    if(modernBackpack(this.gameVersion)){
+      if(t.hp<=0)return false;
+      const from={x:t.x,y:t.y};
+      t.x=x;t.y=impactY-52;
+      // A side-wall contact may be below the top of its connected platform.
+      // Clear the body before opening the canopy, instead of snapping upward next frame.
+      if(Number.isFinite(x)&&x>=0&&x<=WORLD_W&&Number.isFinite(impactY)&&impactY<BOTTOM_Y)t.y=Math.min(t.y,this.support(x,t.y+18)-52);
+      t.fallStart=t.y;t.fallVelocity=60;
+      t.parachute={projectile,startedAt:this.elapsed};
+      this.fallOrigins.set(t.id,{cause:'转移弹降落',source:{weapon:'shell',owner:t.id,projectile},from,impact:{x,y:impactY},fallDamage:false});
+      this.heardX[t.id]=Math.round(t.x/90)*90;
+      this.burst(from.x,from.y,18,'#a4bfd0');this.burst(t.x,t.y,18,'#a4bfd0');
+      this.observe('fall',t);this.itemCues.push({tank:t.id,item:'teleport',age:0});
+      this.recordBattle('transfer',`${t.name}转移至命中点上方，降落伞垂直落位（免坠落伤害）`,{from,to:{x:t.x,y:t.y},impact:{x,y:impactY},projectile,parachute:true,fallDamage:false});
+      if(!Number.isFinite(x)||!Number.isFinite(impactY)||x<0||x>WORLD_W||impactY>=BOTTOM_Y){
+        t.outOfBounds=true;t.parachute=null;t.fallVelocity=0;
+        this.damage(t,t.hp,t.id,true,'fall',undefined,{cause:'out',weapon:'shell',projectile,base:t.hp,formula:'转移弹落出地图，扣除剩余HP（绕过护盾）',origin:this.fallOrigins.get(t.id)});
+        this.emit('item',`${t.name}随转移弹落出了战场。`);
+      }else this.emit('item',`${t.name}随转移弹抵达，降落伞落位中。`);
+      return true;
+    }
     if(!Number.isFinite(x)||x<32||x>WORLD_W-32||this.tanks.some(other=>other.id!==t.id&&other.hp>0&&Math.abs(x-other.x)<56)) return false;
     const levels=[-16,-8,0,8,16].map(dx=>this.walkSurface(x+dx,impactY));
     const foot=levels.sort((a,b)=>a-b)[2];
@@ -453,9 +490,10 @@ export class Game {
     if(this.paused||this.introLocked||this.weatherObservation||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||((this.active.ammo[this.selected]??0)<=0&&(!modernWeather(this.gameVersion)||!this.teleporting&&!this.restoring))||this.active.fallVelocity>0) return false;
     const t=this.active,id=this.selected,transfer=this.teleporting,healing=this.restoring;
     if(transfer&&this.itemUnavailable('teleport',ai))return false;
-    if(transfer)this.consumeItem('teleport');
-    if(healing){if(this.itemUnavailable('repair',ai))return false;this.consumeItem('repair');}
-    this.observation={kind:'ground',target:null,point:null};this.phase='flying';this.teleporting=false;this.restoring=false;this.firedBy=t.id;
+    const armedSlot=modernBackpack(this.gameVersion)?this.armedItemSlot??undefined:undefined;
+    if(transfer){if(this.itemUnavailable('teleport',ai,armedSlot))return false;this.consumeItem('teleport',armedSlot);}
+    if(healing){if(this.itemUnavailable('repair',ai,armedSlot))return false;this.consumeItem('repair',armedSlot);}
+    this.observation={kind:'ground',target:null,point:null};this.phase='flying';this.teleporting=false;this.restoring=false;this.armedItemSlot=null;this.firedBy=t.id;
     if(!transfer&&!healing&&Number.isFinite(t.ammo[id])) t.ammo[id]--;
     t.shots++;
     if(modernWeather(this.gameVersion)&&t.controller==='ai'&&t.aiCalibration&&!healing&&!transfer)advanceCalibration(t.aiCalibration);
@@ -522,6 +560,8 @@ export class Game {
   }
   private stepProjectile(p:Projectile,dt:number):boolean {
     if(this.invalidVolleyTarget(p)){this.cancelVolley(p.volley);return true;}
+    if(p.transfer&&modernBackpack(this.gameVersion)&&this.tanks[p.owner].hp<=0){this.recordBattle('projectile-end','转移者已出局，清除剩余转移弹',{projectile:p.traceId,owner:p.owner});return true;}
+    if(p.awaitTransfer&&modernBackpack(this.gameVersion)&&this.tanks[p.owner].parachute)return false;
     if(p.awaitTransfer&&this.projectiles.some(other=>other!==p&&other.transfer&&!other.awaitTransfer))return false;
     if(p.delay>0) {p.delay-=dt;if(p.delay<=0){if(p.awaitTransfer){const fresh=this.launch(this.tanks[p.owner],'shell');Object.assign(p,fresh,{transfer:true,awaitTransfer:false,echo:true,delay:0,boost:1,fireBoosted:false,rage:false,digBoost:1});this.recordBattle('transfer-relaunch','双发第二枚转移弹从新落点发射',{projectile:p.traceId,owner:p.owner,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:this.tanks[p.owner].angle,absolute:this.aim(this.tanks[p.owner]).absolute,power:this.tanks[p.owner].power,wind:this.wind});}this.recordBattle('projectile-echo',`第${p.traceId??'?'}弹延迟装填完成`,{projectile:p.traceId,weapon:p.weapon,owner:p.owner});if(p.echo)this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon,!!p.transfer);}return false;}
     p.age+=dt;
@@ -579,11 +619,11 @@ export class Game {
       for(let i=-2;i<=2;i++) this.projectiles.push(this.traceProjectile({...p,vx:p.vx*0.75+i*76,vy:40+Math.abs(i)*16,sub:true,age:0,trail:[]},p.traceId));
       this.burst(p.x,p.y,16,'#e0c384');return true;
     }
-    if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70||p.age>12){this.observe('ground',null,{x:clamp(p.x,0,WORLD_W),y:clamp(p.y,-TERRAIN_H,BOTTOM_Y)});this.recordBattle('projectile-end',`第${p.traceId??'?'}弹${p.age>12?'超时':'越界'}消失`,{projectile:p.traceId,weapon:p.weapon,x:p.x,y:p.y,age:p.age});if(p.transfer)this.emit('item','转移弹未落在战场内，转移失败。');return true;}
+    if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70||p.age>12){this.observe('ground',null,{x:clamp(p.x,0,WORLD_W),y:clamp(p.y,-TERRAIN_H,BOTTOM_Y)});this.recordBattle('projectile-end',`第${p.traceId??'?'}弹${p.age>12?'超时':'越界'}消失`,{projectile:p.traceId,weapon:p.weapon,x:p.x,y:p.y,age:p.age});if(p.transfer){if(modernBackpack(this.gameVersion))this.transferTo(this.tanks[p.owner],p.x,p.y,p.traceId);else this.emit('item','转移弹未落在战场内，转移失败。');}return true;}
     const hitTank=this.projectileHit(p);
     if(p.healing&&(this.land.solid(p.x,p.y)||hitTank)){this.restoreImpact(p,hitTank?.id);return true;}
     if(p.transfer&&(this.land.solid(p.x,p.y)||hitTank)){
-      if(!this.transferTo(this.tanks[p.owner],p.x,p.y))this.emit('item','转移弹落点无法站立，转移失败。');
+      if(!this.transferTo(this.tanks[p.owner],p.x,p.y,p.traceId))this.emit('item','转移弹落点无法站立，转移失败。');
       return true;
     }
     if(p.hitCooldown<=0&&(this.land.solid(p.x,p.y)||hitTank||p.drillY!==null)) {
@@ -621,8 +661,20 @@ export class Game {
     const event=this.recordBattle('terrain',`挖土(${x.toFixed(2)},${y.toFixed(2)})，半径${radius.toFixed(2)}／深${depth.toFixed(2)}，移除${removed}像素（永久层保留）`,{x,y,radius,depth,removed,source});
     if(removed)for(const {t,pose} of affected){t.aiCalibration??={stableShots:0,disturbed:false};t.aiCalibration.terrainPending??={...pose,event};}
     for(const t of this.tanks) if(t.hp>0&&this.support(t.x,t.y+18)-18>t.y+3 && t.fallVelocity===0) { t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{event,source:traceClone(source??null),terrain:{x,y,radius,depth,removed},cause:'地形支撑被破坏'}); }
-    for(const c of this.crates) c.y=this.ground(c.x,c.y-5)-14;
-    this.crates=this.crates.filter(c=>c.y<BOTTOM_Y-14);
+    if(modernBackpack(this.gameVersion)){
+      this.crates=this.crates.filter(c=>{
+        const dx=(clamp(x,c.x-15,c.x+15)-x)/radius,dy=(clamp(y,c.y-14,c.y+14)-y)/depth;
+        const hit=radius>0&&depth>0&&dx*dx+dy*dy<=1;
+        const unsupported=!c.falling&&this.ground(c.x,c.y-5)-14>c.y+6;
+        if(!hit&&!unsupported)return true;
+        this.recordBattle('crate-destroy',`补给箱被${hit?'炮击挖土波及':'脚下支撑破坏'}摧毁`,{crate:{...c},cause:hit?'excavation':'support',source,terrainEvent:event});
+        this.burst(c.x,c.y,10,'#c29a6b');this.float(c.x,c.y-24,'箱子摧毁','#997651');
+        return false;
+      });
+    }else{
+      for(const c of this.crates)c.y=this.ground(c.x,c.y-5)-14;
+      this.crates=this.crates.filter(c=>c.y<BOTTOM_Y-14);
+    }
   }
   private excavateImpact(p:Projectile,radius:number,depth:number,directTarget?:number){
     if(radius<=0||depth<=0)return;
@@ -747,7 +799,22 @@ export class Game {
   }
   private updateTanks(dt:number) {
     for(const t of this.tanks) {
-      if(t.hp<=0) continue;
+      if(t.hp<=0){if(modernBackpack(this.gameVersion))this.updateCorpse(t,dt);continue;}
+      if(t.parachute){
+        // Transfer uses its landing column, not a flat five-point placement test.
+        const ground=this.support(t.x,t.y+18)-18;
+        this.observe('fall',t);t.fallVelocity=Math.min(150,t.fallVelocity+120*dt);t.y+=t.fallVelocity*dt;
+        if(ground<BOTTOM_Y-18&&t.y>=ground){
+          t.y=ground;t.fallVelocity=0;const source=t.parachute;t.parachute=null;
+          this.recordBattle('landing',`${t.name}降落伞落位，免坠落伤害`,{target:t.id,projectile:source.projectile,position:{x:t.x,y:t.y},distance:t.y-t.fallStart,parachute:true,fallDamage:false});
+          this.collectCrates();
+        }else if(t.y+18>=BOTTOM_Y){
+          t.outOfBounds=true;t.parachute=null;t.fallVelocity=0;
+          this.damage(t,t.hp,t.id,true,'fall',undefined,{cause:'out',weapon:'shell',base:t.hp,formula:'降落伞落位掉穿地图底边，扣除剩余HP（绕过护盾）',origin:this.fallOrigins.get(t.id)});
+          this.emit('hit',`${t.name}掉出了战场。`);
+        }
+        continue;
+      }
       const ground=this.support(t.x,t.y+18)-18;
       if(t.y<ground-0.5 || t.fallVelocity>0) {
         if(!t.fallVelocity) {t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{cause:'失去地形支撑',action:this.turn+1});}
@@ -761,22 +828,34 @@ export class Game {
       if(t.y+18>=BOTTOM_Y) {t.outOfBounds=true;this.damage(t,t.hp,this.firedBy,true,'fall',undefined,{cause:'out',weapon:(this.fallOrigins.get(t.id) as any)?.source?.weapon,base:t.hp,formula:'掉穿地图底边，扣除剩余HP（绕过护盾）',origin:{bottomY:BOTTOM_Y,fallStart:t.fallStart,attributedOwner:this.firedBy,trigger:this.fallOrigins.get(t.id)}});this.emit('hit',`${t.name}掉出了战场。`); }
     }
   }
+  private updateCorpse(t:Tank,dt:number){
+    if(!t.defeat||t.outOfBounds)return;
+    t.x=t.defeat.x;t.y=t.defeat.y;
+    const ground=this.support(t.x,t.y+18)-18;
+    if(t.y<ground-.5||t.fallVelocity>0){
+      if(!t.fallVelocity){t.fallVelocity=1;t.fallStart=t.y;this.recordBattle('corpse-fall',`${t.name}的哭泣尸体失去支撑，开始下落`,{target:t.id,from:{x:t.x,y:t.y}});}
+      t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt;t.defeat.y=t.y;t.defeat.slope=0;
+      if(ground<BOTTOM_Y-18&&t.y>=ground){t.y=ground;t.defeat.y=ground;t.fallVelocity=0;t.defeat.slope=this.tankSlope(t);this.recordBattle('corpse-landing',`${t.name}的哭泣尸体落到下层`,{target:t.id,position:{x:t.x,y:t.y}});}
+    }
+    if(t.y+18>=BOTTOM_Y){t.outOfBounds=true;t.defeat=null;t.fallVelocity=0;this.recordBattle('corpse-out',`${t.name}的哭泣尸体掉出了地图`,{target:t.id,position:{x:t.x,y:t.y}});}
+  }
   private collectCrates() {
     this.crates=this.crates.filter(c=>{
       const t=this.active;
       if(c.falling||Math.abs(c.x-t.x)>28||Math.abs(c.y-t.y)>40) return true;
-      if(TURN_ITEMS.every(id=>t.items[id]>0))return true;
+      if(modernBackpack(this.gameVersion)?this.backpack(t).every(id=>id!==null):TURN_ITEMS.every(id=>t.items[id]>0))return true;
       const item=c.type==='medical'?'repair':c.type==='double'?'double':c.type==='transfer'?'teleport':c.type==='boost'?'boost':null;
-      let name:string;
+      let name:string;let slot:number|undefined;
       if(item){
-        if(t.items[item]>0)return true;
-        t.items[item]=1;name=this.itemName(item);
+        if(modernBackpack(this.gameVersion)){slot=putBackpackItem(t,item);if(slot<0)return true;}
+        else {if(t.items[item]>0)return true;t.items[item]=1;}
+        name=this.itemName(item);
       }else{
         if(t.ammo.homing>0)return true;
         t.ammo.homing=1;name='猎星追踪弹';
       }
       this.float(t.x,t.y-40,`${name} +1`,'#ad9261');
-      this.recordBattle('crate-pickup',`${t.name}拾取${name}，填入空槽`,{target:t.id,crate:c,item,items:t.items,ammo:t.ammo});
+      this.recordBattle('crate-pickup',`${t.name}拾取${name}，填入空槽`,{target:t.id,crate:c,item,...(slot===undefined?{}:{slot,itemSlots:t.itemSlots}),items:t.items,ammo:t.ammo});
       this.emit('crate',`${t.name}拾取了${name}补给。`,undefined,t.x);return false;
     });
   }
@@ -831,7 +910,7 @@ export class Game {
     if(this.fireLine&&--this.fireLineTurnsRemaining<=0){this.fireLine=null;this.emit('weather','火线熄灭了，强化通道已关闭。');}
     }
     const preferred=this.active.selectedWeapon;
-    this.restoring=false;this.selected=(this.active.ammo[preferred]??0)>0?preferred:this.active.vehicleId?vehicleById(this.active.vehicleId).normal:'shell';this.teleporting=false;
+    this.restoring=false;this.armedItemSlot=null;this.selected=(this.active.ammo[preferred]??0)>0?preferred:this.active.vehicleId?vehicleById(this.active.vehicleId).normal:'shell';this.teleporting=false;
     this.active.selectedWeapon=this.selected;
     this.active.actionTime=0;this.active.movedThisTurn=0;this.active.itemDelay=0;this.active.delayCommitted=false;
     this.active.fuel=this.active.vehicleId?100:Math.min(100,this.active.fuel+18);this.active.itemUsed=false;
@@ -851,8 +930,9 @@ export class Game {
     if(this.checkWin()) return;
     if(this.shouldCheckSupply(completedRound)&&this.crates.length<3) {
       const humans=this.tanks.filter(t=>t.controller==='human'&&t.hp>0),candidates=humans.length?humans:this.tanks.filter(t=>t.hp>0);
-      for(let tries=0;tries<50;tries++) {
-        const human=modernWeather(this.gameVersion)?candidates[Math.floor(this.rng()*candidates.length)]:(humans[0]??this.tanks[0]),maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
+      const order=[...candidates];if(modernBackpack(this.gameVersion))for(let i=order.length-1;i>0;i--){const j=Math.floor(this.rng()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+      for(let tries=0;tries<(modernBackpack(this.gameVersion)?50*order.length:50);tries++) {
+        const human=modernBackpack(this.gameVersion)?order[Math.floor(tries/50)]:modernWeather(this.gameVersion)?candidates[Math.floor(this.rng()*candidates.length)]:(humans[0]??this.tanks[0]),maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
         const desired=human.x+(this.rng()<0.5?-1:1)*(45+this.rng()*Math.max(0,maxDistance-45));
         if(!this.stablePlatform(desired)||this.traversable(human,desired)===null) continue;
         const distance=this.ground(desired)+50;
@@ -864,7 +944,7 @@ export class Game {
         // A lower-layer player cannot collect a box resting on the roof above.
         if(start<32||start>WORLD_W-32||!landing||landing.x<40||landing.x>WORLD_W-40||!this.stablePlatform(landing.x)||reachable===null||Math.abs(landing.y+14-reachable)>MAX_STEP_HEIGHT||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45)) continue;
         const roll=this.rng(),type=roll<.3?'medical':roll<.5?'double':roll<.65?'transfer':roll<.8?'boost':'homing';
-        this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0});if(modernWeather(this.gameVersion)){this.nextSupplyAction=this.turn+SUPPLY_ACTION_GAP;this.recordBattle('supply-selection','补给随机兼顾可安全投放的人类炮手',{candidates:candidates.map(t=>t.id),target:human.id,startX:start,landing,nextAction:this.nextSupplyAction});}
+        this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0});if(modernWeather(this.gameVersion)){this.nextSupplyAction=this.turn+(modernBackpack(this.gameVersion)?SUPPLY_INTERVAL_ACTIONS:SUPPLY_ACTION_GAP);this.recordBattle('supply-selection','补给随机兼顾可安全投放的人类炮手',{candidates:candidates.map(t=>t.id),target:human.id,startX:start,landing,nextAction:this.nextSupplyAction});}
         this.emit('crate','补给空降中，回合计时暂停。');break;
       }
     }
@@ -875,6 +955,7 @@ export class Game {
     this.emit('turn',`${this.active.name}，轮到你了。`);
   }
   private shouldCheckSupply(completedRound:boolean){
+    if(modernBackpack(this.gameVersion))return this.turn>0&&this.turn%SUPPLY_INTERVAL_ACTIONS===0;
     if(!modernWeather(this.gameVersion))return this.turn%5===0;
     if(!this.firstSupplyChecked){if(!completedRound||this.roundNumber<FIRST_SUPPLY_ROUND)return false;this.firstSupplyChecked=true;this.nextSupplyAction=this.turn+4;return this.rng()<FIRST_SUPPLY_CHANCE;}
     if(this.turn<this.nextSupplyAction)return false;this.nextSupplyAction=this.turn+SUPPLY_ACTION_GAP;return true;
@@ -1053,6 +1134,7 @@ export class Game {
     this.texts=this.texts.filter(t=>{t.life-=dt;t.y-=dt*20;return t.life>0;});
     for(const tank of this.tanks) if(tank.reaction) {tank.reaction.remaining-=dt;if(tank.reaction.remaining<=0) tank.reaction=null;}
     if(this.phase==='ended'){
+      if(modernBackpack(this.gameVersion))for(const t of this.tanks)if(t.hp<=0)this.updateCorpse(t,dt);
       this.resultAge+=dt;
       return;
     }

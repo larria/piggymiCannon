@@ -11,7 +11,7 @@ import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,p
 import { AudioManager } from './audio';
 import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type WeaponId } from './catalog';
 import { icon } from './icons';
-import { chargePower,touchChargePower } from './interaction';
+import { heldChargePower,chargeDelayProgress,CHARGE_DELAY_SECONDS } from './interaction';
 import {installMobileGestureGuards} from './mobile-gestures';
 import {installAngleNudges} from './angle-nudges';
 import {chooseResultPosition} from './result-layout';
@@ -57,7 +57,7 @@ let dialogPaused=false;
 let statsRecorded=false;
 let toastTimer=0;let snapshotStatusTimer=0;
 let moveHeld=0;
-let charge:null|{pointer:number|null;startedAt:number;previousPower:number;tank:number;touch:boolean;pointerStartedAt?:number}=null;
+let charge:null|{pointer:number|null;startedAt:number;previousPower:number;tank:number;touch:boolean;source:'fire'|'power';audible:boolean;pointerStartedAt?:number}=null;
 let aimPointer:number|null=null;
 let immersive=false;
 let drawerOpen=false;
@@ -95,13 +95,13 @@ $('#app').innerHTML=`
           <div class="dash-angle"><button id="aim-pad" class="angle-instrument" aria-label="拖动角度仪表瞄准"><canvas id="angle-dial"></canvas><span class="angle-instrument-name" id="instrument-tank">老土</span></button><div class="angle-caption"><span id="angle-limits">25–45°</span><button id="face-button" title="切换炮口朝向">${icon('transfer')}<span>朝右</span></button></div><input id="angle" type="range" min="0" max="90" value="45" class="sr-only"/><span id="angle-value" class="sr-only">45</span></div>
           <div class="dash-center"><div class="dash-toolbar"><div id="weapon-switcher" class="weapon-switcher hidden" aria-label="直接切换坦克武器"><button id="weapon-normal" data-weapon="shell"></button><button id="weapon-special" data-weapon="heavy"></button><button id="weapon-bonus" data-weapon="homing" class="hidden"></button></div><div id="quick-items" class="quick-items"></div><div class="wait-readout"><span>等待</span><strong id="waiting-value">580</strong></div></div>
             <div class="meter-row energy-meter"><span class="meter-label">${icon('fuel')}能量</span><div class="meter-track"><span id="energy-fill"></span></div><span id="energy-value" class="meter-value">920 / 920</span></div>
-            <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="按住力度条蓄力，松开发射"><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><span class="meter-help">按住力度条 / SPACE · 松开发射</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="10" max="100" value="68"/></div>
+            <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="短按最小力度发射，按住100毫秒后开始蓄力，松开发射"><svg class="charge-wait-ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="charge-wait-track" cx="24" cy="24" r="20"/><circle class="charge-wait-fill" cx="24" cy="24" r="20" pathLength="1"/></svg><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><span class="meter-help">按住力度条 / SPACE · 松开发射</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="10" max="100" value="68"/></div>
             <div class="meter-row mobility-meter"><span class="meter-label">${icon('transfer')}移动力</span><div class="meter-track"><span id="mobility-fill"></span></div><span class="meter-value"><b id="fuel-value">100</b>%</span><div class="move-buttons"><button id="move-left" aria-label="后退">${icon('left')}<span>后退</span><kbd>A</kbd></button><button id="move-right" aria-label="前进"><kbd>D</kbd><span>前进</span>${icon('right')}</button></div></div><div class="dashboard-note"><span id="move-note">本回合可移动</span><span id="meter-hint">白线为上次力度 · ↑↓ 调角度</span></div>
-          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="按住蓄力，松手提前发射，蓄满自动发射">${icon('target')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
+          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="短按最小力度发射，按住100毫秒后开始蓄力，松手或蓄满发射">${icon('target')}<svg class="charge-wait-ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="charge-wait-track" cx="24" cy="24" r="20"/><circle class="charge-wait-fill" cx="24" cy="24" r="20" pathLength="1"/></svg><span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
         </section>
         <div class="keyboard-hints"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>W</kbd><kbd>S</kbd> 角度</span><span><kbd>SPACE</kbd> 蓄力 · 满力自动发射</span><span class="touch-help">拖动角度盘瞄准 · 长按力度条 · 蓄满自动开火</span><span class="hint-last">每一发，都有一点可能。</span></div>
       </section>
-      <button id="inventory-backdrop" class="inventory-backdrop" aria-label="关闭军火库" tabindex="-1"></button><aside class="arsenal" aria-label="武器和道具"><div class="arsenal-heading"><div><span class="eyebrow">有备而来</span><h2>战术背包<span id="tank-pack-label"></span></h2></div><span class="arsenal-symbol">${icon('shell')}</span><button id="arsenal-close" class="icon-button arsenal-close" aria-label="关闭军火库">${icon('close')}</button></div><div class="arsenal-tabs" role="tablist" aria-label="军火库类别"><button id="weapons-tab" class="selected" role="tab" aria-selected="true">坦克武器 <span>2</span></button><button id="items-tab" role="tab" aria-selected="false">道具 <span>4</span></button></div><div class="inventory-grid" id="inventory-grid" role="tabpanel" aria-label="武器清单"></div><div id="weapon-detail" class="weapon-detail"></div><div class="arsenal-bottom"><div class="supply-icon">${icon('plus')}</div><div><strong>路上有惊喜</strong><p>每 5 回合空投补给，移动可拾取</p></div></div></aside>
+      <button id="inventory-backdrop" class="inventory-backdrop" aria-label="关闭军火库" tabindex="-1"></button><aside class="arsenal" aria-label="武器和道具"><div class="arsenal-heading"><div><span class="eyebrow">有备而来</span><h2>战术背包<span id="tank-pack-label"></span></h2></div><span class="arsenal-symbol">${icon('shell')}</span><button id="arsenal-close" class="icon-button arsenal-close" aria-label="关闭军火库">${icon('close')}</button></div><div class="arsenal-tabs" role="tablist" aria-label="军火库类别"><button id="weapons-tab" class="selected" role="tab" aria-selected="true">坦克武器 <span>2</span></button><button id="items-tab" role="tab" aria-selected="false">道具 <span>4</span></button></div><div class="inventory-grid" id="inventory-grid" role="tabpanel" aria-label="武器清单"></div><div id="weapon-detail" class="weapon-detail"></div><div class="arsenal-bottom"><div class="supply-icon">${icon('plus')}</div><div><strong>路上有惊喜</strong><p>每 5 次行动检查空投，移动可拾取</p></div></div></aside>
     </div>
     <footer class="page-footer"><span>手边的快乐，远方的炮火。</span><button id="version-button" class="version-button" aria-label="点击版本号检查更新">v${APP_VERSION} · 检查更新</button><span>MIMI’S CRAZY TANKS <span class="footer-star">✳</span> MADE FOR A GOOD SHOT</span></footer>
   </main>
@@ -172,9 +172,10 @@ function renderInventory() {
   const tank=displayTank(),vehicle=tank.vehicleId?vehicleById(tank.vehicleId):null;
   const weapons=vehicle?[weaponById(vehicle.normal),weaponById(vehicle.special),...(tank.ammo.homing>0?[weaponById('homing')]:[])]:WEAPONS;
   $('#inventory-grid').innerHTML=activeTab==='weapons'?weapons.map(w=>`<button class="inventory-tile ${game.selected===w.id?'selected':''} ${tank.ammo[w.id]<=0?'depleted':''}" data-weapon="${w.id}" title="${w.name}：${w.description}" aria-label="${w.name}，${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]+' 发':'无限弹药'}" aria-pressed="${game.selected===w.id}"><span class="weapon-icon" style="--weapon-color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span class="tile-name">${w.name}</span><span class="ammo-count">${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]:'∞'}</span>${game.selected===w.id?`<span class="selection-tick">${icon('check')}</span>`:''}</button>`).join(''):
-    ITEMS.filter(i=>TURN_ITEMS.includes(i.id)).sort((a,b)=>TURN_ITEMS.indexOf(a.id)-TURN_ITEMS.indexOf(b.id)).map(i=>{
-      const reason=game.itemUnavailable(i.id),waiting=tank.itemReadyTurn[i.id]-tank.turnsTaken;
-      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${(i.id==='teleport'&&game.teleporting||i.id==='repair'&&game.restoring)?'selected':''}" data-item="${i.id}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="使用${i.name}，剩余 ${tank.items[i.id]} 件${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${itemIcon(i.id)}</span><span class="tile-name">${i.name}</span><span class="ammo-count">${tank.items[i.id]}</span><span class="item-hint">${reason||'每格一件 · 空槽可拾取同类补给'}</span><span class="item-cost">同回合可联动</span></button>`;
+    game.backpack(tank).map((id,slot)=>{
+      if(!id)return `<button class="inventory-tile item-tile empty-item" disabled aria-label="道具槽 ${slot+1}，空槽"><span class="weapon-icon">${icon('plus')}</span><span class="tile-name">空槽</span><span class="item-hint">可拾取任意道具</span></button>`;
+      const i=ITEMS.find(i=>i.id===id)!,reason=game.itemUnavailable(id,false,slot);
+      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${game.itemArmed(slot)?'selected':''}" data-item="${id}" data-item-slot="${slot}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="道具槽 ${slot+1}，使用${i.name}${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${itemIcon(id)}</span><span class="tile-name">${i.name}</span><span class="item-hint">${reason||'使用后留空 · 可拾取重复道具'}</span><span class="item-cost">${game.itemArmed(slot)?'已装填 · 再点取消':'同回合可联动'}</span></button>`;
     }).join('');
   $('#inventory-grid').classList.toggle('items-grid',activeTab==='items');
   $('#inventory-grid').setAttribute('aria-label',activeTab==='weapons'?'武器清单':'道具清单');
@@ -187,7 +188,7 @@ function renderDetail(item?:ItemId) {
   if(activeTab==='weapons') {
     $('#weapon-detail').innerHTML=`<div class="detail-title"><span>${w.name}</span><span class="weapon-tag">${w.tag}</span></div><p>${w.description}</p><div class="weapon-metrics"><span>单枚伤害 <strong>${w.damage}${w.shots&&w.shots>1?` ×${w.shots}`:''}</strong></span><span>爆炸半径 <strong>${w.radius}m</strong></span><span>挖地 <strong>${w.digRadius} × ${w.digDepth}m</strong></span></div><button class="shell-atlas-button" data-dialog="projectiles">认认炮弹 · 弹体图鉴 ${icon('arrow')}</button>`;
   }
-  else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四件道具，选好这一件</span>${icon('shield')}</div><p>开局各带一件，使用后不会自动恢复；补给只填对应空槽，满槽不拾取。可在同回合联动。</p><div class="weapon-metrics"><span>同回合可联动 · 用掉后留空</span></div>`;}
+  else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四个槽位，灵活搭配</span>${icon('shield')}</div><p>开局各带一件，使用后原位留空；任意空槽可拾取道具，重复道具各占一格，满槽不拾取。可在同回合联动。</p><div class="weapon-metrics"><span>同回合可联动 · 用掉后留空</span></div>`;}
 }
 
 let lastInventory='';let lastPhase='';
@@ -208,8 +209,12 @@ function updateUI() {
   $('#instrument-tank').textContent=v?.name??'炮术演习';$('#angle-limits').textContent=`${t.minAngle}–${t.maxAngle}°`;
   $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=game.delayEnabled?String(t.delayCommitted?t.lastDelay:game.delayFor(t,game.teleporting||game.restoring?undefined:shownWeapon)+(game.teleporting||game.restoring?200:0)):'—';
   $('#previous-power').hidden=t.lastPower===null||lobby||game.phase==='ended';$('#previous-power').style.left=t.lastPower===null?'0%':`${t.lastPower}%`;
-  const quick=TURN_ITEMS;const quickSignature=quick.map(id=>`${id}:${t.items[id]}:${game.itemUnavailable(id)}`).join('|')+'|'+game.teleporting+'|'+game.restoring;
-  if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,i)=>{const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id);return `<button data-item="${id}" class="${(id==='teleport'&&game.teleporting||id==='repair'&&game.restoring)?'selected':''}" aria-pressed="${id==='teleport'&&game.teleporting}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+i}${reason?' · '+reason:''}" aria-label="快捷使用${item.name}">${itemIcon(id)}<span>${["双发","转移","加强","补给"][i]}</span><small>${t.items[id]}</small></button>`;}).join('');}
+  const quick=game.backpack(t);const quickSignature=quick.map((id,slot)=>`${id}:${id?game.itemUnavailable(id,false,slot):'empty'}`).join('|')+'|'+game.teleporting+'|'+game.restoring+'|'+quick.map((_,slot)=>game.itemArmed(slot)).join(',');
+  if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,slot)=>{
+    if(!id)return `<button class="empty-item" data-item-slot="${slot}" disabled data-help-name="空槽" data-help-description="可拾取任意道具，重复道具各占一个槽位" aria-label="道具槽 ${slot+1}，空槽">${icon('plus')}<span>空槽</span></button>`;
+    const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id,false,slot),armed=game.itemArmed(slot);
+    return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+slot}${reason?' · '+reason:''}" aria-label="道具槽 ${slot+1}，快捷使用${item.name}">${itemIcon(id)}<span>${item.name}</span></button>`;
+  }).join('');}
   $('.wait-readout').dataset.helpDescription=!(game.delayEnabled)?'含 AI 的对局按存活槽位轮转，DELAY 排序关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
   $('#pwa-update').classList.toggle('hidden',!pendingUpdate||(!lobby&&game.phase!=='ended'));
   $('.battle-stage').classList.toggle('started',!lobby);
@@ -263,9 +268,9 @@ function updateUI() {
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
   updateChargeVisual(t.power);
   $('#fire-button').classList.toggle('charging',Boolean(charge||playback?.charging));
-  document.querySelectorAll<HTMLButtonElement>('.quick-items [data-item]').forEach(button=>button.disabled=!!playback||!!game.itemUnavailable(button.dataset.item as ItemId));
+  document.querySelectorAll<HTMLButtonElement>('.quick-items [data-item]').forEach(button=>button.disabled=!!playback||!!game.itemUnavailable(button.dataset.item as ItemId,false,Number(button.dataset.itemSlot)));
 
-  $('#fire-title').textContent=charge||playback?.charging?'蓄力中':'开火';
+  $('#fire-title').textContent=charge&&!charge.audible||playback?.waiting?'准备蓄力':charge||playback?.charging?'蓄力中':'开火';
   $('#fire-subtitle').textContent=charge?'松手或蓄满发射':'按住 / SPACE';
   $('#fuel-value').textContent=String(Math.floor(t.fuel));$('#move-note').textContent=t.immobile?'紫冻水 · 暂时不能移动':t.frozen?'冰冻中 · 移动耗油加倍':t.vehicleId?`本回合最多移动 ${Math.round(t.moveDistance)}m`:'长按移动 · 每回合补充 18';
   if(t.immobile>0){$<HTMLButtonElement>('#move-left').disabled=true;$<HTMLButtonElement>('#move-right').disabled=true;}
@@ -482,8 +487,8 @@ document.addEventListener('click',e=>{
   if(item) {
     renderDetail(item);
     if(!canControlBattle()) {toast('道具要在自己的回合使用。');return;}
-    if(game.useItem(item)) {toast(item==='repair'?(game.restoring?'恢复弹已装填；轻点原地治疗，蓄力可投向队友。':'已取消恢复弹装填。'):item==='teleport'?(game.teleporting?'转移弹已装填，调整角度后蓄力发射。':'已取消转移弹装填。'):`${ITEMS.find(i=>i.id===item)!.name}已使用。`);lastInventory='';updateUI();}
-    else toast(game.itemUnavailable(item)||'当前不能使用这件道具。');
+    if(game.useItem(item,false,Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot))) {toast(item==='repair'?(game.restoring?'恢复弹已装填；轻点原地治疗，蓄力可投向队友。':'已取消恢复弹装填。'):item==='teleport'?(game.teleporting?'转移弹已装填，调整角度后蓄力发射。':'已取消转移弹装填。'):`${ITEMS.find(i=>i.id===item)!.name}已使用。`);lastInventory='';updateUI();}
+    else toast(game.itemUnavailable(item,false,Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot))||'当前不能使用这件道具。');
   }
 });
 $('#start-button').addEventListener('click',()=>showDialog('setup'));
@@ -512,19 +517,20 @@ $('#power').addEventListener('input',e=>{game.setAim(game.active.angle,Number((e
 $('#face-button').addEventListener('click',()=>{game.face(-game.active.direction);updateUI();});
 function startCharge(pointer:number|null,event?:PointerEvent) {
   if(!canControlBattle()||game.active.fallVelocity>0||charge) return false;
-  setDrawer(false);charge={pointer,startedAt:performance.now(),previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',pointerStartedAt:event?.timeStamp};
-  audio.unlock();audio.startCharge();recorder?.cue('charge-start');game.setAim(game.active.angle,10);updateUI();return true;
+  setDrawer(false);charge={pointer,startedAt:performance.now(),previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',source:(event?.currentTarget as HTMLElement|undefined)?.id==='power-meter'?'power':'fire',audible:false,pointerStartedAt:event?.timeStamp};
+  audio.unlock();recorder?.cue('charge-wait');game.setAim(game.active.angle,10);updateUI();updateChargeDelay(performance.now());return true;
 }
 function cancelCharge() {
   audio.stopCharge();
   if(charge) {recorder?.cue('charge-stop');game.tanks[charge.tank].power=charge.previousPower;charge=null;}
+  updateChargeDelay(performance.now());
 }
 function finishCharge(maximum=false,event?:PointerEvent) {
   if(!charge) return;
   recorder?.cue('charge-stop');
   audio.stopCharge();
   const seconds=event&&charge.touch&&charge.pointerStartedAt!==undefined?Math.max(0,event.timeStamp-charge.pointerStartedAt)/1000:(performance.now()-charge.startedAt)/1000;
-  const tank=charge.tank,power=maximum?100:(charge.touch?touchChargePower:chargePower)(seconds);charge=null;
+  const tank=charge.tank,power=maximum?100:heldChargePower(seconds);charge=null;updateChargeDelay(performance.now());
   if(canControlBattle()&&game.current===tank) game.setAim(game.active.angle,power);
   if(canControlBattle()&&game.current===tank) game.fire();updateUI();
 }
@@ -606,7 +612,7 @@ document.addEventListener('keydown',e=>{
   if(!canControlBattle()) return;
   if((key==='f3'||key==='f4')&&game.active.vehicleId){e.preventDefault();const v=vehicleById(game.active.vehicleId);if(game.selectWeapon(key==='f3'?v.normal:v.special)) {audio.play('click');updateUI();}return;}
   if(key==='f5'){e.preventDefault();cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();return;}
-  if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const id=TURN_ITEMS[Number(key.slice(1))-9];if(game.useItem(id))updateUI();else toast(game.itemUnavailable(id)??'当前不能使用');return;}
+  if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const slot=Number(key.slice(1))-9,id=game.backpack()[slot];if(id&&game.useItem(id,false,slot))updateUI();else toast(id?game.itemUnavailable(id,false,slot)??'当前不能使用':'这个道具槽是空的');return;}
   if(['arrowleft','arrowright','arrowup','arrowdown'].includes(key)){e.preventDefault();keys.add(key);}
   if(['a','d','w','s','q','e',' '].includes(key)) {e.preventDefault();keys.add(key);}
   if(key===' '&&!e.repeat) startCharge(null);
@@ -623,6 +629,14 @@ window.addEventListener('resize',()=>renderer.resize());
 
 // Only the narrow transform / colour-fill changes at display cadence.
 const chargeFill=$('#charge-fill'),chargeFire=$('#fire-button'),chargeReadout=$('#power-value');
+const chargeDelayHosts=[$('#fire-button'),$('#power-meter')];
+const chargeDelayFills=chargeDelayHosts.map(host=>host.querySelector<SVGCircleElement>('.charge-wait-fill')!);
+function updateChargeDelay(now:number){
+  const elapsed=charge?(now-charge.startedAt)/1000:playback?.waiting?playback.time-playback.waitingStartedAt:CHARGE_DELAY_SECONDS;
+  const waiting=!!(charge||playback?.waiting)&&elapsed<CHARGE_DELAY_SECONDS;
+  const source=charge?.source==='power'?1:0;
+  chargeDelayHosts.forEach((host,index)=>{host.classList.toggle('charge-waiting',waiting&&index===source);if(waiting&&index===source)chargeDelayFills[index].style.strokeDashoffset=String(1-chargeDelayProgress(elapsed));});
+}
 let chargeVisualPower=-1;
 function updateChargeVisual(power:number){
   if(power===chargeVisualPower)return;chargeVisualPower=power;
@@ -638,7 +652,7 @@ function frame(now:number) {
   if(document.hidden){requestAnimationFrame(frame);return;}
   impactProfiler?.beginFrame(now);angleNudges.update(now);
   if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open) {
-    if(charge&&charge.tank===game.current) {game.setAim(game.active.angle,(charge.touch?touchChargePower:chargePower)((now-charge.startedAt)/1000));audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
+    if(charge&&charge.tank===game.current) {const seconds=(now-charge.startedAt)/1000;if(seconds>=CHARGE_DELAY_SECONDS&&!charge.audible){charge.audible=true;audio.startCharge();recorder?.cue('charge-start');}game.setAim(game.active.angle,heldChargePower(seconds));if(charge.audible)audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
     const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
@@ -666,6 +680,7 @@ function frame(now:number) {
     if(event.type==='crate-land') audio.play('crate-land',event.x,game.tanks[game.viewer].x);
   }
   if(playback)for(const cue of playback.drainCues()){if(cue.kind==='charge-start')audio.startCharge();if(cue.kind==='charge-stop')audio.stopCharge();if(cue.kind==='charge-power')audio.updateCharge(cue.power!);}
+  updateChargeDelay(now);
   if(charge||playback?.charging)updateChargeVisual(game.active.power);
   if(now-lastUI>80&&(!game.paused||renderer.touring||playback)) {updateUI();lastUI=now;}
   impactProfiler?.finishFrame();

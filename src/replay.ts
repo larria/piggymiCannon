@@ -7,7 +7,7 @@ type Command=[number,...any[]];
 type UpdateBlock={steps:Float64Array;length:number};
 type TapeEntry=Command|UpdateBlock;
 type External={paused:boolean;targetX:number;aims:number[][]};
-type ReplayCue={kind:'charge-start'|'charge-stop'|'charge-power';power?:number};
+type ReplayCue={kind:'charge-wait'|'charge-start'|'charge-stop'|'charge-power';power?:number};
 export interface BattleReplay {
  format:'piggy-battle-replay';formatVersion:1;gameVersion:string;id:string;createdAt:number;
  initial:BattleSnapshot;commands:Command[];duration:number;finalDigest:string;
@@ -56,7 +56,7 @@ export class ReplayRecorder {
   if(changed){this.append([-1,external(g)]);this.rememberExternal();}
  }
  get bufferBytes(){return this.commands.reduce((n,entry)=>n+(Array.isArray(entry)?JSON.stringify(entry).length*2:entry.steps.byteLength),0);}
- cue(kind:'charge-start'|'charge-stop'){if(!this.stopped)this.append([-2,kind]);}
+ cue(kind:'charge-wait'|'charge-start'|'charge-stop'){if(!this.stopped)this.append([-2,kind]);}
  export():BattleReplay{
   if(this.error)throw Error(this.error);
   if(!this.stopped)this.sync();
@@ -78,12 +78,12 @@ export function validateReplay(value:any):asserts value is BattleReplay{
  for(const c of value.commands){
   if(!Array.isArray(c)||!Number.isInteger(c[0]))throw Error('录像操作数据损坏。');
   if(c[0]===-1){const p=c[1];if(c.length!==2||typeof p?.paused!=='boolean'||!finite(p.targetX)||!Array.isArray(p.aims)||p.aims.length>4||p.aims.some((a:any)=>!Array.isArray(a)||a.length!==4||a.some((n:any)=>!finite(n))||!Number.isInteger(a[0])||a[0]<0||a[0]>3))throw Error('录像状态数据损坏。');}
-  else if(c[0]===-2){if(c.length!==2||!['charge-start','charge-stop'].includes(c[1]))throw Error('录像音效提示数据损坏。');}
+  else if(c[0]===-2){if(c.length!==2||!['charge-wait','charge-start','charge-stop'].includes(c[1]))throw Error('录像音效提示数据损坏。');}
   else if(c[0]<0||c[0]>=METHODS.length||c.length>5||c.slice(1).some((a:any)=>!['number','string','boolean'].includes(typeof a)||typeof a==='number'&&!finite(a))||c[0]===0&&(c.length!==2||c[1]<0||c[1]>.1)||c[0]===10&&(!['selfDamage','friendlyFire','allowDragon','fallDamage'].includes(c[1])||typeof c[2]!=='boolean'))throw Error('录像操作不支持。');
  }
 }
 export class ReplayPlayer {
- game:Game;index=0;time=0;paused=false;speed=1;done=false;charging=false;verified:boolean|null=null;private budget=0;private cues:ReplayCue[]=[];
+ game:Game;index=0;time=0;paused=false;speed=1;done=false;charging=false;waiting=false;waitingStartedAt=0;verified:boolean|null=null;private budget=0;private cues:ReplayCue[]=[];
  constructor(readonly recording:BattleReplay){validateReplay(recording);this.game=Game.fromBattleSnapshot(recording.initial);this.game.drainEvents();}
  advance(dt:number){
   if(this.paused||this.done)return;
@@ -93,10 +93,10 @@ export class ReplayPlayer {
    if(method===0&&command[1]>this.budget+1e-10)break;
    this.index++;
    if(method===-1){const p=command[1] as External;this.game.paused=p.paused;this.game.targetX=p.targetX;for(const [id,angle,power,direction] of p.aims){const tank=this.game.tanks[id];if(!tank)throw Error('录像炮手状态损坏。');Object.assign(tank,{angle,power,direction});}}
-   else if(method===-2){this.charging=command[1]==='charge-start';this.cues.push({kind:command[1]});}
+   else if(method===-2){this.charging=command[1]==='charge-start';this.waiting=command[1]==='charge-wait';if(this.waiting)this.waitingStartedAt=this.time;this.cues.push({kind:command[1]});}
    else {if(method===0){this.budget-=command[1];this.time+=command[1];}(this.game[METHODS[method]] as Function).apply(this.game,command.slice(1));if(method===1&&this.charging)this.cues.push({kind:'charge-power',power:this.game.active.power});}
   }
-  if(this.index===this.recording.commands.length){this.done=true;this.verified=replayDigest(this.game)===this.recording.finalDigest;if(this.charging){this.charging=false;this.cues.push({kind:'charge-stop'});}}
+  if(this.index===this.recording.commands.length){this.done=true;this.verified=replayDigest(this.game)===this.recording.finalDigest;if(this.charging||this.waiting){this.charging=false;this.waiting=false;this.cues.push({kind:'charge-stop'});}}
  }
  drainCues(){const result=this.cues;this.cues=[];return result;}
 }

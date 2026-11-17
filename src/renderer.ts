@@ -17,6 +17,7 @@ import {paintCrew} from './crew-art';
 import {teamFlag} from './crew';
 import {crewPortrait,crewPortraitRevision} from './crew-portraits';
 import {paintItemCue} from './item-feedback';
+import {paintTransferParachute} from './transfer-parachute';
 import {classicBackdrop,classicDetails} from './classic-map-art';
 
 interface Palette {sky:string;horizon:string;sun:string;mountains:string[];soil:string;soilLight:string;grass:string;grassLight:string;water:string;ink:string}
@@ -283,6 +284,7 @@ export class Renderer {
     }
     const vehicle=t.vehicleId?vehicleById(t.vehicleId):null;
     const slope=g.tankSlope(t);
+    if(t.parachute)paintTransferParachute(ctx,t.x,t.y,this.time,teamFlag(t.team).color);
     ctx.save();ctx.translate(t.x,t.y);ctx.rotate(slope);ctx.scale(t.direction,1);
     ctx.fillStyle='#34413028';ctx.beginPath();ctx.ellipse(0,17,33,7,0,0,Math.PI*2);ctx.fill();
     if(t.shield>0) {ctx.fillStyle='#b4e4e515';ctx.strokeStyle='#c5eef0a0';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-9,40,42,0,0,Math.PI*2);ctx.fill();ctx.stroke();}
@@ -297,7 +299,7 @@ export class Renderer {
     if(isRaging(t)&&!celebrating){ctx.strokeStyle='#d88b50';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-31,-39);ctx.lineTo(-27,-33);ctx.lineTo(-30,-27);ctx.stroke();}
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
-    for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(celebrating?162:132);paintItemCue(ctx,cue,clamp(t.x,this.offsetX+48,this.offsetX+this.viewWidth-48),Math.max(this.offsetY+38,top),teamFlag(t.team).color,this.reducedMotion);}
+    for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132);paintItemCue(ctx,cue,clamp(t.x,this.offsetX+48,this.offsetX+this.viewWidth-48),Math.max(this.offsetY+38,top),teamFlag(t.team).color,this.reducedMotion);}
     // The portrait stays upright; its frame carries the team colour.
     const celebrateOffset=celebrating?-26:0;let labelOffset=0;
     const box=()=>({left:t.x-25,right:t.x+(t.poisoned?76:25),top:t.y-108+celebrateOffset+labelOffset,bottom:t.y-53+celebrateOffset+labelOffset});
@@ -340,6 +342,7 @@ export class Renderer {
     const flying=g.projectiles.filter(p=>p.delay<=0&&this.visibleAt(p.x));
     if(g.phase==='flying'&&flying.length)targetX=flying.reduce((x,p)=>x+p.x,0)/flying.length-this.viewWidth*.5;
     if(g.phase==='resolving'&&g.observation){const falling=g.tanks.find(t=>t.hp>0&&t.fallVelocity>0),t=falling??(g.observation.target===null?null:g.tanks[g.observation.target]),point=t?(t.defeat??t):g.observation.point;if(point){targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}}
+    if(actor.parachute&&(g.phase==='flying'||g.phase==='resolving')){targetX=actor.x-this.viewWidth*.5;camera=actor.y-70-this.viewHeight*.5;}
     if(g.weatherObservation){const point=weatherCameraPoint(g.weatherObservation,actor);targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}
     this.camera.update(g.paused&&!this.touring&&!this.camera.manual?0:dt,{x:targetX,y:camera});
     ctx.save();ctx.clearRect(0,0,this.viewWidth,this.viewHeight);

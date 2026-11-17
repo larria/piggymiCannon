@@ -171,7 +171,8 @@ dialog,.arsenal{scrollbar-gutter:stable}
 @media(forced-colors:active){*{scrollbar-color:auto}*::-webkit-scrollbar-thumb{background:ButtonText;border-color:Canvas}*::-webkit-scrollbar-track,*::-webkit-scrollbar-corner{background:Canvas}}
 
 /* One shared set of paper-and-brass tactical objects; quiet control chrome. */
-.quick-items button .item-icon{width:24px;height:24px;color:#61754c;flex-shrink:0}.item-tile .weapon-icon .item-icon{width:32px;height:32px;color:#61754c}.item-tile .weapon-icon{background:#f5f0df;border:1px solid #e0dcc8;display:grid;place-items:center}.quick-items button{position:relative;border-color:#ccd4bc;transition:background-color 140ms,border-color 140ms,transform 140ms}.quick-items button:not(:disabled):active{transform:scale(.97)}.quick-items button:focus-visible{outline:2px solid #7d9565;outline-offset:2px}.quick-items small{font-variant-numeric:tabular-nums;background:#f5f5e9;border-radius:3px;padding:0 2px;line-height:12px}.quick-items button:disabled .item-icon{opacity:.5}.quick-items button.selected{background:#e7eddb;border-color:#91a875}
+.quick-items button .item-icon{width:24px;height:24px;color:#61754c;flex-shrink:0}.item-tile .weapon-icon .item-icon{width:32px;height:32px;color:#61754c}.item-tile .weapon-icon{background:#f5f0df;border:1px solid #e0dcc8;display:grid;place-items:center}.quick-items button{position:relative;border-color:#ccd4bc;transition:background-color 140ms,border-color 140ms,transform 140ms}.quick-items button:not(:disabled):active{transform:scale(.97)}.quick-items button:focus-visible{outline:2px solid #7d9565;outline-offset:2px}.quick-items button:disabled .item-icon{opacity:.5}.quick-items button.selected{background:#e7eddb;border-color:#91a875}
+.quick-items button.empty-item,.inventory-tile.empty-item{border-style:dashed;background:#f1f1e8;color:#a4ac96;opacity:1}.empty-item>.icon{width:16px;height:16px;opacity:.45}.item-tile.empty-item .weapon-icon{background:transparent;border-style:dashed;color:#a4ac96}.item-tile.empty-item .weapon-icon>.icon{width:22px;height:22px;opacity:.5}
 @media(max-width:700px){.quick-items button .item-icon{width:20px;height:20px}.quick-items small{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.quick-items button{transition:none}.quick-items button:not(:disabled):active{transform:none}}
 .compact-dashboard .quick-items button .item-icon{width:24px;height:24px}
@@ -216,3 +217,6 @@ dialog,.arsenal{scrollbar-gutter:stable}
 
 /* Separate time preference from map choices, retaining touch targets. */
 .setup-dialog .setup-map-title{margin-bottom:12px}
+
+/* The 100ms tap boundary occupies the existing control, without changing hit targets. */
+.fire-button{position:relative}.charge-wait-ring{position:absolute;width:44px;height:44px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);pointer-events:none;opacity:0;z-index:2;fill:none}.charge-wait-track{stroke:#f6edd6;stroke-width:2.5;opacity:.75}.charge-wait-fill{stroke:#61774e;stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1}.charge-waiting>.charge-wait-ring{opacity:1}.fire-button.charge-waiting>.icon{opacity:.35}.power-meter-button{position:relative}.power-meter-button>.charge-wait-ring{width:26px;height:26px;left:22px}.power-meter-button .charge-wait-track{stroke:#f7f3e7}.power-meter-button .charge-wait-fill{stroke:#6f8057}

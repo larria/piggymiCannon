@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "version": "3.2.8",
+  "nodeFull": {
+    "tests": 312,
+    "passed": 312,
+    "failed": 0
+  },
+  "finalFocusedAfterSidewallRefinement": {
+    "tests": 25,
+    "passed": 25,
+    "failed": 0
+  },
+  "knownNodeDefinitions": 313,
+  "chromium": {
+    "coreTests": 34,
+    "initialPassed": 32,
+    "updatedReplayCueAssertions": 2,
+    "followupTests": 11,
+    "followupPassed": 11,
+    "finalUniquePassed": 34
+  },
+  "webkit": {
+    "tests": 49,
+    "passed": 49,
+    "failed": 0,
+    "execution": "serial, isolated from Chromium"
+  },
+  "visualReview": {
+    "viewport": [
+      1194,
+      834
+    ],
+    "additionalWidth": 1210,
+    "deviceScaleFactor": 2,
+    "touch": true,
+    "realIPadHardware": false,
+    "oneImagePerInspection": true,
+    "parachuteLabelClearanceFixed": true,
+    "chargeRingInsideOriginalButton": true,
+    "controlsNotShrunk": true
+  },
+  "supply": {
+    "seeds": 160,
+    "intervalActions": 5,
+    "byHuman": [
+      38,
+      43,
+      41,
+      38
+    ]
+  },
+  "sourceDirectoriesIgnored": true
+}

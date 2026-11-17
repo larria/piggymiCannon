@@ -2,6 +2,10 @@ import { clamp } from './engine';
 import {MIN_POWER} from './ballistics';
 
 export const chargePower=(seconds:number)=>clamp(10+Math.max(0,seconds)*36,10,100);
+export const CHARGE_DELAY_SECONDS=.1;
+export const chargeDelayProgress=(seconds:number)=>clamp(seconds/CHARGE_DELAY_SECONDS,0,1);
+/** All current input devices have the same deliberate tap/hold boundary. */
+export const heldChargePower=(seconds:number)=>chargePower(Math.max(0,seconds-CHARGE_DELAY_SECONDS));
 export const TOUCH_TAP_SECONDS=.16,TOUCH_JOIN_SECONDS=.35;
 /** Tap fires immediately on release at the minimum. A smooth transition meets
  * the original charge curve at .35s; longer touch holds and SPACE are unchanged. */

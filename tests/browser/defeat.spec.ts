@@ -12,18 +12,18 @@ async function arrange(page:any){
   };
  });
 }
-for(const width of [1194,1210])test(`${width} iPad: mid-match crying appears on the killing frame and survives repeated attacks and holes`,async({page,browserName})=>{
+for(const width of [1194,1210])test(`${width} iPad: mid-match crying appears on the killing frame and follows excavation while remaining visible until a bottom exit`,async({page,browserName})=>{
  await page.setViewportSize({width,height:834});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await arrange(page);
  const state=await page.evaluate(()=>{const g=(window as any).__qa.game,e=g.tanks[1];e.hp=1;g.fire();Object.assign(g.projectiles[0],{x:e.x,y:e.y-10,vx:0,vy:1,age:.5});g.update(.001);g.freezeQA();(window as any).__qa.updateUI();return {phase:g.phase,hp:e.hp,pose:e.defeat,fall:e.fallVelocity,winner:g.winner};});
  expect(state.hp).toBe(0);expect(state.pose).toBeTruthy();expect(state.fall).toBe(0);expect(state.phase).toBe('resolving');expect(state.winner).toBeNull();
  const first=await page.evaluate(()=>(window as any).__corpsePixels(1));expect(first.opaque).toBeGreaterThan(200);await expect(page.locator('#game-overlay')).toBeHidden();
- await page.screenshot({path:`QA/v2.2.3-corpse-${browserName==='webkit'?'webkit-':''}immediate-${width}.png`});
+ await page.screenshot({path:`QA/v3.2.8-corpse-${browserName==='webkit'?'webkit-':''}immediate-${width}.png`});
  await page.evaluate(()=>{const g=(window as any).__qa.game,e=g.tanks[1];for(const d of [0,25,40])g.explode({...g.launch(g.active,'cannon-normal'),x:e.x+d,y:e.y},e.id);g.crater(e.x,450,100,250);for(let turn=0;turn<8;turn++)g.nextTurn();g.resumeQA();for(let i=0;i<16;i++)g.update(.05);g.freezeQA();(window as any).__qa.updateUI();});
  const later=await page.evaluate(()=>(window as any).__corpsePixels(1));expect(later).toEqual(first);
  const after=await page.evaluate(()=>{const g=(window as any).__qa.game,e=g.tanks[1];return {pose:e.defeat,out:e.outOfBounds,fall:e.fallVelocity,support:g.support(e.x,e.y+18),phase:g.phase,current:g.current};});
- expect(after.pose).toEqual(state.pose);expect(after.out).toBe(false);expect(after.fall).toBe(0);expect(after.support).toBeGreaterThanOrEqual(579);expect(after.phase).not.toBe('ended');expect(after.current).not.toBe(1);
+ expect(after.pose.y).toBeGreaterThan(state.pose.y);expect(after.out).toBe(false);expect(after.fall).toBeGreaterThan(0);expect(after.support).toBeGreaterThanOrEqual(579);expect(after.phase).not.toBe('ended');expect(after.current).not.toBe(1);
  await expect(page.locator('[data-hud]')).toHaveCount(4);await expect(page.locator('.result')).not.toBeVisible();
- await page.screenshot({path:`QA/v2.2.3-corpse-${browserName==='webkit'?'webkit-':''}excavated-${width}.png`});expect(errors).toEqual([]);
+ await page.screenshot({path:`QA/v3.2.8-corpse-${browserName==='webkit'?'webkit-':''}excavated-${width}.png`});expect(errors).toEqual([]);
 });
 test('all four prone identities share the battle/result path, while bottom exits draw zero pixels',async({page})=>{
  await arrange(page);await page.evaluate(()=>{const g=(window as any).__qa.game;g.freezeQA();g.tanks.forEach((t:any)=>g.damage(t,99999,t.id,true,'fall'));});

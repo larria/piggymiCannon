@@ -26,10 +26,10 @@ export const ITEMS: { id:ItemId; name:string; description:string; count:number; 
   { id:'repair', name:'恢复弹', description:'装填后蓄力发射，不挖土；轻点原地治疗。基础恢复目标最大生命40%，受威力加强与火线影响。友伤关闭时只治疗自己与队友，开启时也会治疗敌人；不复活，也不解除中毒。可与双发、强化联动。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
-  { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每局开局携带一件，用掉不会自动恢复；对应补给可填空槽，可在同一回合与其他道具联动。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
-  { id:'teleport', name:'转移弹', description:'装填后按角度与力度发射，坦克传送到炮弹实际落点，不造成伤害。落点掉穿地图底边或在敌人身上则转移失败。每局携带一件，用掉不会自动恢复；可在同一回合与其他道具联动。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
+  { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每局开局携带一件，用掉不会自动恢复；任意空槽可拾取重复道具；可与双发、恢复弹联动，不能与转移弹同时使用。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
+  { id:'teleport', name:'转移弹', description:'装填后按角度与力度发射；命中后移至落点上方，带降落伞垂直落位，不挖土、不造成伤害且免坠落伤害。落出地图会死亡。可与双发联动，不能与恢复弹或威力加强同时使用。使用后空槽可拾取任意道具。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
   { id:'wind', name:'定风装置', description:'风速至少 1.5 m/s 时将本回合风力归零。消耗 2 战术点，冷却 2 回合。', count:1, icon:'wind',cost:2,cooldown:2,unlock:1 },
-  {id:'double',name:'双发',description:'本次攻击追加一轮齐射，只算一次行动。每局开局携带一件，用掉不会自动恢复；对应补给可填空槽，可在同一回合与其他道具联动。',count:1,icon:'triple',cost:0,cooldown:0,unlock:1},
+  {id:'double',name:'双发',description:'本次攻击追加一轮齐射，只算一次行动。每局开局携带一件，用掉不会自动恢复；任意空槽可拾取重复道具；可与转移弹、威力加强、恢复弹联动。',count:1,icon:'triple',cost:0,cooldown:0,unlock:1},
 ];
 export const MAPS: { id:MapId; name:string; sub:string; color:string;description:string }[] = [
   { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75',description:'本作原创峡谷，高地与断崖构成攻防。' },

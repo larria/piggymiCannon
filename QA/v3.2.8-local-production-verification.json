@@ -1,0 +1,44 @@
+{
+  "formatVersion": 1,
+  "version": "v3.2.8",
+  "base": "http://localhost:4177/piggymiCannon/",
+  "verifiedAt": "2026-11-17T04:28:18.588Z",
+  "liveBundleMatchesLocal": true,
+  "offlineReload": true,
+  "offlinePixi": true,
+  "allOfflineAudioHashesMatch": true,
+  "audioFiles": 100,
+  "precacheURLs": 142,
+  "range": {
+    "status": 206,
+    "bytes": 4096,
+    "range": "bytes 3049556-3053651/3053652"
+  },
+  "actualMap": "temple",
+  "mapName": "神圣殿堂",
+  "seed": 3888331516,
+  "world": {
+    "width": 1920,
+    "height": 960,
+    "bottomY": 960
+  },
+  "snapshotFormatVersion": 1,
+  "allMaterialHashesVerifiedOffline": true,
+  "actualMapMusicPlayedOffline": true,
+  "allFourPortraitsDecodedOffline": true,
+  "allOfflinePortraitHashesMatch": true,
+  "portraitBackup": {
+    "files": 4,
+    "bytes": 49453
+  },
+  "angleNudgesVerified": true,
+  "independentSwitchesEnabled": true,
+  "offlineReplayVerified": true,
+  "healingComboVerified": true,
+  "localReplayBytes": 25727,
+  "backend": "pixi",
+  "map": "神圣殿堂",
+  "productionWithoutQA": true,
+  "timerHidden": true,
+  "errors": []
+}
