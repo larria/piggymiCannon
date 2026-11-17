@@ -1,0 +1,22 @@
+{
+  "scene": "lobby",
+  "before": {
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-lobby.mp3",
+    "time": 12
+  },
+  "during": {
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-lobby.mp3",
+    "time": 12.249232,
+    "paused": false,
+    "events": {
+      "pause": 0,
+      "load": 0
+    },
+    "battlePaused": true,
+    "effectsPaused": true
+  },
+  "musicSwitchWorks": true,
+  "effectsIndependent": true,
+  "volume": 0.4,
+  "closeDoesNotRewind": true
+}

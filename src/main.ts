@@ -16,7 +16,7 @@ import {TERRAIN_H} from './terrain';
 import { Renderer } from './renderer';
 import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,portraitDiagnostics} from './crew-portraits';
 import { AudioManager } from './audio';
-import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type WeaponId } from './catalog';
+import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById,weaponDamage,weaponDigProfile, type ItemId, type WeaponId } from './catalog';
 import { icon } from './icons';
 import {MIN_POWER} from './ballistics';
 import { heldChargePower,chargeDelayProgress,chargePreparationSeconds,CHARGE_DELAY_SECONDS } from './interaction';
@@ -68,7 +68,7 @@ const audio=new AudioManager();
 audio.setSoundEnabled(saved?.soundEnabled??saved?.sound??true);audio.setMusicEnabled(saved?.musicEnabled??saved?.sound??true);audio.setVolume(saved?.audioVersion===2?clamp(Number(saved.volume)||0,0,1):Math.max(0.65,clamp(Number(saved?.volume)||0.65,0,1)));
 let stats:{games:number;wins:number;damage:number;shots:number}=safeRead('piggy-stats')||{games:0,wins:0,damage:0,shots:0};
 let activeTab:'weapons'|'items'='items';
-let dialogPaused=false;
+let dialogPaused=false,dialogKeepsMusic=false;
 let statsRecorded=false;
 let toastTimer=0;let snapshotStatusTimer=0;
 let moveHeld=0;
@@ -205,7 +205,8 @@ function renderInventory() {
 function renderDetail(item?:ItemId) {
   const w=weaponById(canControlBattle()?game.selected:displayTank().selectedWeapon);
   if(activeTab==='weapons') {
-    $('#weapon-detail').innerHTML=`<div class="detail-title"><span>${w.name}</span><span class="weapon-tag">${w.tag}</span></div><p>${w.description}</p><div class="weapon-metrics"><span>单枚伤害 <strong>${w.damage}${w.shots&&w.shots>1?` ×${w.shots}`:''}</strong></span><span>爆炸半径 <strong>${w.radius}m</strong></span><span>挖地 <strong>${w.digRadius} × ${w.digDepth}m</strong></span></div><button class="shell-atlas-button" data-dialog="projectiles">认认炮弹 · 弹体图鉴 ${icon('arrow')}</button>`;
+    const dig=weaponDigProfile(w.id,game.gameVersion);
+    $('#weapon-detail').innerHTML=`<div class="detail-title"><span>${w.name}</span><span class="weapon-tag">${w.tag}</span></div><p>${w.description}</p><div class="weapon-metrics"><span>${w.effect==='pierce'?'首节伤害':'单枚伤害'} <strong>${weaponDamage(w.id,game.gameVersion)}${w.shots&&w.shots>1?` ×${w.shots}`:''}</strong></span><span>爆炸半径 <strong>${w.radius}m</strong></span><span>挖地 <strong>${dig.radius} × ${dig.depth}m</strong></span></div><button class="shell-atlas-button" data-dialog="projectiles">认认炮弹 · 弹体图鉴 ${icon('arrow')}</button>`;
   }
   else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四个槽位，灵活搭配</span>${icon('shield')}</div><p>开局各带一件，使用后原位留空；任意空槽可拾取道具，重复道具各占一格，满槽不拾取。可在同回合联动。</p><div class="weapon-metrics"><span>同回合可联动 · 用掉后留空</span></div>`;}
 }
@@ -384,7 +385,8 @@ function showDialog(type:string) {
   if(playback&&type==='setup'){toast('请先退出录像，再调整对局。');return;}
   if(renderer.touring)renderer.finishTour();
   const dialog=$<HTMLDialogElement>('#dialog');
-  if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;audio.pause(true);moveHeld=0;keys.clear();}
+  if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;moveHeld=0;keys.clear();}
+  dialogKeepsMusic=type==='settings'&&!(playback?.paused??dialogPaused);audio.pause(true,dialogKeepsMusic);
   dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');content.removeEventListener('click',profileClick);
   dialog.classList.toggle('settings-dialog',type==='settings');
   if(type.startsWith('portrait:')) {
@@ -441,8 +443,8 @@ function showDialog(type:string) {
   }
   if(playback)content.querySelectorAll<HTMLButtonElement>('[data-setting]').forEach(button=>button.disabled=true);
 }
-function closeDialog() {const dialog=$<HTMLDialogElement>('#dialog');dialog.close();audio.setSelectionMusic(false);game.paused=dialogPaused;setReplayAudioPaused(playback?.paused??game.paused);updateOverlay();updateUI();}
-function setReplayAudioPaused(paused:boolean){audio.pause(paused);if(!paused&&playback?.charging){audio.startCharge();audio.updateCharge(game.active.power);}}
+function closeDialog() {const dialog=$<HTMLDialogElement>('#dialog');dialog.close();dialogKeepsMusic=false;audio.setSelectionMusic(false);game.paused=dialogPaused;setReplayAudioPaused(playback?.paused??game.paused);updateOverlay();updateUI();}
+function setReplayAudioPaused(paused:boolean){audio.pause(paused,dialogKeepsMusic&&$<HTMLDialogElement>('#dialog').open);if(!paused&&playback?.charging){audio.startCharge();audio.updateCharge(game.active.power);}}
 const replayTime=(seconds:number)=>`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`;
 const replayEscape=(value:unknown)=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 function saveCurrentReplay(){
@@ -655,7 +657,7 @@ let backgroundGame:Game|null=null,backgroundWasPaused=false;
 document.addEventListener('visibilitychange',()=>{
   if(playback){audio.setPageHidden(document.hidden);if(!document.hidden){setReplayAudioPaused(playback.paused);renderer.invalidate();updateUI();}previous=performance.now();return;}
   if(document.hidden){keys.clear();moveHeld=0;cancelCharge();if(backgroundGame!==game){backgroundGame=game;backgroundWasPaused=game.paused;}game.paused=true;audio.setPageHidden(true);}
-  else {if(backgroundGame===game)game.paused=backgroundWasPaused;backgroundGame=null;previous=performance.now();audio.setPageHidden(false);audio.pause(game.paused);renderer.invalidate();updateUI();}
+  else {if(backgroundGame===game)game.paused=backgroundWasPaused;backgroundGame=null;previous=performance.now();audio.setPageHidden(false);audio.pause(game.paused,dialogKeepsMusic&&$<HTMLDialogElement>('#dialog').open);renderer.invalidate();updateUI();}
 });
 window.addEventListener('resize',()=>renderer.resize());
 

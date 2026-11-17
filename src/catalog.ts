@@ -1,3 +1,4 @@
+import {impactPolish} from './match-polish';
 import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
@@ -54,13 +55,21 @@ export const launchDamageScale=(hasVehicle:boolean,id:WeaponId)=>hasVehicle&&!we
 export const weaponHasTrail=(id:WeaponId)=>VEHICLES.some(v=>v.era==='现代系'&&(v.normal===id||v.special===id));
 export const MODERN_TRAIL_POINTS=6,MODERN_TRAIL_LENGTH=24,MODERN_TRAIL_ALPHA=.16,MODERN_TRAIL_WIDTH=1;
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
-export const excavation = (id:WeaponId,direct:boolean) => {
-  const w=weaponById(id),full=id==='ion-special'||!direct;
-  return {radius:w.digRadius*(full?1.35:.6),depth:w.digDepth*(full?1.5:.65)};
+/** Flat depth absorbed by a direct body contact, shared by every weapon. */
+export const DIRECT_DIG_DEPTH_REDUCTION=65;
+export const weaponDamage=(id:WeaponId,version='development')=>id==='missile-normal'&&!impactPolish(version)?120:weaponById(id).damage;
+export function weaponDigProfile(id:WeaponId,version='development'){
+  const w=weaponById(id),modern=impactPolish(version);
+  return {radius:id==='bowl-normal'&&!modern?43:w.digRadius,depth:id==='bowl-normal'&&!modern?40:id==='ion-special'&&!modern?28:w.digDepth};
+}
+export const excavation = (id:WeaponId,direct:boolean,version='development',digBoost=1) => {
+  const modern=impactPolish(version),{radius,depth}=weaponDigProfile(id,version);
+  if(!modern){const full=id==='ion-special'||!direct;return {radius:radius*(full?1.35:.6)*digBoost,depth:depth*(full?1.5:.65)*digBoost};}
+  return {radius:radius*1.35*digBoost,depth:Math.max(0,depth*1.5*digBoost-(direct&&id!=='ion-special'?DIRECT_DIG_DEPTH_REDUCTION:0))};
 };
-export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number,profile?:{missChance:number;error:number}) {
+export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number,profile?:{missChance:number;error:number},version='development') {
   const d=DIFFICULTIES.find(d=>d.id===difficulty)!,w=weaponById(weapon);
   const miss=rng()<(profile?.missChance??d.missChance);
-  const offset=miss?(rng()<0.5?-1:1)*(Math.max(w.radius+45,w.digRadius*1.35+40,w.effect==='homing'||weapon==='homing'?(w.homingRadius??140)+45:0)+rng()*65):(rng()-0.5)*(profile?.error??d.error)*2;
+  const offset=miss?(rng()<0.5?-1:1)*(Math.max(w.radius+45,weaponDigProfile(weapon,version).radius*1.35+40,w.effect==='homing'||weapon==='homing'?(w.homingRadius??140)+45:0)+rng()*65):(rng()-0.5)*(profile?.error??d.error)*2;
   return {miss,offset};
 }

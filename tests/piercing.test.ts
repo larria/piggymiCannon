@@ -4,7 +4,7 @@ import {permanentPiercingContact,PIERCING_DAMAGE} from '../src/piercing';
 const events=(g:Game,type:string)=>g.battleSnapshot().events.filter(e=>e.type===type);
 function temple(doubled=false,boost=false){
  const slots=defaultSlots();slots[0].vehicle='missile';slots[1].vehicle='bowl';slots[1].controller='human';
- const g=new Game({slots,map:'temple',timer:0,fog:false,fireLine:false,seed:3827673668},'test-pierce');g.start();g.wind=0;g.crater(960,400,1400,300);
+ const g=new Game({slots,map:'temple',timer:0,fog:false,fireLine:false,seed:3827673668},'3.2.2');g.start();g.wind=0;g.crater(960,400,1400,300);
  Object.assign(g.tanks[0],{x:143,y:g.support(143,750)-18,fallVelocity:0,doubleShot:doubled,boost});Object.assign(g.tanks[1],{x:960,y:g.support(960,750)-18,fallVelocity:0});
  assert.ok(g.fire());g.projectiles.forEach(p=>Object.assign(p,{x:972,y:g.tanks[1].y+16,vx:100,vy:650,age:2}));return g;
 }

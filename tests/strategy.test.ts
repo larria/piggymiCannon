@@ -78,7 +78,7 @@ test('all weapons separate blast damage from excavation and dig more on a ground
   const profiles=new Set<string>();
   for(const w of WEAPONS) {
     const direct=excavation(w.id,true),miss=excavation(w.id,false);
-    assert.ok(miss.radius>direct.radius&&miss.depth>direct.depth);
+    assert.ok(miss.radius===direct.radius&&miss.depth>direct.depth);
     profiles.add(`${w.digRadius},${w.digDepth}`);
   }
   assert.equal(profiles.size,13);assert.ok(excavation('quake',false).radius>excavation('heavy',false).radius);

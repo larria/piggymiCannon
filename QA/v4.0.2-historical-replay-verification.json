@@ -1,0 +1,39 @@
+{
+  "baseline": "9d195bf",
+  "scenarios": [
+    {
+      "version": "4.0.0",
+      "vehicles": [
+        "bowl",
+        "missile"
+      ],
+      "updates": 2400,
+      "dt": 0.025,
+      "stateIdentical": true,
+      "rngIdentical": true
+    },
+    {
+      "version": "4.0.1",
+      "vehicles": [
+        "missile",
+        "ion"
+      ],
+      "updates": 2400,
+      "dt": 0.025,
+      "stateIdentical": true,
+      "rngIdentical": true
+    },
+    {
+      "version": "4.0.1",
+      "vehicles": [
+        "ion",
+        "bowl"
+      ],
+      "updates": 2400,
+      "dt": 0.025,
+      "stateIdentical": true,
+      "rngIdentical": true
+    }
+  ],
+  "passed": true
+}

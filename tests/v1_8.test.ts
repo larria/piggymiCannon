@@ -40,8 +40,8 @@ test('direct head impacts excavate under the feet; orbital excavation is full-si
   (g as any).explode({...g.launch(g.active,id),x:e.x-12,y:e.y-34},e.id);
   assert.ok(g.land.mask.reduce((a,b)=>a+b,0)<before,id);assert.ok(e.hp<e.maxHP,id);
  }
- const normal=excavation('cannon-normal',false),orbital=excavation('ion-special',true);
- assert.deepEqual(orbital,excavation('ion-special',false));assert.ok(orbital.radius<normal.radius&&orbital.radius>normal.radius*.85);assert.ok(orbital.depth<normal.depth*.5);
+ const normal=excavation('cannon-normal',false,'3.2.6'),orbital=excavation('ion-special',true,'3.2.6');
+ assert.deepEqual(orbital,excavation('ion-special',false,'3.2.6'));assert.ok(orbital.radius<normal.radius&&orbital.radius>normal.radius*.85);assert.ok(orbital.depth<normal.depth*.5);
 });
 test('all multi and dragon volleys have distinct impact positions, including nine independent guidance endpoints',()=>{
  for(const vehicle of ['multi','dragon'] as const)for(const slot of ['normal','special'] as const){

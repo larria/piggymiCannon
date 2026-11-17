@@ -34,14 +34,14 @@ test('ineligible target cancels a whole group before even its delayed members fl
   g.projectiles.reverse();g.update(.001);assert.equal(g.projectiles.length,0,policy);assert.equal(cached(g).size,0);assert.equal(g.phase,'resolving');
  }
 });
-test('killing impact completes damage, excavation and effects but cancels siblings in the same substep',()=>{
+test('killing impact completes damage and effects without a zero-depth body crater, then cancels siblings in the same substep',()=>{
  const g=volley(true);acquire(g);const target=g.tanks[1];target.hp=1;
  const before=g.land.mask.reduce((a,b)=>a+b,0),missiles=[...g.projectiles],ages=missiles.map(p=>p.age);
  Object.assign(missiles[0],{x:target.x,y:target.y-10,vx:0,vy:1});
  g.drainEvents();g.update(.001);
  assert.equal(target.hp,0);assert.equal(g.projectiles.length,0);assert.equal(cached(g).size,0);assert.equal(g.phase,'resolving');
  assert.equal(g.drainEvents().filter(e=>e.type==='explosion'&&e.weapon==='dragon-special').length,1);
- assert.equal(g.blasts.length,1);assert.ok(g.particles.length>12);assert.ok(g.land.mask.reduce((a,b)=>a+b,0)<before);
+ assert.equal(g.blasts.length,1);assert.ok(g.particles.length>12);assert.equal(g.land.mask.reduce((a,b)=>a+b,0),before);
  assert.ok(missiles.slice(1).every((p,i)=>p.age===ages[i+1]),'canceled snapshot entries must not advance or explode');
  assert.equal(g.tanks[0].hp,g.tanks[0].maxHP);assert.equal(g.tanks[2].hp,g.tanks[2].maxHP);
  for(let i=0;i<120&&g.phase==='resolving';i++)g.update(1/120);

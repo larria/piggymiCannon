@@ -1,0 +1,12 @@
+import {test,expect} from '@playwright/test';import {writeFileSync} from 'node:fs';
+test('4.0.2 production PWA reloads offline with every runtime file intact and no QA interface',async({page,context,browserName})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('./');await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller),{timeout:20000}).toBe(true);
+ const publishedVersion=await page.evaluate(async()=>(await(await fetch('version.json')).json()).version);
+ await context.setOffline(true);await page.reload();await expect(page.getByRole('button',{name:'进入战场',exact:true})).toBeVisible();
+ const result=await page.evaluate(async(version)=>{
+  const m=await(await fetch('asset-integrity.json')).json(),failures:string[]=[];let bytes=0;
+  for(const f of m.files){const r=await fetch(f.url),data=await r.arrayBuffer(),hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data)),x=>x.toString(16).padStart(2,'0')).join('');bytes+=data.byteLength;if(!r.ok||data.byteLength!==f.bytes||hash!==f.sha256)failures.push(f.url);}
+  return {version,manifestVersion:m.gameVersion,files:m.files.length,bytes,audioFiles:m.files.filter((f:any)=>f.url.startsWith('audio/')).length,portraits:m.files.filter((f:any)=>f.url.startsWith('portraits/')).length,productionWithoutQA:typeof(window as any).__qa==='undefined',failures};
+ },publishedVersion);expect(result.version).toBe('4.0.2');expect(result.manifestVersion).toBe('4.0.2');expect(result.failures).toEqual([]);expect(result.audioFiles).toBe(100);expect(result.portraits).toBe(4);expect(result.productionWithoutQA).toBe(true);expect(result.bytes).toBeLessThan(90_000_000);
+ await page.getByRole('button',{name:'进入战场',exact:true}).click();await page.locator('[data-choice="missile"]').click();await page.locator('[data-controller="1"]').selectOption('human');await page.getByRole('button',{name:'开始对局',exact:true}).click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:10000});await expect(page.locator('#relative-angle')).toHaveText('32.5°');await expect(page.locator('#game-overlay')).toBeHidden();expect(errors).toEqual([]);writeFileSync(`QA/v4.0.2-local-production-${browserName}.json`,JSON.stringify({...result,errors,offlineReload:true,offlineMatchStarts:true,midpoint:32.5,onlineChecked:false},null,2));
+});

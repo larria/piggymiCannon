@@ -1,0 +1,50 @@
+{
+  "formatVersion": 1,
+  "version": "4.0.2",
+  "node": {
+    "fullPassed": 355,
+    "fullFailed": 0,
+    "additionalAudioTestPassed": 1,
+    "totalUnique": 356
+  },
+  "chromium": {
+    "corePassed": 32,
+    "settingsMusicPassed": 4,
+    "productionOfflinePassed": 1
+  },
+  "webkit": {
+    "coreIncludingMusicPassed": 36,
+    "productionOfflinePassed": 1
+  },
+  "oldReplayBaseline": "9d195bf",
+  "oldReplayScenarios": 3,
+  "oldReplayStateAndRngExact": true,
+  "directExcavationDepthReduction": 65,
+  "satelliteException": true,
+  "flyfireSectionBase": 210,
+  "flyfireSectionScales": [
+    1,
+    0.8,
+    0.6,
+    0.4
+  ],
+  "sameEraDirectHpLoss": [
+    168,
+    134,
+    101,
+    67
+  ],
+  "viewports": [
+    [
+      1194,
+      834
+    ],
+    [
+      1210,
+      834
+    ]
+  ],
+  "deviceScaleFactor": 2,
+  "realIPadHardware": false,
+  "onlineCheckRequested": false
+}

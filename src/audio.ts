@@ -6,7 +6,7 @@ export class AudioManager {
   music=new Audio(asset(BGM_TRACKS.lobby));
   private selectionMusic=new Audio(asset(BGM_TRACKS.setup));private selectionActive=false;
   soundEnabled=false;musicEnabled=false;volume=0.65;unlocked=false;
-  private paused=false;
+  private paused=false;private musicPaused=false;
   private pageHidden=false;
   private playingEffects=new Set<HTMLAudioElement>();
   private pausedEffects=new Set<HTMLAudioElement>();
@@ -22,19 +22,33 @@ export class AudioManager {
   private movement:{oscillator:OscillatorNode;noise:AudioBufferSourceNode;gain:GainNode;pan:StereoPannerNode}|null=null;
   private tracking:{oscillator:OscillatorNode;gain:GainNode;pan:StereoPannerNode}|null=null;private lastLock=-10;
   constructor() {this.music.loop=true;this.selectionMusic.loop=true;this.music.volume=this.selectionMusic.volume=this.volume*0.55;}
-  unlock() {this.unlocked=true;try{this.graph();void this.preloadForMatch([]);}catch{/* Optional audio. */}if(this.musicEnabled&&!this.paused) this.start();}
-  setMusicEnabled(enabled:boolean) {this.musicEnabled=enabled;if(this.selectionActive){this.music.pause();if(enabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});else this.selectionMusic.pause();}else if(enabled&&this.unlocked&&!this.paused)this.start();else this.music.pause();}
+  unlock() {this.unlocked=true;try{this.graph();void this.preloadForMatch([]);}catch{/* Optional audio. */}if(this.musicEnabled&&!this.musicPaused) this.start();}
+  setMusicEnabled(enabled:boolean) {this.musicEnabled=enabled;if(this.selectionActive){this.music.pause();if(enabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});else this.selectionMusic.pause();}else if(enabled&&this.unlocked&&!this.musicPaused)this.start();else this.music.pause();}
   setSoundEnabled(enabled:boolean) {this.soundEnabled=enabled;if(this.master&&this.context)this.master.gain.setTargetAtTime(enabled?this.volume:0,this.context.currentTime,.02);if(!enabled)this.resetEffects();}
   private start() {if(this.selectionActive||this.pageHidden)return;void this.music.play().catch(()=>{});}
   setPageHidden(hidden:boolean){this.pageHidden=hidden;if(hidden){this.pause(true);this.selectionMusic.pause();}else if(this.selectionActive&&this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}
   setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.selectionMusic.volume=this.volume*0.55;for(const clip of this.playingEffects)clip.volume=this.volume*.75;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
   setSelectionMusic(active:boolean){if(active===this.selectionActive)return;this.selectionActive=active;if(active){this.music.pause();this.selectionMusic.currentTime=0;if(this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}else this.selectionMusic.pause();}
-  pause(paused:boolean) {this.paused=paused;if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();if(this.context)void this.context.suspend().catch(()=>{});for(const clip of this.playingEffects)if(!clip.paused){clip.pause();this.pausedEffects.add(clip);}}else {if(this.context&&this.unlocked)void this.context.resume().catch(()=>{});if(this.musicEnabled&&this.unlocked)this.start();if(this.soundEnabled&&this.unlocked)for(const clip of this.pausedEffects)void clip.play().catch(()=>{});this.pausedEffects.clear();}}
-  setScene(scene:AudioScene){if(this.scene===scene)return;this.scene=scene;this.music.pause();this.music.src=asset(BGM_TRACKS[scene]);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.paused)this.start();}
+  /** Modal settings stop battle effects while keeping the current BGM timeline. */
+  pause(paused:boolean,keepMusic=false) {
+    this.paused=paused;this.musicPaused=paused&&!keepMusic;
+    if(this.musicPaused)this.music.pause();
+    else if(this.musicEnabled&&this.unlocked&&this.music.paused)this.start();
+    if(paused){
+      this.stopCharge();this.stopMovement();this.stopTracking();
+      if(this.context)void this.context.suspend().catch(()=>{});
+      for(const clip of this.playingEffects)if(!clip.paused){clip.pause();this.pausedEffects.add(clip);}
+    }else{
+      if(this.context&&this.unlocked)void this.context.resume().catch(()=>{});
+      if(this.soundEnabled&&this.unlocked)for(const clip of this.pausedEffects)void clip.play().catch(()=>{});
+      this.pausedEffects.clear();
+    }
+  }
+  setScene(scene:AudioScene){if(this.scene===scene)return;this.scene=scene;this.music.pause();this.music.src=asset(BGM_TRACKS[scene]);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused)this.start();}
   resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources])source.stop();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();}
   async retryAssets(vehicles:(VehicleId|null)[],restored:string[]=[],skipFiles:string[]=[]){
     const clips=restored.filter(url=>url.startsWith('audio/')).map(url=>url.slice(6));for(const name of clips){await this.loading.get(name);this.buffers.delete(name);this.lastSamples.delete(name);}
-    for(const clip of [this.music,this.selectionMusic])if(clip.error||clips.some(name=>clip.src.endsWith('/'+name))){const position=clip.currentTime;clip.addEventListener('loadedmetadata',()=>{if(Number.isFinite(clip.duration))clip.currentTime=Math.min(position,clip.duration);},{once:true});clip.load();if(this.musicEnabled&&this.unlocked&&!this.paused&&!this.pageHidden){if(clip===this.music&&!this.selectionActive||clip===this.selectionMusic&&this.selectionActive)void clip.play().catch(()=>{});}}
+    for(const clip of [this.music,this.selectionMusic])if(clip.error||clips.some(name=>clip.src.endsWith('/'+name))){const position=clip.currentTime;clip.addEventListener('loadedmetadata',()=>{if(Number.isFinite(clip.duration))clip.currentTime=Math.min(position,clip.duration);},{once:true});clip.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused&&!this.pageHidden){if(clip===this.music&&!this.selectionActive||clip===this.selectionMusic&&this.selectionActive)void clip.play().catch(()=>{});}}
     if(this.unlocked)await Promise.all([...new Set([...COMMON_CLIPS,...vehicles.flatMap(id=>vehicleClips(id??'cannon'))])].filter(name=>!skipFiles.includes('audio/'+name)).map(name=>this.loadClip(name)));
   }
   async preloadForMatch(vehicles:(VehicleId|null)[]){if(!this.unlocked)return;await Promise.all([...new Set([...COMMON_CLIPS,...vehicles.flatMap(id=>vehicleClips(id??'cannon'))])].map(name=>this.loadClip(name)));}

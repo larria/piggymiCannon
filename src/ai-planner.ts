@@ -1,9 +1,10 @@
+import {impactPolish} from './match-polish';
 import {salvoProfile} from './salvo';
-import {permanentPiercingContact} from './piercing';
+import {PIERCING_DAMAGE,permanentPiercingContact} from './piercing';
 import {impactDamageScale} from './impact-damage';
 import {eraDamageFactor} from './era-damage';
 import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,BOTTOM_Y,type Game,type Tank} from './engine';
-import {weaponById,launchDamageScale,excavation,type WeaponId} from './catalog';
+import {weaponById,weaponDamage,launchDamageScale,excavation,type WeaponId} from './catalog';
 import {aimGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
 import {projectileSpeed} from './ballistics';
@@ -60,7 +61,8 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
   const scale=impactDamageScale(b.tank,x,y,b.slope,spec.radius,hit);
   const mine=spec.effect==='mine'?1/3:1;
   const rage=t.vehicleId==='sea'&&t.hp<t.maxHP*.5?1.5:1,snow=t.vehicleId==='water'&&g.snow?1.25:1;
-  const damage=landed&&b.eligible&&(hit||d<=spec.radius+26)?Math.round(spec.damage*launchDamageScale(!!t.vehicleId,weapon)*boost*rage*snow*mine*scale*eraDamageFactor(t.vehicleId,b.tank.vehicleId).value):0;
+  const raw=weaponDamage(weapon,g.gameVersion)*launchDamageScale(!!t.vehicleId,weapon)*boost*rage*snow*mine*scale*eraDamageFactor(t.vehicleId,b.tank.vehicleId).value;
+  const damage=landed&&b.eligible&&(hit||d<=spec.radius+26)?(hit&&weapon==='missile-normal'&&impactPolish(g.gameVersion)?PIERCING_DAMAGE.reduce((n,f)=>n+Math.round(raw*f),0):Math.round(raw)):0;
   return {body:b,damage,direct:hit};
  });
  return {x,y,hits,age};
@@ -88,7 +90,7 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
    if(spec.effect==='freeze'&&h.damage>0&&!t.immobile)utility+=25;
    if(spec.effect==='poison'&&h.damage>0&&!t.poisoned&&t.hp>t.maxHP*.3)utility+=25;
    if(!h.direct&&spec.digDepth>0){
-    const dig=excavation(weapon,false),dx=Math.abs(impact.x-t.x),bottom=w.game.land.bottom(t.x,t.y+13);
+    const dig=excavation(weapon,false,w.game.gameVersion),dx=Math.abs(impact.x-t.x),bottom=w.game.land.bottom(t.x,t.y+13);
     const reach=dx<dig.radius?dig.depth*Math.sqrt(1-(dx/dig.radius)**2):0;
     if(dx<dig.radius-18&&impact.y-reach<=t.y+18&&impact.y+reach>=bottom&&bottom<BOTTOM_Y)utility+=45;
    }
@@ -151,7 +153,7 @@ export function chooseAIPosition(game:Game,tank:Tank,weapons:WeaponId[],targets:
  const stay=existingStay??solveAIShot(game,tank,weapons,targets),danger=game.fires.some(f=>Math.abs(f.x-tank.x)<f.radius&&game.canDamage(tank,f.owner));
  // A solid firing solution needs no gratuitous travel. Fuel, time and movement
  // delay all count, even though AI matches retain their cyclic turn order.
- const potential=Math.max(...weapons.map(id=>{const w=weaponById(id);return w.damage*launchDamageScale(!!tank.vehicleId,id)*(w.shots??1)*(w.effect==='mine'?1/3:1)*(tank.boost?1.5:1)*(tank.vehicleId==='sea'&&tank.hp<tank.maxHP*.5?1.5:1)*(tank.vehicleId==='water'&&game.snow?1.25:1)*Math.max(...targets.map(t=>eraDamageFactor(tank.vehicleId,t.vehicleId).value));}));
+ const potential=Math.max(...weapons.map(id=>{const w=weaponById(id);return weaponDamage(id,game.gameVersion)*launchDamageScale(!!tank.vehicleId,id)*(w.shots??1)*(id==='missile-normal'&&impactPolish(game.gameVersion)?PIERCING_DAMAGE.reduce((n,f)=>n+f,0):1)*(w.effect==='mine'?1/3:1)*(tank.boost?1.5:1)*(tank.vehicleId==='sea'&&tank.hp<tank.maxHP*.5?1.5:1)*(tank.vehicleId==='water'&&game.snow?1.25:1)*Math.max(...targets.map(t=>eraDamageFactor(tank.vehicleId,t.vehicleId).value));}));
  if(stay.effective&&stay.utility>=potential*.65&&!danger)return {stay,best:stay};
  let best=stay,bestValue=stay.utility-(danger?160:0);
  for(const position of safeAIPositions(game,tank,targets)){
