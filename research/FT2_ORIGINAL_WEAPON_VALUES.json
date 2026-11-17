@@ -1,0 +1,118 @@
+{
+  "source": "本机 ft2 目录/原版分析",
+  "sha256": "8d8d84d1901a19cb8b28b005a8d06b2c14b8a4e6bf71ab06ea4dc264435d83d3",
+  "characters": [
+    {
+      "A1Power": 300,
+      "A1Round": 45,
+      "A2Power": 150,
+      "A2Round": 40,
+      "Defence": 100,
+      "Range": 45
+    },
+    {
+      "A1Power": 330,
+      "A1Round": 31,
+      "A2Power": 100,
+      "A2Round": 28,
+      "Defence": 99,
+      "Range": 47
+    },
+    {
+      "A1Power": 140,
+      "A1Round": 78,
+      "A2Power": 420,
+      "A2Round": 35,
+      "Defence": 89,
+      "Range": 43
+    },
+    {
+      "A1Power": 230,
+      "A1Round": 57,
+      "A2Power": 150,
+      "A2Round": 38,
+      "Defence": 118,
+      "Range": 47
+    },
+    {
+      "A1Power": 240,
+      "A1Round": 55,
+      "A2Power": 153,
+      "A2Round": 43,
+      "Defence": 123,
+      "Range": 49
+    },
+    {
+      "A1Power": 120,
+      "A1Round": 45,
+      "A2Power": 90,
+      "A2Round": 32,
+      "Defence": 117,
+      "Range": 60
+    },
+    {
+      "A1Power": 175,
+      "A1Round": 40,
+      "A2Power": 60,
+      "A2Round": 28,
+      "Defence": 115,
+      "Range": 53
+    },
+    {
+      "A1Power": 220,
+      "A1Round": 70,
+      "A2Power": 99,
+      "A2Round": 40,
+      "Defence": 95,
+      "Range": 50
+    },
+    {
+      "A1Power": 220,
+      "A1Round": 52,
+      "A2Power": 320,
+      "A2Round": 30,
+      "Defence": 115,
+      "Range": 48
+    },
+    {
+      "A1Power": 200,
+      "A1Round": 48,
+      "A2Power": 270,
+      "A2Round": 66,
+      "Defence": 91,
+      "Range": 60
+    },
+    {
+      "A1Power": 230,
+      "A1Round": 54,
+      "A2Power": 190,
+      "A2Round": 43,
+      "Defence": 105,
+      "Range": 47
+    },
+    {
+      "A1Power": 220,
+      "A1Round": 65,
+      "A2Power": 166,
+      "A2Round": 42,
+      "Defence": 92,
+      "Range": 55
+    },
+    {
+      "A1Power": 225,
+      "A1Round": 60,
+      "A2Power": 80,
+      "A2Round": 27,
+      "Defence": 125,
+      "Range": 70
+    },
+    {
+      "A1Power": 200,
+      "A1Round": 65,
+      "A2Power": 300,
+      "A2Round": 30,
+      "Defence": 100,
+      "Range": 43
+    }
+  ]
+}

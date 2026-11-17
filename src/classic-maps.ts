@@ -1,3 +1,4 @@
+import {originalBallistics} from './original-ballistics';
 import {Terrain,WORLD_W,TERRAIN_H} from './terrain';
 import type {MapId} from './catalog';
 
@@ -21,17 +22,17 @@ export const templeNode=(node:number)=>{
 };
 export function templeCap(x:number,node:number){const {radius,rise}=templeNode(node),u=(x-node)/radius;return templeRail(x)-rise*Math.max(0,1-u*u)**2;}
 /** Self-drawn 3.1 layouts; protected ramps/caps and thin rails keep their game-unit sizes. */
-export function buildClassicMap(land:Terrain,map:MapId){
+export function buildClassicMap(land:Terrain,map:MapId,version='4.0.4'){
   if(!['factory','temple','egypt'].includes(map))return false;
   const beam=(from:number,to:number,y:number|((x:number)=>number),thickness:number,permanent=false)=>{
     for(let x=Math.ceil(from*1.5);x<=Math.floor(to*1.5);x++){const top=(typeof y==='number'?y:y(x/1.5))*1.5;land.column(x,top,top+thickness,permanent);}
   };
   if(map==='factory'){
     for(let x=0;x<=WORLD_W;x++)land.column(x,factoryFloor(x),TERRAIN_H,true);
-    beam(60,450,310,30);beam(830,1220,310,30);
+    const steel=originalBallistics(version)?90:30;beam(60,450,310,steel);beam(830,1220,310,steel);
     beam(450,780,x=>310+(x-450)*.3,30);beam(590,1030,410,36);
     beam(820,1040,x=>410+(x-820)*.5,30);
-    beam(410,870,202,30);beam(410,630,x=>202+(x-410)*.49,30);
+    beam(410,870,202,originalBallistics(version)?90:30);beam(410,630,x=>202+(x-410)*.49,30);
     beam(420,440,330,120);beam(1010,1030,434,177);
   }else if(map==='temple'){
     beam(50,445,335,13.5);beam(835,1230,335,13.5);

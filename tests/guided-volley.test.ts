@@ -3,7 +3,7 @@ import {Game} from '../src/engine';import {defaultSlots} from '../src/crew';
 
 function volley(double=false){
  const slots=defaultSlots();slots.forEach((s,i)=>Object.assign(s,{enabled:true,controller:'human',team:i%2,vehicle:i===0?'dragon':'cannon'}));
- const g=new Game({slots,map:'valley',seed:52,timer:0,fog:false,fireLine:false,selfDamage:false,friendlyFire:false});g.start();
+ const g=new Game({slots,map:'valley',seed:52,timer:0,fog:false,fireLine:false,selfDamage:false,friendlyFire:false},'4.0.4');g.start();
  g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.wind=0;
  g.tanks.forEach((t,i)=>Object.assign(t,{x:[200,650,70,1150][i],y:432,fallVelocity:0,shield:0}));
  const target=g.tanks[1];g.selectWeapon('dragon-special');g.active.angle=45;

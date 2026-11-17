@@ -1,0 +1,1261 @@
+{
+  "source": "本机 ft2 目录/原版分析",
+  "version": "4.0.5",
+  "cellWorld": 3,
+  "rows": [
+    {
+      "id": "shell",
+      "name": "标准榴弹",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 42,
+        "radius": 40,
+        "dig": {
+          "radius": 43.2,
+          "depth": 45
+        }
+      },
+      "current": {
+        "damage": 42,
+        "radius": 40,
+        "dig": {
+          "radius": 43.2,
+          "depth": 45
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "heavy",
+      "name": "重磅炸弹",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 68,
+        "radius": 65,
+        "dig": {
+          "radius": 76.95,
+          "depth": 82.5
+        }
+      },
+      "current": {
+        "damage": 68,
+        "radius": 65,
+        "dig": {
+          "radius": 76.95,
+          "depth": 82.5
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "triple",
+      "name": "三连齐射",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 25,
+        "radius": 29,
+        "dig": {
+          "radius": 28.35,
+          "depth": 28.5
+        }
+      },
+      "current": {
+        "damage": 25,
+        "radius": 29,
+        "dig": {
+          "radius": 28.35,
+          "depth": 28.5
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "cluster",
+      "name": "散花弹",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 22,
+        "radius": 30,
+        "dig": {
+          "radius": 33.75,
+          "depth": 33
+        }
+      },
+      "current": {
+        "damage": 22,
+        "radius": 30,
+        "dig": {
+          "radius": 33.75,
+          "depth": 33
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "drill",
+      "name": "钻地弹",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 58,
+        "radius": 57,
+        "dig": {
+          "radius": 62.1,
+          "depth": 127.5
+        }
+      },
+      "current": {
+        "damage": 58,
+        "radius": 57,
+        "dig": {
+          "radius": 62.1,
+          "depth": 127.5
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "bounce",
+      "name": "跳跳弹",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 54,
+        "radius": 48,
+        "dig": {
+          "radius": 49.95,
+          "depth": 48
+        }
+      },
+      "current": {
+        "damage": 54,
+        "radius": 48,
+        "dig": {
+          "radius": 49.95,
+          "depth": 48
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "napalm",
+      "name": "火焰南瓜",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 30,
+        "radius": 55,
+        "dig": {
+          "radius": 29.700000000000003,
+          "depth": 18
+        }
+      },
+      "current": {
+        "damage": 30,
+        "radius": 55,
+        "dig": {
+          "radius": 29.700000000000003,
+          "depth": 18
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "ice",
+      "name": "冰霜炮弹",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 34,
+        "radius": 46,
+        "dig": {
+          "radius": 21.6,
+          "depth": 18
+        }
+      },
+      "current": {
+        "damage": 34,
+        "radius": 46,
+        "dig": {
+          "radius": 21.6,
+          "depth": 18
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "emp",
+      "name": "电磁脉冲",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 30,
+        "radius": 58,
+        "dig": {
+          "radius": 10.8,
+          "depth": 9
+        }
+      },
+      "current": {
+        "damage": 30,
+        "radius": 58,
+        "dig": {
+          "radius": 10.8,
+          "depth": 9
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "airstrike",
+      "name": "空中支援",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 25,
+        "radius": 34,
+        "dig": {
+          "radius": 39.150000000000006,
+          "depth": 39
+        }
+      },
+      "current": {
+        "damage": 25,
+        "radius": 34,
+        "dig": {
+          "radius": 39.150000000000006,
+          "depth": 39
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "quake",
+      "name": "大地震",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 32,
+        "radius": 90,
+        "dig": {
+          "radius": 118.80000000000001,
+          "depth": 135
+        }
+      },
+      "current": {
+        "damage": 32,
+        "radius": 90,
+        "dig": {
+          "radius": 118.80000000000001,
+          "depth": 135
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "sniper",
+      "name": "穿甲飞镖",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 72,
+        "radius": 16,
+        "dig": {
+          "radius": 10.8,
+          "depth": 12
+        }
+      },
+      "current": {
+        "damage": 72,
+        "radius": 16,
+        "dig": {
+          "radius": 10.8,
+          "depth": 12
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "homing",
+      "name": "猎星追踪弹",
+      "sourceIndex": null,
+      "source": null,
+      "sourceDamageRadiusWorld": null,
+      "old": {
+        "damage": 62,
+        "radius": 29,
+        "dig": {
+          "radius": 27,
+          "depth": 30
+        }
+      },
+      "current": {
+        "damage": 62,
+        "radius": 29,
+        "dig": {
+          "radius": 27,
+          "depth": 30
+        }
+      },
+      "policy": "本作扩展，无原始对应"
+    },
+    {
+      "id": "bowl-normal",
+      "name": "巨石",
+      "sourceIndex": 1,
+      "source": {
+        "index": 1,
+        "round": 45,
+        "power": 300,
+        "sourcePower": 300,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 150.9271347372632,
+      "old": {
+        "damage": 350,
+        "radius": 45,
+        "dig": {
+          "radius": 51.300000000000004,
+          "depth": 34.2
+        }
+      },
+      "current": {
+        "damage": 333,
+        "radius": 150.9271347372632,
+        "dig": {
+          "radius": 99,
+          "depth": 66
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "bowl-special",
+      "name": "火石",
+      "sourceIndex": 1,
+      "source": {
+        "index": 1,
+        "round": 40,
+        "power": 150,
+        "sourcePower": 150,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 134.1640786499874,
+      "old": {
+        "damage": 150,
+        "radius": 40,
+        "dig": {
+          "radius": 33.75,
+          "depth": 22.5
+        }
+      },
+      "current": {
+        "damage": 165,
+        "radius": 134.1640786499874,
+        "dig": {
+          "radius": 90,
+          "depth": 60
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "crossbow-normal",
+      "name": "穿心箭",
+      "sourceIndex": 2,
+      "source": {
+        "index": 2,
+        "round": 31,
+        "power": 330,
+        "sourcePower": 330,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 103.96634070698074,
+      "old": {
+        "damage": 390,
+        "radius": 31,
+        "dig": {
+          "radius": 21.6,
+          "depth": 14.4
+        }
+      },
+      "current": {
+        "damage": 361,
+        "radius": 103.96634070698074,
+        "dig": {
+          "radius": 69,
+          "depth": 45
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "crossbow-special",
+      "name": "毒箭",
+      "sourceIndex": 2,
+      "source": {
+        "index": 2,
+        "round": 28,
+        "power": 100,
+        "sourcePower": 100,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 93.91485505499116,
+      "old": {
+        "damage": 100,
+        "radius": 28,
+        "dig": {
+          "radius": 16.200000000000003,
+          "depth": 10.800000000000002
+        }
+      },
+      "current": {
+        "damage": 110,
+        "radius": 93.91485505499116,
+        "dig": {
+          "radius": 63,
+          "depth": 42
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "cannon-normal",
+      "name": "大铅弹",
+      "sourceIndex": 3,
+      "source": {
+        "index": 3,
+        "round": 78,
+        "power": 140,
+        "sourcePower": 140,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 261.6199533674754,
+      "old": {
+        "damage": 140,
+        "radius": 78,
+        "dig": {
+          "radius": 99.9,
+          "depth": 66.60000000000001
+        }
+      },
+      "current": {
+        "damage": 156,
+        "radius": 261.6199533674754,
+        "dig": {
+          "radius": 177,
+          "depth": 117
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "cannon-special",
+      "name": "小红豆",
+      "sourceIndex": 3,
+      "source": {
+        "index": 3,
+        "round": 35,
+        "power": 420,
+        "sourcePower": 420,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 117.3839852790831,
+      "old": {
+        "damage": 420,
+        "radius": 35,
+        "dig": {
+          "radius": 13.5,
+          "depth": 9
+        }
+      },
+      "current": {
+        "damage": 468,
+        "radius": 117.3839852790831,
+        "dig": {
+          "radius": 78,
+          "depth": 51
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "beetle-normal",
+      "name": "骷髅弹",
+      "sourceIndex": 4,
+      "source": {
+        "index": 4,
+        "round": 57,
+        "power": 230,
+        "sourcePower": 230,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 191.1779275962578,
+      "old": {
+        "damage": 230,
+        "radius": 57,
+        "dig": {
+          "radius": 51.300000000000004,
+          "depth": 34.2
+        }
+      },
+      "current": {
+        "damage": 254,
+        "radius": 191.1779275962578,
+        "dig": {
+          "radius": 126,
+          "depth": 84
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "beetle-special",
+      "name": "趴趴弹",
+      "sourceIndex": 4,
+      "source": {
+        "index": 4,
+        "round": 38,
+        "power": 150,
+        "sourcePower": 150,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 127.455874717488,
+      "old": {
+        "damage": 150,
+        "radius": 38,
+        "dig": {
+          "radius": 28.35,
+          "depth": 18.900000000000002
+        }
+      },
+      "current": {
+        "damage": 165,
+        "radius": 127.455874717488,
+        "dig": {
+          "radius": 87,
+          "depth": 57
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "duke-normal",
+      "name": "弹簧弹",
+      "sourceIndex": 5,
+      "source": {
+        "index": 5,
+        "round": 55,
+        "power": 240,
+        "sourcePower": 240,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 184.46950967571848,
+      "old": {
+        "damage": 300,
+        "radius": 55,
+        "dig": {
+          "radius": 49.95,
+          "depth": 33.300000000000004
+        }
+      },
+      "current": {
+        "damage": 266,
+        "radius": 184.46950967571848,
+        "dig": {
+          "radius": 123,
+          "depth": 81
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "duke-special",
+      "name": "毒气弹",
+      "sourceIndex": 5,
+      "source": {
+        "index": 5,
+        "round": 43,
+        "power": 153,
+        "sourcePower": 153,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 144.21858410066298,
+      "old": {
+        "damage": 153,
+        "radius": 43,
+        "dig": {
+          "radius": 32.400000000000006,
+          "depth": 21.600000000000005
+        }
+      },
+      "current": {
+        "damage": 170,
+        "radius": 144.21858410066298,
+        "dig": {
+          "radius": 96,
+          "depth": 63
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "mine-normal",
+      "name": "手榴弹",
+      "sourceIndex": 9,
+      "source": {
+        "index": 9,
+        "round": 52,
+        "power": 220,
+        "sourcePower": 220,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 174.4133022449836,
+      "old": {
+        "damage": 270,
+        "radius": 52,
+        "dig": {
+          "radius": 47.25,
+          "depth": 31.5
+        }
+      },
+      "current": {
+        "damage": 245,
+        "radius": 174.4133022449836,
+        "dig": {
+          "radius": 117,
+          "depth": 78
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "mine-special",
+      "name": "地雷",
+      "sourceIndex": 9,
+      "source": {
+        "index": 9,
+        "round": 30,
+        "power": 640,
+        "sourcePower": 320,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 100.62305898749054,
+      "old": {
+        "damage": 640,
+        "radius": 30,
+        "dig": {
+          "radius": 16.200000000000003,
+          "depth": 10.800000000000002
+        }
+      },
+      "current": {
+        "damage": 704,
+        "radius": 100.62305898749054,
+        "dig": {
+          "radius": 69,
+          "depth": 45
+        }
+      },
+      "policy": "原版范围，保留伤害×2与直击必挖土"
+    },
+    {
+      "id": "missile-normal",
+      "name": "飞火弹",
+      "sourceIndex": 6,
+      "source": {
+        "index": 6,
+        "round": 45,
+        "power": 120,
+        "sourcePower": 120,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 150.9271347372632,
+      "old": {
+        "damage": 210,
+        "radius": 45,
+        "dig": {
+          "radius": 41.85,
+          "depth": 27.900000000000002
+        }
+      },
+      "current": {
+        "damage": 210,
+        "radius": 45,
+        "dig": {
+          "radius": 99,
+          "depth": 66
+        }
+      },
+      "policy": "挖土对齐，伤害范围和连续四段按体感保留"
+    },
+    {
+      "id": "missile-special",
+      "name": "追魂弹",
+      "sourceIndex": 6,
+      "source": {
+        "index": 6,
+        "round": 32,
+        "power": 90,
+        "sourcePower": 90,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 107.33126291998991,
+      "old": {
+        "damage": 90,
+        "radius": 32,
+        "dig": {
+          "radius": 24.3,
+          "depth": 16.2
+        }
+      },
+      "current": {
+        "damage": 98,
+        "radius": 107.33126291998991,
+        "dig": {
+          "radius": 72,
+          "depth": 48
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "multi-normal",
+      "name": "三叉戟",
+      "sourceIndex": 7,
+      "source": {
+        "index": 7,
+        "round": 40,
+        "power": 175,
+        "sourcePower": 175,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 134.1640786499874,
+      "old": {
+        "damage": 135,
+        "radius": 40,
+        "dig": {
+          "radius": 29.700000000000003,
+          "depth": 19.8
+        }
+      },
+      "current": {
+        "damage": 192,
+        "radius": 134.1640786499874,
+        "dig": {
+          "radius": 90,
+          "depth": 60
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "multi-special",
+      "name": "流星雨",
+      "sourceIndex": 7,
+      "source": {
+        "index": 7,
+        "round": 28,
+        "power": 60,
+        "sourcePower": 60,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 93.91485505499116,
+      "old": {
+        "damage": 55,
+        "radius": 28,
+        "dig": {
+          "radius": 21.6,
+          "depth": 14.4
+        }
+      },
+      "current": {
+        "damage": 66,
+        "radius": 93.91485505499116,
+        "dig": {
+          "radius": 63,
+          "depth": 42
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "laser-normal",
+      "name": "单雷炮",
+      "sourceIndex": 8,
+      "source": {
+        "index": 8,
+        "round": 70,
+        "power": 220,
+        "sourcePower": 220,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 234.78713763747788,
+      "old": {
+        "damage": 250,
+        "radius": 70,
+        "dig": {
+          "radius": 86.4,
+          "depth": 57.6
+        }
+      },
+      "current": {
+        "damage": 245,
+        "radius": 234.78713763747788,
+        "dig": {
+          "radius": 159,
+          "depth": 105
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "laser-special",
+      "name": "三雷炮",
+      "sourceIndex": 8,
+      "source": {
+        "index": 8,
+        "round": 40,
+        "power": 49,
+        "sourcePower": 49,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 134.1640786499874,
+      "old": {
+        "damage": 99,
+        "radius": 40,
+        "dig": {
+          "radius": 33.75,
+          "depth": 22.5
+        }
+      },
+      "current": {
+        "damage": 53,
+        "radius": 134.1640786499874,
+        "dig": {
+          "radius": 90,
+          "depth": 60
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "water-normal",
+      "name": "水水弹",
+      "sourceIndex": 11,
+      "source": {
+        "index": 11,
+        "round": 54,
+        "power": 230,
+        "sourcePower": 230,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 181.12150617748296,
+      "old": {
+        "damage": 300,
+        "radius": 54,
+        "dig": {
+          "radius": 49.95,
+          "depth": 33.300000000000004
+        }
+      },
+      "current": {
+        "damage": 255,
+        "radius": 181.12150617748296,
+        "dig": {
+          "radius": 123,
+          "depth": 81
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "water-special",
+      "name": "紫冻水",
+      "sourceIndex": 11,
+      "source": {
+        "index": 11,
+        "round": 43,
+        "power": 190,
+        "sourcePower": 190,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 144.21858410066298,
+      "old": {
+        "damage": 190,
+        "radius": 43,
+        "dig": {
+          "radius": 27,
+          "depth": 18
+        }
+      },
+      "current": {
+        "damage": 212,
+        "radius": 144.21858410066298,
+        "dig": {
+          "radius": 96,
+          "depth": 63
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "ion-normal",
+      "name": "离子弹",
+      "sourceIndex": 10,
+      "source": {
+        "index": 10,
+        "round": 48,
+        "power": 200,
+        "sourcePower": 200,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 160.99689437998487,
+      "old": {
+        "damage": 260,
+        "radius": 48,
+        "dig": {
+          "radius": 45.900000000000006,
+          "depth": 30.600000000000005
+        }
+      },
+      "current": {
+        "damage": 220,
+        "radius": 160.99689437998487,
+        "dig": {
+          "radius": 108,
+          "depth": 72
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "ion-special",
+      "name": "离子光波",
+      "sourceIndex": 10,
+      "source": {
+        "index": 10,
+        "round": 66,
+        "power": 270,
+        "sourcePower": 270,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 221.3707297724792,
+      "old": {
+        "damage": 310,
+        "radius": 66,
+        "dig": {
+          "radius": 91.80000000000001,
+          "depth": 61.20000000000001
+        }
+      },
+      "current": {
+        "damage": 298,
+        "radius": 221.3707297724792,
+        "dig": {
+          "radius": 150,
+          "depth": 99
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "sea-normal",
+      "name": "大电环",
+      "sourceIndex": 12,
+      "source": {
+        "index": 12,
+        "round": 65,
+        "power": 220,
+        "sourcePower": 220,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 218.01146758828997,
+      "old": {
+        "damage": 220,
+        "radius": 65,
+        "dig": {
+          "radius": 63.45,
+          "depth": 42.300000000000004
+        }
+      },
+      "current": {
+        "damage": 243,
+        "radius": 218.01146758828997,
+        "dig": {
+          "radius": 144,
+          "depth": 96
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    },
+    {
+      "id": "sea-special",
+      "name": "双发小电环",
+      "sourceIndex": 12,
+      "source": {
+        "index": 12,
+        "round": 42,
+        "power": 166,
+        "sourcePower": 166,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 140.87228258248675,
+      "old": {
+        "damage": 166,
+        "radius": 42,
+        "dig": {
+          "radius": 37.800000000000004,
+          "depth": 25.200000000000003
+        }
+      },
+      "current": {
+        "damage": 181,
+        "radius": 140.87228258248675,
+        "dig": {
+          "radius": 96,
+          "depth": 63
+        }
+      },
+      "policy": "原版范围，保留1世界单位极窄满伤"
+    },
+    {
+      "id": "dragon-normal",
+      "name": "黄金飞弹",
+      "sourceIndex": 13,
+      "source": {
+        "index": 13,
+        "round": 45,
+        "power": 168,
+        "sourcePower": 225,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 150.9271347372632,
+      "old": {
+        "damage": 420,
+        "radius": 55,
+        "dig": {
+          "radius": 58.050000000000004,
+          "depth": 38.7
+        }
+      },
+      "current": {
+        "damage": 186,
+        "radius": 150.9271347372632,
+        "dig": {
+          "radius": 99,
+          "depth": 66
+        }
+      },
+      "policy": "原版隐藏款首段Round45；三枚齐射与单次爆炸按体感保留"
+    },
+    {
+      "id": "dragon-special",
+      "name": "黄金导弹",
+      "sourceIndex": 13,
+      "source": {
+        "index": 13,
+        "round": 27,
+        "power": 80,
+        "sourcePower": 80,
+        "section": 1
+      },
+      "sourceDamageRadiusWorld": 90.54832963671942,
+      "old": {
+        "damage": 130,
+        "radius": 38,
+        "dig": {
+          "radius": 39.150000000000006,
+          "depth": 26.100000000000005
+        }
+      },
+      "current": {
+        "damage": 88,
+        "radius": 90.54832963671942,
+        "dig": {
+          "radius": 60,
+          "depth": 39
+        }
+      },
+      "policy": "原版整数范围；本作坡面旋转与ERA倍率保留"
+    }
+  ],
+  "salvo": {
+    "retained": "现有乘法初速分布",
+    "ordinaryTest": {
+      "distance": 320,
+      "angle": 45,
+      "powerRange": [
+        10,
+        70
+      ],
+      "step": 0.5,
+      "samples": 242,
+      "maxFull": 1,
+      "maxNearFull": 1,
+      "edgeContacts": [
+        {
+          "vehicle": "dragon",
+          "power": 17,
+          "direct": 2,
+          "full": 0,
+          "high": 0,
+          "total": 392,
+          "impacts": [
+            {
+              "x": 467.61785350230394,
+              "y": 450.01822607421224,
+              "direct": false,
+              "bullseye": false
+            },
+            {
+              "x": 526.567445926111,
+              "y": 429.38596103363307,
+              "direct": true,
+              "bullseye": false
+            },
+            {
+              "x": 593.2699901276135,
+              "y": 400.84499999999997,
+              "direct": true,
+              "bullseye": false
+            }
+          ]
+        }
+      ]
+    },
+    "sourceCandidate": {
+      "timeUnit": "sqrt(3/gravity)；仅在本作当前力度曲线下的候选换算",
+      "multiOffsetsFixed": {
+        "vx": 150,
+        "vy": 200
+      },
+      "dragonOffsetsFixed": {
+        "vx": 200,
+        "vy": 150
+      },
+      "specialGridFixed": {
+        "multi": {
+          "vx": 180,
+          "vy": 150
+        },
+        "dragon": {
+          "vx": 150,
+          "vy": 150
+        }
+      },
+      "testedPower": [
+        15,
+        30
+      ],
+      "step": 0.5,
+      "conflicts": [
+        {
+          "vehicle": "multi",
+          "power": 19,
+          "direct": 3,
+          "full": 0,
+          "high": 2,
+          "total": 450,
+          "impacts": [
+            {
+              "x": 540,
+              "y": 414.68012469649955
+            },
+            {
+              "x": 558.2445515413882,
+              "y": 404.15574999999995
+            },
+            {
+              "x": 568.4366260977731,
+              "y": 422.15936049914984
+            }
+          ]
+        },
+        {
+          "vehicle": "multi",
+          "power": 19.5,
+          "direct": 3,
+          "full": 0,
+          "high": 2,
+          "total": 463,
+          "impacts": [
+            {
+              "x": 540,
+              "y": 405.45389474244126
+            },
+            {
+              "x": 574.5964814824621,
+              "y": 406.28875
+            },
+            {
+              "x": 580.5733861555295,
+              "y": 417
+            }
+          ]
+        },
+        {
+          "vehicle": "dragon",
+          "power": 19,
+          "direct": 3,
+          "full": 2,
+          "high": 2,
+          "total": 583,
+          "impacts": [
+            {
+              "x": 570.1890787028768,
+              "y": 399
+            },
+            {
+              "x": 571.031952604196,
+              "y": 403.91499999999996
+            },
+            {
+              "x": 540,
+              "y": 422.9193168155042
+            }
+          ]
+        },
+        {
+          "vehicle": "dragon",
+          "power": 19.5,
+          "direct": 3,
+          "full": 0,
+          "high": 2,
+          "total": 551,
+          "impacts": [
+            {
+              "x": 586.3399200223895,
+              "y": 399
+            },
+            {
+              "x": 586.9051049931556,
+              "y": 404.15574999999995
+            },
+            {
+              "x": 552.0912656917562,
+              "y": 416.9800730922391
+            }
+          ]
+        }
+      ],
+      "decision": "与短射程不能两枚高伤冲突，本版不迁移"
+    }
+  }
+}

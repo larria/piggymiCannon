@@ -19,7 +19,7 @@ import {TERRAIN_H} from './terrain';
 import { Renderer } from './renderer';
 import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,portraitDiagnostics} from './crew-portraits';
 import { AudioManager } from './audio';
-import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById,weaponDamage,weaponDigProfile, type ItemId, type WeaponId } from './catalog';
+import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById,weaponDamage,weaponBlastRadius,excavation, type ItemId, type WeaponId } from './catalog';
 import { icon } from './icons';
 import {MIN_POWER} from './ballistics';
 import { heldChargePower,chargeDelayProgress,chargePreparationSeconds,CHARGE_DELAY_SECONDS } from './interaction';
@@ -208,8 +208,8 @@ function renderInventory() {
 function renderDetail(item?:ItemId) {
   const w=weaponById(canControlBattle()?game.selected:displayTank().selectedWeapon);
   if(activeTab==='weapons') {
-    const dig=weaponDigProfile(w.id,game.gameVersion);
-    $('#weapon-detail').innerHTML=`<div class="detail-title"><span>${w.name}</span><span class="weapon-tag">${w.tag}</span></div><p>${w.description}</p><div class="weapon-metrics"><span>${w.effect==='pierce'?'首节伤害':'单枚伤害'} <strong>${weaponDamage(w.id,game.gameVersion)}${w.shots&&w.shots>1?` ×${w.shots}`:''}</strong></span><span>爆炸半径 <strong>${w.radius}m</strong></span><span>挖地 <strong>${dig.radius} × ${dig.depth}m</strong></span></div><button class="shell-atlas-button" data-dialog="projectiles">认认炮弹 · 弹体图鉴 ${icon('arrow')}</button>`;
+    const dig=excavation(w.id,false,game.gameVersion);
+    $('#weapon-detail').innerHTML=`<div class="detail-title"><span>${w.name}</span><span class="weapon-tag">${w.tag}</span></div><p>${w.description}</p><div class="weapon-metrics"><span>${w.effect==='pierce'?'首节伤害':'单枚伤害'} <strong>${weaponDamage(w.id,game.gameVersion)}${w.shots&&w.shots>1?` ×${w.shots}`:''}</strong></span><span>爆炸半径 <strong>${Math.round(weaponBlastRadius(w.id,game.gameVersion))}m</strong></span><span>挖地 <strong>${dig.radius} × ${dig.depth}m</strong></span></div><button class="shell-atlas-button" data-dialog="projectiles">认认炮弹 · 弹体图鉴 ${icon('arrow')}</button>`;
   }
   else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四个槽位，灵活搭配</span>${icon('shield')}</div><p>开局各带一件，使用后原位留空；任意空槽可拾取道具，重复道具各占一格，满槽不拾取。可在同回合联动。</p><div class="weapon-metrics"><span>同回合可联动 · 用掉后留空</span></div>`;}
 }

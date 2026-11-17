@@ -1,0 +1,335 @@
+{
+  "weapon": "laser-special",
+  "version": "4.0.5",
+  "terrain": [
+    {
+      "x": 450,
+      "y": 399,
+      "radius": 90,
+      "depth": 60,
+      "removed": 837,
+      "source": {
+        "x": 450,
+        "y": 399,
+        "vx": 0,
+        "vy": 500,
+        "weapon": "laser-special",
+        "owner": 0,
+        "age": 0,
+        "bounces": 0,
+        "drillY": null,
+        "sub": false,
+        "boost": 1,
+        "boostSources": {
+          "fire": null,
+          "rage": 1,
+          "snow": 1
+        },
+        "trail": [],
+        "delay": 0,
+        "echo": false,
+        "fireBoosted": false,
+        "homing": false,
+        "penetrations": 0,
+        "scale": 1,
+        "phase": 0,
+        "lockAge": 0,
+        "lockX": 0,
+        "lockY": 0,
+        "lockTarget": null,
+        "volley": 0,
+        "weaveX": 0,
+        "weaveY": 0,
+        "hitCooldown": 0,
+        "mineArmed": false,
+        "digBoost": 1,
+        "rage": false,
+        "traceId": 1,
+        "traceLaunch": {
+          "action": 1,
+          "time": 0.218,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "laser",
+          "hp": 850,
+          "maxHP": 850,
+          "x": 450,
+          "y": 399,
+          "vx": 0,
+          "vy": 500,
+          "relative": 20.5,
+          "absolute": 20.5,
+          "power": 1,
+          "wind": 5.455884193535894,
+          "rngIndex": 10
+        }
+      },
+      "round": 40,
+      "model": "source-scanlines"
+    },
+    {
+      "x": 900,
+      "y": 450,
+      "radius": 90,
+      "depth": 60,
+      "removed": 8856,
+      "source": {
+        "x": 900,
+        "y": 450,
+        "vx": 0,
+        "vy": 500,
+        "weapon": "laser-special",
+        "owner": 0,
+        "age": 0,
+        "bounces": 0,
+        "drillY": null,
+        "sub": false,
+        "boost": 1,
+        "boostSources": {
+          "fire": null,
+          "rage": 1,
+          "snow": 1
+        },
+        "trail": [],
+        "delay": 0,
+        "echo": false,
+        "fireBoosted": false,
+        "homing": false,
+        "penetrations": 0,
+        "scale": 1,
+        "phase": 0,
+        "lockAge": 0,
+        "lockX": 0,
+        "lockY": 0,
+        "lockTarget": null,
+        "volley": 0,
+        "weaveX": 0,
+        "weaveY": 0,
+        "hitCooldown": 0,
+        "mineArmed": false,
+        "digBoost": 1,
+        "rage": false,
+        "traceId": 2,
+        "traceLaunch": {
+          "action": 1,
+          "time": 0.218,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "laser",
+          "hp": 850,
+          "maxHP": 850,
+          "x": 900,
+          "y": 450,
+          "vx": 0,
+          "vy": 500,
+          "relative": 20.5,
+          "absolute": 20.5,
+          "power": 1,
+          "wind": 5.455884193535894,
+          "rngIndex": 106
+        }
+      },
+      "round": 40,
+      "model": "source-scanlines"
+    }
+  ],
+  "geometry": [
+    {
+      "damagePolicy": "source-radial",
+      "projectile": 1,
+      "weapon": "laser-special",
+      "source": {
+        "index": 8,
+        "round": 40,
+        "power": 49,
+        "sourcePower": 49,
+        "section": 1
+      },
+      "cell": 3,
+      "defences": [
+        {
+          "id": 0,
+          "value": 95
+        },
+        {
+          "id": 1,
+          "value": 89
+        }
+      ],
+      "result": {
+        "radius": 90,
+        "depth": 60
+      }
+    },
+    {
+      "damagePolicy": "source-radial",
+      "projectile": 2,
+      "weapon": "laser-special",
+      "source": {
+        "index": 8,
+        "round": 40,
+        "power": 49,
+        "sourcePower": 49,
+        "section": 1
+      },
+      "cell": 3,
+      "defences": [
+        {
+          "id": 0,
+          "value": 95
+        },
+        {
+          "id": 1,
+          "value": 89
+        }
+      ],
+      "result": {
+        "radius": 90,
+        "depth": 60
+      }
+    }
+  ],
+  "damage": [
+    {
+      "cause": "direct",
+      "weapon": "laser-special",
+      "projectile": 2,
+      "impact": 24,
+      "base": 53,
+      "factors": [
+        {
+          "source": "系别相克（本作规则）未来系→古代系",
+          "value": 0.8
+        },
+        {
+          "source": "原版防御换算",
+          "value": 1.1235955056179776
+        },
+        {
+          "source": "原版整数结算",
+          "value": 1.0262054507337524
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "未强化",
+          "value": 1
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.6136363636363636
+        }
+      ],
+      "bullseye": false,
+      "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)",
+      "dig": {
+        "radius": 90,
+        "depth": 60,
+        "digBoost": 1,
+        "source": "原版Round；强化不改变挖土"
+      },
+      "origin": {
+        "projectileStart": 2,
+        "launch": {
+          "action": 1,
+          "time": 0.218,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "laser",
+          "hp": 850,
+          "maxHP": 850,
+          "x": 900,
+          "y": 450,
+          "vx": 0,
+          "vy": 500,
+          "relative": 20.5,
+          "absolute": 20.5,
+          "power": 1,
+          "wind": 5.455884193535894,
+          "rngIndex": 106
+        },
+        "impact": {
+          "x": 900,
+          "y": 450,
+          "age": 0
+        },
+        "boost": 1,
+        "fireBoosted": false,
+        "weaponBase": 53,
+        "fullDamageArea": {
+          "blastDistance": 2.1640786499873883,
+          "directCore": {
+            "xRadius": 1.5,
+            "yRadius": 1.5,
+            "yCenter": -33
+          },
+          "reference": "head",
+          "model": "source-radial"
+        },
+        "dragon": null
+      },
+      "requested": 30,
+      "actual": 30,
+      "hpBefore": 920,
+      "hpAfter": 890,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "大猪头",
+      "weaponName": "三雷炮",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "normalised-era-cycle-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": false
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 900,
+        "y": 432
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    }
+  ],
+  "backend": "pixi"
+}

@@ -5,9 +5,9 @@ import {vehicleById,type VehicleId} from '../src/vehicles';
 import type {Difficulty,MapId} from '../src/catalog';
 export const AI_SAMPLE_MAPS:MapId[]=['valley','coast','moon','factory','temple','egypt'];
 export const AI_SAMPLE_VEHICLES:VehicleId[]=['cannon','bowl','missile','laser','water','multi','ion','duke','beetle','crossbow','mine','sea','dragon'];
-export function aiScenario(difficulty:Difficulty,seed:number,map:MapId='valley',distance?:number,vehicle:VehicleId='cannon'){
+export function aiScenario(difficulty:Difficulty,seed:number,map:MapId='valley',distance?:number,vehicle:VehicleId='cannon',version='development'){
  const slots=defaultSlots();slots.forEach((s,i)=>Object.assign(s,{enabled:true,team:i%2,controller:i===0?'ai':'human',difficulty,vehicle:i===0?vehicle:AI_SAMPLE_VEHICLES[(seed+i*3)%AI_SAMPLE_VEHICLES.length]}));
- const g=new Game({slots,seed,map,timer:0,fog:false,fireLine:false,selfDamage:false,friendlyFire:false});g.start();
+ const g=new Game({slots,seed,map,timer:0,fog:false,fireLine:false,selfDamage:false,friendlyFire:false},version);g.start();
  if(distance!==undefined){g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640,true);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=[220,220+distance,70,1180][i];t.y=432;t.fallVelocity=0;});g.wind=[-9,0,9][seed%3];}
  return g;
 }

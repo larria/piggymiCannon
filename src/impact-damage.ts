@@ -1,3 +1,4 @@
+import {originalBallistics,originalWeapon,sourceDistance,sourceFalloff,sourceRadius} from './original-ballistics';
 import type {WeaponId} from './catalog';
 import type {Tank} from './engine';
 import {precisionPolish} from './match-polish';
@@ -23,10 +24,12 @@ function bodyRim(t:Tank,x:number,y:number,slope:number,rx:number,ry:number,incom
 }
 /** Collision remains broad; only this small rotated centre qualifies as a bullseye. */
 export function preciseContact(t:Tank,x:number,y:number,slope:number,version='development',incoming?:Incoming,weapon?:WeaponId){
+ if(originalBallistics(version)&&weapon&&weapon!=='missile-normal'&&originalWeapon(weapon)){const p=originalWeapon(weapon)!;return sourceFalloff(sourceDistance(t,x,y,slope,weapon),p.round)===1;}
  const core=contactCore(weapon);return !precisionPolish(version)||bodyRim(t,x,y,slope,core.xRadius,core.yRadius,incoming)<=1;
 }
-export function fullDamageArea(version:string,weapon?:WeaponId){return precisionPolish(version)?{blastDistance:weapon==='sea-special'?1:PRECISE_BLAST_DISTANCE,directCore:contactCore(weapon)}:{blastDistance:FULL_BLAST_DISTANCE,directCore:{xRadius:23,yRadius:32,yCenter:-9}};}
-export function impactDamageScale(t:Tank,x:number,y:number,slope:number,radius:number,direct:boolean,version='development',incoming?:Incoming,weapon?:WeaponId){
+export function fullDamageArea(version:string,weapon?:WeaponId){if(originalBallistics(version)&&weapon&&weapon!=='missile-normal'&&originalWeapon(weapon)){const p=originalWeapon(weapon)!,radius=sourceRadius(p.round);return {blastDistance:(radius-Math.floor(radius))*3,directCore:{xRadius:1.5,yRadius:1.5,yCenter:-33},reference:weapon==='mine-special'||weapon==='ion-special'?'foot':'head',model:'source-radial'};}return precisionPolish(version)?{blastDistance:weapon==='sea-special'?1:PRECISE_BLAST_DISTANCE,directCore:contactCore(weapon)}:{blastDistance:FULL_BLAST_DISTANCE,directCore:{xRadius:23,yRadius:32,yCenter:-9}};}
+export function impactDamageScale(t:Tank,x:number,y:number,slope:number,radius:number,direct:boolean,version='development',incoming?:Incoming,weapon?:WeaponId,section=0){
+ if(originalBallistics(version)&&weapon&&weapon!=='missile-normal'&&originalWeapon(weapon)){const p=originalWeapon(weapon,section)!;return sourceFalloff(sourceDistance(t,x,y,slope,weapon),p.round);}
  const modern=precisionPolish(version),core=contactCore(weapon);
  if(direct){const rim=bodyRim(t,x,y,slope,modern?core.xRadius:23,modern?core.yRadius:32,modern?incoming:undefined);return Math.max(modern?.35:.65,Math.min(1,1-Math.max(0,rim-1)*(modern?.35:.45)));}
  const d=Math.hypot(x-t.x,y-t.y),full=modern?(weapon==='sea-special'?1:PRECISE_BLAST_DISTANCE):FULL_BLAST_DISTANCE;

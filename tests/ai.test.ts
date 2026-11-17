@@ -11,7 +11,7 @@ function fireSolution(g:ReturnType<typeof aiScenario>,shot:AIShot){
  return hp.map((h,i)=>h-g.tanks[i].hp);
 }
 export function coveredShooter(difficulty:'easy'|'expert'='expert'){
- const g=aiScenario(difficulty,52,'valley',400,'cannon');for(let x=180;x<=420;x++)g.land.column(x,320,390,true);g.land.rebuild();
+ const g=aiScenario(difficulty,52,'valley',400,'cannon','4.0.4');for(let x=180;x<=420;x++)g.land.column(x,320,390,true);g.land.rebuild();
  g.active.x=250;g.active.y=432;g.tanks[1].x=650;g.tanks[3].x=1050;return g;
 }
 test('2v2 close shots search 10-22 power at several distances and both facings with damage switches off',()=>{

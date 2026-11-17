@@ -1,3 +1,4 @@
+import {originalBallistics,originalWeapon,originalCraterAxes,sourceRadius,sourceMaximum} from './original-ballistics';
 import {ellipseExcavation,precisionPolish,impactPolish} from './match-polish';
 import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
@@ -34,9 +35,9 @@ export const ITEMS: { id:ItemId; name:string; description:string; count:number; 
 ];
 export const MAPS: { id:MapId; name:string; sub:string; color:string;description:string }[] = [
   { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75',description:'本作原创峡谷，高地与断崖构成攻防。' },
-  { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；按用户手感校准180像素桥面：无人落点老土普通弹单发约挖去54%且不超过60%，两发可穿中段，连续挖掘仍可击落。桥宽、厚度与比例为本作配置。' },
+  { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；按用户手感校准210像素桥面：无人落点老土普通弹单发约挖去57%且不超过60%，两发可穿中段，连续挖掘仍可击落。桥宽、厚度与比例为本作配置。' },
   { id:'moon', name:'天空之城', sub:'薄雪浮岛 · S形枝层', color:'#91aab6',description:'按用户要求自绘：上层58像素，大多数位置可被老土普通弹一发击穿；下层中间70%为4像素S形树枝与细枝。保持本作3.1.0布局和低重力，不采用原网格规格。' },
-  { id:'factory', name:'钢铁工厂', sub:'永久 Z 形底板 · 钢梁',color:'#8f9998',description:'用户确认底层是永久Z形连续斜面，圆滑折点可移位调角；上层30像素钢梁，小红豆连续两发可穿；中层钢梁仍可破。坠落伤害可开关且默认关闭。参照游侠攻略“不会被打掉下去”，坐标与坡面为本作重绘。' },
+  { id:'factory', name:'钢铁工厂', sub:'永久 Z 形底板 · 钢梁',color:'#8f9998',description:'用户确认底层是永久Z形连续斜面，圆滑折点可移位调角；上层90像素钢梁，按统一Round小红豆连续两发可穿；中层钢梁仍可破。坠落伤害可开关且默认关闭。参照游侠攻略“不会被打掉下去”，坐标与坡面为本作重绘。' },
   { id:'temple', name:'神圣殿堂', sub:'小蘑菇永久节点 · 易碎薄轨',color:'#bba883',description:'用户确认永久蘑菇节点缩至原尺寸约1/3：圆顶伞盖、窄柄／小基座，可微移调角。非节点薄轨保持4像素且易碎，上层殿堂可破。参照游侠攻略，五节点坐标／弧度为本作重绘，不宣称逐像素复刻。' },
   { id:'egypt', name:'古老埃及', sub:'金字塔高地 · 主题重绘',color:'#c4a274',description:'月光 2003 年赛事记录确认古老埃及场景名；未取得原版地形细节。金字塔、方尖碑和薄桥是本作战术主题重绘，不能称为原图复原。' },
 ];
@@ -57,7 +58,7 @@ export const MODERN_TRAIL_POINTS=6,MODERN_TRAIL_LENGTH=24,MODERN_TRAIL_ALPHA=.16
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
 /** Flat depth absorbed by a direct body contact, shared by every weapon. */
 export const DIRECT_DIG_DEPTH_REDUCTION=65;
-export const weaponDamage=(id:WeaponId,version='development')=>id==='missile-normal'&&!impactPolish(version)?120:id==='mine-special'&&!precisionPolish(version)?320:weaponById(id).damage;
+export const weaponDamage=(id:WeaponId,version='development')=>originalBallistics(version)&&id!=='missile-normal'&&originalWeapon(id)?sourceMaximum(originalWeapon(id)!.power,originalWeapon(id)!.round):id==='missile-normal'&&!impactPolish(version)?120:id==='mine-special'&&!precisionPolish(version)?320:weaponById(id).damage;
 export function weaponDigProfile(id:WeaponId,version='development'){
   const w=weaponById(id),modern=impactPolish(version);
   return {radius:id==='bowl-normal'&&!modern?43:w.digRadius,depth:id==='bowl-normal'&&!modern?40:id==='ion-special'&&!modern?28:w.digDepth};
@@ -66,6 +67,7 @@ export const fullContactExcavation=(id:WeaponId,version='development')=>id==='io
 export const contactDepthReduction=(id:WeaponId,version='development')=>fullContactExcavation(id,version)?0:precisionPolish(version)&&id==='mine-normal'?30:precisionPolish(version)&&id==='beetle-normal'?34:DIRECT_DIG_DEPTH_REDUCTION;
 export const excavation = (id:WeaponId,direct:boolean,version='development',digBoost=1) => {
   const modern=impactPolish(version),{radius,depth}=weaponDigProfile(id,version);
+  if(originalBallistics(version)&&originalWeapon(id))return originalCraterAxes(originalWeapon(id)!.round);
   // Native rounds share the reviewed 3:2 ellipse. Width remains calibrated
   // to our world/art scale; contact never shrinks the ellipse itself.
   if(ellipseExcavation(version)){const halfWidth=radius*1.35*digBoost;return {radius:halfWidth,depth:VEHICLE_WEAPONS.some(w=>w.id===id)?halfWidth/1.5:depth*1.5*digBoost};}
@@ -75,6 +77,8 @@ export const excavation = (id:WeaponId,direct:boolean,version='development',digB
 export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number,profile?:{missChance:number;error:number},version='development') {
   const d=DIFFICULTIES.find(d=>d.id===difficulty)!,w=weaponById(weapon);
   const miss=rng()<(profile?.missChance??d.missChance);
-  const offset=miss?(rng()<0.5?-1:1)*(Math.max(w.radius+45,weaponDigProfile(weapon,version).radius*1.35+40,w.effect==='homing'||weapon==='homing'?(w.homingRadius??140)+45:0)+rng()*65):(rng()-0.5)*(profile?.error??d.error)*2;
+  const offset=miss?(rng()<0.5?-1:1)*(Math.max(weaponBlastRadius(weapon,version)+45,excavation(weapon,false,version).radius+40,w.effect==='homing'||weapon==='homing'?(w.homingRadius??140)+45:0)+rng()*65):(rng()-0.5)*(profile?.error??d.error)*2;
   return {miss,offset};
 }
+
+export function weaponBlastRadius(id:WeaponId,version='4.0.4',section=0){const p=originalBallistics(version)&&id!=='missile-normal'?originalWeapon(id,section):null;return p?sourceRadius(p.round)*3:weaponById(id).radius;}

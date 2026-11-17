@@ -1,24 +1,27 @@
+import {originalBallistics} from './original-ballistics';
+import {restoreRadius} from './item-combos';
 import type {Game,Tank} from './engine';import {SHOT_WIND_GAIN,WORLD_W,WORLD_H} from './engine';import {pointHitsTank} from './tank-hitbox';import {impactDamageScale} from './impact-damage';
 export interface RestorePlan {target:number;angle:number;power:number;direction:number;x:number;y:number;gain:number;score:number;self:boolean}
 /** Read-only healing flight: same launch, wind, collision grace, fire line and falloff. */
 type RestoreBody={tank:Tank;slope:number};
 function evaluate(g:Game,t:Tank,target:Tank,angle:number,power:number,direction:number,bodies:RestoreBody[]):RestorePlan|null{
- const shooter={...t,direction},p=g.launch(shooter,'cannon-normal',angle,power);p.healing=true;let boosted=t.boost;
+ const modernGeometry=originalBallistics(g.gameVersion),shooter={...t,direction},p=g.launch(shooter,'cannon-normal',angle,power);p.healing=true;let boosted=t.boost;
  if(power<=g.minimumShotPower)Object.assign(p,{x:t.x,y:t.y-45,vx:0,vy:0});
  let hit:number|undefined,landed=false;const dt=1/240;
  for(let i=0;i<8/dt;i++){
   const oldX=p.x,oldY=p.y;p.age+=dt;p.vx+=g.wind*SHOT_WIND_GAIN*dt;p.vy+=g.gravity*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
   if(g.fireLine&&!boosted&&(oldX-g.fireLine.x)*(p.x-g.fireLine.x)<=0&&p.y>=g.fireLine.top&&p.y<=g.fireLine.bottom)boosted=true;
   if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70)return null;
-  if(p.age>=.09)hit=bodies.find(b=>g.projectileCollisionAllowed(b.tank,t.id)&&g.canRestore(b.tank,t.id)&&Math.abs(b.tank.x-p.x)<50&&Math.abs(b.tank.y-p.y)<62&&pointHitsTank(b.tank,p.x,p.y,b.slope))?.tank.id;
+  if(modernGeometry){const c=g.firstImpact(p,oldX,oldY,p.x,p.y,bodies);if(c){p.x=c.x;p.y=c.y;hit=c.tank?.id;landed=true;break;}}
+  else if(p.age>=.09)hit=bodies.find(b=>g.projectileCollisionAllowed(b.tank,t.id)&&g.canRestore(b.tank,t.id)&&Math.abs(b.tank.x-p.x)<50&&Math.abs(b.tank.y-p.y)<62&&pointHitsTank(b.tank,p.x,p.y,b.slope,g.gameVersion))?.tank.id;
   if(g.land.solid(p.x,p.y)||hit!==undefined){if(hit===undefined&&p.vx===0)p.y=g.ground(p.x,oldY);landed=true;break;}
  }
  if(!landed)return null;
  let score=0,targetGain=0;
  for(const {tank:b,slope} of bodies){
-  if(!g.canRestore(b,t.id)||hit!==b.id&&Math.hypot(b.x-p.x,b.y-p.y)>104)continue;
+  if(!g.canRestore(b,t.id)||hit!==b.id&&Math.hypot(b.x-p.x,b.y-p.y)>restoreRadius(g.gameVersion)+26)continue;
   const selfCentred=b.id===t.id&&power<=g.minimumShotPower&&Math.abs(p.x-t.x)<=3&&Math.abs(p.y-(t.y+18))<=4;
-  const factor=selfCentred?1:impactDamageScale(b,p.x,p.y,slope,78,hit===b.id,g.gameVersion,{vx:p.vx,vy:p.vy},'cannon-normal');
+  const factor=selfCentred?1:impactDamageScale(b,p.x,p.y,slope,restoreRadius(g.gameVersion),hit===b.id,g.gameVersion,{vx:p.vx,vy:p.vy},'cannon-normal');
   const gain=Math.min(b.maxHP-b.hp,Math.round(b.maxHP*.4*(boosted?1.5:1)*factor));
   score+=gain*(b.team===t.team?1+(1-b.hp/b.maxHP)*.5:-1.25);if(b.id===target.id)targetGain=gain;
  }

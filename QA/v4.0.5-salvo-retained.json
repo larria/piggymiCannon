@@ -1,0 +1,6340 @@
+[
+  {
+    "vehicle": "multi",
+    "power": 10,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 327.1967211351005,
+        "y": 450.18538079176454,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 360.03730563782005,
+        "y": 507.52123436217846,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 393.1668776109461,
+        "y": 564.1174586816109,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 10.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 335.18040960537354,
+        "y": 450.4655672118351,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 372.277943141413,
+        "y": 507.0081818585943,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 410.359650530984,
+        "y": 564.1354534844497,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 11,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 343.47023323861606,
+        "y": 450.7234345075003,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 384.1817687737827,
+        "y": 504.3005899762196,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 426.3371368362981,
+        "y": 558.1293524621219,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 11.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 351.71452969447097,
+        "y": 450.1941830918328,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 397.35666420388094,
+        "y": 504.1829957961136,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 444.8236889345295,
+        "y": 558.5693229271272,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 12,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 360.59560929915045,
+        "y": 450.3920074848649,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 410.96823889425195,
+        "y": 504.00597985575314,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 462.06845980796163,
+        "y": 553.5954246877261,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 12.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 369.78460515269364,
+        "y": 450.56605513836183,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 423.1778161804484,
+        "y": 499.4230588195569,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 478.9323886973583,
+        "y": 546.5034123551251,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 13,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 379.2763008333025,
+        "y": 450.72059509705497,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 437.04046968794023,
+        "y": 498.0052453120637,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 497.6980329814289,
+        "y": 543.2351534871016,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 13.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 388.599108908015,
+        "y": 450.0632202489132,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 450.22111165478464,
+        "y": 494.35384834522324,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 514.6253336030113,
+        "y": 534.5847613802231,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 14,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 398.64059761771864,
+        "y": 450.191649982001,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 464.4459819004262,
+        "y": 492.2757380995717,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 534.1622152973939,
+        "y": 531.0961967034561,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 14.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 9,
+    "impacts": [
+      {
+        "x": 408.9483501602379,
+        "y": 450.3303907151395,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 478.38177334680904,
+        "y": 489.0801416531948,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 553.1502762435559,
+        "y": 525.5772630196677,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 15,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 36,
+    "impacts": [
+      {
+        "x": 419.50233493520614,
+        "y": 450.49583602262646,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 492.82426728680906,
+        "y": 486.42345146319184,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 570.4018583120665,
+        "y": 516.1080564745471,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 15.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 152,
+    "impacts": [
+      {
+        "x": 430.27834811132374,
+        "y": 450.70779397265807,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 507.14945843458463,
+        "y": 483.2459865654216,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 540,
+        "y": 429.8004126542877,
+        "direct": true,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 16,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 187,
+    "impacts": [
+      {
+        "x": 440.657908139104,
+        "y": 450.1357184902884,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 540,
+        "y": 402.26490902549807,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 519.2934703305582,
+        "y": 476.3137171694354,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 16.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 222,
+    "impacts": [
+      {
+        "x": 451.76433481899767,
+        "y": 450.5011032701882,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 558.9470866045255,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 534.4377017660295,
+        "y": 474.3828132339603,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 17,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 250,
+    "impacts": [
+      {
+        "x": 462.35797369896227,
+        "y": 450.1171137271785,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 549.3211840669239,
+        "y": 472.0675946830727,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 580.8819623748616,
+        "y": 399.01075,
+        "direct": true,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 17.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 229,
+    "impacts": [
+      {
+        "x": 473.64875418651576,
+        "y": 450.7554584963271,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 528.4433507327601,
+        "y": 421.9174869504299,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 642.4638121992073,
+        "y": 450.2397085353167,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 18,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 213,
+    "impacts": [
+      {
+        "x": 484.29633766958517,
+        "y": 450.69060646422315,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 540,
+        "y": 417.21317792202524,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 664.6660865801107,
+        "y": 450.44476324311233,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 18.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 201,
+    "impacts": [
+      {
+        "x": 494.89034106525395,
+        "y": 450.8372736067818,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 540,
+        "y": 400.65229184258527,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 686.0580426554947,
+        "y": 450.0299936485825,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 19,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 211,
+    "impacts": [
+      {
+        "x": 504.6591391530859,
+        "y": 450.31791693175126,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 553.813700324246,
+        "y": 399.58824999999996,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 707.3560507778252,
+        "y": 450.28646557966795,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 19.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 243,
+    "impacts": [
+      {
+        "x": 514.2321985206069,
+        "y": 450.0751875166283,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 568.3037960601365,
+        "y": 399.765,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 727.5321875323516,
+        "y": 450.0752882527343,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 20,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 239,
+    "impacts": [
+      {
+        "x": 523.5553103809975,
+        "y": 450.15344905464826,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 582.1167122290706,
+        "y": 399.96475,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 746.8750617353575,
+        "y": 450.104278033586,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 20.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 231,
+    "impacts": [
+      {
+        "x": 532.5715176892556,
+        "y": 450.59931437412433,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 594.9764344041798,
+        "y": 400.07325,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 765.2362812676397,
+        "y": 450.47831836211776,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 21,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 152,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 449.9784267853413,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 650.4043354907681,
+        "y": 450.182902009233,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 781.97946580251,
+        "y": 450.64369309197775,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 21.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 148,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 441.62513871917105,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 661.2727829795401,
+        "y": 450.4132770204503,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 796.4384384264313,
+        "y": 450.01796295448264,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 22,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 144,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 434.7543365576794,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 670.5262456980245,
+        "y": 450.3444043019648,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 809.4349786777614,
+        "y": 450.0158915292004,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 22.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 144,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 428.7037803224021,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 678.9760585961246,
+        "y": 450.13836640387063,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 821.4712407112435,
+        "y": 450.0199875107002,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 23,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 137,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 422.8643505010131,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 687.9766595935145,
+        "y": 450.5016691564931,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 833.6399819833049,
+        "y": 450.0142882953978,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 23.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 129,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 417.2271530497831,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 696.6058216413668,
+        "y": 450.27463710863225,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 846.4611489544254,
+        "y": 450.6882963700231,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 24,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 129,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 411.78221120921984,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 705.3219408527564,
+        "y": 450.0351678972483,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 858.9008704873648,
+        "y": 450.66541953626125,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 24.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 133,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 406.52034610544376,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 714.6051526315753,
+        "y": 450.3766798684203,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 871.4730712589196,
+        "y": 450.6327475056971,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 25,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 133,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 401.4350920664543,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 723.5006209927167,
+        "y": 450.11621650726954,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 884.1777512690634,
+        "y": 450.58795152833056,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 25.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 137,
+    "impacts": [
+      {
+        "x": 543.0252199814876,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 732.974051566756,
+        "y": 450.44682343323484,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 897.0149105178862,
+        "y": 450.5333603541617,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 26,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 144,
+    "impacts": [
+      {
+        "x": 549.018647793996,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 742.0488690776899,
+        "y": 450.16536592231745,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 909.9845490053247,
+        "y": 450.4666452331902,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 26.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 153,
+    "impacts": [
+      {
+        "x": 555.0775111458828,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 751.7125184469361,
+        "y": 450.4827390530756,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 923.0866667313617,
+        "y": 450.3901349154164,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 27,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 161,
+    "impacts": [
+      {
+        "x": 561.2025473235079,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 760.9666851076105,
+        "y": 450.1802873923917,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 936.3212636960556,
+        "y": 450.3015006508404,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 27.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 169,
+    "impacts": [
+      {
+        "x": 567.3943712954602,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 770.8205532720499,
+        "y": 450.4867554779429,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 949.6883398993778,
+        "y": 450.203071189462,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 28,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 169,
+    "impacts": [
+      {
+        "x": 573.6510213922737,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 780.2540690825035,
+        "y": 450.16330966749257,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 963.1878953412954,
+        "y": 450.0925177812812,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 28.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 161,
+    "impacts": [
+      {
+        "x": 579.9745493087055,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 790.2981560421493,
+        "y": 450.4565439578366,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 977.400094318009,
+        "y": 450.7230594144813,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 29,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 153,
+    "impacts": [
+      {
+        "x": 586.364063833811,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 799.9110210023871,
+        "y": 450.11210399761956,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 991.1706300207888,
+        "y": 450.597657137841,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 29.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 144,
+    "impacts": [
+      {
+        "x": 592.8192122715326,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 810.145326757253,
+        "y": 450.39443324275675,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1005.0736449621611,
+        "y": 450.4601309143985,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 30,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 137,
+    "impacts": [
+      {
+        "x": 599.341249796955,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 819.9375408672266,
+        "y": 450.02899913277327,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1019.1091391421965,
+        "y": 450.3128094941536,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 30.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 42,
+    "impacts": [
+      {
+        "x": 659.6250430040654,
+        "y": 450.52702869609703,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 830.3620654172864,
+        "y": 450.29809458270347,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1033.2771125608704,
+        "y": 450.1533641271062,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 31,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 34,
+    "impacts": [
+      {
+        "x": 665.945303834388,
+        "y": 450.0144466768737,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 840.8844167763218,
+        "y": 450.5648419736699,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1048.187838432121,
+        "y": 450.76570767716635,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 31.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 23,
+    "impacts": [
+      {
+        "x": 672.8101941298331,
+        "y": 450.0272364687308,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 850.9483720223049,
+        "y": 450.16985672767635,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1062.6267921116118,
+        "y": 450.59141344165954,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 32,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 15,
+    "impacts": [
+      {
+        "x": 679.733258767643,
+        "y": 450.0343347135588,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 861.66094217657,
+        "y": 450.4233703234358,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1077.198225029739,
+        "y": 450.40499525935064,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 32.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 11,
+    "impacts": [
+      {
+        "x": 686.7144977478688,
+        "y": 450.0357414113577,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 871.9042465723319,
+        "y": 450.0073909276756,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1091.902137186493,
+        "y": 450.2087818802389,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 33,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 693.7539110705053,
+        "y": 450.03145656212786,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 882.807035521769,
+        "y": 450.24999947822835,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1106.7385285818173,
+        "y": 450.00044455432476,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 33.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 700.8514987355052,
+        "y": 450.02148016586887,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 893.8076512801692,
+        "y": 450.4879312198171,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1122.3477813476995,
+        "y": 450.5945900212456,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 34,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 708.0072607429228,
+        "y": 450.00581222258114,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 904.3226968119402,
+        "y": 450.0424006880473,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1137.4551530039153,
+        "y": 450.3714038268724,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 34.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 715.7464351103763,
+        "y": 450.5396667256873,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 915.5135313655861,
+        "y": 450.2694273844293,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1152.695003898705,
+        "y": 450.13609368569644,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 35,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 723.0233936644325,
+        "y": 450.5156345177559,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 926.8021927281571,
+        "y": 450.4917772718478,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1168.7257815147523,
+        "y": 450.7221484127914,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 35.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 730.3585265609083,
+        "y": 450.4859107627954,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 937.5889793959378,
+        "y": 450.016695604068,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1184.2366126704292,
+        "y": 450.47198940315616,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 36,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 737.7518337997941,
+        "y": 450.450495460806,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 949.0678595537155,
+        "y": 450.22814044627944,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1199.879923064674,
+        "y": 450.2097064467185,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 36.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 745.2033153810405,
+        "y": 450.4093886117876,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 960.6445665204565,
+        "y": 450.4349084795275,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1216.3322255309295,
+        "y": 450.78767043398807,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 37,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 752.7129713047079,
+        "y": 450.36259021574045,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 972.3191002961719,
+        "y": 450.63932845381197,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1232.2465161860355,
+        "y": 450.5105386090912,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 37.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 760.2808015707728,
+        "y": 450.31010027266416,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 983.4700200862369,
+        "y": 450.1261386637784,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1248.2932860797348,
+        "y": 450.22128283739175,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 38,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 767.9068061792216,
+        "y": 450.2519187825592,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 995.3347726571594,
+        "y": 450.3173248428559,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1265.1671133961734,
+        "y": 450.7911560848353,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 38.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 775.5909851300809,
+        "y": 450.1880457454247,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1007.2973520370344,
+        "y": 450.5061629629697,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1281.4848635507428,
+        "y": 450.48705144467635,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 39,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 783.3333384233375,
+        "y": 450.1184811612617,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1019.3577582258729,
+        "y": 450.6903242741201,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1297.9350929439288,
+        "y": 450.17082285771545,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 39.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 791.1338660589759,
+        "y": 450.04322503006983,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1030.8728111381592,
+        "y": 450.13902636183315,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1315.2304451105092,
+        "y": 450.73260536533326,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 40,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 799.5711325351831,
+        "y": 450.55069846882856,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1043.1234361222052,
+        "y": 450.3122826277764,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1331.9516547645326,
+        "y": 450.40152790991215,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 40.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 807.492856717498,
+        "y": 450.467078072993,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1055.4718879152592,
+        "y": 450.48086208475604,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1348.8053436571724,
+        "y": 450.0583265076895,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 41,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 815.4727552421925,
+        "y": 450.37776613012824,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1067.9181665172418,
+        "y": 450.6470934827721,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1366.5222206739463,
+        "y": 450.61201827548166,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 41.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 823.5108281093017,
+        "y": 450.28276264023464,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1079.7973525517702,
+        "y": 450.05768744823206,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1383.646889827414,
+        "y": 450.2539680047994,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 42,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 831.6070753188081,
+        "y": 450.18206760331213,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1092.4338499489495,
+        "y": 450.21068505104097,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1401.6467906721416,
+        "y": 450.8046227044226,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 42.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 839.7614968706926,
+        "y": 450.0756810193607,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1105.168174155102,
+        "y": 450.3613345948864,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1419.0424400864656,
+        "y": 450.42939481528066,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 43,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 848.5817444343479,
+        "y": 450.5724657318455,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1118.0003251702506,
+        "y": 450.5073073297682,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1436.570568739388,
+        "y": 450.04437172933643,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 43.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 856.8573625329127,
+        "y": 450.45771488325056,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1130.9303029943194,
+        "y": 450.6509320056865,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1454.9919944342914,
+        "y": 450.5869356891342,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 44,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 865.1911549738534,
+        "y": 450.33727248762625,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1143.266014137353,
+        "y": 450.01486086264947,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1472.7911033480768,
+        "y": 450.18473498473054,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 44.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 873.5831217572122,
+        "y": 450.21113854497344,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1156.3862107566501,
+        "y": 450.145251743361,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1491.4955528709565,
+        "y": 450.7242618763598,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 45,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 882.0332628829686,
+        "y": 450.07931305529144,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1169.604234184891,
+        "y": 450.2732945651087,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1509.5656420455416,
+        "y": 450.3072123034966,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 45.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 891.1734693297858,
+        "y": 450.5657530091171,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1182.920084422105,
+        "y": 450.3966605778927,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1528.5531153964312,
+        "y": 450.8437021269564,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 46,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 899.7448070022028,
+        "y": 450.4255632547915,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1196.3337614683132,
+        "y": 450.5176785317133,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1546.894184831836,
+        "y": 450.40947493563425,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 46.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 908.3743190170173,
+        "y": 450.2796819534368,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1209.845265323444,
+        "y": 450.6340196765701,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1566.1646820106741,
+        "y": 450.9429276909256,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 47,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 917.0620053742041,
+        "y": 450.1281091050534,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1223.4545959875472,
+        "y": 450.7480127624633,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1584.7767317069843,
+        "y": 450.4938516311436,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 47.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 926.4591484999652,
+        "y": 450.60920576783445,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1236.4316162115551,
+        "y": 450.04816253844297,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1603.5212606418072,
+        "y": 450.03265162455966,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 48,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 935.2680314038378,
+        "y": 450.44926865480744,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1250.231165670856,
+        "y": 450.1489218291292,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1623.2132826708216,
+        "y": 450.5580136400251,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 48.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 944.1350886500707,
+        "y": 450.2836399947513,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1264.1285419391293,
+        "y": 450.24733306085193,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1642.5024704129573,
+        "y": 450.41644059631426,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 49,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 953.0603202387476,
+        "y": 450.11231978766625,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1278.1237450163956,
+        "y": 450.34106748361125,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1661.9281519159913,
+        "y": 450.2674571225645,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 49.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 962.7144000434299,
+        "y": 450.5857444094027,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1292.2167749025953,
+        "y": 450.4324538474066,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1681.490327180061,
+        "y": 450.11106321877526,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 50,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 971.7608281787193,
+        "y": 450.40605993767406,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1306.4076315977493,
+        "y": 450.5191634022386,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1701.7483968651095,
+        "y": 450.63035109790366,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 50.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 980.8654306564541,
+        "y": 450.22068391891634,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1320.6963151019108,
+        "y": 450.603524898107,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1721.5875741735551,
+        "y": 450.4654023508008,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 51,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 990.0282074765764,
+        "y": 450.0296163531298,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1335.0828254150024,
+        "y": 450.6832095850118,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1741.5632452431319,
+        "y": 450.2930431736595,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 51.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 999.9392239601398,
+        "y": 450.49769768382185,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1349.5671625370483,
+        "y": 450.7605462129528,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1761.6754100736232,
+        "y": 450.1132735664789,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 52,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1009.2231973269324,
+        "y": 450.29826585339157,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1364.149326468095,
+        "y": 450.8332060319304,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1782.4995274145067,
+        "y": 450.6264873092695,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 52.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1018.5653450361128,
+        "y": 450.0931424759323,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1378.0448317318244,
+        "y": 450.0439057681961,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1802.8886942895006,
+        "y": 450.43816285877483,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 53,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1028.6702759943319,
+        "y": 450.5562244831947,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1392.81721445804,
+        "y": 450.10566054196687,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1823.4143549254109,
+        "y": 450.242427978242,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 53.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1038.1336202501823,
+        "y": 450.34273684109195,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1407.6874239932195,
+        "y": 450.16273850677385,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1844.0765093222894,
+        "y": 450.03928266767014,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 54,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1047.6551388483801,
+        "y": 450.12355765196025,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1422.6554603373704,
+        "y": 450.2174684126173,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1865.466674319257,
+        "y": 450.5464222741234,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 54.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1057.9539842812985,
+        "y": 450.5839690857929,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1437.7213234905125,
+        "y": 450.26752150949704,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1886.4058307605783,
+        "y": 450.33472212023713,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 55,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1067.5966994262008,
+        "y": 450.3564256320175,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1452.8850134525817,
+        "y": 450.3152265474132,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1907.4814809629013,
+        "y": 450.11561153631203,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 55.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1077.2975889134564,
+        "y": 450.12319063121333,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1468.1465302236224,
+        "y": 450.3582547763658,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 56,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1087.7903488210313,
+        "y": 450.57860274161595,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1483.5058738036819,
+        "y": 450.398934946355,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 56.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1097.6124348549974,
+        "y": 450.3370034761681,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1498.9630441926429,
+        "y": 450.4349383073803,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 57,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1107.4926952313128,
+        "y": 450.089712663691,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1514.5180413905755,
+        "y": 450.468593609442,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 57.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1118.179369613546,
+        "y": 450.542454200664,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1530.170865397498,
+        "y": 450.4975721025403,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 58,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1128.1808265365548,
+        "y": 450.2867991235436,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1545.9215162133487,
+        "y": 450.52420253667503,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 58.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1138.2404578019284,
+        "y": 450.0254524993941,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1561.769993838171,
+        "y": 450.546156161846,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 59,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1149.1210466588177,
+        "y": 450.4731947129371,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1577.7162982719492,
+        "y": 450.56576172805353,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 59.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1159.3018744708907,
+        "y": 450.20348382414403,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1593.7604295146903,
+        "y": 450.58069048529745,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 60,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1170.3133555981453,
+        "y": 450.65122818187194,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1609.902387566403,
+        "y": 450.5932711835776,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 60.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1180.61537995688,
+        "y": 450.37315302843535,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1626.142172427104,
+        "y": 450.6011750728943,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 61,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1190.9755786579876,
+        "y": 450.08938632796946,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1642.479784096743,
+        "y": 450.60673090324735,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 61.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1202.1809742598991,
+        "y": 450.5321313622675,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1658.9152225753376,
+        "y": 450.60760992463696,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 62,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1212.662369507691,
+        "y": 450.24000039715816,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1675.448487862979,
+        "y": 450.6061408870628,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 62.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1223.9986573800252,
+        "y": 450.68274757564086,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1692.0795799595096,
+        "y": 450.59999504052496,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 63,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1234.60124917445,
+        "y": 450.38225234588816,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1708.808498864996,
+        "y": 450.5915011350238,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 63.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1245.2620153113007,
+        "y": 450.0760655691064,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1725.6352445794778,
+        "y": 450.578330420559,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 64,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1256.7922176582604,
+        "y": 450.51381342415937,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1742.5598171028983,
+        "y": 450.56281164713033,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 64.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1267.5741803417434,
+        "y": 450.19926238273365,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1759.5822164352746,
+        "y": 450.5426160647382,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 65,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1279.235274959128,
+        "y": 450.63701238197154,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1776.7024425766147,
+        "y": 450.52007242338266,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 65.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1290.1384341892997,
+        "y": 450.3140970759026,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1793.9204955269252,
+        "y": 450.4928519730634,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 66,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1301.930421077052,
+        "y": 450.74952046932543,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1811.236375286223,
+        "y": 450.46328346378067,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 66.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1312.9547768538455,
+        "y": 450.4182408986125,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1828.6500818544528,
+        "y": 450.4290381455336,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 67,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1324.0373069730745,
+        "y": 450.08126978087046,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1845.8475834532742,
+        "y": 450.0575315467029,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 67.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1336.0232083354836,
+        "y": 450.51402260086354,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1863.770975417911,
+        "y": 450.35117458215007,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 68,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1347.2269350013735,
+        "y": 450.1686872184781,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1881.7958174065584,
+        "y": 450.6458325934868,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 68.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1359.3437286342032,
+        "y": 450.59911343265645,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1899.2831762171245,
+        "y": 450.2592612829124,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 69,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1370.6686518467288,
+        "y": 450.24541378562697,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1917.5072950388758,
+        "y": 450.550257461175,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 69.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1382.9163377499053,
+        "y": 450.6758421439896,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "multi",
+    "power": 70,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1394.3624575091167,
+        "y": 450.31377823231685,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 10,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 327.1967211351005,
+        "y": 450.18538079176454,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 361.6998904570849,
+        "y": 513.4084570429136,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 396.1812950323479,
+        "y": 576.0460276390294,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 10.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 335.19001359374914,
+        "y": 450.4577074455689,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 374.3006365628764,
+        "y": 513.4667959371305,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 413.71706220612236,
+        "y": 576.1529304588046,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 11,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 343.5123680831295,
+        "y": 450.6889519553773,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 387.17975591863643,
+        "y": 512.8904628313618,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 431.09781930536695,
+        "y": 573.3868447809544,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 11.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 351.81686178069975,
+        "y": 450.11043598090805,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 399.90606670805164,
+        "y": 510.5480482919394,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 449.01517679290487,
+        "y": 570.4272064513823,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 12,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 360.79092934117847,
+        "y": 450.23216036526503,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 412.7775618056307,
+        "y": 507.5225081943631,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 466.53178100038866,
+        "y": 564.5222827929782,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 12.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 370.1094224056852,
+        "y": 450.3002293595621,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 427.1341628147735,
+        "y": 507.1244346852245,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 486.25359937109005,
+        "y": 563.1784369619436,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 13,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 379.77027011527747,
+        "y": 450.31633772503267,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 440.994949308073,
+        "y": 504.3811006919182,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 504.1826637001051,
+        "y": 555.4570588907827,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 13.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 389.76720172942345,
+        "y": 450.28561734573645,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 455.2107749579935,
+        "y": 501.5109450419982,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 523.3185873635155,
+        "y": 549.5823435726028,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 14,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 10,
+    "impacts": [
+      {
+        "x": 400.0894199690105,
+        "y": 450.21690455997947,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 469.76672834070365,
+        "y": 498.528879159302,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 542.875953630115,
+        "y": 543.5226467868845,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 14.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 44,
+    "impacts": [
+      {
+        "x": 410.7213207099638,
+        "y": 450.122969558978,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 484.6408256179796,
+        "y": 495.4568868820204,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 562.8252311608055,
+        "y": 537.3118176316727,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 15,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 78,
+    "impacts": [
+      {
+        "x": 421.642259027689,
+        "y": 450.02070785276527,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 499.8038695014938,
+        "y": 492.32416549850524,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 581.7696651988426,
+        "y": 528.2845595194856,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 15.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 223,
+    "impacts": [
+      {
+        "x": 433.3989809920992,
+        "y": 450.77608530341195,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 513.6144851798473,
+        "y": 486.36842357015166,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 540,
+        "y": 421.4846338195477,
+        "direct": true,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 16,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 261,
+    "impacts": [
+      {
+        "x": 444.8407259527566,
+        "y": 450.7366404140948,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 544.7332011139857,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 530.8434582069301,
+        "y": 486.02987429307046,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 16.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 316,
+    "impacts": [
+      {
+        "x": 456.47712569506797,
+        "y": 450.76611034471455,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 566.4865878124998,
+        "y": 397.2013055533041,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 546.2755022966201,
+        "y": 482.39760645337515,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 17,
+    "direct": 2,
+    "full": 0,
+    "high": 0,
+    "total": 392,
+    "impacts": [
+      {
+        "x": 467.61785350230394,
+        "y": 450.01822607421224,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 526.567445926111,
+        "y": 429.38596103363307,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 593.2699901276135,
+        "y": 400.84499999999997,
+        "direct": true,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 17.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 291,
+    "impacts": [
+      {
+        "x": 479.4873411142607,
+        "y": 450.28077273708135,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 540,
+        "y": 424.9367835944904,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 655.3275553903626,
+        "y": 450.37820659688623,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 18,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 291,
+    "impacts": [
+      {
+        "x": 491.40887862038215,
+        "y": 450.7289400134563,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 540,
+        "y": 405.8159641688475,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 679.1521514406099,
+        "y": 450.2141409797431,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 18.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 281,
+    "impacts": [
+      {
+        "x": 502.6074584802513,
+        "y": 450.492610453251,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 550.6122109268865,
+        "y": 399.58824999999996,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 702.633127995051,
+        "y": 450.0433902539756,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 19,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 301,
+    "impacts": [
+      {
+        "x": 513.6942766912103,
+        "y": 450.5154150227535,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 566.9993475045109,
+        "y": 399.765,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 726.0629439509971,
+        "y": 450.60196028642815,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 19.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 300,
+    "impacts": [
+      {
+        "x": 524.6042600369116,
+        "y": 450.85060870845064,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 582.8321829542266,
+        "y": 399.96475,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 747.8968481955935,
+        "y": 450.11377305207805,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 20,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 292,
+    "impacts": [
+      {
+        "x": 534.4934984512081,
+        "y": 450.60528539854164,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 597.804790912854,
+        "y": 400.07325,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 769.3321613995505,
+        "y": 450.59477960982633,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 20.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 208,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 445.948799762325,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 655.4572805035014,
+        "y": 450.1577282464972,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 788.7490144453701,
+        "y": 450.219935396663,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 21,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 199,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 436.21443144448506,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 668.4940355970824,
+        "y": 450.32731440292645,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 806.9118161098734,
+        "y": 450.4138728976319,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 21.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 196,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 428.11325128687946,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 679.9155615380641,
+        "y": 450.23515721194445,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 823.1370396823982,
+        "y": 450.6349980942751,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 22,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 187,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 421.53648422625355,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 690.039979856886,
+        "y": 450.5318951431069,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 836.7158018536147,
+        "y": 450.31489093954445,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 22.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 186,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 415.7975956528412,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 698.822154597294,
+        "y": 450.17048040270987,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 849.229040796695,
+        "y": 450.09363901021743,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 23,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 169,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 410.25903704024995,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 708.1698706896306,
+        "y": 450.3846118103702,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 862.4059980458051,
+        "y": 450.55545192865804,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 23.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 167,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 404.9112588264961,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 717.6180339518755,
+        "y": 450.59377479811235,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 875.1974756495204,
+        "y": 450.3087027348412,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 24,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 167,
+    "impacts": [
+      {
+        "x": 540,
+        "y": 399.7465326600422,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 726.6792286087225,
+        "y": 450.1955301412765,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 888.124981042936,
+        "y": 450.0480909617187,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 24.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 171,
+    "impacts": [
+      {
+        "x": 545.2133389097988,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 736.3227058124847,
+        "y": 450.3863641875116,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 901.7347539864263,
+        "y": 450.4888714687313,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 25,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 179,
+    "impacts": [
+      {
+        "x": 551.3927467258623,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 746.066630186179,
+        "y": 450.5722298138286,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 914.9404980405153,
+        "y": 450.2027624311187,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 25.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 188,
+    "impacts": [
+      {
+        "x": 557.6415519219289,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 755.406844759452,
+        "y": 450.1371552405541,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 928.840875807376,
+        "y": 450.63181646188656,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 26,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 196,
+    "impacts": [
+      {
+        "x": 563.9604344021819,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 765.3460830746259,
+        "y": 450.30469192536384,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 942.3248585220954,
+        "y": 450.3225389097846,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 26.5,
+    "direct": 1,
+    "full": 1,
+    "high": 1,
+    "total": 208,
+    "impacts": [
+      {
+        "x": 570.3483807311338,
+        "y": 399,
+        "direct": true,
+        "bullseye": true
+      },
+      {
+        "x": 775.3857685597322,
+        "y": 450.46726019025596,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 956.5158411123255,
+        "y": 450.73986646430797,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 27,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 201,
+    "impacts": [
+      {
+        "x": 576.806732043778,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 785.52590121477,
+        "y": 450.62253128522997,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 970.2780624877606,
+        "y": 450.4050916477163,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 27.5,
+    "direct": 1,
+    "full": 0,
+    "high": 1,
+    "total": 192,
+    "impacts": [
+      {
+        "x": 583.3338269340777,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 795.2400024760849,
+        "y": 450.13959502392726,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 984.1763116528468,
+        "y": 450.056454251819,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 28,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 184,
+    "impacts": [
+      {
+        "x": 589.9316415880631,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 805.5754490726176,
+        "y": 450.27886592739424,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 998.8001099374228,
+        "y": 450.452749394914,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 28.5,
+    "direct": 1,
+    "full": 0,
+    "high": 0,
+    "total": 175,
+    "impacts": [
+      {
+        "x": 596.5978919961714,
+        "y": 399,
+        "direct": true,
+        "bullseye": false
+      },
+      {
+        "x": 816.0113428390492,
+        "y": 450.41083966094277,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1012.9765977631932,
+        "y": 450.0786147345264,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 29,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 70,
+    "impacts": [
+      {
+        "x": 656.6546178251593,
+        "y": 450.175125787565,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 826.5476837754179,
+        "y": 450.53784497457383,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1027.8910008711746,
+        "y": 450.46318340137685,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 29.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 58,
+    "impacts": [
+      {
+        "x": 663.5441022207577,
+        "y": 450.11189812077106,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 836.6356717247611,
+        "y": 450.00704702524285,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1042.3457273576178,
+        "y": 450.0658802265004,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 30,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 53,
+    "impacts": [
+      {
+        "x": 670.4933192000676,
+        "y": 450.0417036646171,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 847.3673266026378,
+        "y": 450.1157233973666,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1057.5507352889658,
+        "y": 450.4387224171056,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 30.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 41,
+    "impacts": [
+      {
+        "x": 678.0017539336988,
+        "y": 450.5035721729651,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 858.19942865041,
+        "y": 450.21943134957246,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1072.2837004360395,
+        "y": 450.01592197773977,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 31,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 32,
+    "impacts": [
+      {
+        "x": 685.0754137957213,
+        "y": 450.422356697311,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 869.1319778681348,
+        "y": 450.3158421318602,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1087.7793131907556,
+        "y": 450.3770376921006,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 31.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 24,
+    "impacts": [
+      {
+        "x": 692.2088062414607,
+        "y": 450.3341744322968,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 880.1649742557657,
+        "y": 450.4072844942299,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1103.423319897839,
+        "y": 450.73573286540017,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 32,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 15,
+    "impacts": [
+      {
+        "x": 699.4019312709249,
+        "y": 450.23902537792253,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 891.2984178133269,
+        "y": 450.4914296866816,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1118.5767345766362,
+        "y": 450.2804579763608,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 32.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 7,
+    "impacts": [
+      {
+        "x": 706.6547888840876,
+        "y": 450.1369095341882,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 902.5323085407946,
+        "y": 450.5706064592158,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1134.5113461070423,
+        "y": 450.6274266734161,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 33,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 713.9673790809746,
+        "y": 450.0278269010938,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 913.8666464381536,
+        "y": 450.64248606183185,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1149.9429994465265,
+        "y": 450.14665451988697,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 33.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 721.8690533240298,
+        "y": 450.4682825878212,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 924.7079881618708,
+        "y": 450.019699338116,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1166.168215800335,
+        "y": 450.48189674069727,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 34,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 729.3060864036356,
+        "y": 450.34817893522654,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 936.2376400007754,
+        "y": 450.075578749225,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1182.5418261065104,
+        "y": 450.81471842044675,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 34.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 736.8028520669656,
+        "y": 450.2211084932719,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 947.8677390095984,
+        "y": 450.1241609904158,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1198.3939289776715,
+        "y": 450.30147181724453,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 35,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 744.3593503139945,
+        "y": 450.08707126195713,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 959.5982851883284,
+        "y": 450.16777481168873,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1215.0581441071713,
+        "y": 450.6225670207494,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 35.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 752.5248434684388,
+        "y": 450.51655133734425,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 971.4292785369454,
+        "y": 450.2040914630437,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1231.188485639009,
+        "y": 450.083823153058,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 36,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 760.2057845982117,
+        "y": 450.3714930865291,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 983.3607190555114,
+        "y": 450.23543969448036,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1248.14330559192,
+        "y": 450.39319188031726,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 36.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 767.946458311684,
+        "y": 450.2194680463542,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 995.3926067440065,
+        "y": 450.2594907559995,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1265.2465194971778,
+        "y": 450.7001400665164,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 37,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 775.7468646088796,
+        "y": 450.06047621681904,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1007.5249416024092,
+        "y": 450.27857339760027,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1281.7973105607125,
+        "y": 450.1289217491515,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 37.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 784.1761766747281,
+        "y": 450.4766519308657,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1019.7577236306956,
+        "y": 450.29035886928364,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1299.1911292893064,
+        "y": 450.4241434591057,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 38,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 792.1010258546283,
+        "y": 450.3066390818305,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1032.0909528289453,
+        "y": 450.2971759210486,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1316.733341970336,
+        "y": 450.71694462799894,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 38.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 800.0856076182671,
+        "y": 450.12965944343495,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1044.5246291971034,
+        "y": 450.29669580289544,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1333.7045825655107,
+        "y": 450.11092311096075,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 39,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 808.7140282964867,
+        "y": 450.53891377628133,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1057.0587527351845,
+        "y": 450.2912472648246,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1351.5374000698616,
+        "y": 450.3919978036093,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 39.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 816.8230529428574,
+        "y": 450.35091311838596,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1069.693323443177,
+        "y": 450.27850155683586,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1369.5186115265924,
+        "y": 450.6706519551966,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 40,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 824.9918101729281,
+        "y": 450.15594567113027,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1082.4283413210544,
+        "y": 450.2607874289289,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1386.9103016534382,
+        "y": 450.032155988486,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 40.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 833.8193394635003,
+        "y": 450.5559498727765,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1095.263806368884,
+        "y": 450.2357761311041,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1405.182117933523,
+        "y": 450.29908366382847,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 41,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 842.1125395763029,
+        "y": 450.34996140602044,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1108.1997185866417,
+        "y": 450.20579641336104,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1423.6023281660164,
+        "y": 450.56359079810966,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 41.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 850.4654722728282,
+        "y": 450.1370061499047,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1121.2360779743178,
+        "y": 450.16851952570016,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1442.1709323508176,
+        "y": 450.82567739133026,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 42,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 859.4921101758014,
+        "y": 450.5300889703505,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1134.3728845319024,
+        "y": 450.1262742181216,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1460.1252828803874,
+        "y": 450.14307228976236,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 42.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 867.9694857550478,
+        "y": 450.30611269473445,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1147.6101382593731,
+        "y": 450.0767317406248,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1478.9844918885478,
+        "y": 450.3934324067382,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 43,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 876.5065939179833,
+        "y": 450.07516962975825,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1160.9478391567945,
+        "y": 450.02222084321,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1497.9920948490737,
+        "y": 450.641371982653,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 43.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 885.7323404333165,
+        "y": 450.45900231900396,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1175.0910385342816,
+        "y": 450.74809021571537,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1517.1480917620197,
+        "y": 450.8868910175064,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 44,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 894.3938914790167,
+        "y": 450.2170382345276,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1188.6352141698665,
+        "y": 450.6850483301356,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1535.6651026942172,
+        "y": 450.16250553108205,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 44.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 903.7540363077114,
+        "y": 450.5980037727129,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1202.2798369753386,
+        "y": 450.61703802463853,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1555.1117044305358,
+        "y": 450.39629808969096,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 45,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 912.5400302361331,
+        "y": 450.34501866873654,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1216.02490695077,
+        "y": 450.5417305492229,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1574.7067001191458,
+        "y": 450.6276701072386,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 45.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 921.3857567482412,
+        "y": 450.0850667753999,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1229.87042409611,
+        "y": 450.46145465388963,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1594.450089760105,
+        "y": 450.8566215837251,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 46,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 930.9450101892962,
+        "y": 450.4567821823851,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1243.8163884113774,
+        "y": 450.3738815886383,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1613.5297610951109,
+        "y": 450.08812696244416,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 46.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 939.9151795841715,
+        "y": 450.1858092695484,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1257.8627998965542,
+        "y": 450.2813401034689,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1633.5637555594105,
+        "y": 450.3053519626861,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 47,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 949.6088313385774,
+        "y": 450.5546575254731,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1272.0096585516192,
+        "y": 450.1815014483814,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1653.7461439761814,
+        "y": 450.520156421867,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 47.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 958.7034436161848,
+        "y": 450.2726635931364,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1286.2569643766328,
+        "y": 450.0766943733761,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1673.5231520102689,
+        "y": 450.05697168060397,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 48,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 968.5314936839131,
+        "y": 450.636315948001,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1301.3599922666529,
+        "y": 450.79752273333196,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1693.9982062774375,
+        "y": 450.2623447949146,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 48.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 977.7505488442421,
+        "y": 450.34330099616386,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1315.813772829839,
+        "y": 450.68418467016204,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1714.6216544970293,
+        "y": 450.4652973681638,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 49,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 987.0293365882924,
+        "y": 450.0433192549667,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1330.3680005629344,
+        "y": 450.56587818707396,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1735.3934966689144,
+        "y": 450.66582940035147,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 49.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 997.05649526842,
+        "y": 450.40005022863113,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1345.0226754659193,
+        "y": 450.4402745340683,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1755.7434702412716,
+        "y": 450.17001118110284,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 50,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1006.459725895162,
+        "y": 450.08904746793394,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1359.7777975388515,
+        "y": 450.30970246114396,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1776.8079782637458,
+        "y": 450.3611118684206,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 50.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1016.6212828886496,
+        "y": 450.4405825405382,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1374.6333667817105,
+        "y": 450.17183321830186,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1798.020880238472,
+        "y": 450.54979201467734,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 51,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1026.148956398154,
+        "y": 450.1185587603407,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1389.5893831944793,
+        "y": 450.028995555542,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1818.7995474510442,
+        "y": 450.0283511212515,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 51.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1036.4449117049912,
+        "y": 450.46722668188477,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1405.4401844605609,
+        "y": 450.7472505394418,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1840.3051152762548,
+        "y": 450.20759992263766,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 52,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1046.0970280972288,
+        "y": 450.1341818821872,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1420.6026756115039,
+        "y": 450.5958818885172,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1861.9590770538302,
+        "y": 450.3844281829628,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 52.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1056.5273817173747,
+        "y": 450.47765390267136,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1435.8656139323566,
+        "y": 450.43954481767486,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1883.7614327838646,
+        "y": 450.55883590222624,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 53,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1066.3039409923463,
+        "y": 450.13358808347357,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1451.228999423076,
+        "y": 450.27591057691427,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1905.113065534606,
+        "y": 450.00631403081513,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 53.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1076.868692925882,
+        "y": 450.47419295289717,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1466.6928320837635,
+        "y": 450.1073079162354,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 54,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1086.7696950835868,
+        "y": 450.1191061141993,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1483.0793515894084,
+        "y": 450.8254571605725,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 54.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1097.468845330472,
+        "y": 450.45451508256303,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1498.7496589882617,
+        "y": 450.6483235117292,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 55,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1107.4942903708684,
+        "y": 450.08840722436497,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1514.5204135570411,
+        "y": 450.46622144296805,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 55.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1118.3278389311063,
+        "y": 450.4209490416685,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1530.3916152957388,
+        "y": 450.2768222042891,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 56,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1128.4777268542725,
+        "y": 450.04382016397017,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1546.3632642043467,
+        "y": 450.0824545456918,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 56.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1139.445673727854,
+        "y": 450.3711660802134,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1563.285501949557,
+        "y": 450.8004980504661,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 57,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1150.4833086157741,
+        "y": 450.6996990755365,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1579.4636255963305,
+        "y": 450.59759940370446,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 57.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1160.8223497206523,
+        "y": 450.3074949481981,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1595.7421964129549,
+        "y": 450.38973233702404,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 58,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1171.9943829219249,
+        "y": 450.6308320424613,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1612.121214399563,
+        "y": 450.1745681004263,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 58.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1182.4578669095715,
+        "y": 450.2276068956222,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1629.4731428160894,
+        "y": 450.8937396838852,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 59,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1193.7642984241804,
+        "y": 450.54807683882507,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1646.0586355408711,
+        "y": 450.6723732091228,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 59.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1204.3522252945736,
+        "y": 450.1338306724865,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1662.7445754355633,
+        "y": 450.44370956444226,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 60,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1215.7930551224952,
+        "y": 450.4491047146288,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1679.5309625001812,
+        "y": 450.2100774998431,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 60.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1226.5054248756223,
+        "y": 450.0238375287902,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1697.3125815880503,
+        "y": 450.9303771619863,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 61,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1238.0806530169295,
+        "y": 450.3362444198726,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1714.3054433908014,
+        "y": 450.6882141092231,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 61.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1249.725569172557,
+        "y": 450.6475096400348,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1731.3987523634955,
+        "y": 450.44108263654175,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 62,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1260.6270921074472,
+        "y": 450.20716720455556,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1748.5925085060253,
+        "y": 450.18665399394274,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 62.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1272.4064065763969,
+        "y": 450.5155652736577,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1766.8038182652174,
+        "y": 450.9080817347696,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 63,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1283.4323723940122,
+        "y": 450.06420181867827,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1784.2040491459934,
+        "y": 450.6474508540057,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 63.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1295.3460851763464,
+        "y": 450.3674039867204,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1801.704727196664,
+        "y": 450.37952280332405,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 64,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1307.3294859730013,
+        "y": 450.6717932338422,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1819.305852417277,
+        "y": 450.10662633272386,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 64.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1318.5446049723446,
+        "y": 450.2053545292225,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1837.6337101677955,
+        "y": 450.4949323322254,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 65,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1330.6624040823572,
+        "y": 450.5045478752842,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1855.7544528065641,
+        "y": 450.5477546934706,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 65.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1342.0019659644604,
+        "y": 450.02708815116443,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1873.97936288078,
+        "y": 450.5988746192455,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 66,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1354.254163387822,
+        "y": 450.3234143461659,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1892.308440390497,
+        "y": 450.6467396095497,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 66.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1366.5760488255046,
+        "y": 450.6185988702473,
+        "direct": false,
+        "bullseye": false
+      },
+      {
+        "x": 1910.1005189134878,
+        "y": 450.0097860865735,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 67,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1378.1047638893365,
+        "y": 450.12606389648704,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 67.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1390.5610476403685,
+        "y": 450.41838126950825,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 68,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1403.0870194057864,
+        "y": 450.7095569716096,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 68.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1414.8048876513565,
+        "y": 450.20194674820925,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 69,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1427.4652577300667,
+        "y": 450.4902552992499,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 69.5,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1440.1953158231336,
+        "y": 450.7774221793705,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  },
+  {
+    "vehicle": "dragon",
+    "power": 70,
+    "direct": 0,
+    "full": 0,
+    "high": 0,
+    "total": 0,
+    "impacts": [
+      {
+        "x": 1452.1023372504467,
+        "y": 450.2547367063298,
+        "direct": false,
+        "bullseye": false
+      }
+    ]
+  }
+]

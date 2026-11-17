@@ -12,6 +12,7 @@ export class Terrain {
   readonly mask=new Uint8Array((WORLD_W+1)*TERRAIN_H);
   readonly protectedMask=new Uint8Array((WORLD_W+1)*TERRAIN_H);
   readonly surface=new Float32Array(WORLD_W+1).fill(TERRAIN_H);
+  ceiling=TERRAIN_H;
   revision=0;
   readonly changes:(TerrainChange&{revision:number})[]=[];
   changedSince(revision:number):TerrainChange|null {
@@ -36,6 +37,7 @@ export class Terrain {
       if(y!==this.surface[x]){top=Math.min(top,y,this.surface[x]);bottom=Math.max(bottom,y,this.surface[x]);}
       this.surface[x]=y;
     }
+    this.ceiling=this.surface.reduce((a,b)=>Math.min(a,b),TERRAIN_H);
     this.revision++;
     this.changes.push({revision:this.revision,from,to,top:Math.max(0,top),bottom:Math.min(TERRAIN_H-1,bottom)});
     if(this.changes.length>64)this.changes.shift();
@@ -76,4 +78,12 @@ export class Terrain {
     if(removed) this.rebuild(from,to,top,bottom);
     return removed;
   }
+  removeScanlines(cx:number,cy:number,rows:readonly {y:number;left:number;width:number}[],scale=3){
+    cx=Math.floor(cx/scale)*scale;cy=Math.floor(cy/scale)*scale;
+    let removed=0,from=WORLD_W,to=0,top=TERRAIN_H,bottom=-1;
+    for(const row of rows){const left=Math.max(0,cx+row.left*scale),right=Math.min(WORLD_W,cx+(row.left+row.width)*scale-1);
+      for(let y=Math.max(0,cy+row.y*scale);y<=Math.min(TERRAIN_H-1,cy+row.y*scale+scale-1);y++)for(let x=left;x<=right;x++){const index=y*this.stride+x;if(this.mask[index]&&!this.protectedMask[index]){this.mask[index]=0;removed++;from=Math.min(from,x);to=Math.max(to,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}}}
+    if(removed)this.rebuild(from,to,top,bottom);return removed;
+  }
+
 }

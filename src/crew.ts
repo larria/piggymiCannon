@@ -17,4 +17,4 @@ export function normalizeSlots(input:unknown,allowDragon=false):Slot[]{
 export function slotProblem(slots:Slot[]){const active=slots.filter(s=>s.enabled);return active.length<2?'至少开启两个槽位':active.length>4?'最多四个槽位':new Set(active.map(s=>s.team)).size<2?'至少使用两面不同的队旗':null;}
 export function crewAvatarPath(id:CrewId,base=''){return base+`portraits/${id}.png`;}
 export function crewAvatar(id:CrewId,base=''){return `<img data-crew-portrait="${id}" data-portrait-primary="${crewAvatarPath(id,base)}" src="${portraitFallback(id)}" alt="${CREW[id].name}"/>`;}
-export function nameMarkup(name:string,team:number){return `<span class="crew-name" style="color:${teamFlag(team).color}">${name}</span>`;}
+export function nameMarkup(name:string,team:number){return `<span class="crew-name" style="color:${teamFlag(team).color};--crew-on-dark:${['#ffe0d5','#dcefc7','#d5eaff','#ffedc1'][((team%4)+4)%4]}">${name}</span>`;}

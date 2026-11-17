@@ -267,3 +267,5 @@ dialog,.arsenal{scrollbar-gutter:stable}
 
 .replay-tools{display:flex;align-items:center;gap:12px;margin-top:16px}.replay-tools small{font-size:11px;color:#7d8970}.replay-tools .button,.replay-entry .button,.replay-entry .text-button{min-height:44px;min-width:44px}.replay-entry{flex-wrap:wrap}.replay-entry>div{flex-basis:180px}.replay-entry .button{padding:8px 12px}
 @media(max-width:600px){.replay-entry>div{flex-basis:100%}.replay-tools{flex-wrap:wrap}}
+
+.toast .crew-name{color:var(--crew-on-dark,#fff5dc)!important;-webkit-text-stroke:.15px rgba(20,35,23,.65);text-shadow:0 1px 1px rgba(0,0,0,.5);font-weight:700}

@@ -2,7 +2,7 @@ import {test} from 'node:test';import assert from 'node:assert/strict';
 import {Game,WORLD_W,BOTTOM_Y,BRIDGE_THICKNESS,MAX_STEP_HEIGHT,MAX_CLIMB_ANGLE} from '../src/engine';
 import {Terrain,TERRAIN_H} from '../src/terrain';import {defaultSlots} from '../src/crew';
 import {MAPS} from '../src/catalog';import {TEMPLE_NODES,templeNode,templeRail,factoryFloor} from '../src/classic-maps';
-const ready=(map:any='coast')=>{const g=new Game({map,seed:52,timer:0,fallDamage:true,fog:false,fireLine:false,slots:defaultSlots().map(s=>({...s,controller:'human',vehicle:'missile'}))});g.start();g.wind=0;return g;};
+const ready=(map:any='coast')=>{const g=new Game({map,seed:52,timer:0,fallDamage:true,fog:false,fireLine:false,slots:defaultSlots().map(s=>({...s,controller:'human',vehicle:'missile'}))},'4.0.4');g.start();g.wind=0;return g;};
 test('expanded 1920 × 960 maps keep key cap, thin rail, ramp pitch and living body sizes',()=>{
  assert.equal(WORLD_W,1920);assert.equal(TERRAIN_H,960);assert.equal(BOTTOM_Y,960);assert.equal(MAX_STEP_HEIGHT,12);assert.equal(MAX_CLIMB_ANGLE,60);
  const temple=ready('temple');assert.deepEqual(TEMPLE_NODES.map(n=>templeNode(n).radius),[32,24,104/3,24,32]);TEMPLE_NODES.forEach((n,i)=>assert.ok(Math.abs(templeNode(n).rise-(i===2?32:28)/3)<1e-9));

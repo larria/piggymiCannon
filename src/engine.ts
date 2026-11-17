@@ -1,3 +1,4 @@
+import {originalBallistics,originalWeapon,originalCrater,originalCraterAxes,ORIGINAL_TANKS,sourceMaximum,sourceDistance,sourceDamage} from './original-ballistics';
 import {planAIRestoration} from './ai-restoration';
 import {abandonmentWinner} from './exit-rules';
 import {ellipseExcavation,precisionPolish,impactPolish,matchPolish,startingAngle} from './match-polish';
@@ -11,9 +12,9 @@ import {salvoProfile,DOUBLE_SHOT_INTERVAL} from './salvo';
 import {permanentPiercingContact,PIERCING_SECTIONS,PIERCING_INTERVAL,piercingDamageScale,piercingDigScale} from './piercing';
 import {impactDamageScale,preciseContact,fullDamageArea,FULL_BLAST_DISTANCE} from './impact-damage';
 import {eraDamageFactor,ERA_DAMAGE_VERSION} from './era-damage';
-import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById,weaponDamage,contactDepthReduction,fullContactExcavation,DIRECT_DIG_DEPTH_REDUCTION,launchDamageScale, weaponHasTrail,MODERN_TRAIL_POINTS,MODERN_TRAIL_LENGTH, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
+import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById,weaponDamage,weaponBlastRadius,contactDepthReduction,fullContactExcavation,DIRECT_DIG_DEPTH_REDUCTION,launchDamageScale, weaponHasTrail,MODERN_TRAIL_POINTS,MODERN_TRAIL_LENGTH, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
 import {isRaging,redHealthLimit} from './health';
-import {pointHitsTank} from './tank-hitbox';
+import {pointHitsTank,tankSegmentContact} from './tank-hitbox';
 import {resolveVehicle,vehicleById,type VehicleId,type VehicleChoice} from './vehicles';
 import { Terrain, WORLD_W, WORLD_H, BOTTOM_Y, TERRAIN_H } from './terrain';
 import {rollWeather,modernWeather,rollBattleWeather,weatherDuration,nextWeatherRound,WEATHER_CLEAR_ROUNDS,rollSnow,fireLinePlacement,WEATHER_OBSERVATION_SECONDS,type WeatherObservation} from './weather';
@@ -50,7 +51,7 @@ export interface DefeatPose {x:number;y:number;slope:number;direction:number}
 export interface Tank {powerMarker?:number|null;battleStats?:CombatMetrics;defeatCause?:string;aiCalibration?:AICalibration;defeat?:DefeatPose|null;deathResolved?:boolean;itemSlots?:(ItemId|null)[];parachute?:{projectile?:number;startedAt:number}|null}
 export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean;aimOffsetX?:number;aimOffsetY?:number }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
-export interface Blast { healing?:boolean;x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
+export interface Blast { damageRadius?:number;healing?:boolean;x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
 export interface Crate { recipient?:number;x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
@@ -317,14 +318,14 @@ export class Game {
   }
   private generateTerrain() {
     const phase=this.rng()*2;
-    if(buildClassicMap(this.land,this.config.map))return;
+    if(buildClassicMap(this.land,this.config.map,this.gameVersion))return;
     for(let x=0;x<=WORLD_W;x++) {
       const u=x/1.5;
       if(this.config.map==='coast') {
         if(u<90||u>1190) this.land.column(x,591,TERRAIN_H);
         else {
           const top=597+Math.sin(u/115)*6;
-              this.land.column(x,top,top+BRIDGE_THICKNESS);
+              this.land.column(x,top,top+(originalBallistics(this.gameVersion)?210:BRIDGE_THICKNESS));
         }
       } else if(this.config.map==='moon') {
         if(u>=70&&u<=410) {const top=532.5+Math.sin(u/92+phase)*18;this.land.column(x,top,top+SKY_UPPER_THICKNESS);}
@@ -498,7 +499,7 @@ export class Game {
     const spec=weaponById(weapon),speed=projectileSpeed(Math.max(this.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
     const rage=isRaging(t)?1.5:1;
     const weather=t.vehicleId==='water'&&this.snow?1.25:1;
-    return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:launchDamageScale(!!t.vehicleId,weapon),phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:rage>1?1.15:1,rage:rage>1};
+    return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:launchDamageScale(!!t.vehicleId,weapon),phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:originalBallistics(this.gameVersion)?1:rage>1?1.15:1,rage:rage>1};
   }
   delayFor(t:Tank,weapon?:WeaponId) {
     const base=t.vehicleId?vehicleById(t.vehicleId).waiting:560;
@@ -558,9 +559,17 @@ export class Game {
     const owner=this.tanks[p.owner];p.traceLaunch??={action:this.turn+1,time:this.elapsed,owner:p.owner,name:owner?.name,vehicle:owner?.vehicleId,hp:owner?.hp,maxHP:owner?.maxHP,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:owner?.angle,absolute:owner?this.aim(owner).absolute:null,power:owner?.power,wind:this.wind,rngIndex:this.trace.rngIndex};
     this.recordBattle('projectile-start',`${this.tanks[p.owner]?.name??p.owner}的${p.healing?'恢复弹':p.transfer?'转移弹':weaponById(p.weapon).name}第${p.traceId}弹${p.delay?'（延迟追加）':''}`,{projectile:p.traceId,parent,owner:p.owner,weapon:p.weapon,...(modernWeather(this.gameVersion)?{healing:!!p.healing,transfer:!!p.transfer}:{}),volley:p.volley,x:p.x,y:p.y,vx:p.vx,vy:p.vy,delay:p.delay,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,boostSources:p.boostSources,digBoost:p.digBoost,aimOffsetX:p.aimOffsetX,aimOffsetY:p.aimOffsetY,penetrations:p.penetrations,hitCooldown:p.hitCooldown});return p;
   }
+  firstImpact(p:Projectile,x:number,y:number,toX:number,toY:number,bodies?:readonly {tank:Tank;slope:number}[]){
+    let best:{x:number;y:number;fraction:number;tank?:Tank}|null=null;
+    if(p.age>=.09)for(const entry of bodies??this.tanks){const t=bodies?(entry as {tank:Tank;slope:number}).tank:entry as Tank;if(t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))){if(Math.max(x,toX)<t.x-70||Math.min(x,toX)>t.x+70||Math.max(y,toY)<t.y-70||Math.min(y,toY)>t.y+70)continue;const slope=bodies?(entry as {tank:Tank;slope:number}).slope:this.tankSlope(t),point=tankSegmentContact(t,x,y,toX,toY,slope);if(point&&(!best||point.fraction<best.fraction))best={...point,tank:t};}}
+    if(Math.max(y,toY)<this.land.ceiling)return best;
+    const steps=Math.max(1,Math.ceil(Math.max(Math.abs(toX-x),Math.abs(toY-y))));
+    for(let i=0;i<=steps;i++){const f=i/steps;if(best&&f>best.fraction)break;const px=x+(toX-x)*f,py=y+(toY-y)*f;if(this.land.solid(px,py)){best={x:px,y:py,fraction:f};break;}}
+    return best;
+  }
   private projectileHit(p:Projectile) {
     if(p.age<0.09) return undefined;
-    return this.tanks.find(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
+    return this.tanks.find(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion));
   }
   private invalidVolleyTarget(p:Projectile) {
     if(p.volley===0||weaponById(p.weapon).homingMode!=='volley')return false;
@@ -594,7 +603,7 @@ export class Game {
       p.x=p.pierceContact.x;p.y=p.pierceContact.y;p.vx=0;p.vy=0;
       if(p.hitCooldown>0)return false;
       const t=this.tanks[p.pierceContact.target];
-      const direct=t?.hp>0&&!t.outOfBounds&&this.canDamage(t,p.owner)&&pointHitsTank(t,p.x,p.y,this.tankSlope(t))?t.id:undefined;
+      const direct=t?.hp>0&&!t.outOfBounds&&this.canDamage(t,p.owner)&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion)?t.id:undefined;
       this.explode(p,direct);this.continuePiercing(p);return true;
     }
     const spec=weaponById(p.weapon),effect=spec.effect;
@@ -651,7 +660,12 @@ export class Game {
       this.burst(p.x,p.y,16,'#e0c384');return true;
     }
     if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70||p.age>12){this.observe('ground',null,{x:clamp(p.x,0,WORLD_W),y:clamp(p.y,-TERRAIN_H,BOTTOM_Y)});this.recordBattle('projectile-end',`第${p.traceId??'?'}弹${p.age>12?'超时':'越界'}消失`,{projectile:p.traceId,weapon:p.weapon,x:p.x,y:p.y,age:p.age});if(p.transfer){if(modernBackpack(this.gameVersion))this.transferTo(this.tanks[p.owner],p.x,p.y,p.traceId);else this.emit('item','转移弹未落在战场内，转移失败。');}return true;}
-    const hitTank=this.projectileHit(p);
+    let sweptTank:Tank|undefined;
+    if(originalBallistics(this.gameVersion)&&p.hitCooldown<=0){
+      const impact=this.firstImpact(p,oldX,oldY,p.x,p.y);
+      if(impact){p.x=impact.x;p.y=impact.y;sweptTank=impact.tank;}
+    }
+    const hitTank=sweptTank??this.projectileHit(p);
     if(p.healing&&(this.land.solid(p.x,p.y)||hitTank)){if(this.minimumShotPower===MIN_POWER&&!hitTank&&p.vx===0&&p.vy>0)p.y=this.ground(p.x,oldY);this.restoreImpact(p,hitTank?.id);return true;}
     if(p.transfer&&(this.land.solid(p.x,p.y)||hitTank)){
       if(!this.transferTo(this.tanks[p.owner],p.x,p.y,p.traceId))this.emit('item','转移弹落点无法站立，转移失败。');
@@ -666,7 +680,7 @@ export class Game {
       }
       if(effect==='orbital'&&!p.sub) {
         const markerCore=hitTank&&preciseContact(hitTank,p.x,p.y,this.tankSlope(hitTank),this.gameVersion,{vx:p.vx,vy:p.vy},p.weapon);
-        this.excavateImpact(p,12,!ellipseExcavation(this.gameVersion)&&impactPolish(this.gameVersion)&&markerCore?0:8,markerCore?hitTank?.id:undefined);this.burst(p.x,p.y,12,'#b8cfea');
+        if(!originalBallistics(this.gameVersion))this.excavateImpact(p,12,!ellipseExcavation(this.gameVersion)&&impactPolish(this.gameVersion)&&markerCore?0:8,markerCore?hitTank?.id:undefined);this.burst(p.x,p.y,12,'#b8cfea');
         this.projectiles.push(this.traceProjectile({...p,x:p.x,y:-50,vx:0,vy:680,sub:true,trail:[],age:0,delay:0.3},p.traceId));return true;
       }
       if(p.weapon==='drill'&&!hitTank) {
@@ -699,15 +713,15 @@ export class Game {
     this.winner=winner;this.phase='ended';this.resultAge=0;this.projectiles=[];this.aiPending=null;this.aiMoveGoal=null;
     this.recordBattle('forfeit','第二完整回合起退出：人类方判负',{winner,round:this.roundNumber,humanTeams:[...new Set(this.tanks.filter(t=>t.controller==='human').map(t=>t.team))]},true);return true;
   }
-  crater(x:number,y:number,radius:number,depth=radius,source?:{owner:number;weapon:WeaponId;traceId?:number}) {
+  crater(x:number,y:number,radius:number,depth=radius,source?:{owner:number;weapon:WeaponId;traceId?:number},round?:number) {
     const affected=modernWeather(this.gameVersion)&&source?this.tanks.filter(t=>t.hp>0&&t.controller==='ai'&&source.owner!==t.id&&Math.abs(t.x-x)<radius+28&&Math.abs(t.y+18-y)<depth+40).map(t=>({t,pose:{x:t.x,y:t.y,slope:this.tankSlope(t),owner:source.owner,event:0}})):[];
     const protectedCrates=precisionPolish(this.gameVersion)?new Set(this.crates.filter(c=>{
       if(c.falling)return false;const floor=this.ground(c.x,c.y-5),x=Math.max(0,Math.min(WORLD_W,Math.round(c.x)));
       return floor<BOTTOM_Y&&Math.abs(floor-(c.y+14))<=4&&this.land.protectedMask[floor*this.land.stride+x]===1;
     })):new Set<Crate>();
     const mineSupports=precisionPolish(this.gameVersion)?this.mines.map(m=>({m,ground:this.ground(m.x,m.y)})):[];
-    const removed=this.land.removeEllipse(x,y,radius,depth,!ellipseExcavation(this.gameVersion));
-    const event=this.recordBattle('terrain',`挖土(${x.toFixed(2)},${y.toFixed(2)})，半径${radius.toFixed(2)}／深${depth.toFixed(2)}，移除${removed}像素（永久层保留）`,{x,y,radius,depth,removed,source});
+    const removed=round===undefined?this.land.removeEllipse(x,y,radius,depth,!ellipseExcavation(this.gameVersion)):this.land.removeScanlines(x,y,originalCrater(round));
+    const event=this.recordBattle('terrain',`挖土(${x.toFixed(2)},${y.toFixed(2)})，半径${radius.toFixed(2)}／深${depth.toFixed(2)}，移除${removed}像素（永久层保留）`,{x,y,radius,depth,removed,source,...(round===undefined?{}:{round,model:'source-scanlines'})});
     if(removed&&radius>0&&depth>0)for(const {m,ground} of mineSupports){
       const covered=((m.x-x)/radius)**2+((m.y-y)/depth)**2<=1;
       const unsupported=this.ground(m.x,m.y)>ground+2;
@@ -735,20 +749,20 @@ export class Game {
       this.crates=this.crates.filter(c=>c.y<BOTTOM_Y-14);
     }
   }
-  private excavateImpact(p:Projectile,radius:number,depth:number,directTarget?:number){
+  private excavateImpact(p:Projectile,radius:number,depth:number,directTarget?:number,round?:number){
     if(radius<=0||depth<=0)return;
     let x=p.x,y=p.y;
-    if(!ellipseExcavation(this.gameVersion)&&directTarget!==undefined){
+    if((!ellipseExcavation(this.gameVersion)||originalBallistics(this.gameVersion)&&p.weapon==='mine-special')&&directTarget!==undefined){
       const target=this.tanks[directTarget],foot=target.y+18,surface=this.support(target.x,foot);
       if(surface<BOTTOM_Y&&Math.abs(surface-foot)<=28){
         x=clamp(p.x,target.x-16,target.x+16);y=surface;
       }
     }
-    this.crater(x,y,radius,depth,p);
+    this.crater(x,y,radius,depth,p,round);
   }
   canRestore(t:Tank,owner:number){return t.hp>0&&(t.team===this.tanks[owner]?.team||!!this.config.friendlyFire);}
   private restoreImpact(p:Projectile,directTarget?:number){
-    const radius=restoreRadius();this.blasts.push({x:p.x,y:p.y,radius,life:.7,maxLife:.7,color:'#b6d6a5',healing:true});this.burst(p.x,p.y,12,'#98bd82');
+    const radius=restoreRadius(this.gameVersion);this.blasts.push({x:p.x,y:p.y,radius,life:.7,maxLife:.7,color:'#b6d6a5',healing:true});this.burst(p.x,p.y,12,'#98bd82');
     this.recordBattle('restore-impact','恢复弹落地，不挖土',{projectile:p.traceId,owner:p.owner,x:p.x,y:p.y,radius,boost:p.boost,fireBoosted:p.fireBoosted});
     for(const target of this.tanks){if(target.hp<=0||directTarget!==target.id&&Math.hypot(target.x-p.x,target.y-p.y)>radius+26)continue;
       if(!this.canRestore(target,p.owner)){this.recordBattle('heal-blocked',`${target.name}不受敌方恢复弹影响：友伤关闭`,{owner:p.owner,target:target.id,friendlyFire:!!this.config.friendlyFire});continue;}
@@ -769,33 +783,36 @@ export class Game {
     const incoming=p.pierceContact?.incoming??{vx:p.vx,vy:p.vy};
     const bodyContact=directTarget!==undefined;
     const direct=!!p.pierceContact||bodyContact&&preciseContact(this.tanks[directTarget!],p.x,p.y,this.tankSlope(this.tanks[directTarget!]),this.gameVersion,incoming,p.weapon);
-    const w=weaponById(p.weapon), radius=w.radius;
+    const w=weaponById(p.weapon),native=originalBallistics(this.gameVersion)?originalWeapon(p.weapon,p.penetrations):null,radius=weaponBlastRadius(p.weapon,this.gameVersion,p.penetrations),nativeDamage=!!native&&p.weapon!=='missile-normal';
     this.observe('ground',null,{x:p.x,y:p.y});
     const section=w.effect==='pierce'?p.penetrations+1:undefined;
     const impact=this.recordBattle('impact',`第${p.traceId}弹 ${this.tanks[p.owner]?.name??p.owner}的${w.name}${section?`第${section}/${PIERCING_SECTIONS}段`:''}${direct?`正中${this.tanks[directTarget??p.pierceContact!.target]?.name}`:bodyContact?`擦中${this.tanks[directTarget!]?.name}`:'命中地形／爆炸波及'}；(${p.x.toFixed(2)},${p.y.toFixed(2)})`,{projectile:p.traceId,parent:p.traceParent,owner:p.owner,weapon:p.weapon,directTarget,x:p.x,y:p.y,age:p.age,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,sources:p.boostSources,section,...(precisionPolish(this.gameVersion)?{bullseye:direct,bodyContact}:{}),...(p.pierceContact?{contact:p.pierceContact}:{})});
-    const damageGeometry=this.tanks.map(t=>({tank:t,distance:Math.hypot(t.x-p.x,t.y-p.y),scale:impactDamageScale(t,p.x,p.y,this.tankSlope(t),radius,directTarget===t.id,this.gameVersion,incoming,p.weapon)}));
+    const damageGeometry=this.tanks.map(t=>({tank:t,distance:Math.hypot(t.x-p.x,t.y-p.y),nativeDistance:native?sourceDistance(t,p.x,p.y,this.tankSlope(t),p.weapon):0,scale:impactDamageScale(t,p.x,p.y,this.tankSlope(t),radius,directTarget===t.id,this.gameVersion,incoming,p.weapon,p.penetrations)}));
     const color=w.color;
-    this.blasts.push({x:p.x,y:p.y,radius,life:0.65,maxLife:0.65,color,weapon:p.weapon});
-    this.burst(p.x,p.y,Math.round(radius*0.6),color);
-    this.shake=Math.min(10,radius/10);
-    const dig=excavation(p.weapon,direct,this.gameVersion,p.digBoost);
+    this.blasts.push({x:p.x,y:p.y,radius:w.radius,...(native?{damageRadius:radius}:{}),life:0.65,maxLife:0.65,color,weapon:p.weapon});
+    this.burst(p.x,p.y,Math.round(w.radius*0.6),color);
+    this.shake=Math.min(10,w.radius/10);
+    const dig=native?originalCraterAxes(native.round):excavation(p.weapon,direct,this.gameVersion,p.digBoost);
+    if(native)this.recordBattle('source-geometry',nativeDamage?'原版统一坐标：Round生成整数椭圆，伤害按实际爆点到参照点连续衰减':'飞火挖土采用原版Round递减；伤害保留已确认的连续四段',{damagePolicy:nativeDamage?'source-radial':'preserved-four-sections',projectile:p.traceId,weapon:p.weapon,source:native,cell:3,defences:this.tanks.map(t=>({id:t.id,value:t.vehicleId?ORIGINAL_TANKS[t.vehicleId].defence:100})),result:dig});
     if(ellipseExcavation(this.gameVersion))this.recordBattle('excavation-profile','完整椭圆以实际爆点为中心，仅移除与可破坏地形相交的部分；正中不扣深度',{projectile:p.traceId,weapon:p.weapon,direct,directTarget,center:{x:p.x,y:p.y},model:'impact-ellipse',result:{...dig}});
     else if(impactPolish(this.gameVersion))this.recordBattle('excavation-profile',direct&&!fullContactExcavation(p.weapon,this.gameVersion)?`机体直击：宽度不变，深度减去固定${contactDepthReduction(p.weapon,this.gameVersion)}；不大于0则不挖土`:fullContactExcavation(p.weapon,this.gameVersion)?'特殊挖土例外：正中／地形命中都保留完整弹坑':'地形命中：完整挖土范围',{projectile:p.traceId,weapon:p.weapon,direct,directTarget,contact:p.pierceContact,full:excavation(p.weapon,false,this.gameVersion,p.digBoost),depthReduction:direct?contactDepthReduction(p.weapon,this.gameVersion):0,result:{...dig}});
-    if(matchPolish(this.gameVersion)&&p.weapon==='missile-normal'){const taper=piercingDigScale(p.penetrations);dig.radius*=taper.radius;dig.depth*=taper.depth;this.recordBattle('pierce-dig','飞火普通弹第'+(p.penetrations+1)+'段挖土逐渐收尖',{projectile:p.traceId,section:p.penetrations+1,scale:taper,radius:dig.radius,depth:dig.depth});}
-    this.excavateImpact(p,dig.radius,dig.depth,direct?directTarget:undefined);
-    for(const {tank:t,distance,scale:distanceScale} of damageGeometry) {
-      if(directTarget!==t.id&&distance>radius+26) continue;
+    if(!native&&matchPolish(this.gameVersion)&&p.weapon==='missile-normal'){const taper=piercingDigScale(p.penetrations);dig.radius*=taper.radius;dig.depth*=taper.depth;this.recordBattle('pierce-dig','飞火普通弹第'+(p.penetrations+1)+'段挖土逐渐收尖',{projectile:p.traceId,section:p.penetrations+1,scale:taper,radius:dig.radius,depth:dig.depth});}
+    this.excavateImpact(p,dig.radius,dig.depth,native&&p.weapon==='mine-special'?directTarget:direct?directTarget:undefined,native?.round);
+    for(const {tank:t,distance,nativeDistance,scale:distanceScale} of damageGeometry) {
+      if(native&&t.hp<=0||(nativeDamage?distanceScale<=0:directTarget!==t.id&&distance>radius+26)) continue;
       if(!this.canDamage(t,p.owner)){this.recordBattle('damage-blocked',`${t.name}未受伤：${t.id===p.owner?'自伤':'友伤'}关闭`,{target:t.id,owner:p.owner,weapon:p.weapon,projectile:p.traceId,impact,rules:this.traceRules()});continue;}
       if(p.weapon==='emp') {const before={shield:t.shield,fuel:t.fuel};t.shield=0;t.fuel=Math.max(0,t.fuel-35);this.float(t.x,t.y-65,'脉冲','#ac88bc');this.recordBattle('status',`${t.name}被脉冲移除护盾${before.shield}，燃料−35（伤害计算前）`,{target:t.id,weapon:p.weapon,impact,before,after:{shield:t.shield,fuel:t.fuel}});}
       if(p.weapon==='ice') {t.frozen=2;this.float(t.x,t.y-65,'冻结 ×2','#79aebe');this.recordBattle('status',`${t.name}冻结2次行动`,{target:t.id,weapon:p.weapon,impact,frozen:2});}
       const mineScale=w.effect==='mine'?(!p.mineArmed?1/3:t.vehicleId==='mine'?.5:1):1;
       const era=eraDamageFactor(this.tanks[p.owner]?.vehicleId,t.vehicleId);
-      const sectionScale=w.effect==='pierce'?piercingDamageScale(p.penetrations):1;
+      const sectionScale=nativeDamage?sourceMaximum(native.power,native.round)/weaponDamage(p.weapon,this.gameVersion):w.effect==='pierce'?piercingDamageScale(p.penetrations):1;
       const base=weaponDamage(p.weapon,this.gameVersion);
-      const damage=Math.round(base*p.scale*p.boost*mineScale*era.value*distanceScale*sectionScale);
+      const continuous=base*p.scale*p.boost*mineScale*era.value*distanceScale*sectionScale*(nativeDamage?100/(t.vehicleId?ORIGINAL_TANKS[t.vehicleId].defence:100):1);
+      const damage=nativeDamage?Math.round(sourceDamage(native!.power,native!.round,nativeDistance,t.vehicleId?ORIGINAL_TANKS[t.vehicleId].defence:100,p.boost)*p.scale*mineScale*era.value):Math.round(continuous);
       const sources=p.boostSources??{fire:p.fireBoosted?'line':null,rage:p.rage?1.5:1,snow:1},fire=sources.fire?1.5:1,known=fire*sources.rage*sources.snow;
-      const factors=[era,{source:'弹体scale（实际实现）',value:p.scale},...(w.effect==='pierce'?[{source:`飞火第${p.penetrations+1}/${PIERCING_SECTIONS}段递减（本作参数）`,value:sectionScale}]:[]),{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:distanceScale}];
-      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base,factors,...(precisionPolish(this.gameVersion)?{bullseye:direct&&directTarget===t.id}:{}),formula:'round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)',dig:{...dig,digBoost:p.digBoost,source:p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,section,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:base,fullDamageArea:fullDamageArea(this.gameVersion,p.weapon),dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
+      const defence=nativeDamage?100/(t.vehicleId?ORIGINAL_TANKS[t.vehicleId].defence:100):1;
+      const factors=[era,...(nativeDamage?[{source:'原版防御换算',value:defence},{source:'原版整数结算',value:continuous?damage/continuous:1}]:[]),{source:'弹体scale（实际实现）',value:p.scale},...(w.effect==='pierce'?[{source:`飞火第${p.penetrations+1}/${PIERCING_SECTIONS}段递减（本作参数）`,value:sectionScale}]:[]),{source:sources.fire==='item'?'威力加强（fireBoosted仅一次）':sources.fire==='line'?'火线（fireBoosted仅一次）':'未强化',value:fire},{source:'海怪发怒',value:sources.rage},{source:'水鬼雪天',value:sources.snow},{source:'继承／外部boost修正',value:p.boost/known},{source:'地雷直击／踩踏系数',value:mineScale},{source:'距离衰减',value:distanceScale}];
+      this.damage(t,damage,p.owner,false,directTarget===t.id?'direct':'graze',undefined,{cause:w.effect==='mine'?'mine':directTarget===t.id?'direct':'graze',weapon:p.weapon,projectile:p.traceId,impact,base,factors,...(precisionPolish(this.gameVersion)?{bullseye:direct&&directTarget===t.id}:{}),formula:'round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)',dig:{...dig,digBoost:p.digBoost,source:native?'原版Round；强化不改变挖土':p.rage?'海怪发怒挖土×1.15':'武器挖土（不乘入伤害）'},origin:{projectileStart:p.traceId,parent:p.traceParent,section,launch:p.traceLaunch,impact:{x:p.x,y:p.y,age:p.age},fireLine:p.traceFireLine,boost:p.boost,fireBoosted:p.fireBoosted,weaponBase:base,fullDamageArea:fullDamageArea(this.gameVersion,p.weapon),dragon:this.tanks[p.owner]?.vehicleId==='dragon'?'暴龙固有武器基础伤害，无额外暴龙倍率':null}});
       if(w.effect==='poison'&&damage>0&&t.hp>redHealthLimit(t)) {
         const fresh=!t.poisoned;t.poisoned=true;t.poisonOwner=p.owner;
         if(fresh){this.float(t.x,t.y-95,'中毒','#6c994b',t.id);this.emit('poison',`${t.name}中了毒箭，自己的行动结束时结算毒伤。`,undefined,t.x,p.weapon);}
@@ -1108,7 +1125,7 @@ export class Game {
         if(contact){p.x=contact.x;p.y=contact.y;}
       }
       if(i%6===0) points.push({x:p.x,y:p.y});
-      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
+      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion));
       if(p.x<0||p.x>WORLD_W||p.y>WORLD_H||this.land.solid(p.x,p.y)||direct) break;
     }
     return {x:p.x,y:p.y,points,direct};
