@@ -7,7 +7,7 @@ export function benchmarkAIBattles(difficulty:Difficulty='expert',seedsPerMap=6)
   g.tanks.forEach(t=>{t.controller='ai';t.difficulty=difficulty;});g.config.slots.forEach(s=>{s.controller='ai';s.difficulty=difficulty;});
   const records:{owner:number;intentional:boolean;moved:number;direct:boolean;damage:Record<number,number>;victims:{id:number;maxHP:number}[]}[]=[];let record:typeof records[number]|null=null;
   const fire=g.fire.bind(g),next=g.nextTurn.bind(g),damage=g.damage.bind(g);
-  g.fire=(ai=false)=>{const ok=fire(ai);if(ok){record={owner:g.current,intentional:g.aiDecision?.intentionalMiss??false,moved:g.active.movedThisTurn,direct:false,damage:{},victims:g.opponents(g.active).map(t=>({id:t.id,maxHP:t.maxHP}))};records.push(record);}return ok;};
+  g.fire=(ai=false)=>{const ok=fire(ai);if(ok&&!g.projectiles.every(p=>p.healing||p.transfer)){record={owner:g.current,intentional:g.aiDecision?.intentionalMiss??false,moved:g.active.movedThisTurn,direct:false,damage:{},victims:g.opponents(g.active).map(t=>({id:t.id,maxHP:t.maxHP}))};records.push(record);}return ok;};
   g.nextTurn=()=>{record=null;next();};
   g.damage=(t,amount,owner,ignoreShield,reaction,status,context)=>{const hp=t.hp+t.shield;damage(t,amount,owner,ignoreShield,reaction,status,context);if(record&&owner===record.owner&&t.team!==g.tanks[owner].team){const d=hp-t.hp-t.shield;record.damage[t.id]=(record.damage[t.id]??0)+d;if(d>0&&reaction==='direct')record.direct=true;}};
   for(let i=0;i<30000&&g.phase!=='ended';i++)g.update(1/30);

@@ -6,15 +6,15 @@ import {WATER_Y} from '../src/engine.ts';
 import {MAPS,ALL_WEAPONS,excavation} from '../src/catalog.ts';
 import {TEMPLE_NODES,templeRail,factoryFloor} from '../src/classic-maps.ts';
 
-const ready=(config={})=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,...config});g.start();return g;};
+const ready=(config={},version='development')=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,...config},version);g.start();return g;};
 const run=(g:Game,seconds:number,until?:(g:Game)=>boolean)=>{for(let i=0;i<seconds*120;i++){g.update(1/120);if(until?.(g))break;}};
 
-test('fog lasts two completed actions and ignores pauses, handoff and supply animation',()=>{
- const g=ready({mode:'hotseat',fog:true});g.paused=true;run(g,90);assert.equal(g.fogTurnsRemaining,2);
+test('legacy replay fog lasts two completed actions and ignores pauses, handoff and supply animation',()=>{
+ const g=ready({mode:'hotseat',fog:true},'3.2.6');g.paused=true;run(g,90);assert.equal(g.fogTurnsRemaining,2);
  g.paused=false;g.nextTurn();assert.equal(g.fog,true);assert.equal(g.fogTurnsRemaining,1);
  run(g,90);assert.equal(g.fogTurnsRemaining,1);g.acceptHandoff();g.nextTurn();assert.equal(g.fog,false);
  assert.equal(g.drainEvents().filter(e=>e.type==='weather').length,1);
- const supply=ready({mode:'hotseat',fog:true});supply.turn=4;supply.nextTurn();assert.equal(supply.phase,'supply');
+ const supply=ready({mode:'hotseat',fog:true},'3.2.6');supply.turn=4;supply.nextTurn();assert.equal(supply.phase,'supply');
  run(supply,8);assert.equal(supply.fog,true);assert.equal(supply.fogTurnsRemaining,1);
  supply.acceptHandoff();supply.nextTurn();assert.equal(supply.fog,false);
 });

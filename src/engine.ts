@@ -1,3 +1,5 @@
+import {RESTORE_FRACTION,restoreRadius,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
+import {calibrationProfile,calibrationDisturbed,advanceCalibration,type AICalibration} from './ai-calibration';
 import {addSkyBranch,SKY_UPPER_THICKNESS} from './sky-map';
 import {OBSERVATION_SECONDS,OBSERVATION_PRIORITY,type ObservationKind,type ShotObservation} from './shot-observation';
 import {salvoProfile,DOUBLE_SHOT_INTERVAL} from './salvo';
@@ -9,7 +11,7 @@ import {isRaging,redHealthLimit} from './health';
 import {pointHitsTank} from './tank-hitbox';
 import {resolveVehicle,vehicleById,type VehicleId,type VehicleChoice} from './vehicles';
 import { Terrain, WORLD_W, WORLD_H, BOTTOM_Y, TERRAIN_H } from './terrain';
-import {rollWeather} from './weather';
+import {rollWeather,modernWeather,rollBattleWeather,weatherDuration,nextWeatherRound,WEATHER_CLEAR_ROUNDS,rollSnow,fireLinePlacement,WEATHER_OBSERVATION_SECONDS,type WeatherObservation} from './weather';
 import {buildClassicMap} from './classic-maps';
 
 import {defaultSlots,slotProblem,teamFlag,CREW,type Slot,type CrewId} from './crew';
@@ -40,18 +42,18 @@ export interface Tank {
   selectedWeapon:WeaponId;lastPower:number|null;poisonOwner?:number;actionTime:number;movedThisTurn:number;itemDelay:number;delayCommitted:boolean;outOfBounds:boolean;
 }
 export interface DefeatPose {x:number;y:number;slope:number;direction:number}
-export interface Tank {defeat?:DefeatPose|null;deathResolved?:boolean}
+export interface Tank {aiCalibration?:AICalibration;defeat?:DefeatPose|null;deathResolved?:boolean}
 export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean;aimOffsetX?:number;aimOffsetY?:number }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
-export interface Blast { x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
+export interface Blast { healing?:boolean;x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
 export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
-export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'|'defeat'|'wind'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
+export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'|'defeat'|'wind'|'heal'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
 export interface Mine {x:number;y:number;owner:number;weapon:WeaponId;boost:number}
 export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;clock?:number}
 interface BoostSources {fire:'item'|'line'|null;rage:number;snow:number;inherited?:number}
-export interface Projectile {traceId?:number;traceParent?:number;boostSources?:BoostSources;traceCrossed?:boolean;traceLaunch?:Record<string,any>;traceFireLine?:unknown}
+export interface Projectile {healing?:boolean;awaitTransfer?:boolean;traceId?:number;traceParent?:number;boostSources?:BoostSources;traceCrossed?:boolean;traceLaunch?:Record<string,any>;traceFireLine?:unknown}
 export interface Mine {boostSources?:BoostSources;traceOrigin?:number;traceLaunch?:Record<string,any>}
 export interface GameEvent {sequence?:number;time?:number;action?:number}
 interface DamageContext {cause:string;weapon?:WeaponId;projectile?:number;impact?:number;base?:number;factors?:{source:string;value:number}[];formula?:string;dig?:unknown;origin?:unknown}
@@ -73,7 +75,9 @@ export class Game {
   events:GameEvent[]=[]; log:string[]=[];
   introLocked=false;observation:ShotObservation|null=null;paused=false; winner:number|null=null; shake=0; elapsed=0;
   supplyObservation:SupplyObservation|null=null;
+  restoring=false;private firstSupplyChecked=false;private nextSupplyAction=8;
   targetX=1000; teleporting=false; aiTime=0; resolveTime=0;resolveHazardTime=0;
+  weatherObservation:WeatherObservation|null=null;private weatherNextRound=2;private weatherCooldownUntil=0;private weatherSnow=false;
   fog=false;fogTurnsRemaining=0;fireLineTurnsRemaining=0;fireLine:{x:number;top:number;bottom:number}|null=null;
   movingUntil=[0,0];
   resultAge=0;
@@ -102,9 +106,9 @@ export class Game {
       this.config.map=MAPS[Math.min(MAPS.length-1,Math.floor(this.rng()*MAPS.length))].id;
       this.recordBattle('map-selection',`随机地图抽中${MAPS.find(m=>m.id===this.config.map)!.name}`,{choice:'random',actual:this.config.map,available:MAPS.map(m=>m.id)});
     }else if(this.config.mapChoice&&MAPS.some(m=>m.id===this.config.mapChoice))this.config.map=this.config.mapChoice;
-    const weather=rollWeather(this.rng);this.fog=this.config.fog??weather.fog;
+    const weather=rollWeather(this.rng);this.fog=this.config.fog??(!modernWeather(this.gameVersion)&&weather.fog);
     this.fogTurnsRemaining=this.fog?2:0;
-    if(this.config.fireLine??weather.fireLine) this.fireLine={x:WORLD_W*(.35+this.rng()*.3),top:50,bottom:BOTTOM_Y-50};
+    if((this.config.fireLine??(!modernWeather(this.gameVersion)&&weather.fireLine))&&(!modernWeather(this.gameVersion)||!this.fog)) this.fireLine={x:WORLD_W*(.35+this.rng()*.3),top:50,bottom:BOTTOM_Y-50};
     this.fireLineTurnsRemaining=this.fireLine?2:0;
     this.generateTerrain();
     const participants=this.config.slots.map((slot,index)=>({...slot,index})).filter(s=>s.enabled);
@@ -118,7 +122,7 @@ export class Game {
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
-  private traceRules(){return {eraDamageVersion:ERA_DAMAGE_VERSION,雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
+  private traceRules(){return {...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),eraDamageVersion:ERA_DAMAGE_VERSION,雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=BOTTOM_Y||t.x<0||t.x>WORLD_W)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
@@ -145,6 +149,7 @@ export class Game {
     const current:Record<string,any>={};for(const key of RESTORE_KEYS){const value=(this as any)[key];current[key]=value instanceof Map?[...value]:key==='projectiles'?this.projectiles.map(({trail,...p})=>p):value;}
     // Old recordings retain both their original supply timing and digest shape.
     if(modernSupplyTiming(this.gameVersion))current.supplyObservation=this.supplyObservation;
+    if(modernWeather(this.gameVersion))Object.assign(current,{restoring:this.restoring,firstSupplyChecked:this.firstSupplyChecked,nextSupplyAction:this.nextSupplyAction,weatherObservation:this.weatherObservation,weatherNextRound:this.weatherNextRound,weatherCooldownUntil:this.weatherCooldownUntil,weatherSnow:this.weatherSnow});
     current.terrain={mask:packTerrain(this.land.mask),protectedMask:packTerrain(this.land.protectedMask),revision:this.land.revision};
     current.annotatedTanks=this.traceTanks();
     return this.trace.snapshot(this.gameVersion,current);
@@ -156,6 +161,7 @@ export class Game {
     const g=new Game(snapshot.initial.config,snapshot.gameVersion),state=JSON.parse(JSON.stringify(snapshot.current),(_key,v)=>v==='Infinity'?Infinity:v==='-Infinity'?-Infinity:v==='NaN'?NaN:v);
     for(const key of RESTORE_KEYS)if(key in state)(g as any)[key]=['volleyTargets','fallOrigins'].includes(key)?new Map(state[key]):state[key];
     if(modernSupplyTiming(g.gameVersion)&&state.supplyObservation)g.supplyObservation=state.supplyObservation;
+    if(modernWeather(g.gameVersion))for(const key of ['restoring','firstSupplyChecked','nextSupplyAction','weatherObservation','weatherNextRound','weatherCooldownUntil','weatherSnow'] as const)if(key in state)(g as any)[key]=state[key];
     unpackTerrain(state.terrain.mask,g.land.mask);unpackTerrain(state.terrain.protectedMask,g.land.protectedMask);g.land.rebuild();g.land.revision=state.terrain.revision;
     g.land.changes.length=0;
     g.projectiles.forEach(p=>p.trail=[]);g.trace.restore(snapshot);g.rng=g.diagnosticRng(makeRng(snapshot.rng.state));g.events=[];g.particles=[];return g;
@@ -166,8 +172,8 @@ export class Game {
   canDamage(t:Tank,owner:number){const source=this.tanks[owner];return !source|| (t.id===owner?!!this.config.selfDamage:t.team===source.team?!!this.config.friendlyFire:true);}
   visible(t:Tank){return this.introLocked||!this.fog||t.team===this.tanks[this.viewer].team;}
   get gravity() { return this.config.map==='moon'?145:230; }
-  get snow(){return this.config.snow===true;}
-  get humanTurn() { return this.phase==='aiming' && !this.paused && !this.introLocked && this.active.hp>0 && this.active.controller==='human'; }
+  get snow(){return modernWeather(this.gameVersion)?this.config.snow??this.weatherSnow:this.config.snow===true;}
+  get humanTurn() { return this.phase==='aiming' && !this.paused && !this.introLocked && !this.weatherObservation && this.active.hp>0 && this.active.controller==='human'; }
   get round() { return this.roundNumber; }
   get viewer() {return this.active.controller==='human'||this.tanks.every(t=>t.controller==='ai')?this.current:this.tanks.find(t=>t.controller==='human'&&t.hp>0&&t.team===this.active.team)?.id??this.tanks.find(t=>t.controller==='human'&&t.hp>0)?.id??this.current;}
   get delayEnabled(){return this.tanks.every(t=>t.controller==='human');}
@@ -324,6 +330,8 @@ export class Game {
     if(this.phase!=='lobby') return;
     this.phase='aiming'; this.wind=(this.rng()-0.5)*NATURAL_WIND_LIMIT*2;this.windChangeRound=nextWindRound(this.roundNumber,this.rng);
     this.recordBattle('wind-start','开局风力；每1–2完整轮次变化，单次最多全风程60%',{wind:this.wind,nextRound:this.windChangeRound,maxDelta:MAX_WIND_CHANGE});
+    if(modernWeather(this.gameVersion)&&(this.config.fog!==false||this.config.fireLine!==false)){this.weatherSnow=this.config.snow??rollSnow(this.config.map,this.rng);this.weatherNextRound=nextWeatherRound(this.roundNumber,this.rng);this.recordBattle('atmosphere',this.snow?'飞雪展示风向':'落叶展示风向',{kind:this.snow?'snow':'leaves',nextWeatherRound:this.weatherNextRound});}
+    if(modernWeather(this.gameVersion))this.trace.initial.rules=this.traceRules();
     this.active.turnsTaken=1;
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.emit('turn',`${this.active.name}，轮到你了。`);
@@ -345,10 +353,10 @@ export class Game {
   selectWeapon(id:WeaponId) {
     if(!this.humanTurn||!weaponById(id)||(this.active.ammo[id]??0)<=0) return false;
     if(this.active.vehicleId) {const v=vehicleById(this.active.vehicleId);if(id!==v.normal&&id!==v.special&&id!=='homing') return false;}
-    this.selected=id;this.active.selectedWeapon=id;this.teleporting=false;this.recordBattle('weapon',`${this.active.name}选择${weaponById(id).name}`,{weapon:id});return true;
+    this.selected=id;this.active.selectedWeapon=id;this.teleporting=false;this.restoring=false;this.recordBattle('weapon',`${this.active.name}选择${weaponById(id).name}`,{weapon:id});return true;
   }
   move(direction:number,dt:number,ai=false) {
-    if(this.paused||this.introLocked||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||this.active.fallVelocity>0||this.active.immobile>0||!Number.isFinite(dt)||dt<=0||!Number.isFinite(direction)||!direction) return false;
+    if(this.paused||this.introLocked||this.weatherObservation||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||this.active.fallVelocity>0||this.active.immobile>0||!Number.isFinite(dt)||dt<=0||!Number.isFinite(direction)||!direction) return false;
     const t=this.active;
     const from={x:t.x,y:t.y,slope:this.tankSlope(t)},fuelBefore=t.fuel;
     t.direction=Math.sign(direction);
@@ -370,15 +378,15 @@ export class Game {
   face(direction:number) { if(this.humanTurn){if(direction!==this.active.direction)this.recordBattle('face',`${this.active.name}转向${direction<0?'左':'右'}`,{direction});this.active.direction=direction;} }
   itemUnavailable(id:ItemId,ai=false):string|null {
     const t=this.active,i=itemById(id);
-    if(this.phase!=='aiming'||this.paused||this.introLocked||(!ai&&!this.humanTurn)) return '等待自己的回合';
+    if(this.phase!=='aiming'||this.paused||this.introLocked||this.weatherObservation||(!ai&&!this.humanTurn)) return '等待自己的回合';
     if(t.fallVelocity>0) return '坠落中不能使用';
-    if(t.itemUsed) return '本回合已用过道具';
+    if(t.itemUsed&&!modernWeather(this.gameVersion)) return '本回合已用过道具';
     if(t.items[id]<=0) return i.count===0?'仅空投获得':'库存已用完';
     if(t.turnsTaken<i.unlock) return `第 ${i.unlock} 回合解锁`;
     const wait=TURN_ITEMS.includes(id)?0:t.itemReadyTurn[id]-t.turnsTaken;
     if(wait>0) return `冷却还剩 ${wait} 回合`;
     if(t.tactics<i.cost) return `需要 ${i.cost} 战术点`;
-    if(id==='repair'&&t.hp>=t.maxHP) return '生命已满，无需补给';
+    if(id==='repair'&&!modernWeather(this.gameVersion)&&t.hp>=t.maxHP) return '生命已满，无需补给';
     if(id==='shield'&&t.shield>0) return '已有护盾，不能叠加';
     if(id==='fuel'&&t.fuel>45) return '燃料需不高于 45';
     if(id==='boost'&&t.boost) return '火力已强化';
@@ -386,27 +394,29 @@ export class Game {
     if(id==='wind'&&Math.abs(this.wind)<3) return '当前风力太小';
     return null;
   }
+  private itemName(id:ItemId){return id==='repair'&&!modernWeather(this.gameVersion)?'补给':itemById(id).name;}
   private consumeItem(id:ItemId) {
     const t=this.active,i=itemById(id);
     t.items[id]--;t.tactics-=i.cost;t.itemUsed=true;
     t.itemDelay+=200;
-    t.itemReadyTurn[id]=t.turnsTaken+i.cooldown+1;this.teleporting=false;
+    t.itemReadyTurn[id]=t.turnsTaken+i.cooldown+1;if(!modernWeather(this.gameVersion))this.teleporting=false;
     this.itemCues.push({tank:t.id,item:id,age:0});
-    this.emit('item',`${t.name}使用了${i.name}${i.cost?`，消耗 ${i.cost} 战术点`:''}。`,undefined,t.x);
-    this.recordBattle('item-use',`${t.name}使用${i.name}；HP${t.hp}，护盾${t.shield}，道具等待+200`,{item:id,tank:this.traceTanks().find(e=>e.id===t.id)});
+    this.emit('item',`${t.name}使用了${this.itemName(id)}${i.cost?`，消耗 ${i.cost} 战术点`:''}。`,undefined,t.x);
+    this.recordBattle('item-use',`${t.name}使用${this.itemName(id)}；HP${t.hp}，护盾${t.shield}，道具等待+200`,{item:id,tank:this.traceTanks().find(e=>e.id===t.id)});
   }
   useItem(id:ItemId,ai=false) {
     if(this.itemUnavailable(id,ai)) return false;
     const t=this.active;
     const before={hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind};
-    if(id==='teleport') {this.teleporting=!this.teleporting;if(this.teleporting)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('teleport-arm',`${t.name}${this.teleporting?'装填':'取消'}转移弹`,{armed:this.teleporting});return true;}
+    if(id==='teleport') {this.teleporting=!this.teleporting;this.restoring=false;if(this.teleporting)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('teleport-arm',`${t.name}${this.teleporting?'装填':'取消'}转移弹`,{armed:this.teleporting});return true;}
+    if(id==='repair'&&modernWeather(this.gameVersion)){this.restoring=!this.restoring;this.teleporting=false;if(this.restoring)this.itemCues.push({tank:t.id,item:id,age:0});this.recordBattle('restore-arm',`${t.name}${this.restoring?'装填':'取消'}恢复弹`,{armed:this.restoring});return true;}
     if(id==='repair') {const gain=Math.round(t.maxHP*35/150);t.hp=Math.min(t.maxHP,t.hp+gain);this.float(t.x,t.y-42,`+${gain}`,'#548166');}
     if(id==='shield') t.shield=Math.round(t.maxHP*40/150);
     if(id==='fuel') t.fuel=Math.min(100,t.fuel+55);
     if(id==='boost') t.boost=true;
     if(id==='double') t.doubleShot=true;
     if(id==='wind') this.wind=0;
-    this.consumeItem(id);this.recordBattle('item-effect',`${t.name}道具${itemById(id).name}生效：HP${before.hp}→${t.hp}，护盾${before.shield}→${t.shield}`,{item:id,before,after:{hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind}});return true;
+    this.consumeItem(id);this.recordBattle('item-effect',`${t.name}道具${this.itemName(id)}生效：HP${before.hp}→${t.hp}，护盾${before.shield}→${t.shield}`,{item:id,before,after:{hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind}});return true;
   }
   private transferTo(t:Tank,x:number,impactY:number) {
     if(!Number.isFinite(x)||x<32||x>WORLD_W-32||this.tanks.some(other=>other.id!==t.id&&other.hp>0&&Math.abs(x-other.x)<56)) return false;
@@ -440,34 +450,37 @@ export class Game {
     return base+attack+t.itemDelay+Math.round(t.movedThisTurn*2+t.actionTime*10);
   }
   fire(ai=false) {
-    if(this.paused||this.introLocked||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||(this.active.ammo[this.selected]??0)<=0||this.active.fallVelocity>0) return false;
-    const t=this.active,id=this.selected,transfer=this.teleporting;
+    if(this.paused||this.introLocked||this.weatherObservation||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||((this.active.ammo[this.selected]??0)<=0&&(!modernWeather(this.gameVersion)||!this.teleporting&&!this.restoring))||this.active.fallVelocity>0) return false;
+    const t=this.active,id=this.selected,transfer=this.teleporting,healing=this.restoring;
     if(transfer&&this.itemUnavailable('teleport',ai))return false;
     if(transfer)this.consumeItem('teleport');
-    this.observation={kind:'ground',target:null,point:null};this.phase='flying';this.teleporting=false;this.firedBy=t.id;
-    if(!transfer&&Number.isFinite(t.ammo[id])) t.ammo[id]--;
+    if(healing){if(this.itemUnavailable('repair',ai))return false;this.consumeItem('repair');}
+    this.observation={kind:'ground',target:null,point:null};this.phase='flying';this.teleporting=false;this.restoring=false;this.firedBy=t.id;
+    if(!transfer&&!healing&&Number.isFinite(t.ammo[id])) t.ammo[id]--;
     t.shots++;
+    if(modernWeather(this.gameVersion)&&t.controller==='ai'&&t.aiCalibration&&!healing&&!transfer)advanceCalibration(t.aiCalibration);
     t.lastPower=t.power;t.selectedWeapon=id;
     const spec=weaponById(id);
-    t.lastDelay=this.delayFor(t,transfer?undefined:id);t.delayCommitted=true;
-    if(transfer)this.projectiles=[{...this.launch(t,'shell'),transfer:true,scale:1,boost:1,fireBoosted:false,rage:false,digBoost:1}];
+    t.lastDelay=this.delayFor(t,transfer||healing?undefined:id);t.delayCommitted=true;
+    if(healing){const p={...this.launch(t,'cannon-normal'),healing:true,boost:t.boost?1.5:1,fireBoosted:t.boost,rage:false,digBoost:1,boostSources:{fire:t.boost?'item' as const:null,rage:1,snow:1}};if(t.power<=10)Object.assign(p,{x:t.x,y:t.y-45,vx:0,vy:0});this.projectiles=[p];}
+    else if(transfer)this.projectiles=[{...this.launch(t,'shell'),transfer:true,scale:1,boost:1,fireBoosted:false,rage:false,digBoost:1}];
     else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>(()=>{const profile=salvoProfile(t.vehicleId,id,i,spec.shots!),p=this.launch(t,id,t.angle+profile.angle);p.vx*=profile.vx;p.vy*=profile.vy;p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;p.phase=i*Math.PI*2/spec.shots!;return p;})());
     else if(id==='triple') this.projectiles=[-5,0,5].map(d=>this.launch(t,id,t.angle+d));
     else if(id==='airstrike') this.projectiles=[-38,0,38].map(d=>({...this.launch(t,id),x:clamp(this.targetX+d,20,WORLD_W-20),y:-40-Math.abs(d),vx:0,vy:190}));
     else this.projectiles=[this.launch(t,id)];
     // Preserve the old carrier spread for legacy bonus salvos; Multi's own
     // normal/special pair above already uses its new shared velocity profile.
-    if(!transfer&&!(spec.shots&&spec.shots>1)&&(t.vehicleId==='multi'||t.vehicleId==='dragon'))this.projectiles.forEach((p,i)=>{const profile=salvoProfile(t.vehicleId,id,i,this.projectiles.length);p.vx*=profile.vx;p.vy*=profile.vy;if(spec.effect==='homing'){p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;}});
-    if(!transfer&&spec.homingMode==='volley') {
+    if(!transfer&&!healing&&!(spec.shots&&spec.shots>1)&&(t.vehicleId==='multi'||t.vehicleId==='dragon'))this.projectiles.forEach((p,i)=>{const profile=salvoProfile(t.vehicleId,id,i,this.projectiles.length);p.vx*=profile.vx;p.vy*=profile.vy;if(spec.effect==='homing'){p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;}});
+    if(!transfer&&!healing&&spec.homingMode==='volley') {
       const volley=++this.volleySequence,impact=this.predict(t.angle,t.power,id,12,t);
       this.volleyTargets.set(volley,{x:impact.x,y:impact.y,target:null});
       this.projectiles.forEach(p=>p.volley=volley);
     }
-    if(t.doubleShot) this.projectiles.push(...this.projectiles.map((p,i)=>({...p,trail:[],delay:DOUBLE_SHOT_INTERVAL*FLIGHT_SPEED,echo:i===0})));
-    this.recordBattle('fire-action',`${t.name}发射${transfer?'转移弹':spec.name}，${this.projectiles.length}枚；相对${t.angle.toFixed(2)}°／绝对${this.aim(t).absolute.toFixed(2)}°，力度${t.power.toFixed(2)}，等待${t.lastDelay}`,{owner:t.id,weapon:transfer?'shell':id,selectedWeapon:id,transfer,relative:t.angle,absolute:this.aim(t).absolute,power:t.power,direction:t.direction,position:{x:t.x,y:t.y},slope:this.tankSlope(t),projectileCount:this.projectiles.length,doubleShot:t.doubleShot,doubleShotIntervalSeconds:t.doubleShot?DOUBLE_SHOT_INTERVAL:0,delay:t.lastDelay,ammo:t.ammo[id],rules:this.traceRules()});
+    if(t.doubleShot) this.projectiles.push(...this.projectiles.map((p,i)=>({...p,trail:[],delay:DOUBLE_SHOT_INTERVAL*FLIGHT_SPEED,echo:i===0,...(transfer&&modernWeather(this.gameVersion)?{awaitTransfer:true}:{})})));
+    this.recordBattle('fire-action',`${t.name}发射${healing?'恢复弹':transfer?'转移弹':spec.name}，${this.projectiles.length}枚；相对${t.angle.toFixed(2)}°／绝对${this.aim(t).absolute.toFixed(2)}°，力度${t.power.toFixed(2)}，等待${t.lastDelay}`,{owner:t.id,weapon:healing?'cannon-normal':transfer?'shell':id,selectedWeapon:id,transfer,healing,relative:t.angle,absolute:this.aim(t).absolute,power:t.power,direction:t.direction,position:{x:t.x,y:t.y},slope:this.tankSlope(t),projectileCount:this.projectiles.length,doubleShot:t.doubleShot,doubleShotIntervalSeconds:t.doubleShot?DOUBLE_SHOT_INTERVAL:0,delay:t.lastDelay,ammo:t.ammo[id],rules:this.traceRules()});
     this.projectiles.forEach(p=>this.traceProjectile(p));
     t.boost=false;t.doubleShot=false;this.heardX[t.id]=Math.round(t.x/90)*90;
-    this.emit('shot',`${t.name}发射了${transfer?'转移弹':weaponById(id).name}。`,undefined,t.x,transfer?'shell':id,transfer);
+    this.emit('shot',`${t.name}发射了${healing?'恢复弹':transfer?'转移弹':weaponById(id).name}。`,undefined,t.x,healing?'cannon-normal':transfer?'shell':id,transfer);
     this.burst(this.muzzle(t).x,this.muzzle(t).y,12,'#f5ce89');
     return true;
   }
@@ -483,11 +496,11 @@ export class Game {
   private traceProjectile(p:Projectile,parent?:number){
     p.traceId=++this.projectileSequence;p.traceParent=parent;
     const owner=this.tanks[p.owner];p.traceLaunch??={action:this.turn+1,time:this.elapsed,owner:p.owner,name:owner?.name,vehicle:owner?.vehicleId,hp:owner?.hp,maxHP:owner?.maxHP,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:owner?.angle,absolute:owner?this.aim(owner).absolute:null,power:owner?.power,wind:this.wind,rngIndex:this.trace.rngIndex};
-    this.recordBattle('projectile-start',`${this.tanks[p.owner]?.name??p.owner}的${weaponById(p.weapon).name}第${p.traceId}弹${p.delay?'（延迟追加）':''}`,{projectile:p.traceId,parent,owner:p.owner,weapon:p.weapon,volley:p.volley,x:p.x,y:p.y,vx:p.vx,vy:p.vy,delay:p.delay,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,boostSources:p.boostSources,digBoost:p.digBoost,aimOffsetX:p.aimOffsetX,aimOffsetY:p.aimOffsetY,penetrations:p.penetrations,hitCooldown:p.hitCooldown});return p;
+    this.recordBattle('projectile-start',`${this.tanks[p.owner]?.name??p.owner}的${p.healing?'恢复弹':p.transfer?'转移弹':weaponById(p.weapon).name}第${p.traceId}弹${p.delay?'（延迟追加）':''}`,{projectile:p.traceId,parent,owner:p.owner,weapon:p.weapon,...(modernWeather(this.gameVersion)?{healing:!!p.healing,transfer:!!p.transfer}:{}),volley:p.volley,x:p.x,y:p.y,vx:p.vx,vy:p.vy,delay:p.delay,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,boostSources:p.boostSources,digBoost:p.digBoost,aimOffsetX:p.aimOffsetX,aimOffsetY:p.aimOffsetY,penetrations:p.penetrations,hitCooldown:p.hitCooldown});return p;
   }
   private projectileHit(p:Projectile) {
     if(p.age<0.09) return undefined;
-    return this.tanks.find(t=>t.hp>0&&this.canDamage(t,p.owner)&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
+    return this.tanks.find(t=>t.hp>0&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
   }
   private invalidVolleyTarget(p:Projectile) {
     if(p.volley===0||weaponById(p.weapon).homingMode!=='volley')return false;
@@ -509,7 +522,8 @@ export class Game {
   }
   private stepProjectile(p:Projectile,dt:number):boolean {
     if(this.invalidVolleyTarget(p)){this.cancelVolley(p.volley);return true;}
-    if(p.delay>0) {p.delay-=dt;if(p.delay<=0){this.recordBattle('projectile-echo',`第${p.traceId??'?'}弹延迟装填完成`,{projectile:p.traceId,weapon:p.weapon,owner:p.owner});if(p.echo)this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon);}return false;}
+    if(p.awaitTransfer&&this.projectiles.some(other=>other!==p&&other.transfer&&!other.awaitTransfer))return false;
+    if(p.delay>0) {p.delay-=dt;if(p.delay<=0){if(p.awaitTransfer){const fresh=this.launch(this.tanks[p.owner],'shell');Object.assign(p,fresh,{transfer:true,awaitTransfer:false,echo:true,delay:0,boost:1,fireBoosted:false,rage:false,digBoost:1});this.recordBattle('transfer-relaunch','双发第二枚转移弹从新落点发射',{projectile:p.traceId,owner:p.owner,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:this.tanks[p.owner].angle,absolute:this.aim(this.tanks[p.owner]).absolute,power:this.tanks[p.owner].power,wind:this.wind});}this.recordBattle('projectile-echo',`第${p.traceId??'?'}弹延迟装填完成`,{projectile:p.traceId,weapon:p.weapon,owner:p.owner});if(p.echo)this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon,!!p.transfer);}return false;}
     p.age+=dt;
     p.hitCooldown=Math.max(0,p.hitCooldown-dt);
     const spec=weaponById(p.weapon),effect=spec.effect;
@@ -567,6 +581,7 @@ export class Game {
     }
     if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70||p.age>12){this.observe('ground',null,{x:clamp(p.x,0,WORLD_W),y:clamp(p.y,-TERRAIN_H,BOTTOM_Y)});this.recordBattle('projectile-end',`第${p.traceId??'?'}弹${p.age>12?'超时':'越界'}消失`,{projectile:p.traceId,weapon:p.weapon,x:p.x,y:p.y,age:p.age});if(p.transfer)this.emit('item','转移弹未落在战场内，转移失败。');return true;}
     const hitTank=this.projectileHit(p);
+    if(p.healing&&(this.land.solid(p.x,p.y)||hitTank)){this.restoreImpact(p,hitTank?.id);return true;}
     if(p.transfer&&(this.land.solid(p.x,p.y)||hitTank)){
       if(!this.transferTo(this.tanks[p.owner],p.x,p.y))this.emit('item','转移弹落点无法站立，转移失败。');
       return true;
@@ -601,8 +616,10 @@ export class Game {
     return false;
   }
   crater(x:number,y:number,radius:number,depth=radius,source?:{owner:number;weapon:WeaponId;traceId?:number}) {
+    const affected=modernWeather(this.gameVersion)&&source?this.tanks.filter(t=>t.hp>0&&t.controller==='ai'&&source.owner!==t.id&&Math.abs(t.x-x)<radius+28&&Math.abs(t.y+18-y)<depth+40).map(t=>({t,pose:{x:t.x,y:t.y,slope:this.tankSlope(t),owner:source.owner,event:0}})):[];
     const removed=this.land.removeEllipse(x,y,radius,depth);
     const event=this.recordBattle('terrain',`挖土(${x.toFixed(2)},${y.toFixed(2)})，半径${radius.toFixed(2)}／深${depth.toFixed(2)}，移除${removed}像素（永久层保留）`,{x,y,radius,depth,removed,source});
+    if(removed)for(const {t,pose} of affected){t.aiCalibration??={stableShots:0,disturbed:false};t.aiCalibration.terrainPending??={...pose,event};}
     for(const t of this.tanks) if(t.hp>0&&this.support(t.x,t.y+18)-18>t.y+3 && t.fallVelocity===0) { t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{event,source:traceClone(source??null),terrain:{x,y,radius,depth,removed},cause:'地形支撑被破坏'}); }
     for(const c of this.crates) c.y=this.ground(c.x,c.y-5)-14;
     this.crates=this.crates.filter(c=>c.y<BOTTOM_Y-14);
@@ -618,7 +635,20 @@ export class Game {
     }
     this.crater(x,y,radius,depth,p);
   }
+  canRestore(t:Tank,owner:number){return t.hp>0&&(t.team===this.tanks[owner]?.team||!!this.config.friendlyFire);}
+  private restoreImpact(p:Projectile,directTarget?:number){
+    const radius=restoreRadius();this.blasts.push({x:p.x,y:p.y,radius,life:.7,maxLife:.7,color:'#b6d6a5',healing:true});this.burst(p.x,p.y,12,'#98bd82');
+    this.recordBattle('restore-impact','恢复弹落地，不挖土',{projectile:p.traceId,owner:p.owner,x:p.x,y:p.y,radius,boost:p.boost,fireBoosted:p.fireBoosted});
+    for(const target of this.tanks){if(target.hp<=0||directTarget!==target.id&&Math.hypot(target.x-p.x,target.y-p.y)>radius+26)continue;
+      if(!this.canRestore(target,p.owner)){this.recordBattle('heal-blocked',`${target.name}不受敌方恢复弹影响：友伤关闭`,{owner:p.owner,target:target.id,friendlyFire:!!this.config.friendlyFire});continue;}
+      const before=target.hp,base=target.maxHP*RESTORE_FRACTION,requested=Math.round(base*p.boost);target.hp=Math.min(target.maxHP,target.hp+requested);const actual=target.hp-before;
+      const factors=[{source:'基础恢复比例',value:RESTORE_FRACTION},{source:`fireBoosted（${p.boostSources?.fire??'无强化'}）`,value:p.fireBoosted?1.5:1},{source:'恢复弹范围内',value:1}];
+      this.recordBattle('heal',`${this.tanks[p.owner].name}→${target.name}恢复弹：最大HP${target.maxHP}${factors.map(f=>` ×${f.value}[${f.source}]`).join('')}，恢复${actual}，HP ${before}→${target.hp}`,{owner:p.owner,target:target.id,weapon:'cannon-normal',projectile:p.traceId,base:target.maxHP,factors,requested,actual,hpBefore:before,hpAfter:target.hp,boostSources:p.boostSources,friendlyFire:!!this.config.friendlyFire,poisoned:target.poisoned});
+      if(actual){this.float(target.x,target.y-40,`+${actual}`,'#568949',target.id);this.itemCues.push({tank:target.id,item:'repair',age:0});this.observe('hit',target);this.emit('heal',`${target.name}恢复了${actual}点生命。`,actual,target.x);}
+    }
+  }
   private explode(p:Projectile,directTarget?:number) {
+    if(p.healing){this.restoreImpact(p,directTarget);return;}
     if(this.explosionDepth++===0)for(const t of this.tanks)if(t.hp>0){const pose=this.landPose(t,true);if(pose)this.blastGrounded.set(t.id,pose);}
     try {
     if(p.traceId===undefined)this.traceProjectile(p,p.traceParent);
@@ -740,7 +770,7 @@ export class Game {
       let name:string;
       if(item){
         if(t.items[item]>0)return true;
-        t.items[item]=1;name=itemById(item).name;
+        t.items[item]=1;name=this.itemName(item);
       }else{
         if(t.ammo.homing>0)return true;
         t.ammo.homing=1;name='猎星追踪弹';
@@ -756,12 +786,13 @@ export class Game {
     this.traceTurn('turn-end');
     this.phase='ended';this.resultAge=0;
     this.tanks.forEach(t=>t.lastPower=null);
-    this.fog=false;this.fogTurnsRemaining=0;this.fireLine=null;this.fireLineTurnsRemaining=0;
+    this.weatherObservation=null;this.fog=false;this.fogTurnsRemaining=0;this.fireLine=null;this.fireLineTurnsRemaining=0;
     this.winner=teams.size?[...teams][0]:null;
     this.emit('win',this.winner===null?'各队同时出局，平局！':`${teamFlag(this.winner).letter} 旗${teamFlag(this.winner).name}队赢得了这场对决！`);
     return true;
   }
   nextTurn() {
+    if(this.weatherObservation)return;
     if(this.checkWin()) return;
     const previous=this.active;
     // Poison settles once after the victim's own completed action and cannot kill.
@@ -794,10 +825,13 @@ export class Game {
       this.recordBattle('wind-change',`第${this.roundNumber}完整轮风力变化`,{from,to:this.wind,maxDelta:MAX_WIND_CHANGE,nextRound:this.windChangeRound});
       this.emit('wind','风向轻轻变了。');
     }
+    if(modernWeather(this.gameVersion)){if(completedRound)this.advanceWeather();}
+    else {
     if(this.fog&&--this.fogTurnsRemaining<=0){this.fog=false;this.emit('weather','雾气散去了，战场重新可见。');}
     if(this.fireLine&&--this.fireLineTurnsRemaining<=0){this.fireLine=null;this.emit('weather','火线熄灭了，强化通道已关闭。');}
+    }
     const preferred=this.active.selectedWeapon;
-    this.selected=(this.active.ammo[preferred]??0)>0?preferred:this.active.vehicleId?vehicleById(this.active.vehicleId).normal:'shell';this.teleporting=false;
+    this.restoring=false;this.selected=(this.active.ammo[preferred]??0)>0?preferred:this.active.vehicleId?vehicleById(this.active.vehicleId).normal:'shell';this.teleporting=false;
     this.active.selectedWeapon=this.selected;
     this.active.actionTime=0;this.active.movedThisTurn=0;this.active.itemDelay=0;this.active.delayCommitted=false;
     this.active.fuel=this.active.vehicleId?100:Math.min(100,this.active.fuel+18);this.active.itemUsed=false;
@@ -815,9 +849,10 @@ export class Game {
     this.gases=this.gases.filter(gas=>gas.turns>0);
     if(this.turn>=40) {this.damage(this.active,Math.ceil(this.active.maxHP*.08),this.active.id,true,'fall',undefined,{cause:'sudden',base:this.active.maxHP,factors:[{source:'第40次行动后决胜扣血',value:.08}],formula:'ceil(maxHP × 8%)，绕过护盾与伤害开关'});this.float(this.active.x,this.active.y-55,'决胜时刻','#bd765d');}
     if(this.checkWin()) return;
-    if(this.turn%5===0&&this.crates.length<3) {
-      const human=this.tanks.find(t=>t.controller==='human'&&t.hp>0)??this.tanks[0],maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
+    if(this.shouldCheckSupply(completedRound)&&this.crates.length<3) {
+      const humans=this.tanks.filter(t=>t.controller==='human'&&t.hp>0),candidates=humans.length?humans:this.tanks.filter(t=>t.hp>0);
       for(let tries=0;tries<50;tries++) {
+        const human=modernWeather(this.gameVersion)?candidates[Math.floor(this.rng()*candidates.length)]:(humans[0]??this.tanks[0]),maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
         const desired=human.x+(this.rng()<0.5?-1:1)*(45+this.rng()*Math.max(0,maxDistance-45));
         if(!this.stablePlatform(desired)||this.traversable(human,desired)===null) continue;
         const distance=this.ground(desired)+50;
@@ -829,7 +864,7 @@ export class Game {
         // A lower-layer player cannot collect a box resting on the roof above.
         if(start<32||start>WORLD_W-32||!landing||landing.x<40||landing.x>WORLD_W-40||!this.stablePlatform(landing.x)||reachable===null||Math.abs(landing.y+14-reachable)>MAX_STEP_HEIGHT||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45)) continue;
         const roll=this.rng(),type=roll<.3?'medical':roll<.5?'double':roll<.65?'transfer':roll<.8?'boost':'homing';
-        this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0});
+        this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0});if(modernWeather(this.gameVersion)){this.nextSupplyAction=this.turn+SUPPLY_ACTION_GAP;this.recordBattle('supply-selection','补给随机兼顾可安全投放的人类炮手',{candidates:candidates.map(t=>t.id),target:human.id,startX:start,landing,nextAction:this.nextSupplyAction});}
         this.emit('crate','补给空降中，回合计时暂停。');break;
       }
     }
@@ -838,6 +873,36 @@ export class Game {
     this.supplySettling=modernSupplyTiming(this.gameVersion)?SUPPLY_LANDING_SECONDS:.35;
     this.supplyObservation=this.phase==='supply'&&modernSupplyTiming(this.gameVersion)?{approach:SUPPLY_APPROACH_SECONDS,crates:this.crates.flatMap((c,i)=>c.falling?[i]:[])}:null;
     this.emit('turn',`${this.active.name}，轮到你了。`);
+  }
+  private shouldCheckSupply(completedRound:boolean){
+    if(!modernWeather(this.gameVersion))return this.turn%5===0;
+    if(!this.firstSupplyChecked){if(!completedRound||this.roundNumber<FIRST_SUPPLY_ROUND)return false;this.firstSupplyChecked=true;this.nextSupplyAction=this.turn+4;return this.rng()<FIRST_SUPPLY_CHANCE;}
+    if(this.turn<this.nextSupplyAction)return false;this.nextSupplyAction=this.turn+SUPPLY_ACTION_GAP;return true;
+  }
+  private advanceWeather(){
+    let expired=false;
+    if(this.fog&&--this.fogTurnsRemaining<=0){this.fog=false;expired=true;this.weatherCooldownUntil=this.roundNumber+WEATHER_CLEAR_ROUNDS+1;this.recordBattle('weather-end','雾气散去',{kind:'fog',round:this.roundNumber});this.emit('weather','雾气散去了，战场重新可见。');}
+    if(this.fireLine&&--this.fireLineTurnsRemaining<=0){
+      const line={...this.fireLine},point=this.weatherObservation?.point??{x:line.x,y:this.tanks.filter(t=>t.hp>0).reduce((n,t)=>n+t.y,0)/this.tanks.filter(t=>t.hp>0).length-40};
+      this.fireLine=null;expired=true;this.weatherCooldownUntil=this.roundNumber+WEATHER_CLEAR_ROUNDS+1;this.weatherObservation={kind:'disappear',line,point,age:0};this.recordBattle('weather-end','火线消退',{kind:'fireLine',line,round:this.roundNumber});this.emit('weather','火线正在熄灭，强化通道已关闭。');
+    }
+    if(this.roundNumber<this.weatherNextRound||this.config.fog===false&&this.config.fireLine===false)return;
+    this.weatherNextRound=nextWeatherRound(this.roundNumber,this.rng);
+    this.weatherSnow=this.config.snow??rollSnow(this.config.map,this.rng);
+    this.recordBattle('atmosphere',this.snow?'飞雪展示风向':'落叶展示风向',{kind:this.snow?'snow':'leaves',nextWeatherRound:this.weatherNextRound});
+    if(expired||this.fog||this.fireLine||this.roundNumber<this.weatherCooldownUntil)return;
+    const kind=rollBattleWeather(this.rng,this.config.fog!==false,this.config.fireLine!==false);
+    if(!kind)return;
+    const placement=kind==='fireLine'?fireLinePlacement(this.tanks,this.rng):null;
+    if(kind==='fireLine'&&!placement)return;
+    const duration=weatherDuration(this.rng);this.weatherCooldownUntil=this.roundNumber+duration+WEATHER_CLEAR_ROUNDS+1;
+    if(kind==='fog'){this.fog=true;this.fogTurnsRemaining=duration;}
+    else if(placement){
+      this.fireLine={x:placement.x,top:50,bottom:BOTTOM_Y-50};this.fireLineTurnsRemaining=duration;
+      this.weatherObservation={kind:'appear',line:{...this.fireLine},point:{x:placement.x,y:placement.y},age:0};
+    }
+    this.recordBattle('weather-start',`${kind==='fog'?'雾气':'火线'}随机出现，持续${duration}完整轮`,{kind,duration,round:this.roundNumber,placement,line:this.fireLine});
+    this.emit('weather',kind==='fog'?`雾气来了，持续${duration}完整轮。`:`火线升起，持续${duration}完整轮。`,undefined,placement?.x);
   }
   predictSupply(startX:number) {
     let x=startX,y=-50,vx=0,vy=80;const dt=1/120;
@@ -850,7 +915,7 @@ export class Game {
     return null;
   }
   acceptHandoff() { if(this.phase==='handoff') this.phase='aiming'; }
-  skipTurn() { if(this.phase==='aiming'&&!this.paused&&!this.introLocked) this.nextTurn(); }
+  skipTurn() { if(this.phase==='aiming'&&!this.paused&&!this.introLocked&&!this.weatherObservation) this.nextTurn(); }
   predict(angle=this.active.angle,power=this.active.power,weapon=this.selected,maxTime=10,tank=this.active) {
     const p=this.launch(tank,weapon,angle,power),points:{x:number;y:number}[]=[];
     const dt=1/90;let direct=false;
@@ -864,12 +929,12 @@ export class Game {
         if(contact){p.x=contact.x;p.y=contact.y;}
       }
       if(i%6===0) points.push({x:p.x,y:p.y});
-      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&this.canDamage(t,p.owner)&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
+      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
       if(p.x<0||p.x>WORLD_W||p.y>WORLD_H||this.land.solid(p.x,p.y)||direct) break;
     }
     return {x:p.x,y:p.y,points,direct};
   }
-  planAI() {if(this.introLocked)return;
+  planAI() {if(this.introLocked||this.weatherObservation||modernWeather(this.gameVersion)&&this.active.fallVelocity>0)return;
     const t=this.active,e=this.enemy,difficulty=t.difficulty;
     const enemyX=this.fog?this.heardX[e.id]:e.x,enemyY=this.fog?this.ground(enemyX)-18:e.y;
     const level=DIFFICULTIES.findIndex(d=>d.id===difficulty);
@@ -877,6 +942,7 @@ export class Game {
       const candidates:ItemId[]=[...(t.hp<=t.maxHP*.7?['repair' as ItemId]:[]),...(this.rng()>0.6?['boost' as ItemId]:[]),...(this.rng()>.8?['double' as ItemId]:[])];
       const item=candidates.find(id=>!this.itemUnavailable(id,true));if(item) this.useItem(item,true);
     }
+    if(this.restoring&&modernWeather(this.gameVersion)){t.power=10;t.angle=t.minAngle;this.aiDecision={target:t.id,fromX:t.x,goalX:t.x,weapon:'cannon-normal',intentionalMiss:false};return;}
     t.direction=enemyX>t.x?1:-1;
     let weapon:WeaponId='shell';
     if(t.vehicleId) {
@@ -899,15 +965,33 @@ export class Game {
     }
     this.aiMoveGoal=null;this.aiPending=null;
     const targets=this.knownAITargets();
-    if(weapon==='airstrike') {this.selected=weapon;this.targetX=clamp(enemyX+aiAimOffset(difficulty,weapon,this.rng).offset,20,WORLD_W-20);return;}
+    if(weapon==='airstrike') {
+      let profile:ReturnType<typeof calibrationProfile>|undefined;
+      if(modernWeather(this.gameVersion)){this.refreshAICalibration(t);profile=calibrationProfile(difficulty,t.aiCalibration!);}
+      const intent=aiAimOffset(difficulty,weapon,this.rng,profile);this.selected=weapon;this.targetX=clamp(enemyX+intent.offset,20,WORLD_W-20);
+      if(profile){this.aiDecision={target:e.id,fromX:t.x,goalX:t.x,weapon,intentionalMiss:intent.miss};this.recordBattle('ai-calibration',`${t.name}空袭瞄准校准`,{target:t.id,state:t.aiCalibration,profile,decision:this.aiDecision});}
+      return;
+    }
     const weapons=level===3&&t.vehicleId?[vehicleById(t.vehicleId).normal,vehicleById(t.vehicleId).special,...(t.ammo.homing>0?['homing' as WeaponId]:[])]:[weapon];
-    const planned=level===3||level===2&&this.fires.some(f=>Math.abs(f.x-t.x)<f.radius&&this.canDamage(t,f.owner))?chooseAIPosition(this,t,weapons,targets):{stay:solveAIShot(this,t,weapons,targets),best:undefined};
+    if(modernWeather(this.gameVersion))this.refreshAICalibration(t);
+    const stay=solveAIShot(this,t,weapons,targets),recover=modernWeather(this.gameVersion)&&!!t.aiCalibration?.disturbed&&!stay.effective;
+    const planned=level===3||recover||level===2&&this.fires.some(f=>Math.abs(f.x-t.x)<f.radius&&this.canDamage(t,f.owner))?chooseAIPosition(this,t,weapons,targets,stay):{stay,best:undefined};
     const best=planned.best??planned.stay;
     this.selected=best.weapon;
-    const intent=aiAimOffset(difficulty,best.weapon,this.rng),offset=intent.offset+(this.fog?(this.rng()-.5)*120:0);
+    const profile=modernWeather(this.gameVersion)?calibrationProfile(difficulty,t.aiCalibration!):undefined;
+    const intent=aiAimOffset(difficulty,best.weapon,this.rng,profile),offset=intent.offset+(this.fog?(this.rng()-.5)*120:0);
     this.aiDecision={target:best.target,fromX:t.x,goalX:best.x,weapon:best.weapon,intentionalMiss:intent.miss};
+    if(profile)this.recordBattle('ai-calibration',`${t.name}校准：${t.aiCalibration!.disturbed?'地形扰动后的下一炮':t.aiCalibration!.stableShots===0?'开局首炮':'稳定射击逐步校准'}；误瞄概率${(profile.missChance*100).toFixed(1)}%，${recover?'先恢复射角':'评估当前射位'}`,{target:t.id,state:t.aiCalibration,profile,decision:this.aiDecision});
     this.applyAIShot(solveAIShot(this,t,[best.weapon],targets,offset,true,intent.miss,best.target),level);
     if(Math.abs(best.x-t.x)>2){this.aiMoveGoal=best.x;this.aiPending={weapons:[best.weapon],offset,level,miss:intent.miss,target:best.target};}
+  }
+  private refreshAICalibration(t:Tank){
+    const state=t.aiCalibration??(t.aiCalibration={stableShots:0,disturbed:false});
+    if(state.terrainPending&&calibrationDisturbed(state,t.x,t.y,this.tankSlope(t))){
+      if(!state.disturbed)this.recordBattle('ai-disturbed',`${t.name}被其他炮手挖土改变车身角／落位，下一炮重新校准`,{target:t.id,before:state.terrainPending,after:{x:t.x,y:t.y,slope:this.tankSlope(t)}});
+      state.stableShots=0;state.disturbed=true;
+    }
+    if(t.fallVelocity===0)delete state.terrainPending;
   }
   private knownAITargets(){return this.opponents(this.active).map(t=>this.fog?{...t,x:this.heardX[t.id],y:this.ground(this.heardX[t.id])-18}:{...t});}
   private applyAIShot(shot:AIShot,level:number){
@@ -927,6 +1011,16 @@ export class Game {
     // landing before solving from the actual support, never keep an air aim.
     if(this.active.fallVelocity>0)return;
     const pending=this.aiPending;this.aiPending=null;
+    if(modernWeather(this.gameVersion)&&this.active.aiCalibration?.terrainPending){
+      const shifted=calibrationDisturbed(this.active.aiCalibration,this.active.x,this.active.y,this.tankSlope(this.active));this.refreshAICalibration(this.active);
+      if(shifted){
+        const intent=aiAimOffset(this.active.difficulty,pending.weapons[0],this.rng,calibrationProfile(this.active.difficulty,this.active.aiCalibration));pending.offset=intent.offset+(this.fog?(this.rng()-.5)*120:0);pending.miss=intent.miss;
+        const recovery=chooseAIPosition(this,this.active,pending.weapons,this.knownAITargets());
+        if(this.aiDecision){this.aiDecision.goalX=recovery.best.x;this.aiDecision.intentionalMiss=intent.miss;}
+        this.recordBattle('ai-adjusted-plan','移动中地形改变，落地后重新校准并恢复射角',{target:this.active.id,decision:this.aiDecision,state:this.active.aiCalibration});
+        if(Math.abs(recovery.best.x-this.active.x)>2){this.aiMoveGoal=recovery.best.x;this.aiPending=pending;return;}
+      }
+    }
     this.applyAIShot(solveAIShot(this,this.active,pending.weapons,this.knownAITargets(),pending.offset,true,pending.miss,pending.target),pending.level);
   }
   private updateHazards(dt:number) {
@@ -962,13 +1056,14 @@ export class Game {
       this.resultAge+=dt;
       return;
     }
+    if(this.weatherObservation){this.weatherObservation.age+=dt;if(this.weatherObservation.age>=WEATHER_OBSERVATION_SECONDS){this.weatherObservation=null;this.recordBattle('weather-presentation-end','火线展示结束，镜头回到行动炮手');this.emit('turn',`${this.active.name}，轮到你了。`);}return;}
     if(this.phase==='lobby'||this.phase==='handoff') return;
     this.updateTanks(dt);
     if(this.phase==='supply') {
       let dropDt=dt;
       if(this.supplyObservation?.approach){const wait=Math.min(dropDt,this.supplyObservation.approach);this.supplyObservation.approach-=wait;dropDt-=wait;if(dropDt<=0)return;}
       for(const c of this.crates) if(c.falling) {
-        const steps=Math.ceil(dropDt/(1/120)),step=dropDt/steps;
+        const motionDt=dropDt*(modernWeather(this.gameVersion)?1.15:1),steps=Math.ceil(motionDt/(1/120)),step=motionDt/steps;
         for(let i=0;i<steps&&c.falling;i++) {
           const target=this.ground(c.x,c.y-8)-14;
           c.vx=((c.vx??0)+this.wind*2.5*step)*Math.exp(-0.35*step);
@@ -992,9 +1087,9 @@ export class Game {
       }
       if(this.active.controller==='ai') {
         const previous=this.aiTime;this.aiTime+=dt;
-        if(previous<0.8&&this.aiTime>=0.8) this.planAI();
+        if(previous<0.8&&this.aiTime>=0.8||modernWeather(this.gameVersion)&&!this.aiDecision&&this.aiTime>=.8&&this.active.fallVelocity===0) this.planAI();
         this.updateAIMovement(dt);
-        if(this.aiTime>=1.8&&this.aiMoveGoal===null&&this.aiPending===null) this.fire(true);
+        if(this.aiTime>=1.8&&this.aiMoveGoal===null&&this.aiPending===null&&(!modernWeather(this.gameVersion)||this.aiDecision)) this.fire(true);
       }
     } else if(this.phase==='flying') {
       // Fixed small substeps prevent fast shells tunnelling through tanks and ground.

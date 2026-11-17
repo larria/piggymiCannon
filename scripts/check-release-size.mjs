@@ -1,5 +1,6 @@
 import {readdirSync,lstatSync,readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {resolve,dirname,relative,sep} from 'node:path';
+import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 const project=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const args=process.argv.slice(2),build=resolve(args[0]&&!args[0].startsWith('--')?args.shift():resolve(project,'dist'));
@@ -20,7 +21,7 @@ function precache(source){
  }
  if(end<0)throw new Error('PWA清单格式不完整');
  // Parse only the generated data literal, never execute the worker.
- return JSON.parse(source.slice(start,end).replace(/([{,]\s*)(url|revision)\s*:/g,'$1"$2":'));
+ return JSON.parse(source.slice(start,end).replace(/([{,]\s*)(url|revision|integrity)\s*:/g,'$1"$2":'));
 }
 try{
  const contents=files(build),distBytes=contents.reduce((n,f)=>n+f.bytes,0),byPath=new Map(contents.map(f=>[f.path,f.bytes]));
@@ -32,6 +33,12 @@ try{
   precacheBytes+=byPath.get(path);
   if(seen.has(e.url)){if(seen.get(e.url)!==e.revision)throw new Error(`预缓存同URL版本冲突：${e.url}`);duplicateExactEntries++;continue;}
   seen.set(e.url,e.revision);uniquePrecacheBytes+=byPath.get(path);
+ }
+ const manifestPath=resolve(build,'asset-integrity.json');
+ if(existsSync(manifestPath)){
+  const manifest=JSON.parse(readFileSync(manifestPath,'utf8')),precacheByURL=new Map(entries.map(e=>[e.url,e.revision]));
+  for(const f of manifest.files){const data=readFileSync(resolve(build,f.url));if(data.length!==f.bytes||createHash('sha256').update(data).digest('hex')!==f.sha256||precacheByURL.get(f.url)!==f.revision)throw Error('素材修复清单与发布产物／PWA键不符：'+f.url);}
+  for(const url of precacheByURL.keys())if(url!=='asset-integrity.json'&&!manifest.files.some(f=>f.url===url))throw Error('素材修复清单缺少：'+url);
  }
  const forbidden=contents.filter(f=>/(^|\/)(\.workbuddy|ft2-audio|ft2-bullets|ft2-extra|ft2-mapdata)(\/|$)/.test(relative(build,f.path).split(sep).join('/')));
  if(forbidden.length)throw new Error('来源目录或私有目录混入构建产物');

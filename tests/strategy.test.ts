@@ -115,11 +115,11 @@ test('breathing uses thirty-percent health and visibly changes pose over time',(
   const a=breathingPose(45,0),b=breathingPose(45,0.4);
   assert.equal(a.active,true);assert.notEqual(a.bob,b.bob);assert.notEqual(a.mouth,b.mouth);
 });
-test('fog and fire lines are independently rolled with one in thirty probability',()=>{
+test('legacy opening fog and fire lines are independently rolled with one in thirty probability',()=>{
   const rng=makeRng(508);let fog=0,fire=0;
   for(let i=0;i<30000;i++) {const w=rollWeather(rng);fog+=Number(w.fog);fire+=Number(w.fireLine);}
   assert.ok(fog>850&&fog<1150);assert.ok(fire>850&&fire<1150);
-  const g=ready({fog:true,fireLine:true});assert.ok(g.fog&&g.fireLine);
+  const g=new Game({seed:52,fog:true,fireLine:true},'3.2.6');assert.ok(g.fog&&g.fireLine);
 });
 test('fire-line crossing boosts a shell only once even if it crosses back',()=>{
   const g=ready({fireLine:true});g.active.x=175;g.active.y=g.ground(175)-18;g.fireLine={x:230,top:0,bottom:TERRAIN_H};g.active.angle=5;g.active.power=50;g.fire();

@@ -9,4 +9,4 @@ export function regressionConfig(input:any={}){
  if(seats){slots.forEach((s,i)=>{s.enabled=i<seats.length;if(seats[i])Object.assign(s,seats[i]);});}
  return {fallDamage:true,...rest,slots};
 }
-export class Game extends EngineGame{constructor(input:any={}){super(regressionConfig(input));}}
+export class Game extends EngineGame{constructor(input:any={},version='3.2.6'){super(regressionConfig(input),version);}}

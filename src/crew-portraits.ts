@@ -37,7 +37,7 @@ function load(id:CrewId,force=false):Promise<boolean>{
 export function crewPortrait(id:CrewId){const s=state(id);if(!s.job&&!s.ready&&!s.attempts)void load(id);return s.canvas;}
 export function portraitDiagnostics(){return {formatVersion:1,revision,integrity:globalThis.crypto?.subtle?'sha256':'png+decode',originals:CREW_ORDER.filter(id=>state(id).ready).length,usable:CREW_ORDER.length,assets:CREW_ORDER.map(id=>{const s=state(id);return {id,source:s.source,original:s.ready,expectedSha256:PORTRAIT_ASSETS[id].sha256,attempts:s.attempts,pending:!!s.job,error:s.error};})};}
 async function refresh(id:CrewId,force:boolean){const s=state(id);if(s.job)await s.job;if(force||!s.ready)await load(id,true);}
-export async function repairCrewPortraits(){await Promise.all(CREW_ORDER.map(id=>refresh(id,true)));return portraitDiagnostics();}
+export async function repairCrewPortraits(skipFiles:string[]=[]){await Promise.all(CREW_ORDER.filter(id=>!skipFiles.includes(PORTRAIT_ASSETS[id].file)).map(id=>refresh(id,true)));return portraitDiagnostics();}
 /** A completed install may have populated cache after an earlier timed-out request. */
 export async function retryUnavailableCrewPortraits(){await Promise.all(CREW_ORDER.map(id=>state(id).ready?Promise.resolve():refresh(id,false)));}
 export function installCrewPortraits(){

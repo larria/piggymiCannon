@@ -2,8 +2,8 @@ import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {MAX_CLIMB_ANGLE,WATER_Y} from '../src/engine';import {Terrain} from '../src/terrain';
 import {aimGeometry} from '../src/aim';import {defaultSlots} from '../src/crew';const defaultSeats=(f:any='1v1',m:any='ai')=>new Game({formation:f,mode:m}).config.slots.filter(s=>s.enabled);import {validChoice,resolveVehicle,VEHICLES} from '../src/vehicles';
-const ready=(c:any={})=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,vehicle0:'bowl',vehicle1:'cannon',...c});g.start();return g;};
-const flat=(c:any={})=>{const g=ready(c);g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=150+i*275;t.y=432;});g.wind=0;return g;};
+const ready=(c:any={},version='development')=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,vehicle0:'bowl',vehicle1:'cannon',...c},version);g.start();return g;};
+const flat=(c:any={},version='development')=>{const g=ready(c,version);g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=150+i*275;t.y=432;});g.wind=0;return g;};
 const run=(g:Game,n:number)=>{for(let i=0;i<n*120;i++)g.update(1/120);};
 const finishSupply=(g:Game)=>{for(let i=0;i<240&&g.phase==='supply';i++)g.update(1/120);assert.notEqual(g.phase,'supply');};
 const near=(a:number,b:number)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
@@ -55,12 +55,12 @@ test('self/friendly damage defaults off across blasts, statuses, hazards and gui
  g.config.selfDamage=true;g.damage(self,10,0);assert.equal(self.hp,self.maxHP-20);g.config.friendlyFire=true;g.damage(ally,10,0);assert.equal(ally.hp,ally.maxHP-10);
  g.config.selfDamage=false;g.config.friendlyFire=false;g.tanks[1].x=800;g.tanks[3].x=1100;const missile={...g.launch(self,'dragon-special'),x:ally.x,y:ally.y-70,vx:20,vy:80,age:.5};g.projectiles=[missile];g.phase='flying';g.update(.01);assert.equal(missile.lockTarget,null);
 });
-test('one shared 50% boost for item, fire line, both, double volleys and transfer; line expires after two actions',()=>{
+test('one shared 50% boost for item, fire line, both, double volleys and transfer; legacy line expires after two actions',()=>{
  for(const item of [false,true])for(const line of [false,true]){
   const g=flat({fireLine:line,vehicle0:'dragon'});g.active.boost=item;const p=g.launch(g.active,'dragon-normal');const base=420;
   if(line){g.fireLine!.x=p.x+2;g.fireLine!.top=0;g.fireLine!.bottom=600;}g.projectiles=[p];g.phase='flying';g.update(.01);assert.equal(p.fireBoosted,item||line);assert.equal(p.boost,item||line?1.5:1);assert.equal(p.boost*base,item||line?630:420);assert.equal(p.trail.length>0,item||line);
  }
- const g=flat({fireLine:true,vehicle0:'dragon'});g.active.boost=true;g.active.doubleShot=true;g.selectWeapon('dragon-special');g.fire();assert.equal(g.projectiles.length,18);assert.ok(g.projectiles.every(p=>p.fireBoosted&&p.boost===1.5));g.projectiles=[];g.nextTurn();assert.equal(g.fireLineTurnsRemaining,1);g.nextTurn();assert.equal(g.fireLine,null);assert.equal(g.fireLineTurnsRemaining,0);
+ const g=flat({fireLine:true,vehicle0:'dragon'},'3.2.6');g.active.boost=true;g.active.doubleShot=true;g.selectWeapon('dragon-special');g.fire();assert.equal(g.projectiles.length,18);assert.ok(g.projectiles.every(p=>p.fireBoosted&&p.boost===1.5));g.projectiles=[];g.nextTurn();assert.equal(g.fireLineTurnsRemaining,1);g.nextTurn();assert.equal(g.fireLine,null);assert.equal(g.fireLineTurnsRemaining,0);
  const t=flat({fireLine:true});t.teleporting=true;t.active.boost=true;t.fire();assert.equal(t.projectiles[0].fireBoosted,false);assert.equal(t.projectiles[0].boost,1);
 });
 function ledge(map='valley',dynamic=false){const g=flat({map});g.land=new Terrain();for(let x=0;x<=1280;x++){g.land.column(x,550,554,true);if(x<350||dynamic)g.land.column(x,280,330);}g.land.rebuild();g.active.x=320;g.active.y=262;g.enemy.x=1000;g.enemy.y=532;if(dynamic)g.crater(500,280,180,250);return g;}

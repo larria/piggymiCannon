@@ -147,8 +147,8 @@ export function safeAIPositions(game:Game,tank:Tank,targets?:Tank[],travelLimit=
  }
  return positions;
 }
-export function chooseAIPosition(game:Game,tank:Tank,weapons:WeaponId[],targets:Tank[]){
- const stay=solveAIShot(game,tank,weapons,targets),danger=game.fires.some(f=>Math.abs(f.x-tank.x)<f.radius&&game.canDamage(tank,f.owner));
+export function chooseAIPosition(game:Game,tank:Tank,weapons:WeaponId[],targets:Tank[],existingStay?:AIShot){
+ const stay=existingStay??solveAIShot(game,tank,weapons,targets),danger=game.fires.some(f=>Math.abs(f.x-tank.x)<f.radius&&game.canDamage(tank,f.owner));
  // A solid firing solution needs no gratuitous travel. Fuel, time and movement
  // delay all count, even though AI matches retain their cyclic turn order.
  const potential=Math.max(...weapons.map(id=>{const w=weaponById(id);return w.damage*launchDamageScale(!!tank.vehicleId,id)*(w.shots??1)*(w.effect==='mine'?1/3:1)*(tank.boost?1.5:1)*(tank.vehicleId==='sea'&&tank.hp<tank.maxHP*.5?1.5:1)*(tank.vehicleId==='water'&&game.snow?1.25:1)*Math.max(...targets.map(t=>eraDamageFactor(tank.vehicleId,t.vehicleId).value));}));

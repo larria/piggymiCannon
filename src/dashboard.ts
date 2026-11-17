@@ -10,6 +10,7 @@ export class DashboardView {
   private terrain=document.createElement('canvas');private revision=-1;private previousGame:Game|null=null;
   private dialSignature='';private mapSignature='';dialFrames=0;mapFrames=0;
   constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;}
+  invalidate(){this.dialSignature='';this.mapSignature='';}
   draw(game:Game,t:Tank,offset:number,viewHeight:number,offsetX=0,viewWidth=WORLD_W){
     const signature=[t.angle,t.direction,t.minAngle,t.maxAngle,game.tankSlope(t)].join('|');
     if(signature!==this.dialSignature){this.dialSignature=signature;this.dialFrames++;

@@ -32,9 +32,17 @@ export class AudioManager {
   pause(paused:boolean) {this.paused=paused;if(paused) {this.music.pause();this.stopCharge();this.stopMovement();this.stopTracking();if(this.context)void this.context.suspend().catch(()=>{});for(const clip of this.playingEffects)if(!clip.paused){clip.pause();this.pausedEffects.add(clip);}}else {if(this.context&&this.unlocked)void this.context.resume().catch(()=>{});if(this.musicEnabled&&this.unlocked)this.start();if(this.soundEnabled&&this.unlocked)for(const clip of this.pausedEffects)void clip.play().catch(()=>{});this.pausedEffects.clear();}}
   setScene(scene:AudioScene){if(this.scene===scene)return;this.scene=scene;this.music.pause();this.music.src=asset(BGM_TRACKS[scene]);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.paused)this.start();}
   resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources])source.stop();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();}
+  async retryAssets(vehicles:(VehicleId|null)[],restored:string[]=[],skipFiles:string[]=[]){
+    const clips=restored.filter(url=>url.startsWith('audio/')).map(url=>url.slice(6));for(const name of clips){await this.loading.get(name);this.buffers.delete(name);this.lastSamples.delete(name);}
+    for(const clip of [this.music,this.selectionMusic])if(clip.error||clips.some(name=>clip.src.endsWith('/'+name))){const position=clip.currentTime;clip.addEventListener('loadedmetadata',()=>{if(Number.isFinite(clip.duration))clip.currentTime=Math.min(position,clip.duration);},{once:true});clip.load();if(this.musicEnabled&&this.unlocked&&!this.paused&&!this.pageHidden){if(clip===this.music&&!this.selectionActive||clip===this.selectionMusic&&this.selectionActive)void clip.play().catch(()=>{});}}
+    if(this.unlocked)await Promise.all([...new Set([...COMMON_CLIPS,...vehicles.flatMap(id=>vehicleClips(id??'cannon'))])].filter(name=>!skipFiles.includes('audio/'+name)).map(name=>this.loadClip(name)));
+  }
   async preloadForMatch(vehicles:(VehicleId|null)[]){if(!this.unlocked)return;await Promise.all([...new Set([...COMMON_CLIPS,...vehicles.flatMap(id=>vehicleClips(id??'cannon'))])].map(name=>this.loadClip(name)));}
   private loadClip(name:string){if(this.buffers.has(name))return Promise.resolve();const existing=this.loading.get(name);if(existing)return existing;
-    const task=(async()=>{try{const {c}=this.graph(),response=await fetch(asset(name));if(!response.ok)throw new Error('Audio missing');this.buffers.set(name,await c.decodeAudioData(await response.arrayBuffer()));}catch{/* Keep synthesized fallback; retry after reconnect. */}})().finally(()=>this.loading.delete(name));this.loading.set(name,task);return task;
+    const task=(async()=>{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);let decodeTimer:ReturnType<typeof setTimeout>|undefined;
+      try{const {c}=this.graph(),response=await fetch(asset(name),{signal:controller.signal});if(!response.ok)throw new Error('Audio missing');const bytes=await response.arrayBuffer(),buffer=await Promise.race([c.decodeAudioData(bytes),new Promise<AudioBuffer>((_,reject)=>{decodeTimer=setTimeout(()=>reject(Error('Audio decode timeout')),5000);})]);this.buffers.set(name,buffer);}
+      catch{/* Keep synthesized fallback; retry after reconnect. */}finally{clearTimeout(timer);clearTimeout(decodeTimer);}
+    })().finally(()=>this.loading.delete(name));this.loading.set(name,task);return task;
   }
   private sample(name:string,x?:number,viewerX=0,loop=false):AudioBufferSourceNode|null {
     const buffer=this.buffers.get(name);if(!buffer){void this.loadClip(name);return null;}

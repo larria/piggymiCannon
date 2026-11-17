@@ -1,0 +1,51 @@
+{
+  "recovered": {
+    "formatVersion": 1,
+    "revision": 14,
+    "integrity": "sha256",
+    "originals": 4,
+    "usable": 4,
+    "assets": [
+      {
+        "id": "mimi",
+        "source": "cache",
+        "original": true,
+        "expectedSha256": "9cd197ce9bd85f933655a746349fa2c7b8ac0a53902ee740425587dbecc99592",
+        "attempts": 3,
+        "pending": false,
+        "error": ""
+      },
+      {
+        "id": "dad",
+        "source": "cache",
+        "original": true,
+        "expectedSha256": "f27bea34659c6e599706a3996a076a4233180a68e9c4c393d820501ca173f1a8",
+        "attempts": 3,
+        "pending": false,
+        "error": ""
+      },
+      {
+        "id": "fox",
+        "source": "cache",
+        "original": true,
+        "expectedSha256": "b6f58f035db39b90517ea41b5362daf7479350910bbab50e1b543420f7a3ebcb",
+        "attempts": 3,
+        "pending": false,
+        "error": ""
+      },
+      {
+        "id": "fish",
+        "source": "cache",
+        "original": true,
+        "expectedSha256": "b810c25fd021eb8893d980717744a9595979af60df2bfd69066b3f505c1878c6",
+        "attempts": 2,
+        "pending": false,
+        "error": ""
+      }
+    ]
+  },
+  "battleUnchanged": true,
+  "rngUnchanged": true,
+  "storageUnchanged": true,
+  "noReload": true
+}

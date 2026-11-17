@@ -1,3 +1,4 @@
+import {assetIntegrityPlugin} from './scripts/asset-integrity-plugin.mjs';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'node:fs';
@@ -15,7 +16,7 @@ for(const spec of Object.values(portraits) as {file:string;bytes:number;width:nu
 export default defineConfig(({mode}) => ({
   base: mode === 'pages' ? '/piggymiCannon/' : '/',
   define:{__APP_VERSION__:JSON.stringify(version)},
-  plugins: [{
+  plugins: [assetIntegrityPlugin(version),{
     name:'game-version',
     configureServer(server){server.middlewares.use((req,res,next)=>{
       if(req.url?.split('?')[0].endsWith('/version.json')) {res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({version}));}
@@ -45,7 +46,8 @@ export default defineConfig(({mode}) => ({
     },
     workbox: {
       importScripts: ['audio-range.js'],
-      globPatterns: ['**/*.{js,css,html,png,svg,mp3,ttf,webmanifest}'],
+      manifestTransforms:[async entries=>({manifest:entries.map(entry=>({...entry,integrity:'sha256-'+createHash('sha256').update(readFileSync(new URL('./dist/'+entry.url,import.meta.url))).digest('base64')})),warnings:[]})],
+      globPatterns: ['**/*.{js,css,html,png,svg,mp3,ttf,webmanifest}','asset-integrity.json'],
       // Include the longest complete BGM; the separate total-size gate remains 90 MB.
       maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       cleanupOutdatedCaches: true,

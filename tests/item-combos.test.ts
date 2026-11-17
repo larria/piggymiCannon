@@ -1,0 +1,30 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {Game} from '../src/engine';import {defaultSlots} from '../src/crew';import {Terrain} from '../src/terrain';
+import {restoreRadius,RESTORE_FRACTION} from '../src/item-combos';import {weaponById} from '../src/catalog';import {ReplayRecorder,ReplayPlayer} from '../src/replay';
+function game(flags={}){const g=new Game({slots:defaultSlots().map((s,i)=>({...s,enabled:true,team:i%2,controller:'human',vehicle:'cannon'})),seed:52,timer:0,fog:false,fireLine:false,...flags},'3.2.7');g.start();g.land=new Terrain();for(let x=0;x<=1920;x++)g.land.column(x,450,960,true);g.land.rebuild();g.tanks.forEach((t,i)=>Object.assign(t,{x:[220,1800,80,1900][i],y:432,fallVelocity:0}));g.wind=0;return g;}
+function run(g:Game){for(let i=0;i<2400&&g.phase==='flying';i++)g.update(1/120);assert.equal(g.projectiles.length,0);}
+test('different items combine in one action, but stock and duplicate boost still limit use',()=>{
+ const g=game();assert.ok(g.useItem('double'));assert.ok(g.useItem('boost'));assert.equal(g.useItem('boost'),false);assert.ok(g.fire());assert.equal(g.projectiles.length,2);assert.ok(g.projectiles.every(p=>p.fireBoosted&&p.boost===1.5));assert.equal(g.active.items.double,0);assert.equal(g.active.items.boost,0);assert.equal(g.active.itemDelay,400);
+});
+test('healing tap lands on self for 40%, no excavation, shields/damage/status unaffected',()=>{
+ const g=game(),t=g.active;t.hp=100;t.shield=30;t.poisoned=true;const mask=g.land.mask.slice(),ammo=t.ammo[g.selected];assert.ok(g.useItem('repair'));assert.equal(t.hp,100);assert.equal(t.items.repair,1);g.setAim(40,10);assert.ok(g.fire());assert.equal(g.projectiles[0].vx,0);assert.equal(g.projectiles[0].healing,true);run(g);assert.equal(t.hp,100+Math.round(t.maxHP*.4));assert.equal(t.shield,30);assert.equal(t.poisoned,true);assert.equal(t.ammo[g.selected],ammo);assert.equal(t.items.repair,0);assert.deepEqual(g.land.mask,mask);assert.equal(restoreRadius(),weaponById('cannon-normal').radius);assert.equal(t.damage,0);assert.ok(g.battleSnapshot().events.some(e=>e.type==='heal'));
+});
+test('double + strength + healing gives two 60% pulses capped at max HP and consumes each stock once',()=>{
+ const g=game(),t=g.active;t.hp=10;assert.ok(g.useItem('repair'));assert.ok(g.useItem('double'));assert.ok(g.useItem('boost'));assert.equal(g.restoring,true);g.setAim(35,10);g.fire();assert.equal(g.projectiles.length,2);assert.ok(g.projectiles.every(p=>p.healing&&p.boost===1.5));run(g);assert.equal(t.hp,t.maxHP);assert.equal(t.items.repair,0);assert.equal(t.items.double,0);assert.equal(t.items.boost,0);const heals=g.battleSnapshot().events.filter(e=>e.type==='heal'&&e.data.target===t.id);assert.equal(heals.length,2);assert.equal(heals[0].data.requested,Math.round(t.maxHP*.6));assert.equal(heals[1].data.actual,t.maxHP-heals[0].data.hpAfter);
+});
+test('area healing includes ally; enemy only with friendly-fire enabled, never resurrects, uses the cannon blast reach',()=>{
+ for(const friendlyFire of [false,true]){const g=game({friendlyFire}),t=g.active;t.hp=100;g.tanks[1].x=240;g.tanks[1].hp=100;g.tanks[2].x=250;g.tanks[2].hp=100;g.tanks[3].x=260;g.tanks[3].hp=0;g.useItem('repair');g.setAim(35,10);g.fire();run(g);assert.ok(g.tanks[2].hp>100);assert.equal(g.tanks[1].hp>100,friendlyFire);assert.equal(g.tanks[3].hp,0);}
+});
+test('healing projectile receives one fire boost; strength + line does not double it, sea rage is damage only',()=>{
+ for(const boosted of [false,true]){const g=game(),t=g.active;t.vehicleId='sea';t.hp=100;g.useItem('repair');if(boosted)g.useItem('boost');g.fire();const p=g.projectiles[0];Object.assign(p,{x:600,y:200,vx:250,vy:0,age:.2});g.fireLine={x:601,top:0,bottom:950};g.update(.02);assert.equal(p.boost,1.5);assert.equal(p.fireBoosted,true);Object.assign(p,{x:t.x,y:t.y});(g as any).explode(p,t.id);assert.equal(t.hp,100+Math.round(t.maxHP*.6));const heal=g.battleSnapshot().events.filter(e=>e.type==='heal'&&e.data.target===t.id).at(-1)!.data;assert.equal(heal.factors.filter((f:any)=>f.source.includes('fireBoosted')).length,1);assert.equal(heal.requested,Math.round(heal.base*heal.factors.reduce((n:number,f:any)=>n*f.value,1)));}
+});
+test('double transfer waits for first landing, then launches from the new location and lands a second time',()=>{
+ const g=game(),t=g.active;g.useItem('double');g.useItem('teleport');g.setAim(35,35);const origin=t.x;g.fire();assert.equal(g.projectiles.length,2);assert.equal(g.projectiles[1].awaitTransfer,true);let first:number|null=null;for(let i=0;i<2400&&g.phase==='flying';i++){g.update(1/120);if(t.x!==origin&&first===null)first=t.x;}assert.ok(first!==null);assert.ok(first>origin+100);assert.ok(t.x>first+100);assert.equal(g.active.items.double,0);assert.equal(g.active.items.teleport,0);assert.ok(g.battleSnapshot().events.some(e=>e.type==='transfer-relaunch'));assert.equal(g.tanks[1].hp,g.tanks[1].maxHP);
+});
+test('armed combo saves, restores and replays without changing seed or item consumption',()=>{
+ const g=game();g.active.hp=10;const r=new ReplayRecorder(g);g.useItem('repair');g.useItem('double');g.useItem('boost');g.setAim(35,10);const h=Game.fromBattleSnapshot(g.battleSnapshot());assert.equal(h.restoring,true);assert.equal(h.active.doubleShot,true);assert.equal(h.active.boost,true);g.fire();for(let i=0;i<300;i++)g.update(.01);const p=new ReplayPlayer(r.export());while(!p.done)p.advance(.1);assert.equal(p.verified,true);assert.deepEqual(p.game.tanks,g.tanks);r.detach();assert.equal(RESTORE_FRACTION,.4);
+});
+
+test('charged healing shot follows the real ballistic path to a teammate without healing the distant caster or excavating',()=>{
+ const g=game(),t=g.active,ally=g.tanks[2];t.hp=100;ally.hp=100;g.setAim(35,30);const landing=g.predict(t.angle,t.power,'cannon-normal');ally.x=landing.x;const terrain=g.land.mask.slice();g.useItem('repair');g.fire();assert.ok(g.projectiles[0].vx>0);run(g);assert.equal(t.hp,100);assert.equal(ally.hp,100+Math.round(ally.maxHP*.4));assert.deepEqual(g.land.mask,terrain);
+});
