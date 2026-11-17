@@ -151,7 +151,7 @@ dialog.setup-dialog{width:min(1040px,calc(100vw - 40px));max-width:1040px}.setup
 
 .stage-top .map-chip{margin-right:auto}.wind-gauge{position:relative;height:9px;margin-top:4px;border:1px solid #cdd4bd;background:#fffef9;border-radius:2px;overflow:hidden;pointer-events:none;--wind-start:50%;--wind-width:0%;--wind-end:50%}.wind-area{position:absolute;top:0;bottom:0;left:var(--wind-start);width:var(--wind-width);background:#f2d58c}.wind-center,.wind-end{position:absolute;top:0;bottom:0;width:1px;transform:translateX(-.5px)}.wind-center{left:50%;background:#8e967d}.wind-end{left:var(--wind-end);background:#b99a58}.wind-end[hidden]{display:none}.minimap-panel.collapsed{height:auto;min-height:47px;padding-top:34px}.minimap-panel.collapsed .wind-gauge{margin-top:0}
 
-#charge-fill{width:calc(100% - 4px)!important;transform-origin:left center;transform:scaleX(.68);transition:none;will-change:transform}
+#charge-fill{position:absolute;display:block;top:2px;bottom:2px;left:2px;width:calc(100% - 4px)!important;border-radius:2px;background:#e59a78;pointer-events:none;transform-origin:left center;transform:scaleX(.68);transition:none;will-change:transform}.compact-dashboard #charge-fill{top:1px;bottom:1px}
 
 /* Retained GPU world below the unchanged interactive vector foreground. */
 .pixi-battle-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.pixi-battle-layer[hidden]{display:none}#battlefield{position:relative}
@@ -218,5 +218,5 @@ dialog,.arsenal{scrollbar-gutter:stable}
 /* Separate time preference from map choices, retaining touch targets. */
 .setup-dialog .setup-map-title{margin-bottom:12px}
 
-/* The 100ms tap boundary occupies the existing control, without changing hit targets. */
-.fire-button{position:relative}.charge-wait-ring{position:absolute;width:44px;height:44px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);pointer-events:none;opacity:0;z-index:2;fill:none}.charge-wait-track{stroke:#f6edd6;stroke-width:2.5;opacity:.75}.charge-wait-fill{stroke:#61774e;stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1}.charge-waiting>.charge-wait-ring{opacity:1}.fire-button.charge-waiting>.icon{opacity:.35}.power-meter-button{position:relative}.power-meter-button>.charge-wait-ring{width:26px;height:26px;left:22px}.power-meter-button .charge-wait-track{stroke:#f7f3e7}.power-meter-button .charge-wait-fill{stroke:#6f8057}
+/* Preparation reuses the original button fill. Power grows only in the horizontal meter. */
+.fire-button{position:relative}.compact-dashboard .fire-button.charging>.icon{color:#83573b}

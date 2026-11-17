@@ -15,9 +15,10 @@ test('dragging upward raises aim and horizontal travel changes direction after t
   assert.equal(dragAim(48,1,0,1000).angle,5);
 });
 
-test('all input devices wait exactly 100ms before charging; early release stays minimum and long power retains its slope',async()=>{
- const {heldChargePower,chargeDelayProgress,CHARGE_DELAY_SECONDS}=await import('../src/interaction');assert.equal(CHARGE_DELAY_SECONDS,.1);
- for(const seconds of [0,.01,.05,.099,.1])assert.equal(heldChargePower(seconds),10);
- assert.ok(Math.abs(heldChargePower(.15)-11.8)<1e-9);assert.equal(heldChargePower(1.1),46);assert.equal(heldChargePower(2.6),100);assert.equal(heldChargePower(99),100);
- assert.equal(chargeDelayProgress(0),0);assert.equal(chargeDelayProgress(.05),.5);assert.equal(chargeDelayProgress(.1),1);assert.equal(chargeDelayProgress(1),1);
+test('all input devices use 200ms preparation before charging, and the button progress has its own timing',async()=>{
+ const {heldChargePower,chargeDelayProgress,chargePreparationSeconds,CHARGE_DELAY_SECONDS}=await import('../src/interaction');assert.equal(CHARGE_DELAY_SECONDS,.2);
+ for(const seconds of [0,.05,.1,.199,.2])assert.equal(heldChargePower(seconds),1);
+ assert.ok(Math.abs(heldChargePower(.25)-2.8)<1e-9);assert.equal(heldChargePower(1.2),37);assert.equal(heldChargePower(2.95),100);assert.equal(heldChargePower(99),100);
+ assert.equal(chargeDelayProgress(0),0);assert.equal(chargeDelayProgress(.1),.5);assert.equal(chargeDelayProgress(.2),1);assert.equal(chargeDelayProgress(1),1);
+ assert.equal(chargePreparationSeconds('3.2.8'),.1);assert.equal(chargePreparationSeconds('v3.2.9'),.2);assert.equal(chargePreparationSeconds('3.2.7'),0);assert.equal(chargeDelayProgress(.05,.1),.5);
 });

@@ -14,7 +14,7 @@ test('one blast can deal full ancient damage to future and discounted damage to 
  const g=game('cannon','water'),extra={...g.tanks[1],id:2,crew:'fox' as const,vehicleId:'missile' as const,x:716,maxHP:1100,hp:1100};g.tanks.push(extra);g.selected='cannon-special';impact(g);assert.equal(damage(g,1).requested,420);assert.equal(damage(g,2).requested,336);
 });
 test('self/friendly switches still block damage and environmental or percentage damage is not era-discounted',()=>{
- const g=game('cannon','missile');g.tanks[1].team=g.tanks[0].team;const hp=g.tanks[1].hp;impact(g);assert.equal(g.tanks[1].hp,hp);g.config.friendlyFire=true;impact(g);assert.equal(hp-g.tanks[1].hp,112);g.tanks[0].vehicleId='dragon';const ownerHP=g.tanks[0].hp;(g as any).explode({...g.launch(g.active,'dragon-normal'),x:g.active.x,y:g.active.y},0);assert.equal(g.active.hp,ownerHP);
+ const g=game('cannon','missile');g.tanks[1].team=g.tanks[0].team;const hp=g.tanks[1].hp;impact(g);assert.equal(g.tanks[1].hp,hp);g.config.friendlyFire=true;impact(g);assert.equal(hp-g.tanks[1].hp,112);g.config.friendlyFire=false;g.tanks[0].vehicleId='dragon';const ownerHP=g.tanks[0].hp;(g as any).explode({...g.launch(g.active,'dragon-normal'),x:g.active.x,y:g.active.y},0);assert.equal(g.active.hp,ownerHP);
  for(const cause of ['fall','fire','gas','poison']){const h=game('cannon','missile'),t=h.tanks[1];h.damage(t,31,0,true,cause==='fall'?'fall':'graze',undefined,{cause,base:31});assert.equal(t.maxHP-t.hp,31);assert.equal(damage(h).factors.length,0);}
  const h=game('cannon','missile'),t=h.tanks[1];h.current=1;t.poisoned=true;t.poisonOwner=0;h.nextTurn();assert.equal(t.maxHP-t.hp,Math.floor(t.maxHP*.2));
 });

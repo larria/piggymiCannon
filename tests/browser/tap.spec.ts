@@ -13,7 +13,7 @@ for(const width of [1194,1210])test(`${width} iPad: native short taps on fire an
  await page.setViewportSize({width,height:834});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  for(const id of ['fire-button','power-meter']){
   await arrange(page,width===1194?56:90);const r=await page.locator('#'+id).boundingBox();await page.touchscreen.tap(r!.x+r!.width/2,r!.y+r!.height/2);
-  const shot=await page.evaluate(()=>{const g=(window as any).__qa.game;return {shots:g.tanks[0].shots,power:g.tanks[0].lastPower,events:(window as any).__tapEvents};});expect(shot.shots).toBe(1);expect(shot.power).toBe(10);expect(shot.events.some((e:any)=>e.type==='pointerdown'&&e.pointerType==='touch')).toBe(true);expect(shot.events.some((e:any)=>e.type==='pointerup')).toBe(true);
+  const shot=await page.evaluate(()=>{const g=(window as any).__qa.game;return {shots:g.tanks[0].shots,power:g.tanks[0].lastPower,events:(window as any).__tapEvents};});expect(shot.shots).toBe(1);expect(shot.power).toBe(1);expect(shot.events.some((e:any)=>e.type==='pointerdown'&&e.pointerType==='touch')).toBe(true);expect(shot.events.some((e:any)=>e.type==='pointerup')).toBe(true);
   await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.tanks[1].hp),{timeout:8000}).toBeLessThan(920);
   expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].hp)).toBe(920);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[2].hp)).toBe(920);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].shots)).toBe(1);
   await expect.poll(()=>page.evaluate(()=>{const boxes=(window as any).__qa.renderer.labelRects;return boxes.length===4&&boxes.every((a:any,i:number)=>boxes.slice(i+1).every((b:any)=>a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));})).toBe(true);
@@ -29,15 +29,15 @@ test('early capture loss and another pointer cancellation do not cancel the acti
   document.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,cancelable:true,pointerId:701,pointerType:'touch'}));
   fire.dispatchEvent(new PointerEvent('lostpointercapture',{bubbles:true,pointerId:701,pointerType:'touch'}));
  });
- expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].lastPower)).toBe(10);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].shots)).toBe(1);await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.tanks[1].hp)).toBeLessThan(920);
+ expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].lastPower)).toBe(1);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].shots)).toBe(1);await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.tanks[1].hp)).toBeLessThan(920);
 });
 test('a genuine cancellation restores previous power and does not shoot on subsequent release/click',async({page})=>{
  await arrange(page);await page.evaluate(()=>{const fire=document.getElementById('fire-button')!;for(const type of ['pointerdown','pointercancel','lostpointercapture','pointerup'])fire.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:703,pointerType:'touch'}));fire.dispatchEvent(new MouseEvent('click',{bubbles:true,detail:1}));});
  expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].shots)).toBe(0);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].power)).toBe(68);await expect(page.locator('#fire-button')).toBeEnabled();
 });
 test('SPACE and intentional long touch holds retain normal charging and early release',async({page})=>{
- await arrange(page,600);await page.keyboard.down('Space');await page.waitForTimeout(500);await page.keyboard.up('Space');const space=await page.evaluate(()=>(window as any).__qa.game.tanks[0].lastPower);expect(space).toBeGreaterThan(24);expect(space).toBeLessThan(36);
- await arrange(page,600);await page.locator('#power-meter').dispatchEvent('pointerdown',{pointerId:704,pointerType:'touch',bubbles:true});await page.waitForTimeout(500);await page.locator('#power-meter').dispatchEvent('pointerup',{pointerId:704,pointerType:'touch',bubbles:true});const touch=await page.evaluate(()=>(window as any).__qa.game.tanks[0].lastPower);expect(touch).toBeGreaterThan(24);expect(touch).toBeLessThan(36);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].shots)).toBe(1);
+ await arrange(page,600);await page.keyboard.down('Space');await page.waitForTimeout(500);await page.keyboard.up('Space');const space=await page.evaluate(()=>(window as any).__qa.game.tanks[0].lastPower);expect(space).toBeGreaterThan(9);expect(space).toBeLessThan(20);
+ await arrange(page,600);await page.locator('#power-meter').dispatchEvent('pointerdown',{pointerId:704,pointerType:'touch',bubbles:true});await page.waitForTimeout(500);await page.locator('#power-meter').dispatchEvent('pointerup',{pointerId:704,pointerType:'touch',bubbles:true});const touch=await page.evaluate(()=>(window as any).__qa.game.tanks[0].lastPower);expect(touch).toBeGreaterThan(9);expect(touch).toBeLessThan(20);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].shots)).toBe(1);
 });
 test('a battlefield touch continues to aim without firing or changing previous power',async({page})=>{
  await arrange(page);const r=await page.locator('#battlefield').boundingBox();await page.touchscreen.tap(r!.x+r!.width*.65,r!.y+r!.height*.4);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].shots)).toBe(0);expect(await page.evaluate(()=>(window as any).__qa.game.tanks[0].power)).toBe(68);

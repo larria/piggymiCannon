@@ -23,7 +23,7 @@ export const WEAPONS: Weapon[] = [
 WEAPONS.forEach((w,i)=>{w.shape=w.id;w.sound=27+i;});
 export const TURN_ITEMS:ItemId[]=['double','teleport','boost','repair'];
 export const ITEMS: { id:ItemId; name:string; description:string; count:number; icon:string;cost:number;cooldown:number;unlock:number }[] = [
-  { id:'repair', name:'恢复弹', description:'装填后蓄力发射，不挖土；轻点原地治疗。基础恢复目标最大生命40%，受威力加强与火线影响。友伤关闭时只治疗自己与队友，开启时也会治疗敌人；不复活，也不解除中毒。可与双发、强化联动。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
+  { id:'repair', name:'恢复弹', description:'装填后蓄力发射，不挖土；轻点原地治疗。正中最高恢复目标最大生命40%，偏离时按距离衰减，受威力加强与火线影响。友伤关闭时只治疗自己与队友，开启时也会治疗敌人；不复活，也不解除中毒。可与双发、强化联动。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
   { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每局开局携带一件，用掉不会自动恢复；任意空槽可拾取重复道具；可与双发、恢复弹联动，不能与转移弹同时使用。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },

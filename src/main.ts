@@ -11,7 +11,8 @@ import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,p
 import { AudioManager } from './audio';
 import { DIFFICULTIES, ITEMS, MAPS, WEAPONS, weaponById, type ItemId, type WeaponId } from './catalog';
 import { icon } from './icons';
-import { heldChargePower,chargeDelayProgress,CHARGE_DELAY_SECONDS } from './interaction';
+import {MIN_POWER} from './ballistics';
+import { heldChargePower,chargeDelayProgress,chargePreparationSeconds,CHARGE_DELAY_SECONDS } from './interaction';
 import {installMobileGestureGuards} from './mobile-gestures';
 import {installAngleNudges} from './angle-nudges';
 import {chooseResultPosition} from './result-layout';
@@ -28,6 +29,7 @@ import {CREW,crewAvatar,defaultSlots,normalizeSlots,teamFlag,flagIcon,nameMarkup
 import {setupMarkup,mountSetup} from './setup';
 import {relativeAimForVector} from './aim';
 import {itemIcon} from './item-art';
+import {weaponHint} from './weapon-hints';
 import {installControlHints} from './control-hints';
 import {paintMapOverview} from './map-preview';
 import {freshMatchSeed} from './match-seed';
@@ -57,7 +59,7 @@ let dialogPaused=false;
 let statsRecorded=false;
 let toastTimer=0;let snapshotStatusTimer=0;
 let moveHeld=0;
-let charge:null|{pointer:number|null;startedAt:number;previousPower:number;tank:number;touch:boolean;source:'fire'|'power';audible:boolean;pointerStartedAt?:number}=null;
+let charge:null|{pointer:number|null;startedAt:number;previousPower:number;tank:number;touch:boolean;audible:boolean;pointerStartedAt?:number}=null;
 let aimPointer:number|null=null;
 let immersive=false;
 let drawerOpen=false;
@@ -95,9 +97,9 @@ $('#app').innerHTML=`
           <div class="dash-angle"><button id="aim-pad" class="angle-instrument" aria-label="拖动角度仪表瞄准"><canvas id="angle-dial"></canvas><span class="angle-instrument-name" id="instrument-tank">老土</span></button><div class="angle-caption"><span id="angle-limits">25–45°</span><button id="face-button" title="切换炮口朝向">${icon('transfer')}<span>朝右</span></button></div><input id="angle" type="range" min="0" max="90" value="45" class="sr-only"/><span id="angle-value" class="sr-only">45</span></div>
           <div class="dash-center"><div class="dash-toolbar"><div id="weapon-switcher" class="weapon-switcher hidden" aria-label="直接切换坦克武器"><button id="weapon-normal" data-weapon="shell"></button><button id="weapon-special" data-weapon="heavy"></button><button id="weapon-bonus" data-weapon="homing" class="hidden"></button></div><div id="quick-items" class="quick-items"></div><div class="wait-readout"><span>等待</span><strong id="waiting-value">580</strong></div></div>
             <div class="meter-row energy-meter"><span class="meter-label">${icon('fuel')}能量</span><div class="meter-track"><span id="energy-fill"></span></div><span id="energy-value" class="meter-value">920 / 920</span></div>
-            <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="短按最小力度发射，按住100毫秒后开始蓄力，松开发射"><svg class="charge-wait-ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="charge-wait-track" cx="24" cy="24" r="20"/><circle class="charge-wait-fill" cx="24" cy="24" r="20" pathLength="1"/></svg><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><span class="meter-help">按住力度条 / SPACE · 松开发射</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="10" max="100" value="68"/></div>
+            <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="短按最小力度发射，按住200毫秒准备，填满后横条蓄力，松开发射"><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><span class="meter-help">按住力度条 / SPACE · 松开发射</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="1" max="100" value="68"/></div>
             <div class="meter-row mobility-meter"><span class="meter-label">${icon('transfer')}移动力</span><div class="meter-track"><span id="mobility-fill"></span></div><span class="meter-value"><b id="fuel-value">100</b>%</span><div class="move-buttons"><button id="move-left" aria-label="后退">${icon('left')}<span>后退</span><kbd>A</kbd></button><button id="move-right" aria-label="前进"><kbd>D</kbd><span>前进</span>${icon('right')}</button></div></div><div class="dashboard-note"><span id="move-note">本回合可移动</span><span id="meter-hint">白线为上次力度 · ↑↓ 调角度</span></div>
-          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="短按最小力度发射，按住100毫秒后开始蓄力，松手或蓄满发射">${icon('target')}<svg class="charge-wait-ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="charge-wait-track" cx="24" cy="24" r="20"/><circle class="charge-wait-fill" cx="24" cy="24" r="20" pathLength="1"/></svg><span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
+          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="短按最小力度发射，按住200毫秒准备，填满后横条蓄力，松手或蓄满发射">${icon('target')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
         </section>
         <div class="keyboard-hints"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>W</kbd><kbd>S</kbd> 角度</span><span><kbd>SPACE</kbd> 蓄力 · 满力自动发射</span><span class="touch-help">拖动角度盘瞄准 · 长按力度条 · 蓄满自动开火</span><span class="hint-last">每一发，都有一点可能。</span></div>
       </section>
@@ -171,7 +173,7 @@ function displayTank(){return game.active;}
 function renderInventory() {
   const tank=displayTank(),vehicle=tank.vehicleId?vehicleById(tank.vehicleId):null;
   const weapons=vehicle?[weaponById(vehicle.normal),weaponById(vehicle.special),...(tank.ammo.homing>0?[weaponById('homing')]:[])]:WEAPONS;
-  $('#inventory-grid').innerHTML=activeTab==='weapons'?weapons.map(w=>`<button class="inventory-tile ${game.selected===w.id?'selected':''} ${tank.ammo[w.id]<=0?'depleted':''}" data-weapon="${w.id}" title="${w.name}：${w.description}" aria-label="${w.name}，${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]+' 发':'无限弹药'}" aria-pressed="${game.selected===w.id}"><span class="weapon-icon" style="--weapon-color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span class="tile-name">${w.name}</span><span class="ammo-count">${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]:'∞'}</span>${game.selected===w.id?`<span class="selection-tick">${icon('check')}</span>`:''}</button>`).join(''):
+  $('#inventory-grid').innerHTML=activeTab==='weapons'?weapons.map(w=>`<button class="inventory-tile ${game.selected===w.id?'selected':''} ${tank.ammo[w.id]<=0?'depleted':''}" data-weapon="${w.id}" data-help-name="${w.name}" data-help-description="${weaponHint(w.id)}" aria-label="${w.name}，${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]+' 发':'无限弹药'}" aria-pressed="${game.selected===w.id}"><span class="weapon-icon" style="--weapon-color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span class="tile-name">${w.name}</span><span class="ammo-count">${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]:'∞'}</span>${game.selected===w.id?`<span class="selection-tick">${icon('check')}</span>`:''}</button>`).join(''):
     game.backpack(tank).map((id,slot)=>{
       if(!id)return `<button class="inventory-tile item-tile empty-item" disabled aria-label="道具槽 ${slot+1}，空槽"><span class="weapon-icon">${icon('plus')}</span><span class="tile-name">空槽</span><span class="item-hint">可拾取任意道具</span></button>`;
       const i=ITEMS.find(i=>i.id===id)!,reason=game.itemUnavailable(id,false,slot);
@@ -201,7 +203,7 @@ function updateUI() {
   const shownWeapon=human?game.selected:t.selectedWeapon;
   const weaponSignature=`${t.vehicleId}|${game.current}|${shownWeapon}|${t.ammo.homing}`;
   if(weaponSignature!==lastWeapons) {
-    pair.forEach((id,i)=>{const w=weaponById(id),button=$<HTMLButtonElement>(['#weapon-normal','#weapon-special','#weapon-bonus'][i]);button.dataset.weapon=id;button.dataset.slot=String(i+1);button.dataset.helpDescription=w.description;button.innerHTML=`<span class="switch-icon" style="color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span><small>${i===0?'普通 · F3':i===1?'特殊 · F4':'空投 · 稀有'}</small><strong>${w.name}</strong></span>${i===1?`<em>等待 +${w.extraDelay??100}</em>`:''}`;button.classList.toggle('selected',shownWeapon===id);button.setAttribute('aria-pressed',String(shownWeapon===id));button.setAttribute('aria-label',`${i===0?'普通武器':i===1?'特殊武器':'空投武器'}：${w.name}`);});
+    pair.forEach((id,i)=>{const w=weaponById(id),button=$<HTMLButtonElement>(['#weapon-normal','#weapon-special','#weapon-bonus'][i]);button.dataset.weapon=id;button.dataset.slot=String(i+1);button.dataset.helpDescription=weaponHint(id);button.innerHTML=`<span class="switch-icon" style="color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span><small>${i===0?'普通 · F3':i===1?'特殊 · F4':'空投 · 稀有'}</small><strong>${w.name}</strong></span>${i===1?`<em>等待 +${w.extraDelay??100}</em>`:''}`;button.classList.toggle('selected',shownWeapon===id);button.setAttribute('aria-pressed',String(shownWeapon===id));button.setAttribute('aria-label',`${i===0?'普通武器':i===1?'特殊武器':'空投武器'}：${w.name}`);});
     $('#weapon-bonus').classList.toggle('hidden',t.ammo.homing<=0);lastWeapons=weaponSignature;paintProjectilePreviews($('#weapon-switcher'));
   }
   ['#weapon-normal','#weapon-special','#weapon-bonus'].forEach((selector,i)=>{$<HTMLButtonElement>(selector).disabled=!human||(t.ammo[pair[i]]??0)<=0;});
@@ -260,14 +262,14 @@ function updateUI() {
   $('#angle-value').textContent=String(Math.round(t.angle));$('#relative-angle').textContent=`${Math.round(t.angle)}°`;$('#absolute-angle').textContent=`${Math.round(game.aim(t).absolute)}°`;$('#angle-limits').textContent=`车身 ${t.minAngle}–${t.maxAngle}° · 水平 ${Math.round(game.aim(t,t.minAngle).absolute)}–${Math.round(game.aim(t,t.maxAngle).absolute)}°`;$('#power-value').textContent=String(Math.round(t.power));
   const angle=$<HTMLInputElement>('#angle'),power=$<HTMLInputElement>('#power');
   angle.min=String(t.minAngle);angle.max=String(t.maxAngle);angle.value=String(t.angle);power.value=String(t.power);
-  angle.style.setProperty('--range-fill',`${(t.angle-t.minAngle)/(t.maxAngle-t.minAngle)*100}%`);power.style.setProperty('--range-fill',`${(t.power-10)/90*100}%`);
+  angle.style.setProperty('--range-fill',`${(t.angle-t.minAngle)/(t.maxAngle-t.minAngle)*100}%`);power.style.setProperty('--range-fill',`${(t.power-MIN_POWER)/(100-MIN_POWER)*100}%`);
   angle.disabled=!human;power.disabled=!human;
   $('.control-deck').classList.toggle('inactive',!human);$<HTMLButtonElement>('#power-meter').disabled=!human||t.fallVelocity>0;$<HTMLButtonElement>('#skip-button').disabled=!human&&!renderer.touring;
   $('#skip-button').setAttribute('aria-label',renderer.touring?'跳过开场巡游':'跳过回合');
   document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, .angle-nudge, #face-button, #aim-pad').forEach(b=>b.disabled=!human);if(!human)angleNudges.cancel();
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
   updateChargeVisual(t.power);
-  $('#fire-button').classList.toggle('charging',Boolean(charge||playback?.charging));
+  updateChargePreparation(performance.now());
   document.querySelectorAll<HTMLButtonElement>('.quick-items [data-item]').forEach(button=>button.disabled=!!playback||!!game.itemUnavailable(button.dataset.item as ItemId,false,Number(button.dataset.itemSlot)));
 
   $('#fire-title').textContent=charge&&!charge.audible||playback?.waiting?'准备蓄力':charge||playback?.charging?'蓄力中':'开火';
@@ -390,7 +392,7 @@ function showDialog(type:string) {
     content.innerHTML=`<span class="eyebrow">战场里的那些瞬间</span><h2>作战记录。</h2><p class="dialog-intro">最近 24 条事件 · 当前第 ${game.round} 轮</p><ol class="battle-log">${game.log.length?game.log.map((line,i)=>`<li><span>${String(game.log.length-i).padStart(2,'0')}</span>${colorNames(line)}</li>`).join(''):'<li>战场很安静。第一发炮弹会写下故事。</li>'}</ol><button class="button button-dark dialog-primary" data-action="close">返回对局 ${icon('arrow')}</button>`;
   } else {
     dialog.classList.add('settings-dialog');
-    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>随实际地图切换，大厅与结算各有配乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','自己的炮弹也会伤到自己'],['friendlyFire','友方伤害','开启后队友可互伤，恢复弹也能治疗敌方'],['fallDamage','坠落伤害','关闭时落地不扣血；掉穿底边仍出局'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="repair-assets" class="snapshot-copy">修复素材</button><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
+    content.innerHTML=`<span class="eyebrow">照你喜欢的来</span><h2>一点小设置。</h2><p class="dialog-intro">音乐陪着玩，音效帮着瞄。两种声音可以分别开关。</p><div class="settings-row"><div><strong>游戏音效</strong><p>点击、履带、蓄力、炮火与爆炸</p></div><button id="effects-toggle" class="toggle ${audio.soundEnabled?'on':''}" role="switch" aria-checked="${audio.soundEnabled}" aria-label="游戏音效"><span></span></button></div><div class="settings-row"><div><strong>背景音乐</strong><p>随实际地图切换，大厅与结算各有配乐</p></div><button id="music-toggle" class="toggle ${audio.musicEnabled?'on':''}" role="switch" aria-checked="${audio.musicEnabled}" aria-label="背景音乐"><span></span></button></div><div class="combat-settings">${[['selfDamage','自伤','允许自己的爆炸波及自身（友伤开启时也可自伤）'],['friendlyFire','友方伤害','开启后可伤到自己与队友，恢复弹也能治疗敌方'],['fallDamage','坠落伤害','关闭时落地不扣血；掉穿底边仍出局'],['allowDragon','允许直接选择暴龙','不改变随机上阵的 1/10 概率']].map(([key,name,sub])=>`<div class="settings-row"><div><strong>${name}</strong><p>${sub}</p></div><button data-setting="${key}" class="toggle ${config[key as keyof Config]?'on':''}" role="switch" aria-checked="${!!config[key as keyof Config]}" aria-label="${name}"><span></span></button></div>`).join('')}</div><label class="form-label" for="volume">音量 <span id="volume-percent">${Math.round(audio.volume*100)}%</span></label><input id="volume" type="range" min="0" max="100" value="${Math.round(audio.volume*100)}"/><div class="snapshot-controls"><span id="snapshot-copy-status" class="snapshot-copy-status" role="status"></span><button type="button" id="repair-assets" class="snapshot-copy">修复素材</button><button type="button" id="copy-battle-snapshot" class="snapshot-copy">复制本局快照</button></div><button class="button button-dark dialog-primary" data-action="close">设置好了 ${icon('check')}</button>`;
     $('#copy-battle-snapshot').addEventListener('click',copyBattleSnapshot);
     $('#repair-assets').addEventListener('click',async()=>{
       const button=$<HTMLButtonElement>('#repair-assets');button.disabled=true;button.textContent='检查素材…';
@@ -517,20 +519,20 @@ $('#power').addEventListener('input',e=>{game.setAim(game.active.angle,Number((e
 $('#face-button').addEventListener('click',()=>{game.face(-game.active.direction);updateUI();});
 function startCharge(pointer:number|null,event?:PointerEvent) {
   if(!canControlBattle()||game.active.fallVelocity>0||charge) return false;
-  setDrawer(false);charge={pointer,startedAt:performance.now(),previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',source:(event?.currentTarget as HTMLElement|undefined)?.id==='power-meter'?'power':'fire',audible:false,pointerStartedAt:event?.timeStamp};
-  audio.unlock();recorder?.cue('charge-wait');game.setAim(game.active.angle,10);updateUI();updateChargeDelay(performance.now());return true;
+  setDrawer(false);charge={pointer,startedAt:performance.now(),previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',audible:false,pointerStartedAt:event?.timeStamp};
+  audio.unlock();recorder?.cue('charge-wait');game.setAim(game.active.angle,MIN_POWER);updateUI();updateChargePreparation(performance.now());return true;
 }
 function cancelCharge() {
   audio.stopCharge();
   if(charge) {recorder?.cue('charge-stop');game.tanks[charge.tank].power=charge.previousPower;charge=null;}
-  updateChargeDelay(performance.now());
+  updateChargePreparation(performance.now());
 }
 function finishCharge(maximum=false,event?:PointerEvent) {
   if(!charge) return;
   recorder?.cue('charge-stop');
   audio.stopCharge();
   const seconds=event&&charge.touch&&charge.pointerStartedAt!==undefined?Math.max(0,event.timeStamp-charge.pointerStartedAt)/1000:(performance.now()-charge.startedAt)/1000;
-  const tank=charge.tank,power=maximum?100:heldChargePower(seconds);charge=null;updateChargeDelay(performance.now());
+  const tank=charge.tank,power=maximum?100:heldChargePower(seconds);charge=null;updateChargePreparation(performance.now());
   if(canControlBattle()&&game.current===tank) game.setAim(game.active.angle,power);
   if(canControlBattle()&&game.current===tank) game.fire();updateUI();
 }
@@ -629,20 +631,22 @@ window.addEventListener('resize',()=>renderer.resize());
 
 // Only the narrow transform / colour-fill changes at display cadence.
 const chargeFill=$('#charge-fill'),chargeFire=$('#fire-button'),chargeReadout=$('#power-value');
-const chargeDelayHosts=[$('#fire-button'),$('#power-meter')];
-const chargeDelayFills=chargeDelayHosts.map(host=>host.querySelector<SVGCircleElement>('.charge-wait-fill')!);
-function updateChargeDelay(now:number){
+let lastPreparationFill=-1;
+function updateChargePreparation(now:number){
   const elapsed=charge?(now-charge.startedAt)/1000:playback?.waiting?playback.time-playback.waitingStartedAt:CHARGE_DELAY_SECONDS;
-  const waiting=!!(charge||playback?.waiting)&&elapsed<CHARGE_DELAY_SECONDS;
-  const source=charge?.source==='power'?1:0;
-  chargeDelayHosts.forEach((host,index)=>{host.classList.toggle('charge-waiting',waiting&&index===source);if(waiting&&index===source)chargeDelayFills[index].style.strokeDashoffset=String(1-chargeDelayProgress(elapsed));});
+  const duration=charge?CHARGE_DELAY_SECONDS:playback?chargePreparationSeconds(playback.recording.gameVersion):CHARGE_DELAY_SECONDS;
+  const active=Boolean(charge||playback?.waiting||playback?.charging);
+  const preparing=Boolean(charge?elapsed<duration:playback?.waiting);
+  chargeFire.classList.toggle('charging',active);chargeFire.classList.toggle('charge-preparing',preparing);
+  // The button visualizes only preparation; actual shot power belongs to the horizontal meter.
+  const fill=preparing?chargeDelayProgress(elapsed,duration)*100:active?100:0;
+  if(fill!==lastPreparationFill){lastPreparationFill=fill;chargeFire.style.setProperty('--charge',`${fill}%`);}
 }
 let chargeVisualPower=-1;
 function updateChargeVisual(power:number){
   if(power===chargeVisualPower)return;chargeVisualPower=power;
   // Constants are created before the initial updateUI call at the foot of this file.
   chargeFill.style.transform=`scaleX(${power/100})`;
-  chargeFire.style.setProperty('--charge',`${power}%`);
   const label=String(Math.round(power));if(chargeReadout.textContent!==label)chargeReadout.textContent=label;
 }
 let previous=performance.now(),lastUI=0;
@@ -680,7 +684,7 @@ function frame(now:number) {
     if(event.type==='crate-land') audio.play('crate-land',event.x,game.tanks[game.viewer].x);
   }
   if(playback)for(const cue of playback.drainCues()){if(cue.kind==='charge-start')audio.startCharge();if(cue.kind==='charge-stop')audio.stopCharge();if(cue.kind==='charge-power')audio.updateCharge(cue.power!);}
-  updateChargeDelay(now);
+  updateChargePreparation(now);
   if(charge||playback?.charging)updateChargeVisual(game.active.power);
   if(now-lastUI>80&&(!game.paused||renderer.touring||playback)) {updateUI();lastUI=now;}
   impactProfiler?.finishFrame();

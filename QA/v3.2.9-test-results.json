@@ -1,0 +1,41 @@
+{
+  "formatVersion": 1,
+  "version": "3.2.9",
+  "reproducedPreviousFillHeight": 0,
+  "node": {
+    "tests": 319,
+    "passed": 319
+  },
+  "postCacheFocused": {
+    "tests": 32,
+    "passed": 32
+  },
+  "chromium": {
+    "coreTests": 27,
+    "initialPassed": 26,
+    "correctedHoverFixturePassed": 2,
+    "mobileHoldPassed": 1
+  },
+  "webkit": {
+    "tests": 27,
+    "passed": 27
+  },
+  "visual": {
+    "viewport": [
+      1194,
+      834
+    ],
+    "additionalWidth": 1210,
+    "dpr": 2,
+    "realIPadHardware": false,
+    "oneImagePerReview": true
+  },
+  "preparationMs": 200,
+  "minimumPower": 1,
+  "originalSpeedMappingFrom10Unchanged": true,
+  "shooterCollisionIgnored": true,
+  "friendlyFireSelfSplashAllowed": true,
+  "restoreFalloffRecorded": true,
+  "crateFloatingLabelRemoved": true,
+  "pcStationaryHoverMs": 100
+}

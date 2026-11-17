@@ -22,7 +22,7 @@ import {BattleTrace,packTerrain,unpackTerrain,snapshotText,traceClone,type Battl
 import {MAPS,type MapChoice} from './catalog';
 import {nextNaturalWind,nextWindRound,MAX_WIND_CHANGE,NATURAL_WIND_LIMIT} from './wind-cycle';
 import {ITEM_CUE_SECONDS,type ItemCue} from './item-feedback';
-import {projectileSpeed} from './ballistics';
+import {projectileSpeed,minimumPower,MIN_POWER} from './ballistics';
 import {modernSupplyTiming,SUPPLY_APPROACH_SECONDS,SUPPLY_LANDING_SECONDS,type SupplyObservation} from './supply-camera';
 export {WORLD_W,WORLD_H,BOTTOM_Y};
 export {WATER_Y} from './terrain';
@@ -64,6 +64,7 @@ export const clamp = (v:number,min:number,max:number) => Math.min(max,Math.max(m
 export function makeRng(seed:number) { let a=seed>>>0; return () => { a+=0x6D2B79F5; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
 
 export class Game {
+  readonly minimumShotPower:number;
   config:Config;
   land=new Terrain();
   terrain=this.land.surface;
@@ -100,6 +101,7 @@ export class Game {
   aiDecision:{target:number;fromX:number;goalX:number;weapon:WeaponId;intentionalMiss:boolean}|null=null;
 
   constructor(config:Partial<Config>={},readonly gameVersion='development') {
+    this.minimumShotPower=minimumPower(gameVersion);
     this.config={slots:defaultSlots(),map:'valley',timer:0,fallDamage:false,seed:Date.now(),...config};
     this.config.fallDamage=!!this.config.fallDamage;
     if(this.config.slots.length!==4||slotProblem(this.config.slots))throw new Error(slotProblem(this.config.slots)??'需要四个固定槽位');
@@ -124,7 +126,7 @@ export class Game {
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
-  private traceRules(){return {...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),eraDamageVersion:ERA_DAMAGE_VERSION,雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
+  private traceRules(){return {...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),eraDamageVersion:ERA_DAMAGE_VERSION,雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=BOTTOM_Y||t.x<0||t.x>WORLD_W)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
@@ -174,7 +176,8 @@ export class Game {
   get active() { return this.tanks[this.current]; }
   get enemy() { return this.opponents(this.active).sort((a,b)=>Math.abs(a.x-this.active.x)-Math.abs(b.x-this.active.x))[0]??this.tanks.find(t=>t.team!==this.active.team)!; }
   opponents(t:Tank){return this.tanks.filter(e=>e.team!==t.team&&e.hp>0);}
-  canDamage(t:Tank,owner:number){const source=this.tanks[owner];return !source|| (t.id===owner?!!this.config.selfDamage:t.team===source.team?!!this.config.friendlyFire:true);}
+  canDamage(t:Tank,owner:number){const source=this.tanks[owner];return !source|| (t.id===owner?!!this.config.selfDamage||this.minimumShotPower===MIN_POWER&&!!this.config.friendlyFire:t.team===source.team?!!this.config.friendlyFire:true);}
+  projectileCollisionAllowed(t:Tank,owner:number){return t.id!==owner||this.minimumShotPower!==MIN_POWER;}
   visible(t:Tank){return this.introLocked||!this.fog||t.team===this.tanks[this.viewer].team;}
   get gravity() { return this.config.map==='moon'?145:230; }
   get snow(){return modernWeather(this.gameVersion)?this.config.snow??this.weatherSnow:this.config.snow===true;}
@@ -352,7 +355,7 @@ export class Game {
   setAim(angle:number,power:number) {
     if(!this.humanTurn) return;
     const from={relative:this.active.angle,absolute:this.aim(this.active).absolute,power:this.active.power};
-    this.active.angle=clamp(angle,this.active.minAngle,this.active.maxAngle); this.active.power=clamp(power,10,100);
+    this.active.angle=clamp(angle,this.active.minAngle,this.active.maxAngle); this.active.power=clamp(power,this.minimumShotPower,100);
     const to={relative:this.active.angle,absolute:this.aim(this.active).absolute,power:this.active.power};
     if(from.relative!==to.relative||from.power!==to.power)this.recordBattle('aim',`${this.active.name}瞄准：相对${to.relative.toFixed(2)}°／绝对${to.absolute.toFixed(2)}°，力度${to.power.toFixed(2)}，${weaponById(this.selected).name}`,{from,to,weapon:this.selected},false,true);
   }
@@ -474,7 +477,7 @@ export class Game {
   }
   launch(t:Tank,weapon:WeaponId,angle=t.angle,power=t.power):Projectile {
     const vector=this.aim(t,angle),muzzle=this.muzzle(t,angle);
-    const spec=weaponById(weapon),speed=projectileSpeed(power,weapon==='sniper'?2:spec.speed??1,this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
+    const spec=weaponById(weapon),speed=projectileSpeed(Math.max(this.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
     const rage=isRaging(t)?1.5:1;
     const weather=t.vehicleId==='water'&&this.snow?1.25:1;
     return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:launchDamageScale(!!t.vehicleId,weapon),phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:rage>1?1.15:1,rage:rage>1};
@@ -500,7 +503,7 @@ export class Game {
     t.lastPower=t.power;t.selectedWeapon=id;
     const spec=weaponById(id);
     t.lastDelay=this.delayFor(t,transfer||healing?undefined:id);t.delayCommitted=true;
-    if(healing){const p={...this.launch(t,'cannon-normal'),healing:true,boost:t.boost?1.5:1,fireBoosted:t.boost,rage:false,digBoost:1,boostSources:{fire:t.boost?'item' as const:null,rage:1,snow:1}};if(t.power<=10)Object.assign(p,{x:t.x,y:t.y-45,vx:0,vy:0});this.projectiles=[p];}
+    if(healing){const p={...this.launch(t,'cannon-normal'),healing:true,boost:t.boost?1.5:1,fireBoosted:t.boost,rage:false,digBoost:1,boostSources:{fire:t.boost?'item' as const:null,rage:1,snow:1}};if(t.power<=this.minimumShotPower)Object.assign(p,{x:t.x,y:t.y-45,vx:0,vy:0});this.projectiles=[p];}
     else if(transfer)this.projectiles=[{...this.launch(t,'shell'),transfer:true,scale:1,boost:1,fireBoosted:false,rage:false,digBoost:1}];
     else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>(()=>{const profile=salvoProfile(t.vehicleId,id,i,spec.shots!),p=this.launch(t,id,t.angle+profile.angle);p.vx*=profile.vx;p.vy*=profile.vy;p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;p.phase=i*Math.PI*2/spec.shots!;return p;})());
     else if(id==='triple') this.projectiles=[-5,0,5].map(d=>this.launch(t,id,t.angle+d));
@@ -538,7 +541,7 @@ export class Game {
   }
   private projectileHit(p:Projectile) {
     if(p.age<0.09) return undefined;
-    return this.tanks.find(t=>t.hp>0&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
+    return this.tanks.find(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
   }
   private invalidVolleyTarget(p:Projectile) {
     if(p.volley===0||weaponById(p.weapon).homingMode!=='volley')return false;
@@ -621,7 +624,7 @@ export class Game {
     }
     if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70||p.age>12){this.observe('ground',null,{x:clamp(p.x,0,WORLD_W),y:clamp(p.y,-TERRAIN_H,BOTTOM_Y)});this.recordBattle('projectile-end',`第${p.traceId??'?'}弹${p.age>12?'超时':'越界'}消失`,{projectile:p.traceId,weapon:p.weapon,x:p.x,y:p.y,age:p.age});if(p.transfer){if(modernBackpack(this.gameVersion))this.transferTo(this.tanks[p.owner],p.x,p.y,p.traceId);else this.emit('item','转移弹未落在战场内，转移失败。');}return true;}
     const hitTank=this.projectileHit(p);
-    if(p.healing&&(this.land.solid(p.x,p.y)||hitTank)){this.restoreImpact(p,hitTank?.id);return true;}
+    if(p.healing&&(this.land.solid(p.x,p.y)||hitTank)){if(this.minimumShotPower===MIN_POWER&&!hitTank&&p.vx===0&&p.vy>0)p.y=this.ground(p.x,oldY);this.restoreImpact(p,hitTank?.id);return true;}
     if(p.transfer&&(this.land.solid(p.x,p.y)||hitTank)){
       if(!this.transferTo(this.tanks[p.owner],p.x,p.y,p.traceId))this.emit('item','转移弹落点无法站立，转移失败。');
       return true;
@@ -668,7 +671,7 @@ export class Game {
         const unsupported=!c.falling&&this.ground(c.x,c.y-5)-14>c.y+6;
         if(!hit&&!unsupported)return true;
         this.recordBattle('crate-destroy',`补给箱被${hit?'炮击挖土波及':'脚下支撑破坏'}摧毁`,{crate:{...c},cause:hit?'excavation':'support',source,terrainEvent:event});
-        this.burst(c.x,c.y,10,'#c29a6b');this.float(c.x,c.y-24,'箱子摧毁','#997651');
+        this.burst(c.x,c.y,10,'#c29a6b');
         return false;
       });
     }else{
@@ -693,9 +696,10 @@ export class Game {
     this.recordBattle('restore-impact','恢复弹落地，不挖土',{projectile:p.traceId,owner:p.owner,x:p.x,y:p.y,radius,boost:p.boost,fireBoosted:p.fireBoosted});
     for(const target of this.tanks){if(target.hp<=0||directTarget!==target.id&&Math.hypot(target.x-p.x,target.y-p.y)>radius+26)continue;
       if(!this.canRestore(target,p.owner)){this.recordBattle('heal-blocked',`${target.name}不受敌方恢复弹影响：友伤关闭`,{owner:p.owner,target:target.id,friendlyFire:!!this.config.friendlyFire});continue;}
-      const before=target.hp,base=target.maxHP*RESTORE_FRACTION,requested=Math.round(base*p.boost);target.hp=Math.min(target.maxHP,target.hp+requested);const actual=target.hp-before;
-      const factors=[{source:'基础恢复比例',value:RESTORE_FRACTION},{source:`fireBoosted（${p.boostSources?.fire??'无强化'}）`,value:p.fireBoosted?1.5:1},{source:'恢复弹范围内',value:1}];
-      this.recordBattle('heal',`${this.tanks[p.owner].name}→${target.name}恢复弹：最大HP${target.maxHP}${factors.map(f=>` ×${f.value}[${f.source}]`).join('')}，恢复${actual}，HP ${before}→${target.hp}`,{owner:p.owner,target:target.id,weapon:'cannon-normal',projectile:p.traceId,base:target.maxHP,factors,requested,actual,hpBefore:before,hpAfter:target.hp,boostSources:p.boostSources,friendlyFire:!!this.config.friendlyFire,poisoned:target.poisoned});
+      const falloff=this.minimumShotPower===MIN_POWER?impactDamageScale(target,p.x,p.y,this.tankSlope(target),radius,directTarget===target.id):1;
+      const before=target.hp,base=target.maxHP*RESTORE_FRACTION,requested=Math.round(base*p.boost*falloff);target.hp=Math.min(target.maxHP,target.hp+requested);const actual=target.hp-before;
+      const factors=[{source:'基础恢复比例',value:RESTORE_FRACTION},{source:`fireBoosted（${p.boostSources?.fire??'无强化'}）`,value:p.fireBoosted?1.5:1},{source:this.minimumShotPower===MIN_POWER?'命中／距离衰减':'恢复弹范围内',value:falloff}];
+      this.recordBattle('heal',`${this.tanks[p.owner].name}→${target.name}恢复弹：最大HP${target.maxHP}${factors.map(f=>` ×${f.value}[${f.source}]`).join('')}，恢复${actual}，HP ${before}→${target.hp}`,{owner:p.owner,target:target.id,weapon:'cannon-normal',projectile:p.traceId,base:target.maxHP,factors,requested,actual,hpBefore:before,hpAfter:target.hp,boostSources:p.boostSources,friendlyFire:!!this.config.friendlyFire,poisoned:target.poisoned,...(this.minimumShotPower===MIN_POWER?{falloff,distance:Math.hypot(target.x-p.x,target.y-p.y),directHit:directTarget===target.id}:{} )});
       if(actual){this.float(target.x,target.y-40,`+${actual}`,'#568949',target.id);this.itemCues.push({tank:target.id,item:'repair',age:0});this.observe('hit',target);this.emit('heal',`${target.name}恢复了${actual}点生命。`,actual,target.x);}
     }
   }
@@ -1010,7 +1014,7 @@ export class Game {
         if(contact){p.x=contact.x;p.y=contact.y;}
       }
       if(i%6===0) points.push({x:p.x,y:p.y});
-      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
+      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t)));
       if(p.x<0||p.x>WORLD_W||p.y>WORLD_H||this.land.solid(p.x,p.y)||direct) break;
     }
     return {x:p.x,y:p.y,points,direct};

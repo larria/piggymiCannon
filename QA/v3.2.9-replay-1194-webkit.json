@@ -1,0 +1,13 @@
+{
+  "width": 1194,
+  "browserName": "webkit",
+  "bytes": 34310,
+  "seed": 3897362648,
+  "actualMap": "factory",
+  "commands": 158,
+  "duration": 1.8849999999999982,
+  "exactStateVerified": true,
+  "statsUnchanged": true,
+  "localReload": true,
+  "deleted": true
+}

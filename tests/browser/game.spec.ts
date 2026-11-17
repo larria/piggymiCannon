@@ -297,7 +297,7 @@ test('real snowfall is selectable at setup and remains visible in the battlefiel
 test('holding icon controls explains them without switching or using an item',async({page})=>{
  await start(page);await page.locator('#weapon-special').click();
  const hold=async(selector:string)=>{const r=await page.locator(selector).boundingBox();await page.mouse.move(r!.x+r!.width/2,r!.y+r!.height/2);await page.mouse.down();await page.waitForTimeout(500);await expect(page.locator('#control-hint')).toBeVisible();};
- await hold('#quick-items [data-item="repair"]');await expect(page.locator('#control-hint')).toContainText('生命已满');await page.mouse.up();
+ await hold('#quick-items [data-item="repair"]');await expect(page.locator('#control-hint')).toContainText('恢复弹');await page.mouse.up();
  await hold('#weapon-normal');await expect(page.locator('#control-hint')).toContainText('巨石');await page.mouse.up();await expect(page.locator('#weapon-special')).toHaveAttribute('aria-pressed','true');
  await hold('#quick-items [data-item="double"]');await expect(page.locator('#control-hint')).toContainText('双发');await page.screenshot({path:'QA/slots-regression-control-hint-ipad-pro-11.png'});
  const button=await page.locator('#quick-items [data-item="double"]').boundingBox();await page.mouse.move(button!.x+button!.width/2+12,button!.y+button!.height/2);await page.mouse.up();
