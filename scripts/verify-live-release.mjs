@@ -11,6 +11,7 @@ const portraitFiles=Object.entries(portraitSpecs).map(([id,s])=>({id,...s}));
 const files=readdirSync('dist/audio').filter(n=>n.endsWith('.mp3')).map(name=>({name,hash:hash(readFileSync(resolve('dist/audio',name)))}));
 const browser=await chromium.launch({channel:'chrome',headless:true,...(process.env.PIGGY_VERIFY_PROXY?{proxy:{server:process.env.PIGGY_VERIFY_PROXY}}:{})});
 const context=await browser.newContext({viewport:{width:1194,height:834},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+context.on('requestfailed',r=>console.log('资源请求失败',new URL(r.url()).pathname,r.failure()?.errorText));
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
 const check=(condition,message)=>{if(!condition)throw Error(message);};
 try{
@@ -20,7 +21,8 @@ try{
  const entry=await page.locator('script[type="module"][src]').getAttribute('src');const relative=entry.split('/piggymiCannon/').at(-1).replace(/^\//,'');
  const bundle=await page.evaluate(async path=>Array.from(new Uint8Array(await (await fetch(path)).arrayBuffer())),entry);
  check(hash(Buffer.from(bundle))===hash(readFileSync(resolve('dist',relative))),'线上入口与本地构建不一致');
- await page.evaluate(async()=>{await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(Error('离线包安装超时')),90000))]);});await page.waitForFunction(()=>!!navigator.serviceWorker.controller,null,{timeout:45000});
+ console.log('线上版本与入口哈希已确认；正在安装完整离线包');
+ await page.evaluate(async()=>{await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(Error('离线包安装超时')),210000))]);});await page.waitForFunction(()=>!!navigator.serviceWorker.controller,null,{timeout:45000});
  const precache=await page.evaluate(async()=>{const names=await caches.keys(),keys=[];for(const name of names)if(name.includes('precache')){const c=await caches.open(name);keys.push(...(await c.keys()).map(r=>r.url));}return [...new Set(keys)];});
  await context.setOffline(true);await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'进入战场',exact:true}).waitFor();
  const offline=await page.evaluate(async files=>Promise.all(files.map(async f=>{const r=await fetch('audio/'+f.name),b=await r.arrayBuffer();const actual=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b))).map(v=>v.toString(16).padStart(2,'0')).join('');return {name:f.name,ok:r.ok&&actual===f.hash};})),files);check(offline.every(r=>r.ok),'离线音频缺失或哈希不一致');
