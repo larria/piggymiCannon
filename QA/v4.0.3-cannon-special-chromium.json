@@ -1,0 +1,51 @@
+{
+  "weapon": "cannon-special",
+  "backend": "pixi",
+  "version": "4.0.3",
+  "removed": 0,
+  "ground": 450,
+  "hp": 764,
+  "maxHP": 1100,
+  "damage": [
+    336
+  ],
+  "impacts": [
+    {
+      "projectile": 1,
+      "owner": 0,
+      "weapon": "cannon-special",
+      "directTarget": 1,
+      "x": 900,
+      "y": 410.2546575,
+      "age": 2.0045,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "bullseye": true,
+      "bodyContact": true
+    }
+  ],
+  "terrain": [],
+  "profiles": [
+    {
+      "projectile": 1,
+      "weapon": "cannon-special",
+      "direct": true,
+      "directTarget": 1,
+      "full": {
+        "radius": 13.5,
+        "depth": 13.5
+      },
+      "depthReduction": 65,
+      "result": {
+        "radius": 13.5,
+        "depth": 0
+      }
+    }
+  ]
+}

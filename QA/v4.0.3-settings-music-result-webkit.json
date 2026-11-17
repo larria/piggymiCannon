@@ -1,0 +1,22 @@
+{
+  "scene": "result",
+  "before": {
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-result.mp3",
+    "time": 12
+  },
+  "during": {
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-result.mp3",
+    "time": 12.337383874997613,
+    "paused": false,
+    "events": {
+      "pause": 0,
+      "load": 0
+    },
+    "battlePaused": true,
+    "effectsPaused": true
+  },
+  "musicSwitchWorks": true,
+  "effectsIndependent": true,
+  "volume": 0.4,
+  "closeDoesNotRewind": true
+}

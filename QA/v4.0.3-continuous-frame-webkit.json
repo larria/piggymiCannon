@@ -1,0 +1,46 @@
+{
+  "geometry": {
+    "before": {
+      "frame": {
+        "x": 10,
+        "y": 8,
+        "width": 1174,
+        "height": 818
+      },
+      "gap": 6,
+      "fieldHeight": 614,
+      "fieldBottom": 679,
+      "radius": "0px"
+    },
+    "after": {
+      "frame": {
+        "x": 10,
+        "y": 8,
+        "width": 1174,
+        "height": 818
+      },
+      "gap": 0,
+      "fieldHeight": 621,
+      "fieldBottom": 686,
+      "radius": "16px"
+    }
+  },
+  "fill": {
+    "bar": {
+      "top": 763,
+      "width": 680
+    },
+    "marker": {
+      "top": 761,
+      "bottom": 772
+    },
+    "memory": {
+      "width": 471.79998779296875,
+      "colour": "rgb(242, 213, 187)"
+    },
+    "active": {
+      "width": 118.5970458984375,
+      "colour": "rgb(229, 154, 120)"
+    }
+  }
+}

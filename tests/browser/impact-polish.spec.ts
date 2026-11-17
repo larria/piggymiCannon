@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';import {writeFileSync,readFileSync} from 'node:fs';import {boot} from './qa-app';
 const version=JSON.parse(readFileSync('package.json','utf8')).version;
 test.use({deviceScaleFactor:2});
-for(const weapon of ['missile-normal','cannon-normal','cannon-special','bowl-normal','ion-special'])test(`4.0.2 actual ${weapon} contact: damage, crater and iPad composition`,async({page,browserName})=>{
+for(const weapon of ['missile-normal','cannon-normal','cannon-special','bowl-normal','ion-special'])test(`${version} actual ${weapon} contact: damage, crater and iPad composition`,async({page,browserName})=>{
  await boot(page,true,'factory',weapon.split('-')[0],'missile');await page.waitForFunction(()=>(window as any).__qa.renderer.backend==='pixi');
  const report=await page.evaluate(weapon=>{
   const q=(window as any).__qa,g=q.game;q.recorder.detach();g.land.mask.fill(0);g.land.protectedMask.fill(0);for(let x=0;x<=1920;x++)g.land.column(x,450,960);g.land.rebuild();g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:i?900:160,y:432,fallVelocity:0}));g.wind=0;g.selected=weapon;g.active.selectedWeapon=weapon;

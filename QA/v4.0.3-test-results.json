@@ -1,0 +1,76 @@
+{
+  "formatVersion": 1,
+  "version": "4.0.3",
+  "node": {
+    "fullPassed": 380,
+    "failed": 0,
+    "additionalRetargetTestPassed": 1
+  },
+  "chromiumFinal": {
+    "passed": 15,
+    "failed": 0
+  },
+  "webkitCore": {
+    "passed": 35,
+    "timingAssertionReplacedWithPolling": true
+  },
+  "webkitCorrected": {
+    "passed": 12,
+    "failed": 0
+  },
+  "webkitAIAndProductionFinal": {
+    "passed": 6,
+    "failed": 0
+  },
+  "directExcavationAudit": {
+    "nativeGuns": 26,
+    "states": "normal / boosted / permanent + raging Sea",
+    "noPit": 19,
+    "tinyPit": "mine-special 35x16",
+    "acceptedByUser": true,
+    "remainingDifferencesDeferred": true
+  },
+  "AIHealing": {
+    "selfPower": 1,
+    "selfCriticalFirst": true,
+    "allyHealthThreshold": 0.55,
+    "activeItemDifficulties": [
+      "hard",
+      "expert"
+    ],
+    "unreachableKeepsItem": true,
+    "deadTargetReplans": true
+  },
+  "AIRandom": {
+    "regularVehicles": 12,
+    "hiddenExcluded": true,
+    "humanHiddenOdds": 0.1,
+    "manualDragonRetained": true
+  },
+  "bodyCore": {
+    "xRadius": 10,
+    "yRadius": 14
+  },
+  "seaSpecialCore": {
+    "xRadius": 3,
+    "yRadius": 4
+  },
+  "frame": {
+    "oldFieldHeight": 614,
+    "newFieldHeight": 621,
+    "gap": 0,
+    "cornerRadius": 16
+  },
+  "viewports": [
+    [
+      1194,
+      834
+    ],
+    [
+      1210,
+      834
+    ]
+  ],
+  "realIPadHardware": false,
+  "onlineChecksSkippedAtUserRequest": true
+}

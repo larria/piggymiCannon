@@ -1,0 +1,50 @@
+{
+  "baseline": "0258531",
+  "passed": true,
+  "scenarios": [
+    {
+      "version": "4.0.2",
+      "vehicles": [
+        "bowl",
+        "missile"
+      ],
+      "updates": 1600,
+      "dt": 0.025,
+      "stateIdentical": true,
+      "rngIdentical": true
+    },
+    {
+      "version": "4.0.2",
+      "vehicles": [
+        "mine",
+        "laser"
+      ],
+      "updates": 1600,
+      "dt": 0.025,
+      "stateIdentical": true,
+      "rngIdentical": true
+    },
+    {
+      "version": "4.0.2",
+      "vehicles": [
+        "dragon",
+        "multi"
+      ],
+      "updates": 1600,
+      "dt": 0.025,
+      "stateIdentical": true,
+      "rngIdentical": true
+    },
+    {
+      "version": "4.0.2",
+      "vehicles": [
+        "sea",
+        "ion"
+      ],
+      "updates": 1600,
+      "dt": 0.025,
+      "stateIdentical": true,
+      "rngIdentical": true
+    }
+  ]
+}

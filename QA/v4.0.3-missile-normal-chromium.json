@@ -1,0 +1,235 @@
+{
+  "weapon": "missile-normal",
+  "backend": "pixi",
+  "version": "4.0.3",
+  "removed": 0,
+  "ground": 450,
+  "hp": 630,
+  "maxHP": 1100,
+  "damage": [
+    168,
+    134,
+    101,
+    67
+  ],
+  "impacts": [
+    {
+      "projectile": 1,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 900,
+      "y": 410.2546575,
+      "age": 2.0045,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 1,
+      "bullseye": true,
+      "bodyContact": true,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      }
+    },
+    {
+      "projectile": 2,
+      "parent": 1,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 900,
+      "y": 410.2546575,
+      "age": 2.031500000000001,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 2,
+      "bullseye": true,
+      "bodyContact": true,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      }
+    },
+    {
+      "projectile": 3,
+      "parent": 2,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 900,
+      "y": 410.2546575,
+      "age": 2.058500000000002,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 3,
+      "bullseye": true,
+      "bodyContact": true,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      }
+    },
+    {
+      "projectile": 4,
+      "parent": 3,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 900,
+      "y": 410.2546575,
+      "age": 2.0855000000000032,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 4,
+      "bullseye": true,
+      "bodyContact": true,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      }
+    }
+  ],
+  "terrain": [],
+  "profiles": [
+    {
+      "projectile": 1,
+      "weapon": "missile-normal",
+      "direct": true,
+      "directTarget": 1,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      },
+      "full": {
+        "radius": 41.85,
+        "depth": 39
+      },
+      "depthReduction": 65,
+      "result": {
+        "radius": 41.85,
+        "depth": 0
+      }
+    },
+    {
+      "projectile": 2,
+      "weapon": "missile-normal",
+      "direct": true,
+      "directTarget": 1,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      },
+      "full": {
+        "radius": 41.85,
+        "depth": 39
+      },
+      "depthReduction": 65,
+      "result": {
+        "radius": 41.85,
+        "depth": 0
+      }
+    },
+    {
+      "projectile": 3,
+      "weapon": "missile-normal",
+      "direct": true,
+      "directTarget": 1,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      },
+      "full": {
+        "radius": 41.85,
+        "depth": 39
+      },
+      "depthReduction": 65,
+      "result": {
+        "radius": 41.85,
+        "depth": 0
+      }
+    },
+    {
+      "projectile": 4,
+      "weapon": "missile-normal",
+      "direct": true,
+      "directTarget": 1,
+      "contact": {
+        "x": 900,
+        "y": 410.2546575,
+        "target": 1,
+        "incoming": {
+          "vx": 0,
+          "vy": 501.035
+        }
+      },
+      "full": {
+        "radius": 41.85,
+        "depth": 39
+      },
+      "depthReduction": 65,
+      "result": {
+        "radius": 41.85,
+        "depth": 0
+      }
+    }
+  ]
+}

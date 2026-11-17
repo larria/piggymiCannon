@@ -1,6 +1,6 @@
 """Create only the runtime FT2 audio selection; keep raw user files local."""
 from pathlib import Path
-import hashlib, json, subprocess
+import hashlib, json, subprocess, argparse
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'assets/ft2-audio'
@@ -15,15 +15,18 @@ for scene, choice in SELECTION['maps'].items():
         assert choice['bgmNumber'] in stage['availableBgmNumbers'], (scene, choice)
 BGM = {'lobby': 'GM01.mp3', 'setup': 'GM02.mp3', 'result': 'GM04.mp3',
        **{scene: choice['source'] for scene, choice in SELECTION['maps'].items()}}
-COMMON = {'click': 'Push1.wav', 'select': 'Select1.wav',
+COMMON = {'denied': 'Push2.wav', 'click': 'Push1.wav', 'select': 'Select1.wav',
           'win': 'logo.wav', 'turn': 'Turn.wav', 'wind': 'Wind.wav',
           'firewall': 'Firewall.wav', 'lock': 'Homming.wav', 'crate-land': 'BoxLanding.wav',
           'supply': 'heli.wav', 'warning': 'Warring.wav', 'transfer': 'Push3.wav', 'quake': 'quake.wav', 'death': 'Enemy.wav'}
 
-def build():
+def build(only=None):
     OUTPUT.mkdir(exist_ok=True)
     entries = []
+    previous = json.loads((ROOT / 'research/FT2_AUDIO_SOURCES.json').read_text()) if only else None
     def convert(folder, source, name, limit=None, music=False):
+        if only and name not in only:
+            return False
         # Windows extraction retains inconsistent casing, including Move1 / UnMove5.
         path = next(p for p in (SOURCE / folder).iterdir() if p.name.lower() == source.lower())
         duration = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', str(path)]))
@@ -51,9 +54,10 @@ def build():
                         'encodingArguments': command[command.index('-i')+2: -1],
                         'bytes': target.stat().st_size,
                         'runtimeSHA256': hashlib.sha256(target.read_bytes()).hexdigest()})
+        return True
     for scene, source in BGM.items():
-        convert('bgm', source, f'bgm-{scene}.mp3', music=True)
-        if scene in SELECTION['maps']:
+        converted = convert('bgm', source, f'bgm-{scene}.mp3', music=True)
+        if converted and scene in SELECTION['maps']:
             choice = SELECTION['maps'][scene]
             assert choice['durationMode'] == 'full'
             assert abs(choice['seconds'] - entries[-1]['sourceSeconds']) < .001
@@ -65,6 +69,11 @@ def build():
             convert('sfx', f'{prefix}{group}.wav', f'sfx-{kind}-{vehicle}.mp3', 3)
     for name, source in COMMON.items():
         convert('sfx', source, f'sfx-{name}.mp3', 4)
+    if only:
+        assert entries, 'No requested runtime filename matched'
+        merged = {e['runtime']: e for e in previous['files']}
+        merged.update({e['runtime']: e for e in entries})
+        entries = list(merged.values())
     manifest = {'formatVersion': 2, 'source': '用户本机 ft2逆向/resources/sound 提取素材；仅用于本项目，未宣称官方授权',
                 'mapping': '本作13载具分配Fire/Bomb组；1/2分配普通/特殊。经典地图选曲来自原客户端MapUtil有效列表，本作择一；原创峡谷自行选曲，不使用复刻web规则。',
                 'mapBgmSelection': SELECTION['maps'],
@@ -81,4 +90,6 @@ def build():
     print(f"Generated {len(entries)} runtime files, {manifest['totalBytes']/1024/1024:.2f} MiB")
 
 if __name__ == '__main__':
-    build()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--only', nargs='+', help='Rebuild only these runtime filenames, preserving the rest')
+    build(parser.parse_args().only)

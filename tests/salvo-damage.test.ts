@@ -9,10 +9,10 @@ test('Multi normal/special spread at ordinary angles and only headwind high arcs
 });
 test('narrow full-hit core preserves centre damage; edge hits and 20px splash attenuate on either facing/slope',()=>{
  const g=ready(),t=g.tanks[1];for(const slope of [-.5,0,.5])for(const direction of [-1,1]){t.direction=direction;const world=(x:number,y:number)=>({x:t.x+x*direction*Math.cos(slope)-y*Math.sin(slope),y:t.y+x*direction*Math.sin(slope)+y*Math.cos(slope)});
- for(const [x,y] of [[0,0],[-10,-27]]){const p=world(x,y);assert.equal(impactDamageScale(t,p.x,p.y,slope,50,true),1);}
- const p=world(-30,-27),factor=impactDamageScale(t,p.x,p.y,slope,50,true);assert.ok(factor>=.65&&factor<.95);
+ for(const [x,y] of [[0,0],[-10,-27]]){const p=world(x,y);assert.equal(impactDamageScale(t,p.x,p.y,slope,50,true,'4.0.2'),1);}
+ const p=world(-30,-27),factor=impactDamageScale(t,p.x,p.y,slope,50,true,'4.0.2');assert.ok(factor>=.65&&factor<.95);
  }
- assert.equal(impactDamageScale(t,t.x+18,t.y,0,50,false),1);assert.ok(impactDamageScale(t,t.x+20,t.y,0,50,false)<1);
+ assert.equal(impactDamageScale(t,t.x+18,t.y,0,50,false,'4.0.2'),1);assert.ok(impactDamageScale(t,t.x+20,t.y,0,50,false,'4.0.2')<1);
 });
 test('edge attenuation is recorded once and stacks with boost/era/shield; centre remains full and corpse is untouched',()=>{
  const g=ready(),t=g.tanks[1];t.shield=10;g.active.boost=true;const p=g.launch(g.active,'cannon-normal');Object.assign(p,{x:t.x-30*t.direction,y:t.y-27});const before=t.hp;(g as any).explode(p,1);const e=g.battleSnapshot().events.filter(e=>e.type==='damage'&&e.data.target===1).at(-1)!.data;

@@ -1,0 +1,352 @@
+{
+  "opening": {
+    "vehicle": "multi",
+    "distance": 320,
+    "angle": 25,
+    "power": 27,
+    "rounds": [
+      {
+        "x": 247.69563438550523,
+        "y": 387.86130647699497,
+        "vx": 257.7781221754437,
+        "vy": -36.27315707053128,
+        "weapon": "multi-normal"
+      },
+      {
+        "x": 256.122551473663,
+        "y": 378.03746654488305,
+        "vx": 288.98892620565437,
+        "vy": -72.65774941168661,
+        "weapon": "multi-normal"
+      },
+      {
+        "x": 264.5494685618191,
+        "y": 368.21362661277107,
+        "vx": 320.19973023586505,
+        "vy": -109.04234175284193,
+        "weapon": "multi-normal"
+      }
+    ]
+  },
+  "impacts": [
+    {
+      "projectile": 2,
+      "owner": 0,
+      "weapon": "multi-normal",
+      "directTarget": 1,
+      "x": 470.69682918135715,
+      "y": 387.8735501067056,
+      "age": 1.0124999999999946,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "bullseye": false,
+      "bodyContact": true
+    },
+    {
+      "projectile": 1,
+      "owner": 0,
+      "weapon": "multi-normal",
+      "directTarget": 1,
+      "x": 442.57589475014316,
+      "y": 426.55666973167325,
+      "age": 1.0259999999999945,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "bullseye": false,
+      "bodyContact": true
+    },
+    {
+      "projectile": 3,
+      "owner": 0,
+      "weapon": "multi-normal",
+      "x": 725.6370801014698,
+      "y": 450.40185448867805,
+      "age": 1.7099999999999866,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "bullseye": false,
+      "bodyContact": false
+    }
+  ],
+  "damage": [
+    {
+      "cause": "direct",
+      "weapon": "multi-normal",
+      "projectile": 2,
+      "impact": 22,
+      "base": 135,
+      "factors": [
+        {
+          "source": "系别相克（本作规则）现代系→古代系",
+          "value": 0.8
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "未强化",
+          "value": 1
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.49082831197964505
+        }
+      ],
+      "bullseye": false,
+      "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)",
+      "dig": {
+        "radius": 29.700000000000003,
+        "depth": 28.5,
+        "digBoost": 1,
+        "source": "武器挖土（不乘入伤害）"
+      },
+      "origin": {
+        "projectileStart": 2,
+        "launch": {
+          "action": 1,
+          "time": 0,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "multi",
+          "hp": 1100,
+          "maxHP": 1100,
+          "x": 178.09554139813616,
+          "y": 405.89883388603835,
+          "vx": 288.98892620565437,
+          "vy": -134.7577494116864,
+          "relative": 25,
+          "absolute": 25,
+          "power": 27,
+          "wind": 0,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 470.69682918135715,
+          "y": 387.8735501067056,
+          "age": 1.0124999999999946
+        },
+        "boost": 1,
+        "fireBoosted": false,
+        "weaponBase": 135,
+        "fullDamageArea": {
+          "blastDistance": 6,
+          "directCore": {
+            "xRadius": 10,
+            "yRadius": 14,
+            "yCenter": -9
+          }
+        },
+        "dragon": null
+      },
+      "requested": 53,
+      "actual": 53,
+      "hpBefore": 5000,
+      "hpAfter": 4947,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "大猪头",
+      "weaponName": "三叉戟",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "normalised-era-cycle-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": true
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 470,
+        "y": 432
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    },
+    {
+      "cause": "direct",
+      "weapon": "multi-normal",
+      "projectile": 1,
+      "impact": 28,
+      "base": 135,
+      "factors": [
+        {
+          "source": "系别相克（本作规则）现代系→古代系",
+          "value": 0.8
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "未强化",
+          "value": 1
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.9249464745757565
+        }
+      ],
+      "bullseye": false,
+      "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)",
+      "dig": {
+        "radius": 29.700000000000003,
+        "depth": 28.5,
+        "digBoost": 1,
+        "source": "武器挖土（不乘入伤害）"
+      },
+      "origin": {
+        "projectileStart": 1,
+        "launch": {
+          "action": 1,
+          "time": 0,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "multi",
+          "hp": 1100,
+          "maxHP": 1100,
+          "x": 178.09554139813616,
+          "y": 405.89883388603835,
+          "vx": 257.7781221754437,
+          "vy": -98.37315707053108,
+          "relative": 25,
+          "absolute": 25,
+          "power": 27,
+          "wind": 0,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 442.57589475014316,
+          "y": 426.55666973167325,
+          "age": 1.0259999999999945
+        },
+        "boost": 1,
+        "fireBoosted": false,
+        "weaponBase": 135,
+        "fullDamageArea": {
+          "blastDistance": 6,
+          "directCore": {
+            "xRadius": 10,
+            "yRadius": 14,
+            "yCenter": -9
+          }
+        },
+        "dragon": null
+      },
+      "requested": 100,
+      "actual": 100,
+      "hpBefore": 4947,
+      "hpAfter": 4847,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "大猪头",
+      "weaponName": "三叉戟",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "normalised-era-cycle-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": true
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 470,
+        "y": 432
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    }
+  ],
+  "fullHits": 0
+}

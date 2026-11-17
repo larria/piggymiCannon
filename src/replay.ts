@@ -2,7 +2,7 @@ import {Game} from './engine';
 import {traceClone,type BattleSnapshot} from './battle-trace';
 
 export const REPLAY_FORMAT=1,REPLAY_STORAGE_KEY='piggy-replays-v1';
-const METHODS=['update','setAim','face','selectWeapon','move','useItem','fire','skipTurn','acceptHandoff','setIntroLocked','setBattleRule','nextTurn','setPowerMarker'] as const;
+const METHODS=['update','setAim','face','selectWeapon','move','useItem','fire','skipTurn','acceptHandoff','setIntroLocked','setBattleRule','nextTurn','setPowerMarker','forfeitHumanSide'] as const;
 type Command=[number,...any[]];
 type UpdateBlock={steps:Float64Array;length:number};
 type TapeEntry=Command|UpdateBlock;

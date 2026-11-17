@@ -77,3 +77,9 @@ scripts/verify-audio-quality.py检查全部实际采样率／声道下的解码�
 原客户端一手IL证据存于FT2_SFX_EVIDENCE.json，可用独立Python环境运行scripts/audit-ft2-sfx.py重核。SoundManager.InitSound（RVA 0x9b0b0）将Character×100映射moveN，Character×100+1映射UnmoveN；CCharacter.ChangeAction（RVA 0xa960c）中动作8以循环参数1播放前者，动作9播放后者并停止前者。复核证明moveN作为循环是正确的，本作问题是任何松手都追加了UnmoveN，听起来像移动力耗尽；v2.3.9普通松手／暂停只停循环，只有燃料耗尽才播放UnmoveN。13台载具逐一验证开始／持续／松手／耗尽；素材组与本作载具的既有分配不宣称为所有历史原版版本的编号事实。
 
 来源原件保留本机且不提交，无新增WAV产物。完整长曲、Range离线支持与既有响度／哈希／压缩参数不变；本版正式构建体积及离线核对见QA/v2.3.9-verification.md。
+
+## 4.0.3 不可用操作音效
+
+新增sfx-denied.mp3，来源为用户本机提取的Push2.wav，仅本项目使用，不宣称官方授权。37374字节WAV按现行脚本的loudnorm、0.7留量、44.1kHz／单声道／libmp3lame 64kbps压为3595字节，时长保留0.377324秒。禁止选择暴龙、禁用控件使用该独立提示，不混用普通点击或死亡音。
+
+prepare-ft2-audio.py新增--only，可只重建指定运行时文件并合并哈希记录。本次只新增一个使用中的MP3，之前100个运行时文件SHA256全部相同；所有九首BGM仍是完整原曲，无截取。来源WAV不提交、不进PWA缓存，运行时共101个文件。

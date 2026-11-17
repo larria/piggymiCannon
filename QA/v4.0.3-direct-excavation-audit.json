@@ -1,0 +1,1289 @@
+{
+  "formatVersion": 1,
+  "version": "4.0.3",
+  "draft": false,
+  "method": "Destructible flat ground, one centred projectile per gun; four Flyfire sections complete naturally. Orbital is the satellite; mines are armed. No full salvos forced onto one victim.",
+  "tinyCriterion": "width <=40px or depth <=8px; shallow visible <=20px is also listed for feedback",
+  "summary": {
+    "noPit": [
+      {
+        "vehicle": "大腕",
+        "weapon": "巨石",
+        "id": "bowl-normal"
+      },
+      {
+        "vehicle": "大腕",
+        "weapon": "火石",
+        "id": "bowl-special"
+      },
+      {
+        "vehicle": "叉叉",
+        "weapon": "穿心箭",
+        "id": "crossbow-normal"
+      },
+      {
+        "vehicle": "叉叉",
+        "weapon": "毒箭",
+        "id": "crossbow-special"
+      },
+      {
+        "vehicle": "老土",
+        "weapon": "小红豆",
+        "id": "cannon-special"
+      },
+      {
+        "vehicle": "甲壳虫",
+        "weapon": "趴趴弹",
+        "id": "beetle-special"
+      },
+      {
+        "vehicle": "公爵",
+        "weapon": "弹簧弹",
+        "id": "duke-normal"
+      },
+      {
+        "vehicle": "公爵",
+        "weapon": "毒气弹",
+        "id": "duke-special"
+      },
+      {
+        "vehicle": "飞火",
+        "weapon": "飞火弹",
+        "id": "missile-normal"
+      },
+      {
+        "vehicle": "飞火",
+        "weapon": "追魂弹",
+        "id": "missile-special"
+      },
+      {
+        "vehicle": "流星",
+        "weapon": "三叉戟",
+        "id": "multi-normal"
+      },
+      {
+        "vehicle": "流星",
+        "weapon": "流星雨",
+        "id": "multi-special"
+      },
+      {
+        "vehicle": "水鬼",
+        "weapon": "水水弹",
+        "id": "water-normal"
+      },
+      {
+        "vehicle": "水鬼",
+        "weapon": "紫冻水",
+        "id": "water-special"
+      },
+      {
+        "vehicle": "闪灵",
+        "weapon": "离子弹",
+        "id": "ion-normal"
+      },
+      {
+        "vehicle": "海怪",
+        "weapon": "大电环",
+        "id": "sea-normal"
+      },
+      {
+        "vehicle": "海怪",
+        "weapon": "双发小电环",
+        "id": "sea-special"
+      },
+      {
+        "vehicle": "暴龙",
+        "weapon": "黄金飞弹",
+        "id": "dragon-normal"
+      },
+      {
+        "vehicle": "暴龙",
+        "weapon": "黄金导弹",
+        "id": "dragon-special"
+      }
+    ],
+    "tinyPit": [
+      {
+        "vehicle": "雷霆",
+        "weapon": "地雷",
+        "id": "mine-special",
+        "width": 35,
+        "depth": 16
+      }
+    ],
+    "shallowVisible": [
+      {
+        "vehicle": "甲壳虫",
+        "weapon": "骷髅弹",
+        "id": "beetle-normal",
+        "width": 105,
+        "depth": 18
+      },
+      {
+        "vehicle": "雷霆",
+        "weapon": "手榴弹",
+        "id": "mine-normal",
+        "width": 97,
+        "depth": 16
+      }
+    ]
+  },
+  "rows": [
+    {
+      "vehicle": "bowl",
+      "name": "大腕",
+      "era": "古代系",
+      "weapons": [
+        {
+          "id": "bowl-normal",
+          "name": "巨石",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 51.300000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 51.300000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 51.300000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "bowl-special",
+          "name": "火石",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 33.75,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 33.75,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 33.75,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "crossbow",
+      "name": "叉叉",
+      "era": "古代系",
+      "weapons": [
+        {
+          "id": "crossbow-normal",
+          "name": "穿心箭",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 21.6,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 21.6,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 21.6,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "crossbow-special",
+          "name": "毒箭",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 16.200000000000003,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 16.200000000000003,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 16.200000000000003,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "cannon",
+      "name": "老土",
+      "era": "古代系",
+      "weapons": [
+        {
+          "id": "cannon-normal",
+          "name": "大铅弹",
+          "normal": {
+            "removedPixels": 5203,
+            "actualWidth": 201,
+            "actualDepth": 33,
+            "profile": {
+              "radius": 99.9,
+              "depth": 32.5
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "boosted": {
+            "removedPixels": 5203,
+            "actualWidth": 201,
+            "actualDepth": 33,
+            "profile": {
+              "radius": 99.9,
+              "depth": 32.5
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 99.9,
+              "depth": 32.5
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "cannon-special",
+          "name": "小红豆",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 13.5,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 13.5,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 13.5,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "beetle",
+      "name": "甲壳虫",
+      "era": "近代系",
+      "weapons": [
+        {
+          "id": "beetle-normal",
+          "name": "骷髅弹",
+          "normal": {
+            "removedPixels": 1420,
+            "actualWidth": 105,
+            "actualDepth": 18,
+            "profile": {
+              "radius": 51.300000000000004,
+              "depth": 17
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "boosted": {
+            "removedPixels": 1420,
+            "actualWidth": 105,
+            "actualDepth": 18,
+            "profile": {
+              "radius": 51.300000000000004,
+              "depth": 17
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 51.300000000000004,
+              "depth": 17
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "beetle-special",
+          "name": "趴趴弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 28.35,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 28.35,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 28.35,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "duke",
+      "name": "公爵",
+      "era": "近代系",
+      "weapons": [
+        {
+          "id": "duke-normal",
+          "name": "弹簧弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 49.95,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 49.95,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 49.95,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "duke-special",
+          "name": "毒气弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 32.400000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 32.400000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 32.400000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "mine",
+      "name": "雷霆",
+      "era": "近代系",
+      "weapons": [
+        {
+          "id": "mine-normal",
+          "name": "手榴弹",
+          "normal": {
+            "removedPixels": 1156,
+            "actualWidth": 97,
+            "actualDepth": 16,
+            "profile": {
+              "radius": 47.25,
+              "depth": 15
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "boosted": {
+            "removedPixels": 1156,
+            "actualWidth": 97,
+            "actualDepth": 16,
+            "profile": {
+              "radius": 47.25,
+              "depth": 15
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 47.25,
+              "depth": 15
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "mine-special",
+          "name": "地雷",
+          "normal": {
+            "removedPixels": 400,
+            "actualWidth": 35,
+            "actualDepth": 16,
+            "profile": {
+              "radius": 16.200000000000003,
+              "depth": 15
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "tiny"
+          },
+          "boosted": {
+            "removedPixels": 400,
+            "actualWidth": 35,
+            "actualDepth": 16,
+            "profile": {
+              "radius": 16.200000000000003,
+              "depth": 15
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "tiny"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 16.200000000000003,
+              "depth": 15
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "missile",
+      "name": "飞火",
+      "era": "现代系",
+      "weapons": [
+        {
+          "id": "missile-normal",
+          "name": "飞火弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 41.85,
+              "depth": 0
+            },
+            "sections": 4,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 41.85,
+              "depth": 0
+            },
+            "sections": 4,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 41.85,
+              "depth": 0
+            },
+            "sections": 4,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "missile-special",
+          "name": "追魂弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 24.3,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 24.3,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 24.3,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "multi",
+      "name": "流星",
+      "era": "现代系",
+      "weapons": [
+        {
+          "id": "multi-normal",
+          "name": "三叉戟",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 29.700000000000003,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 29.700000000000003,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 29.700000000000003,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "multi-special",
+          "name": "流星雨",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 21.6,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 21.6,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 21.6,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "laser",
+      "name": "小妖",
+      "era": "未来系",
+      "weapons": [
+        {
+          "id": "laser-normal",
+          "name": "单雷炮",
+          "normal": {
+            "removedPixels": 10675,
+            "actualWidth": 175,
+            "actualDepth": 79,
+            "profile": {
+              "radius": 86.4,
+              "depth": 78
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "boosted": {
+            "removedPixels": 10675,
+            "actualWidth": 175,
+            "actualDepth": 79,
+            "profile": {
+              "radius": 86.4,
+              "depth": 78
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 86.4,
+              "depth": 78
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "laser-special",
+          "name": "三雷炮",
+          "normal": {
+            "removedPixels": 1781,
+            "actualWidth": 70,
+            "actualDepth": 33,
+            "profile": {
+              "radius": 33.75,
+              "depth": 33
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "boosted": {
+            "removedPixels": 1781,
+            "actualWidth": 70,
+            "actualDepth": 33,
+            "profile": {
+              "radius": 33.75,
+              "depth": 33
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 33.75,
+              "depth": 33
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "water",
+      "name": "水鬼",
+      "era": "未来系",
+      "weapons": [
+        {
+          "id": "water-normal",
+          "name": "水水弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 49.95,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 49.95,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 49.95,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "water-special",
+          "name": "紫冻水",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 27,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 27,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 27,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "ion",
+      "name": "闪灵",
+      "era": "未来系",
+      "weapons": [
+        {
+          "id": "ion-normal",
+          "name": "离子弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 45.900000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 45.900000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 45.900000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "ion-special",
+          "name": "离子光波",
+          "normal": {
+            "removedPixels": 13067,
+            "actualWidth": 185,
+            "actualDepth": 91,
+            "profile": {
+              "radius": 91.80000000000001,
+              "depth": 90
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "boosted": {
+            "removedPixels": 13067,
+            "actualWidth": 185,
+            "actualDepth": 91,
+            "profile": {
+              "radius": 91.80000000000001,
+              "depth": 90
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "visible"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 91.80000000000001,
+              "depth": 90
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "sea",
+      "name": "海怪",
+      "era": "未来系",
+      "weapons": [
+        {
+          "id": "sea-normal",
+          "name": "大电环",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 63.45,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 63.45,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 63.45,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "raging": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 72.9675,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "sea-special",
+          "name": "双发小电环",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 37.800000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 37.800000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 37.800000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "raging": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 43.47,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    },
+    {
+      "vehicle": "dragon",
+      "name": "暴龙",
+      "era": "超代系",
+      "weapons": [
+        {
+          "id": "dragon-normal",
+          "name": "黄金飞弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 58.050000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 58.050000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 58.050000000000004,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        },
+        {
+          "id": "dragon-special",
+          "name": "黄金导弹",
+          "normal": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 39.150000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "boosted": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 39.150000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          },
+          "permanent": {
+            "removedPixels": 0,
+            "actualWidth": 0,
+            "actualDepth": 0,
+            "profile": {
+              "radius": 39.150000000000006,
+              "depth": 0
+            },
+            "sections": 1,
+            "bullseyeConfirmed": true,
+            "classification": "none"
+          }
+        }
+      ]
+    }
+  ],
+  "reviewStatus": "Accepted by user for 4.0.3; remaining differences deferred to the next release"
+}

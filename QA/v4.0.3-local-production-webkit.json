@@ -1,0 +1,15 @@
+{
+  "version": "4.0.3",
+  "manifestVersion": "4.0.3",
+  "files": 143,
+  "bytes": 37256030,
+  "audioFiles": 101,
+  "portraits": 4,
+  "productionWithoutQA": true,
+  "failures": [],
+  "errors": [],
+  "offlineReload": true,
+  "offlineMatchStarts": true,
+  "midpoint": 32.5,
+  "onlineChecked": false
+}

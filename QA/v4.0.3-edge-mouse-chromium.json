@@ -1,0 +1,19 @@
+{
+  "before": {
+    "x": 310,
+    "y": 110.88737201365188,
+    "angle": 35,
+    "power": 1,
+    "rng": {
+      "algorithm": "mulberry32",
+      "seed": 3921913961,
+      "index": 10,
+      "state": 762735611
+    }
+  },
+  "right": 399.8205,
+  "left": 310,
+  "top": 21.105372013651863,
+  "stops": true,
+  "inputsUnchanged": true
+}

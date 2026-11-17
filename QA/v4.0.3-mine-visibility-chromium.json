@@ -1,0 +1,25 @@
+{
+  "rows": [
+    {
+      "current": 0,
+      "team": 0,
+      "painted": 1
+    },
+    {
+      "current": 2,
+      "team": 0,
+      "painted": 1
+    },
+    {
+      "current": 1,
+      "team": 1,
+      "painted": 0
+    },
+    {
+      "current": 3,
+      "team": 1,
+      "painted": 0
+    }
+  ],
+  "mines": 1
+}

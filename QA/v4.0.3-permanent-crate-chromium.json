@@ -1,0 +1,14 @@
+{
+  "crates": [
+    {
+      "x": 800,
+      "y": 436,
+      "type": "medical",
+      "falling": false
+    }
+  ],
+  "protected": 1,
+  "removed": [
+    0
+  ]
+}

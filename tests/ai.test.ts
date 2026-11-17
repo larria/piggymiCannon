@@ -45,7 +45,7 @@ test('AI candidate routes respect cliffs, overhead permanent layers, fuel, freez
  t.fuel=100;t.immobile=1;assert.deepEqual(safeAIPositions(g,t),[]);t.immobile=0;t.frozen=1;assert.ok(safeAIPositions(g,t).every(p=>Math.abs(p.x-t.x)<=t.moveDistance/2));t.frozen=0;
  g.tanks[2].x=330;assert.ok(safeAIPositions(g,t).every(p=>p.x<=274));
  g.tanks[2].x=70;g.land=new Terrain();for(let x=0;x<=1280;x++){g.land.column(x,550,554,true);if(x<310)g.land.column(x,450,480);}g.land.rebuild();t.x=250;t.y=432;
- assert.ok(safeAIPositions(g,t).every(p=>p.x<310));g.mines.push({x:280,y:447,owner:1,weapon:'mine-special',boost:1});assert.ok(safeAIPositions(g,t).every(p=>p.x<t.x));
+ assert.ok(safeAIPositions(g,t).every(p=>p.x<310));g.mines.push({x:280,y:447,owner:1,weapon:'mine-special',boost:1});assert.ok(safeAIPositions(g,t).some(p=>p.x>t.x),'enemy mine is hidden from route planning');g.mines[0].owner=t.id;g.config.selfDamage=true;assert.ok(safeAIPositions(g,t).every(p=>p.x<t.x),'known harmful mine is avoided');
 });
 test('team target selection can choose a farther reachable enemy over a nearer protected enemy',()=>{
  const g=aiScenario('expert',52,'valley',200,'cannon');g.active.x=300;g.tanks[1].x=500;g.tanks[1].y=532;g.tanks[3].x=900;

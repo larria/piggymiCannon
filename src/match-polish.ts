@@ -6,3 +6,6 @@ export function markerPercent(x:number,left:number,width:number){return Math.max
 
 /** 4.0.2 impact/terrain tuning; historical recordings keep their own model. */
 export function impactPolish(version:string){const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);return !v||+v[1]>4||+v[1]===4&&(+v[2]>0||+v[2]===0&&+v[3]>=2);}
+
+/** 4.0.3 precise contact, mine and abandonment rules. */
+export function precisionPolish(version:string){const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);return !v||+v[1]>4||+v[1]===4&&(+v[2]>0||+v[2]===0&&+v[3]>=3);}

@@ -1,3 +1,4 @@
+import {RELEASE_NOTES} from './src/release-notes';
 import {assetIntegrityPlugin} from './scripts/asset-integrity-plugin.mjs';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -19,10 +20,10 @@ export default defineConfig(({mode}) => ({
   plugins: [assetIntegrityPlugin(version),{
     name:'game-version',
     configureServer(server){server.middlewares.use((req,res,next)=>{
-      if(req.url?.split('?')[0].endsWith('/version.json')) {res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({version}));}
+      if(req.url?.split('?')[0].endsWith('/version.json')) {res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({version,notes:RELEASE_NOTES}));}
       else next();
     });},
-    generateBundle(){this.emitFile({type:'asset',fileName:'version.json',source:JSON.stringify({version})});},
+    generateBundle(){const source=JSON.stringify({version,notes:RELEASE_NOTES});this.emitFile({type:'asset',fileName:'version.json',source});this.emitFile({type:'asset',fileName:'release-notes.json',source});},
   },VitePWA({
     registerType: 'prompt',
     injectRegister: false,
@@ -47,7 +48,7 @@ export default defineConfig(({mode}) => ({
     workbox: {
       importScripts: ['audio-range.js'],
       manifestTransforms:[async entries=>({manifest:entries.map(entry=>({...entry,integrity:'sha256-'+createHash('sha256').update(readFileSync(new URL('./dist/'+entry.url,import.meta.url))).digest('base64')})),warnings:[]})],
-      globPatterns: ['**/*.{js,css,html,png,svg,mp3,ttf,webmanifest}','asset-integrity.json'],
+      globPatterns: ['**/*.{js,css,html,png,svg,mp3,ttf,webmanifest}','asset-integrity.json','release-notes.json'],
       // Include the longest complete BGM; the separate total-size gate remains 90 MB.
       maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       cleanupOutdatedCaches: true,

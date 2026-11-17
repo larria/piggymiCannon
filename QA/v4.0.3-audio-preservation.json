@@ -1,0 +1,34 @@
+{
+  "oldFiles": 100,
+  "unchangedHashes": true,
+  "runtimeFiles": 101,
+  "added": {
+    "runtime": "sfx-denied.mp3",
+    "source": "assets/ft2-audio/sfx/Push2.wav",
+    "sourceBytes": 37374,
+    "sourceSHA256": "0829d047c3629c7890792bcf6063f9d10b32aa2ac2cccda0b5ca89b89ccf8509",
+    "durationMode": "bounded-effect",
+    "sourceSeconds": 0.377324,
+    "seconds": 0.377324,
+    "runtimeSeconds": 0.377324,
+    "encodingArguments": [
+      "-t",
+      "0.377324",
+      "-vn",
+      "-map_metadata",
+      "-1",
+      "-af",
+      "loudnorm=I=-20:TP=-2:LRA=9,volume=0.7",
+      "-ac",
+      "1",
+      "-ar",
+      "44100",
+      "-codec:a",
+      "libmp3lame",
+      "-b:a",
+      "64k"
+    ],
+    "bytes": 3595,
+    "runtimeSHA256": "5c1074cc9778e1dc7b6f7c33744c838f8a8986e16311708f0bc131ebe43c95dd"
+  }
+}

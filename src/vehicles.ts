@@ -13,7 +13,7 @@ function vehicle(id:VehicleId,name:string,era:Era,hp:number,angles:[number,numbe
   for(const [slot,gun] of [['normal',normal],['special',special]] as const) {
     const [gunName,damage,radius,digRadius,digDepth,effect,shots=1]=gun;
     const effects:Record<WeaponEffect,string>={shell:'抛物线爆破。',fire:'火石落地留下沿地面扩散的火焰，接触时持续受伤。',poison:'毒箭命中未红血目标（含造成伤害的擦中、爆炸波及）后中毒；每次自己的行动结束扣最大生命20%，最多扣到30%红血临界线，补给不会解毒。',gas:'落地形成毒气，随风漂移，接触时持续受伤。',mine:'发射两枚地雷。落地埋设；踩雷伤害高于直接砸中。小妖、水鬼悬浮，不会踩响。',pierce:'四节逐段递减爆破；正中机体时在接触点连续爆炸，几乎不挖土；命中地形时继续向内开挖。',homing:'下降末段追踪附近允许受伤的存活机体；默认自伤、友伤关闭，设置开启后也可能锁定自己或队友。',orbital:'定位弹落地后由上方卫星轰击，上层地形会挡住射线。卫星轰击正中也保留完整圆弧弹坑，略小于大铅弹、略大于单雷炮。',freeze:'紫水命中敌人后（含爆炸波及）限制其一个自己的回合无法移动。',beam:'能量弹抛射。',helix:'多枚能量弹沿同一弹道交织、旋转前进。'};
-    weaponList.push({id:`${id}-${slot}`,name:gunName,english:`${name} ${slot}`,description:`${shots>1?`${shots} 枚${effect==='helix'?'交织发射':'齐射'}。`:''}${id==='water'&&slot==='normal'?'抛射一团水，蓝色水团带有水滴与泡沫。':effects[effect]}${id==='cannon'?'标准球体，无拖尾。':''}${id==='dragon'&&slot==='special'?'九枚分别持续追踪，落点略分散，自伤或友伤开启时，近距离慎用。':''}`,damage,radius,digRadius,digDepth,ammo:Infinity,color:PROJECTILE_COLORS[id][slot==='normal'?0:1],icon:effect==='mine'?'bomb':effect==='homing'?'target':effect==='poison'||effect==='gas'?'fire':effect==='beam'||effect==='orbital'||effect==='helix'?'bolt':shots>1?'triple':'shell',tag:slot==='normal'?'普通武器':'特殊武器',effect,shots,spread:effect==='helix'||id==='multi'?0:id==='dragon'?(shots>=9?1.2:2.2):shots>=9?2.2:shots>1?3:0,speed:range,gravity:effect==='beam'||effect==='helix'?0.52:1,sound:weaponList.length+1,shape:`${id}-${slot}`,extraDelay:slot==='special'?100:0,...(effect==='homing'?{homingMode:id==='dragon'?'volley' as const:'nearest' as const,homingRadius:140}:{})});
+    weaponList.push({id:`${id}-${slot}`,name:gunName,english:`${name} ${slot}`,description:`${shots>1?`${shots} 枚${effect==='helix'?'交织发射':'齐射'}。`:''}${id==='water'&&slot==='normal'?'抛射一团水，蓝色水团带有水滴与泡沫。':effects[effect]}${id==='laser'?'正中也保留完整挖土。':''}${id==='sea'&&slot==='special'?'仅极小的中心命中才给满伤，其余按偏离衰减。':''}${id==='mine'&&slot==='special'?'地雷爆炸总会挖土，只有己方可见；挖土破坏可引爆。':''}${id==='cannon'?'标准球体，无拖尾。':''}${id==='dragon'&&slot==='special'?'九枚分别持续追踪，落点略分散，自伤或友伤开启时，近距离慎用。':''}`,damage,radius,digRadius,digDepth,ammo:Infinity,color:PROJECTILE_COLORS[id][slot==='normal'?0:1],icon:effect==='mine'?'bomb':effect==='homing'?'target':effect==='poison'||effect==='gas'?'fire':effect==='beam'||effect==='orbital'||effect==='helix'?'bolt':shots>1?'triple':'shell',tag:slot==='normal'?'普通武器':'特殊武器',effect,shots,spread:effect==='helix'||id==='multi'?0:id==='dragon'?(shots>=9?1.2:2.2):shots>=9?2.2:shots>1?3:0,speed:range,gravity:effect==='beam'||effect==='helix'?0.52:1,sound:weaponList.length+1,shape:`${id}-${slot}`,extraDelay:slot==='special'?100:0,...(effect==='homing'?{homingMode:id==='dragon'?'volley' as const:'nearest' as const,homingRadius:140}:{})});
   }
   return {id,name,era,hp,minAngle:angles[0],maxAngle:angles[1],movement,waiting,range,color,body,trait,hidden:id==='dragon',normal:`${id}-normal`,special:`${id}-special`};
 }
@@ -29,7 +29,7 @@ export const VEHICLES:Vehicle[]=[
   vehicle('cannon','老土','古代系',920,[25,45],48,580,1,'#555d60','cannon','大铅弹挖土，小红豆精准重击。',['大铅弹',140,78,74,65,'shell'],['小红豆',420,35,10,9,'shell']),
   vehicle('beetle','甲壳虫','近代系',1000,[0,40],60,560,1.05,'#c5923e','beetle','厚甲稳定，趴趴弹适合近距三发集中。',['骷髅弹',230,57,38,34,'shell'],['趴趴弹',150,38,21,20,'shell',3]),
   vehicle('duke','公爵','近代系',1000,[0,40],60,560,1.02,'#55713a','duke','弹簧弹正面作战，毒气跟着风走。',['弹簧弹',300,55,37,33,'shell',1],['毒气弹',153,43,24,18,'gas']),
-  vehicle('mine','雷霆','近代系',1250,[5,40],55,590,1,'#678994','mine','高血量与伏雷，封锁敌人的移动路线。',['手榴弹',270,52,35,30,'shell',1],['地雷',320,30,12,10,'mine',2]),
+  vehicle('mine','雷霆','近代系',1250,[5,40],55,590,1,'#678994','mine','高血量与伏雷，封锁敌人的移动路线。',['手榴弹',270,52,35,30,'shell',1],['地雷',640,30,12,10,'mine',2]),
   vehicle('missile','飞火','现代系',1100,[20,45],57,560,1.13,'#71933a','missile','红头导弹机体，四节飞火弹主攻，低伤追魂弹收尾，索敌遵循伤害开关。',['飞火弹',210,45,31,26,'pierce'],['追魂弹',90,32,18,14,'homing']),
   vehicle('multi','流星','现代系',1100,[25,50],52,590,1.12,'#8b9250','multi','三发与九发分散齐射；逆风高抛可收束。',['三叉戟',135,40,22,19,'shell',3],['流星雨',55,28,16,14,'shell',9]),
   vehicle('laser','小妖','未来系',850,[5,36],78,540,1.08,'#c85437','laser','单雷炮开挖地形，三雷炮螺旋前进。',['单雷炮',250,70,64,52,'beam',1],['三雷炮',99,40,25,22,'helix',3]),
@@ -40,9 +40,9 @@ export const VEHICLES:Vehicle[]=[
 ];
 export const VEHICLE_WEAPONS=weaponList;
 export const vehicleById=(id:VehicleId)=>VEHICLES.find(v=>v.id===id)!;
-export function resolveVehicle(choice:VehicleChoice,rng:()=>number):VehicleId {
+export function resolveVehicle(choice:VehicleChoice,rng:()=>number,allowHidden=true):VehicleId {
   if(choice!=='random') return choice;
-  if(rng()<0.1) return 'dragon';
+  if(allowHidden&&rng()<0.1) return 'dragon';
   const regular=VEHICLES.filter(v=>!v.hidden);return regular[Math.min(regular.length-1,Math.floor(rng()*regular.length))].id;
 }
 export const validChoice=(value:unknown,allowDragon=false):value is VehicleChoice=>value==='random'||VEHICLES.some(v=>v.id===value&&(!v.hidden||allowDragon));

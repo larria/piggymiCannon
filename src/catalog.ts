@@ -1,4 +1,4 @@
-import {impactPolish} from './match-polish';
+import {precisionPolish,impactPolish} from './match-polish';
 import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
@@ -57,15 +57,17 @@ export const MODERN_TRAIL_POINTS=6,MODERN_TRAIL_LENGTH=24,MODERN_TRAIL_ALPHA=.16
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
 /** Flat depth absorbed by a direct body contact, shared by every weapon. */
 export const DIRECT_DIG_DEPTH_REDUCTION=65;
-export const weaponDamage=(id:WeaponId,version='development')=>id==='missile-normal'&&!impactPolish(version)?120:weaponById(id).damage;
+export const weaponDamage=(id:WeaponId,version='development')=>id==='missile-normal'&&!impactPolish(version)?120:id==='mine-special'&&!precisionPolish(version)?320:weaponById(id).damage;
 export function weaponDigProfile(id:WeaponId,version='development'){
   const w=weaponById(id),modern=impactPolish(version);
   return {radius:id==='bowl-normal'&&!modern?43:w.digRadius,depth:id==='bowl-normal'&&!modern?40:id==='ion-special'&&!modern?28:w.digDepth};
 }
+export const fullContactExcavation=(id:WeaponId,version='development')=>id==='ion-special'||precisionPolish(version)&&(id==='laser-normal'||id==='laser-special'||id==='mine-special');
+export const contactDepthReduction=(id:WeaponId,version='development')=>fullContactExcavation(id,version)?0:precisionPolish(version)&&id==='mine-normal'?30:precisionPolish(version)&&id==='beetle-normal'?34:DIRECT_DIG_DEPTH_REDUCTION;
 export const excavation = (id:WeaponId,direct:boolean,version='development',digBoost=1) => {
   const modern=impactPolish(version),{radius,depth}=weaponDigProfile(id,version);
   if(!modern){const full=id==='ion-special'||!direct;return {radius:radius*(full?1.35:.6)*digBoost,depth:depth*(full?1.5:.65)*digBoost};}
-  return {radius:radius*1.35*digBoost,depth:Math.max(0,depth*1.5*digBoost-(direct&&id!=='ion-special'?DIRECT_DIG_DEPTH_REDUCTION:0))};
+  return {radius:radius*1.35*digBoost,depth:Math.max(0,depth*1.5*digBoost-(direct?contactDepthReduction(id,version):0))};
 };
 export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number,profile?:{missChance:number;error:number},version='development') {
   const d=DIFFICULTIES.find(d=>d.id===difficulty)!,w=weaponById(weapon);

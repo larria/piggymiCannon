@@ -137,10 +137,10 @@ export class AudioManager {
     }catch{this.stopTracking();}
   }
   stopTracking(){if(!this.tracking||!this.context)return;const t=this.tracking;this.tracking=null;t.gain.gain.setTargetAtTime(.0001,this.context.currentTime,.02);t.oscillator.stop(this.context.currentTime+.07);t.oscillator.onended=()=>{t.oscillator.disconnect();t.gain.disconnect();t.pan.disconnect();};}
-  play(type:'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer'|'turn'|'wind'|'firewall'|'supply'|'warning'|'death',sourceX?:number,viewerX=0,weapon?:WeaponId) {
+  play(type:'denied'|'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer'|'turn'|'wind'|'firewall'|'supply'|'warning'|'death',sourceX?:number,viewerX=0,weapon?:WeaponId) {
     if(type==='item')return; // Item feedback is animation only, including preload/fallback paths.
-    if(!this.soundEnabled||!this.unlocked||(this.paused&&type!=='click'&&type!=='aim')) return;
-    if(type==='click'||type==='win'||(type==='aim'&&this.paused)) {
+    if(!this.soundEnabled||!this.unlocked||(this.paused&&type!=='click'&&type!=='aim'&&type!=='denied')) return;
+    if(type==='denied'||type==='click'||type==='win'||(type==='aim'&&this.paused)) {
       const audio=new Audio(asset(`sfx-${type==='aim'?'select':type}.mp3`));audio.volume=this.volume*.75;this.playingEffects.add(audio);audio.onended=()=>{this.playingEffects.delete(audio);this.pausedEffects.delete(audio);};void audio.play().catch(()=>this.playingEffects.delete(audio));return;
     }
     try {
