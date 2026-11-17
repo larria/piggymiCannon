@@ -1,0 +1,16 @@
+{
+  "version": "4.0.0",
+  "map": "egypt",
+  "seed": 3906995608,
+  "truncatedEvents": 133,
+  "eraMultiplier": 0.8,
+  "damageSections": [1, 0.8, 0.6, 0.4],
+  "attacks": [
+    {"action":9,"actualDamage":[96,77,58,21],"total":252,"cause":"前三节直接命中，最后一节距离衰减"},
+    {"action":10,"actualDamage":[77,58,38],"total":173,"cause":"第一节在(981.95,546.92)远处地形爆炸；后三节才到达目标"},
+    {"action":13,"actualDamage":[96,77,58,38],"total":269,"cause":"四节都直接命中，完整同系伤害"},
+    {"action":15,"actualDamage":[25,15],"total":40,"blastDistances":[64.41,68.71],"distanceFactors":[0.263288664934908,0.1950768507252283],"cause":"仅两节爆炸擦伤，后两节已离开伤害范围"}
+  ],
+  "shieldAbsorbed":0,
+  "conclusion":"上述保留事件计算与实际HP扣除一致，未发现漏扣血；不以截断记录声称所有早期操作可重放。4.0.1仅收窄逐段挖掘宽度，保持四节深度与上述伤害递减规则。"
+}

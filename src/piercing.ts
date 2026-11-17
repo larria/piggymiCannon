@@ -24,3 +24,8 @@ export function permanentPiercingContact(land:Terrain,x:number,y:number,nextX:nu
  }
  return null;
 }
+
+/** A modest tip taper, independent from the existing four damage factors. */
+export const PIERCING_DIG_RADIUS=[1,.90,.80,.70] as const;
+export const PIERCING_DIG_DEPTH=[1,1,1,1] as const;
+export function piercingDigScale(section:number){const i=Math.max(0,Math.min(3,section));return {radius:PIERCING_DIG_RADIUS[i],depth:PIERCING_DIG_DEPTH[i]};}

@@ -1,0 +1,6 @@
+import {ACHIEVEMENTS,RANKS,type Progression,type RankIndex} from './progression';import type {CrewId} from './crew';
+export const ACHIEVEMENT_LEVELS:Record<string,RankIndex>={debut:0,'first-win':0,'ten-wins':1,'fifty-wins':3,streak:2,giant:2,damage:2,kills:2,healer:2,supply:1,combo:2,maps:2,vehicles:3,king:3};
+export const ACHIEVEMENT_COLORS=['#915b43','#55717d','#8d681f','#795889'] as const;
+export function achievementTitle(id:string|null|undefined){const a=ACHIEVEMENTS.find(a=>a.id===id);return a?{...a,level:ACHIEVEMENT_LEVELS[a.id]??0,color:ACHIEVEMENT_COLORS[ACHIEVEMENT_LEVELS[a.id]??0]}:null;}
+export function titleMarkup(id:string|null|undefined,className='equipped-title'){const a=achievementTitle(id);return a?`<small class="${className}" data-title="${a.id}" data-title-tier="${a.level}" style="--achievement-ink:${a.color}" title="${RANKS[a.level].name}级成就：${a.description}">${a.name}</small>`:'';}
+export function equipAchievement(state:Progression,crew:CrewId,id:string|null){if(id!==null&&(!achievementTitle(id)||!state.profiles[crew].achievements[id]))throw Error('先达成这项成就，才能佩戴。');if(state.profiles[crew].equippedAchievement===id)return state;const next=structuredClone(state);next.profiles[crew].equippedAchievement=id;return next;}

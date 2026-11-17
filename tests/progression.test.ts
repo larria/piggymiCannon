@@ -37,8 +37,8 @@ test('loss can demote immediately, points floor at zero, draws neutral, achievem
  const draw=settleProgression(state,m,null,{ended:true});assert.equal(draw.state.profiles.mimi.points,205);assert.equal(draw.state.profiles.mimi.draws,1);
 });
 test('achievements unlock once and do not add rating; metrics and identities survive tank changes',()=>{
- let state=freshProgression();for(let i=0;i<10;i++){const m=match(`win-${i}`);m.competitors[0].metrics={...emptyCombat(),damage:1000,kills:1,healed:100,pickups:1,comboShots:1};const r=settleProgression(state,m,0,{ended:true,date:'2026-11-17'});state=r.state;if(i)assert.ok(!r.results[0].unlocked.includes('first-win'));}
- assert.equal(state.profiles.mimi.points,600);for(const id of ['debut','first-win','ten-wins','streak','giant','damage','kills','healer','supply','combo'])assert.equal(state.profiles.mimi.achievements[id],'2026-11-17');assert.equal(ACHIEVEMENTS.length,14);
+ let state=freshProgression();for(let i=0;i<25;i++){const m=match(`win-${i}`);m.competitors[0].metrics={...emptyCombat(),damage:4000,kills:4,healed:800,pickups:4,comboShots:2};const r=settleProgression(state,m,0,{ended:true,date:'2026-11-17'});state=r.state;if(i)assert.ok(!r.results[0].unlocked.includes('first-win'));}
+ assert.equal(state.profiles.mimi.points,1500);for(const id of ['debut','first-win','ten-wins','streak','giant','damage','kills','healer','supply','combo'])assert.equal(state.profiles.mimi.achievements[id],'2026-11-17');assert.equal(ACHIEVEMENTS.length,14);
 });
 test('malformed/denied local storage is safe; decoding bounds values and preserves only known achievements',()=>{
  for(const text of [null,'broken',JSON.stringify({formatVersion:8})])assert.deepEqual(readProgression({getItem:()=>text}),freshProgression());assert.deepEqual(readProgression({getItem(){throw Error('denied');}}),freshProgression());

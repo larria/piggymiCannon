@@ -1,0 +1,68 @@
+{
+  "formatVersion": 1,
+  "version": "4.0.1",
+  "node": {
+    "passed": 344,
+    "failed": 0,
+    "summary": "ℹ duration_ms 100449.064833"
+  },
+  "chromiumCore": {
+    "passed": 33,
+    "failed": 0,
+    "summary": "  33 passed (1.3m)"
+  },
+  "webkitCore": {
+    "passed": 33,
+    "failed": 0,
+    "summary": "  33 passed (1.5m)"
+  },
+  "latestWebkitUI": {
+    "passed": 11,
+    "failed": 0,
+    "summary": "  11 passed (26.2s)"
+  },
+  "piercingBrowser": {
+    "passed": 1,
+    "failed": 0
+  },
+  "newUnitTests": 10,
+  "defaultAngles": "exact midpoint for all 13 human/AI vehicles",
+  "newHumanMeter": "empty visual, physical minimum 1%",
+  "marker": "per tank, short tap only, retained same match, resets next match",
+  "achievements": 14,
+  "tierColors": 4,
+  "grandfatheredUnlocks": true,
+  "digRadiusScales": [
+    1,
+    0.9,
+    0.8,
+    0.7
+  ],
+  "digDepthScales": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "piercingDamageScales": [
+    1,
+    0.8,
+    0.6,
+    0.4
+  ],
+  "victoryHazardSeconds": 0.55,
+  "resultAnimationSeconds": 3,
+  "pwaBytesLimit": 90000000,
+  "realIPadHardware": false,
+  "viewports": [
+    [
+      1194,
+      834
+    ],
+    [
+      1210,
+      834
+    ]
+  ],
+  "deviceScaleFactor": 2
+}

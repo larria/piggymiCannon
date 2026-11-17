@@ -1,6 +1,10 @@
+import {titleMarkup,equipAchievement} from './achievement-titles';
+import {battleResultMarkup} from './battle-results';
+import {matchPolish,powerDisplay} from './match-polish';
+import {installPowerMarkers} from './power-markers';
 import {readProgression,freshProgression,rankIndex,settleProgression,PROGRESSION_KEY,type Settlement,type Competition} from './progression';
 import {medalSvg} from './medal-art';
-import {progressionMarkup,settlementMarkup} from './progression-ui';
+import {progressionMarkup} from './progression-ui';
 import {modernWeather} from './weather';
 import {repairGameAssets,assetRepairDiagnostics,retryBrokenMaterialImages,retryMaterialFonts} from './asset-repair';
 import {retryBattleSprites} from './battle-sprites';
@@ -41,6 +45,7 @@ import {DEFAULT_TURN_TIMER,storedTurnTimer,TIMER_PREFERENCE_VERSION} from './tur
 import {installMapGestures} from './map-gestures';
 import {ReplayRecorder,ReplayPlayer,readReplays,saveReplay,deleteReplay,type BattleReplay} from './replay';
 const APP_VERSION=__APP_VERSION__;
+const angleLabel=(angle:number)=>{const half=Math.round(angle*2)/2;return Math.abs(angle-half)<1e-8?String(half):String(Math.round(angle));};
 
 const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
 const safeRead=(key:string)=>{try{return JSON.parse(localStorage.getItem(key)||'null');}catch{return null;}};
@@ -48,7 +53,7 @@ const save=(key:string,value:unknown)=>{try{localStorage.setItem(key,JSON.string
 let progression=(()=>{try{return readProgression(localStorage);}catch{return freshProgression();}})();
 let rankSettlement:Settlement[]=[];
 let progressionUnsaved=false;
-function newCompetition():Competition{return {id:crypto.randomUUID(),points:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.points]))};}
+function newCompetition():Competition{return {id:crypto.randomUUID(),titles:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.equippedAchievement])),points:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.points]))};}
 const saved=safeRead('piggy-settings');
 let config:Config={slots:defaultSlots(),map:'valley',timer:DEFAULT_TURN_TIMER,seed:Date.now(),...(saved?.config||{})};
 config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:storedTurnTimer(config.timer,saved?.timerPreferenceVersion),seed:Date.now(),snow:undefined,fog:undefined,fireLine:undefined,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,fallDamage:!!config.fallDamage,allowDragon:config.allowDragon};
@@ -68,6 +73,7 @@ let statsRecorded=false;
 let toastTimer=0;let snapshotStatusTimer=0;
 let moveHeld=0;
 let charge:null|{pointer:number|null;startedAt:number;previousPower:number;tank:number;touch:boolean;audible:boolean;pointerStartedAt?:number}=null;
+let powerMarkGesture:ReturnType<typeof installPowerMarkers>|null=null;
 let aimPointer:number|null=null;
 let immersive=false;
 let drawerOpen=false;
@@ -105,9 +111,9 @@ $('#app').innerHTML=`
           <div class="dash-angle"><button id="aim-pad" class="angle-instrument" aria-label="拖动角度仪表瞄准"><canvas id="angle-dial"></canvas><span class="angle-instrument-name" id="instrument-tank">老土</span></button><div class="angle-caption"><span id="angle-limits">25–45°</span><button id="face-button" title="切换炮口朝向">${icon('transfer')}<span>朝右</span></button></div><input id="angle" type="range" min="0" max="90" value="45" class="sr-only"/><span id="angle-value" class="sr-only">45</span></div>
           <div class="dash-center"><div class="dash-toolbar"><div id="weapon-switcher" class="weapon-switcher hidden" aria-label="直接切换坦克武器"><button id="weapon-normal" data-weapon="shell"></button><button id="weapon-special" data-weapon="heavy"></button><button id="weapon-bonus" data-weapon="homing" class="hidden"></button></div><div id="quick-items" class="quick-items"></div><div class="wait-readout"><span>等待</span><strong id="waiting-value">580</strong></div></div>
             <div class="meter-row energy-meter"><span class="meter-label">${icon('fuel')}能量</span><div class="meter-track"><span id="energy-fill"></span></div><span id="energy-value" class="meter-value">920 / 920</span></div>
-            <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="短按最小力度发射，按住200毫秒准备，填满后横条蓄力，松开发射"><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><span class="meter-help">按住力度条 / SPACE · 松开发射</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="1" max="100" value="68"/></div>
-            <div class="meter-row mobility-meter"><span class="meter-label">${icon('transfer')}移动力</span><div class="meter-track"><span id="mobility-fill"></span></div><span class="meter-value"><b id="fuel-value">100</b>%</span><div class="move-buttons"><button id="move-left" aria-label="后退">${icon('left')}<span>后退</span><kbd>A</kbd></button><button id="move-right" aria-label="前进"><kbd>D</kbd><span>前进</span>${icon('right')}</button></div></div><div class="dashboard-note"><span id="move-note">本回合可移动</span><span id="meter-hint">白线为上次力度 · ↑↓ 调角度</span></div>
-          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="短按最小力度发射，按住200毫秒准备，填满后横条蓄力，松手或蓄满发射">${icon('target')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
+            <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="轻点标记力度，按住200毫秒开始蓄力，松开发射"><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><i id="power-marker" class="power-marker" hidden><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M9 1 16 10H2Z"/><path d="M9 5v3"/></svg></i><span class="meter-help">轻点记号 · 按住蓄力</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="1" max="100" value="68"/></div>
+            <div class="meter-row mobility-meter"><span class="meter-label">${icon('transfer')}移动力</span><div class="meter-track"><span id="mobility-fill"></span></div><span class="meter-value"><b id="fuel-value">100</b>%</span><div class="move-buttons"><button id="move-left" aria-label="后退">${icon('move-left')}<span>后退</span><kbd>A</kbd></button><button id="move-right" aria-label="前进"><kbd>D</kbd><span>前进</span>${icon('move-right')}</button></div></div><div class="dashboard-note"><span id="move-note">本回合可移动</span><span id="meter-hint">白线为上次力度 · ↑↓ 调角度</span></div>
+          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="短按最小力度发射，按住200毫秒准备，填满后横条蓄力，松手或蓄满发射">${icon('fire-control')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
         </section>
         <div class="keyboard-hints"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>W</kbd><kbd>S</kbd> 角度</span><span><kbd>SPACE</kbd> 蓄力 · 满力自动发射</span><span class="touch-help">拖动角度盘瞄准 · 长按力度条 · 蓄满自动开火</span><span class="hint-last">每一发，都有一点可能。</span></div>
       </section>
@@ -125,13 +131,13 @@ $('.lobby-actions').insertAdjacentHTML('beforeend',`<button class="text-button r
 $('.dashboard').insertAdjacentHTML('beforebegin',`<div id="replay-controls" class="replay-controls hidden" aria-label="录像播放控制"><span id="replay-status" role="status">录像播放</span><span id="replay-time"></span><button id="replay-pause">暂停</button><button id="replay-speed">1×</button><button id="replay-restart">重播</button><button id="replay-exit">退出录像</button></div>`);
 $('#lobby-overlay').className='lobby-welcome';
 $('.dash-actions').prepend($('.move-buttons'));
-$('.dash-actions').insertAdjacentHTML('beforeend',`<div class="angle-nudges" role="group" aria-label="射击角度微调"><button type="button" id="angle-up" class="angle-nudge" aria-label="抬高炮口 1 度，长按连续调整" title="抬高 · 1°">${icon('up')}<small aria-hidden="true">1°</small></button><button type="button" id="angle-down" class="angle-nudge" aria-label="压低炮口 1 度，长按连续调整" title="压低 · 1°">${icon('down')}<small aria-hidden="true">1°</small></button></div>`);
+$('.dash-actions').insertAdjacentHTML('beforeend',`<div class="angle-nudges" role="group" aria-label="射击角度微调"><button type="button" id="angle-up" class="angle-nudge" aria-label="抬高炮口 1 度，长按连续调整" title="抬高 · 1°">${icon('aim-up')}<small aria-hidden="true">1°</small></button><button type="button" id="angle-down" class="angle-nudge" aria-label="压低炮口 1 度，长按连续调整" title="压低 · 1°">${icon('aim-down')}<small aria-hidden="true">1°</small></button></div>`);
 const angleNudges=installAngleNudges($('#angle-up'),$('#angle-down'),{enabled:()=>canControlBattle()&&!$<HTMLDialogElement>('#dialog').open,actor:()=>game.active,step:(direction,steps)=>{const t=game.active,target=clamp(t.angle+direction*steps,t.minAngle,t.maxAngle);if(target!==t.angle){game.setAim(target,t.power);updateUI();}}});
 $('#pause-button').insertAdjacentHTML('beforebegin',`<button class="stage-button" data-dialog="settings" aria-label="游戏设置" data-help-name="游戏设置" data-help-description="音效、音乐、自伤、友伤与直接选择暴龙">${icon('settings')}</button>`);
 $('.dashboard').classList.add('compact-dashboard');
 const logButton=$('#log-button');logButton.classList.add('stage-button');logButton.innerHTML=icon('book');logButton.title='战斗记录';$('#pause-button').before(logButton);
 const message=$('.caption-main');message.classList.add('battle-live-message');$('.battle-stage').append(message);$('.battle-caption').remove();
-$('#skip-button').innerHTML=icon('skip');$('#skip-button').setAttribute('aria-label','跳过回合');
+$('#skip-button').innerHTML=icon('skip-control');$('#skip-button').setAttribute('aria-label','跳过回合');
 $('#exit-match').innerHTML=icon('exit');$('#exit-match').setAttribute('aria-label','退出对局');
 $('#exit-match').title='结束当前对局，回到演习场';
 $('#inventory-toggle').dataset.helpDescription='查看当前坦克的武器、战术道具和炮弹图鉴';
@@ -148,6 +154,7 @@ $('.wait-readout').dataset.helpName='行动等待';$('.wait-readout').dataset.he
 installControlHints(()=>{if(!game.paused)audio.unlock();audio.play('aim');});
 installMobileGestureGuards($('#app'));
 const renderer=new Renderer($('#battlefield'),game);
+const displayTitle=(tank:Game['tanks'][number])=>tank.controller==='human'?(playback?game.config.competition?.titles?.[tank.crew]:progression.profiles[tank.crew].equippedAchievement):null;
 const displayMedal=(tank:Game['tanks'][number])=>!playback&&game.phase==='ended'&&tank.controller==='human'?rankIndex(progression.profiles[tank.crew].points):game.medal(tank);
 renderer.medalFor=displayMedal;
 $('.dash-angle').insertAdjacentHTML('beforeend','<span class="angle-readout relative"><small>车身</small><b id="relative-angle">45°</b></span><span class="angle-readout absolute"><small>水平</small><b id="absolute-angle">45°</b></span>');
@@ -221,6 +228,7 @@ function updateUI() {
   $('#instrument-tank').textContent=v?.name??'炮术演习';$('#angle-limits').textContent=`${t.minAngle}–${t.maxAngle}°`;
   $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=game.delayEnabled?String(t.delayCommitted?t.lastDelay:game.delayFor(t,game.teleporting||game.restoring?undefined:shownWeapon)+(game.teleporting||game.restoring?200:0)):'—';
   $('#previous-power').hidden=t.lastPower===null||lobby||game.phase==='ended';$('#previous-power').style.left=t.lastPower===null?'0%':`${t.lastPower}%`;
+  const marker=$('#power-marker');marker.hidden=t.powerMarker==null||lobby;marker.style.left=`${t.powerMarker??0}%`;marker.setAttribute('aria-label',`本局力度记号 ${t.powerMarker??0}%`);marker.dataset.power=String(t.powerMarker??'');
   const quick=game.backpack(t);const quickSignature=quick.map((id,slot)=>`${id}:${id?game.itemUnavailable(id,false,slot):'empty'}`).join('|')+'|'+game.teleporting+'|'+game.restoring+'|'+quick.map((_,slot)=>game.itemArmed(slot)).join(',');
   if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,slot)=>{
     if(!id)return `<button class="empty-item" data-item-slot="${slot}" disabled data-help-name="空槽" data-help-description="可拾取任意道具，重复道具各占一个槽位" aria-label="道具槽 ${slot+1}，空槽">${icon('plus')}<span>空槽</span></button>`;
@@ -236,9 +244,9 @@ function updateUI() {
   $('#move-right .icon').style.transform='';
   $('#mode-label').textContent='自定义战场';
   $('#difficulty-label').textContent=`${game.tanks.length} 名炮手 · ${new Set(game.tanks.map(t=>t.team)).size} 面队旗`;
-  const hudSignature=game.tanks.map(t=>`${t.id}:${t.crew}:${t.vehicleId}:${t.controller}:${t.difficulty}:${t.team}:${displayMedal(t)}`).join('|');
+  const hudSignature=game.tanks.map(t=>`${t.id}:${t.crew}:${t.vehicleId}:${t.controller}:${t.difficulty}:${t.team}:${displayMedal(t)}:${displayTitle(t)}`).join('|');
   if(hudSignature!==lastHud){
-    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud team-${tank.team}" data-hud="${tank.id}" data-slot-id="${tank.slot}" style="--flag-ink:${teamFlag(tank.team).color};--flag-paper:${teamFlag(tank.team).paper}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="定位${tank.name}；长按查看大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button>${medalSvg(displayMedal(tank))}</span><div class="player-info"><div class="player-name">${flagIcon(tank.team)}${nameMarkup(tank.name,tank.team)}<span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
+    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud team-${tank.team}" data-hud="${tank.id}" data-slot-id="${tank.slot}" style="--flag-ink:${teamFlag(tank.team).color};--flag-paper:${teamFlag(tank.team).paper}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="定位${tank.name}；长按查看大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button>${medalSvg(displayMedal(tank))}</span><div class="player-info"><div class="player-name">${flagIcon(tank.team)}<span class="player-name-text">${nameMarkup(tank.name,tank.team)}${titleMarkup(displayTitle(tank))}</span><span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
   }
   game.tanks.forEach((tank,i)=>{
     $(`#hp-${i}`).innerHTML=`${tank.hp} <small>/ ${tank.maxHP}</small>`;
@@ -269,7 +277,8 @@ function updateUI() {
   $('#turn-indicator').style.setProperty('--flag-ink',teamFlag(game.active.team).color);$('#turn-indicator').style.setProperty('--flag-paper',teamFlag(game.active.team).paper);
   $('#round-text').textContent=game.turn>=40?'决胜时刻':`第 ${String(game.round).padStart(2,'0')} 轮`;
   $('#timer span').textContent=String(Math.ceil(Math.max(0,game.clock))).padStart(2,'0');$('#timer').classList.toggle('urgent',game.clock<10);
-  $('#angle-value').textContent=String(Math.round(t.angle));$('#relative-angle').textContent=`${Math.round(t.angle)}°`;$('#absolute-angle').textContent=`${Math.round(game.aim(t).absolute)}°`;$('#angle-limits').textContent=`车身 ${t.minAngle}–${t.maxAngle}° · 水平 ${Math.round(game.aim(t,t.minAngle).absolute)}–${Math.round(game.aim(t,t.maxAngle).absolute)}°`;$('#power-value').textContent=String(Math.round(t.power));
+  const relativeLabel=angleLabel(t.angle);
+  $('#angle-value').textContent=relativeLabel;$('#relative-angle').textContent=`${relativeLabel}°`;$('#absolute-angle').textContent=`${angleLabel(game.aim(t).absolute)}°`;$('#angle-limits').textContent=`车身 ${t.minAngle}–${t.maxAngle}° · 水平 ${Math.round(game.aim(t,t.minAngle).absolute)}–${Math.round(game.aim(t,t.maxAngle).absolute)}°`;
   const angle=$<HTMLInputElement>('#angle'),power=$<HTMLInputElement>('#power');
   angle.min=String(t.minAngle);angle.max=String(t.maxAngle);angle.value=String(t.angle);power.value=String(t.power);
   angle.style.setProperty('--range-fill',`${(t.angle-t.minAngle)/(t.maxAngle-t.minAngle)*100}%`);power.style.setProperty('--range-fill',`${(t.power-MIN_POWER)/(100-MIN_POWER)*100}%`);
@@ -278,7 +287,7 @@ function updateUI() {
   $('#skip-button').setAttribute('aria-label',renderer.touring?'跳过开场巡游':'跳过回合');
   document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, .angle-nudge, #face-button, #aim-pad').forEach(b=>b.disabled=!human);if(!human)angleNudges.cancel();
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
-  updateChargeVisual(t.power);
+  updateChargeVisual(powerDisplay(t.power,t.lastPower,game.minimumShotPower,!!charge||!!playback?.waiting||!!playback?.charging,matchPolish(game.gameVersion)));
   updateChargePreparation(performance.now());
   document.querySelectorAll<HTMLButtonElement>('.quick-items [data-item]').forEach(button=>button.disabled=!!playback||!!game.itemUnavailable(button.dataset.item as ItemId,false,Number(button.dataset.itemSlot)));
 
@@ -305,9 +314,9 @@ function positionResult(){
   const actors=game.tanks.filter(t=>!t.outOfBounds).map(t=>({x:(t.x-renderer.offsetX-50)*sx,y:(t.y-(t.hp>0?124:28)-renderer.offsetY)*sy,width:100*sx,height:(t.hp>0?154:54)*sy}));
   const mapBox=$('#minimap-panel').getBoundingClientRect(),box=layer.getBoundingClientRect();
   const map={x:mapBox.x-box.x,y:mapBox.y-box.y,width:mapBox.width,height:mapBox.height};
-  card.style.position='absolute';card.style.width='370px';
+  card.style.position='absolute';card.style.width='620px';
   let placement=chooseResultPosition(layer.clientWidth,layer.clientHeight,card.offsetWidth,card.offsetHeight,actors,map);
-  if(placement.overlap>0){card.style.width='300px';const smaller=chooseResultPosition(layer.clientWidth,layer.clientHeight,card.offsetWidth,card.offsetHeight,actors,map);if(smaller.overlap<placement.overlap)placement=smaller;else card.style.width='370px';}
+  if(placement.overlap>0){card.style.width='460px';const smaller=chooseResultPosition(layer.clientWidth,layer.clientHeight,card.offsetWidth,card.offsetHeight,actors,map);if(smaller.overlap<placement.overlap)placement=smaller;else card.style.width='620px';}
   card.style.left=`${placement.x}px`;card.style.top=`${placement.y}px`;
 }
 
@@ -320,8 +329,7 @@ function updateOverlay() {
   } else if(game.phase==='ended') {
     recordStats();
     if(game.resultAge<3){el.classList.add('hidden');el.innerHTML='';return;}
-    el.classList.remove('hidden');const draw=game.winner===null,winner=draw?'各位炮手':game.tanks.filter(t=>t.team===game.winner).map(t=>nameMarkup(t.name,t.team)).join('与');
-    el.innerHTML=`<div class="overlay-card result"><span class="overlay-symbol">${icon('trophy')}</span><div class="eyebrow">一场漂亮的对决</div><h2>${draw?'握手言和。':`${winner}，好准头！`}</h2><p>${draw?'全部出局，平局也是一种默契。':`${winner}赢得了胜利。下一发，会更精彩。`}</p><div class="result-stats"><div><strong>${game.round}</strong><span>交战轮数</span></div><div><strong>${game.tanks.reduce((n,t)=>n+t.shots,0)}</strong><span>发射炮弹</span></div><div><strong>${game.tanks.find(t=>t.crew==='mimi')?.damage??game.tanks.reduce((n,t)=>n+t.damage,0)}</strong><span>${game.tanks.some(t=>t.crew==='mimi')?nameMarkup('咪猪头',game.tanks.find(t=>t.crew==='mimi')!.team)+'伤害':'总计伤害'}</span></div></div>${settlementMarkup(rankSettlement)}<button class="button button-dark" data-action="rematch">再来一局 ${icon('refresh')}</button><button class="text-button" data-dialog="setup">调整槽位与战场</button><button class="text-button" data-action="save-replay">保存本局录像</button></div>`;
+    el.classList.remove('hidden');el.innerHTML=battleResultMarkup(game,rankSettlement,import.meta.env.BASE_URL,Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.equippedAchievement])));
   } else {el.classList.add('hidden');el.innerHTML='';}
 }
 function recordStats() {
@@ -371,7 +379,7 @@ function togglePause() {
   cancelCharge();game.paused=!game.paused;moveHeld=0;keys.clear();audio.pause(game.paused);updateOverlay();updateUI();
 }
 
-function profileClick(event:Event){const button=(event.target as HTMLElement).closest<HTMLElement>('[data-profile]');if(!button)return;const crew=button.dataset.profile as keyof typeof CREW;if(!CREW[crew])return;$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);}
+function profileClick(event:Event){const equip=(event.target as HTMLElement).closest<HTMLElement>('[data-equip-achievement]');if(equip){const crew=equip.dataset.profileCrew as keyof typeof CREW;if(!CREW[crew])return;const id=equip.dataset.equipAchievement!;try{progression=equipAchievement(progression,crew,progression.profiles[crew].equippedAchievement===id?null:id);try{localStorage.setItem(PROGRESSION_KEY,JSON.stringify(progression));progressionUnsaved=false;}catch{progressionUnsaved=true;toast('本机存储不可用，称号仅在本次打开期间保留。');}$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);lastHud='';renderer.invalidate();updateUI();}catch(error){toast((error as Error).message);}return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-profile]');if(!button)return;const crew=button.dataset.profile as keyof typeof CREW;if(!CREW[crew])return;$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);}
 function showDialog(type:string) {
   if(playback&&type==='setup'){toast('请先退出录像，再调整对局。');return;}
   if(renderer.touring)renderer.finishTour();
@@ -382,7 +390,7 @@ function showDialog(type:string) {
   if(type.startsWith('portrait:')) {
     const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name,team=game.tanks[id].team;
     const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，大猪头也会打歪。','装甲厚一点，心软一点。','哼哼，轮到大猪头了！','不着急，咱们慢慢瞄。'];
-    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}">${crewAvatar(crew,import.meta.env.BASE_URL)}${medalSvg(displayMedal(game.tanks[id]))}<span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
+    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2>${titleMarkup(displayTitle(game.tanks[id]),'equipped-title portrait-title')}<button id="portrait-art" class="portrait-art" aria-label="戳戳${name}">${crewAvatar(crew,import.meta.env.BASE_URL)}${medalSvg(displayMedal(game.tanks[id]))}<span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
     let taps=0;
     $('#portrait-art').addEventListener('click',()=>{
       $('#portrait-saying').innerHTML=colorNames(sayings[++taps%sayings.length]);
@@ -537,12 +545,13 @@ $('#items-tab').addEventListener('click',()=>{activeTab='items';lastInventory=''
 $('#angle').addEventListener('input',e=>{game.setAim(Number((e.target as HTMLInputElement).value),game.active.power);updateUI();});
 $('#power').addEventListener('input',e=>{game.setAim(game.active.angle,Number((e.target as HTMLInputElement).value));updateUI();});
 $('#face-button').addEventListener('click',()=>{game.face(-game.active.direction);updateUI();});
-function startCharge(pointer:number|null,event?:PointerEvent) {
+function startCharge(pointer:number|null,event?:PointerEvent,startedAt=performance.now()) {
   if(!canControlBattle()||game.active.fallVelocity>0||charge) return false;
-  setDrawer(false);charge={pointer,startedAt:performance.now(),previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',audible:false,pointerStartedAt:event?.timeStamp};
+  setDrawer(false);charge={pointer,startedAt,previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',audible:false,pointerStartedAt:event?.timeStamp};
   audio.unlock();recorder?.cue('charge-wait');game.setAim(game.active.angle,MIN_POWER);updateUI();updateChargePreparation(performance.now());return true;
 }
 function cancelCharge() {
+  powerMarkGesture?.reset();
   audio.stopCharge();
   if(charge) {recorder?.cue('charge-stop');game.tanks[charge.tank].power=charge.previousPower;charge=null;}
   updateChargePreparation(performance.now());
@@ -561,7 +570,7 @@ const forceBar=$<HTMLButtonElement>('#power-meter');
 const ownsChargePointer=(e:PointerEvent)=>charge?.pointer===e.pointerId&&(charge.pointerStartedAt===undefined||e.timeStamp>=charge.pointerStartedAt);
 const releaseChargePointer=(e:PointerEvent)=>{if(ownsChargePointer(e)){e.preventDefault();finishCharge(false,e);}};
 const cancelChargePointer=(e:PointerEvent)=>{if(ownsChargePointer(e)){cancelCharge();updateUI();}};
-for(const control of [fireButton,forceBar]){
+for(const control of [fireButton]){
   control.addEventListener('pointerdown',e=>{if(startCharge(e.pointerId,e)){e.preventDefault();try{control.setPointerCapture(e.pointerId);}catch{/* Document release also handles unavailable/lost capture. */}}});
   control.addEventListener('pointerup',releaseChargePointer);
   control.addEventListener('pointercancel',cancelChargePointer);
@@ -570,6 +579,7 @@ for(const control of [fireButton,forceBar]){
 }
 document.addEventListener('pointerup',releaseChargePointer,true);
 document.addEventListener('pointercancel',cancelChargePointer,true);
+powerMarkGesture=installPowerMarkers(forceBar,{allowed:()=>canControlBattle()&&!charge&&game.active.fallVelocity===0,mark:power=>{game.setPowerMarker(power);updateUI();},start:(e,at)=>startCharge(e.pointerId,e,at),finish:e=>finishCharge(false,e),cancel:()=>{cancelCharge();updateUI();},pending:()=>updateChargePreparation(performance.now())});
 forceBar.addEventListener('contextmenu',e=>e.preventDefault());
 fireButton.addEventListener('contextmenu',e=>e.preventDefault());
 fireButton.addEventListener('click',e=>{if(e.detail===0&&(e as PointerEvent).pointerType!=='touch'&&!charge&&canControlBattle()){audio.unlock();game.fire();updateUI();}});
@@ -653,10 +663,11 @@ window.addEventListener('resize',()=>renderer.resize());
 const chargeFill=$('#charge-fill'),chargeFire=$('#fire-button'),chargeReadout=$('#power-value');
 let lastPreparationFill=-1;
 function updateChargePreparation(now:number){
-  const elapsed=charge?(now-charge.startedAt)/1000:playback?.waiting?playback.time-playback.waitingStartedAt:CHARGE_DELAY_SECONDS;
+  const pendingAt=powerMarkGesture?.pendingStart??null;
+  const elapsed=pendingAt!==null?(now-pendingAt)/1000:charge?(now-charge.startedAt)/1000:playback?.waiting?playback.time-playback.waitingStartedAt:CHARGE_DELAY_SECONDS;
   const duration=charge?CHARGE_DELAY_SECONDS:playback?chargePreparationSeconds(playback.recording.gameVersion):CHARGE_DELAY_SECONDS;
-  const active=Boolean(charge||playback?.waiting||playback?.charging);
-  const preparing=Boolean(charge?elapsed<duration:playback?.waiting);
+  const active=Boolean(pendingAt!==null||charge||playback?.waiting||playback?.charging);
+  const preparing=Boolean(pendingAt!==null|| (charge?elapsed<duration:playback?.waiting));
   chargeFire.classList.toggle('charging',active);chargeFire.classList.toggle('charge-preparing',preparing);
   // The button visualizes only preparation; actual shot power belongs to the horizontal meter.
   const fill=preparing?chargeDelayProgress(elapsed,duration)*100:active?100:0;

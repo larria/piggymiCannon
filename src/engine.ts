@@ -1,3 +1,4 @@
+import {matchPolish,startingAngle} from './match-polish';
 import {playerSupplyTiming,rankIndex,aiRank,emptyCombat,type Competition,type MatchProgress,type CombatMetrics} from './progression';
 import {RESTORE_FRACTION,restoreRadius,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
 import {modernBackpack,backpackSlots,takeBackpackItem,putBackpackItem,SUPPLY_INTERVAL_ACTIONS} from './backpack';
@@ -5,7 +6,7 @@ import {calibrationProfile,calibrationDisturbed,advanceCalibration,type AICalibr
 import {addSkyBranch,SKY_UPPER_THICKNESS} from './sky-map';
 import {OBSERVATION_SECONDS,OBSERVATION_PRIORITY,type ObservationKind,type ShotObservation} from './shot-observation';
 import {salvoProfile,DOUBLE_SHOT_INTERVAL} from './salvo';
-import {permanentPiercingContact,PIERCING_SECTIONS,PIERCING_INTERVAL,piercingDamageScale} from './piercing';
+import {permanentPiercingContact,PIERCING_SECTIONS,PIERCING_INTERVAL,piercingDamageScale,piercingDigScale} from './piercing';
 import {impactDamageScale,FULL_BLAST_DISTANCE} from './impact-damage';
 import {eraDamageFactor,ERA_DAMAGE_VERSION} from './era-damage';
 import { DIFFICULTIES, ITEMS, TURN_ITEMS, WEAPONS, ALL_WEAPONS,weaponById,launchDamageScale, weaponHasTrail,MODERN_TRAIL_POINTS,MODERN_TRAIL_LENGTH, itemById, excavation, aiAimOffset, type Difficulty, type ItemId, type MapId, type WeaponId } from './catalog';
@@ -44,7 +45,7 @@ export interface Tank {
   selectedWeapon:WeaponId;lastPower:number|null;poisonOwner?:number;actionTime:number;movedThisTurn:number;itemDelay:number;delayCommitted:boolean;outOfBounds:boolean;
 }
 export interface DefeatPose {x:number;y:number;slope:number;direction:number}
-export interface Tank {aiCalibration?:AICalibration;defeat?:DefeatPose|null;deathResolved?:boolean;itemSlots?:(ItemId|null)[];parachute?:{projectile?:number;startedAt:number}|null}
+export interface Tank {powerMarker?:number|null;battleStats?:CombatMetrics;defeatCause?:string;aiCalibration?:AICalibration;defeat?:DefeatPose|null;deathResolved?:boolean;itemSlots?:(ItemId|null)[];parachute?:{projectile?:number;startedAt:number}|null}
 export interface Projectile { x:number; y:number; vx:number; vy:number; weapon:WeaponId; owner:number; age:number; bounces:number; drillY:number|null; sub:boolean; boost:number; trail:{x:number;y:number}[];delay:number;echo:boolean;fireBoosted:boolean;homing:boolean;penetrations:number;scale:number;phase:number;lockAge:number;lockX:number;lockY:number;lockTarget:number|null;volley:number;weaveX:number;weaveY:number;hitCooldown:number;mineArmed:boolean;digBoost:number;rage:boolean;transfer?:boolean;aimOffsetX?:number;aimOffsetY?:number }
 export interface Particle { x:number; y:number; vx:number; vy:number; life:number; maxLife:number; size:number; color:string }
 export interface Blast { healing?:boolean;x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
@@ -181,6 +182,7 @@ export class Game {
     g.projectiles.forEach(p=>p.trail=[]);g.trace.restore(snapshot);g.rng=g.diagnosticRng(makeRng(snapshot.rng.state));g.events=[];g.particles=[];return g;
   }
   private credit(t:Tank|undefined,key:keyof CombatMetrics,amount=1){
+    if(t?.battleStats&&amount>0)t.battleStats[key]+=amount;
     const participant=t?.controller==='human'?this.progress?.competitors.find(c=>c.id===t.id&&c.controller==='human'):null;
     if(participant&&amount>0)participant.metrics[key]+=amount;
   }
@@ -282,8 +284,8 @@ export class Game {
     const vehicleId=choice?resolveVehicle(choice,this.rng):null,v=vehicleId?vehicleById(vehicleId):null;
     const ammo=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,v?0:w.ammo])) as Record<WeaponId,number>;
     if(v) {ammo[v.normal]=Infinity;ammo[v.special]=Infinity;}
-    return {id,slot,crew:seat.crew,team:seat.team,controller:seat.controller,difficulty:seat.difficulty,name:CREW[seat.crew].name,x,y:this.ground(x)-18,hp:v?.hp??150,shield:0,fuel:100,angle:clamp(48,v?.minAngle??5,v?.maxAngle??175),power:68,direction:id===0?1:-1,
-      ammo,
+    return {id,slot,crew:seat.crew,team:seat.team,controller:seat.controller,difficulty:seat.difficulty,name:CREW[seat.crew].name,x,y:this.ground(x)-18,hp:v?.hp??150,shield:0,fuel:100,angle:startingAngle(v?.minAngle??5,v?.maxAngle??175,matchPolish(this.gameVersion)),power:matchPolish(this.gameVersion)&&seat.controller==='human'?this.minimumShotPower:68,direction:id===0?1:-1,
+      ammo,...(matchPolish(this.gameVersion)?{powerMarker:null,battleStats:emptyCombat()}:{}),
       items:Object.fromEntries(ITEMS.map(i=>[i.id,TURN_ITEMS.includes(i.id)?1:0])) as Record<ItemId,number>,
       ...(modernBackpack(this.gameVersion)?{itemSlots:[...TURN_ITEMS],parachute:null}:{}),
       frozen:0,boost:false,itemUsed:false,fallVelocity:0,fallStart:0,shots:0,damage:0,tactics:2,turnsTaken:0,
@@ -371,6 +373,7 @@ export class Game {
     const to={relative:this.active.angle,absolute:this.aim(this.active).absolute,power:this.active.power};
     if(from.relative!==to.relative||from.power!==to.power)this.recordBattle('aim',`${this.active.name}瞄准：相对${to.relative.toFixed(2)}°／绝对${to.absolute.toFixed(2)}°，力度${to.power.toFixed(2)}，${weaponById(this.selected).name}`,{from,to,weapon:this.selected},false,true);
   }
+  setPowerMarker(power:number){if(!this.humanTurn||!matchPolish(this.gameVersion))return false;this.active.powerMarker=Math.round(clamp(power,1,100));this.recordBattle('power-marker',`${this.active.name}标记力度${this.active.powerMarker}%`,{tank:this.active.id,power:this.active.powerMarker});return true;}
   selectWeapon(id:WeaponId) {
     if(!this.humanTurn||!weaponById(id)||(this.active.ammo[id]??0)<=0) return false;
     if(this.active.vehicleId) {const v=vehicleById(this.active.vehicleId);if(id!==v.normal&&id!==v.special&&id!=='homing') return false;}
@@ -734,6 +737,7 @@ export class Game {
     this.shake=Math.min(10,radius/10);
     const dig=excavation(p.weapon,direct);
     dig.radius*=p.digBoost;dig.depth*=p.digBoost;
+    if(matchPolish(this.gameVersion)&&p.weapon==='missile-normal'){const taper=piercingDigScale(p.penetrations);dig.radius*=taper.radius;dig.depth*=taper.depth;this.recordBattle('pierce-dig','飞火普通弹第'+(p.penetrations+1)+'段挖土逐渐收尖',{projectile:p.traceId,section:p.penetrations+1,scale:taper,radius:dig.radius,depth:dig.depth});}
     this.excavateImpact(p,dig.radius,dig.depth,directTarget);
     for(const {tank:t,distance,scale:distanceScale} of damageGeometry) {
       if(directTarget!==t.id&&distance>radius+26) continue;
@@ -788,7 +792,7 @@ export class Game {
     const hpBefore=t.hp,shieldBefore=t.shield;
     const absorbed=ignoreShield?0:Math.min(t.shield,amount);
     t.shield-=absorbed;const actual=Math.min(t.hp,amount-absorbed);t.hp-=actual;
-    if(t.hp<=0)this.settleDefeat(t);
+    if(t.hp<=0){if(matchPolish(this.gameVersion))t.defeatCause=context.cause;this.settleDefeat(t);}
     if(t.hp<=0)this.observe('death',t);else if((actual>0||absorbed>0)&&['direct','graze','mine'].includes(context.cause))this.observe('hit',t);
     const high=amount>=t.maxHP*.5||actual>=t.maxHP*.5,cause=DAMAGE_CAUSES[context.cause]??context.cause,source=this.tanks[owner]?.name??`来源${owner}`,weapon=context.weapon?weaponById(context.weapon).name:'无武器／直接机制扣血';
     const detail={...context,base:context.base??amount,factors:context.factors??[],requested:amount,actual,hpBefore,hpAfter:t.hp,shieldBefore,shieldAfter:t.shield,absorbed,ignoreShield,owner,target:t.id,sourceName:source,targetName:t.name,weaponName:weapon,relation:t.id===owner?'self':this.tanks[owner]?.team===t.team?'ally':'enemy',rules:this.traceRules(),reaction,highDamage:high,position:{x:t.x,y:t.y},stateBefore:{poisoned:t.poisoned,frozen:t.frozen,immobile:t.immobile,rage:isRaging({...t,hp:hpBefore})}};
@@ -1233,6 +1237,9 @@ export class Game {
       if(this.projectiles.length===0) {this.phase='resolving';this.resolveHazardTime=.55;this.resolveTime=OBSERVATION_SECONDS[this.observation?.kind??'ground'];this.recordBattle('observation','弹着后观察战场',{...this.observation,seconds:this.resolveTime});this.volleyTargets.clear();}
     } else if(this.phase==='resolving') {
       this.resolveTime-=dt;this.resolveHazardTime=Math.max(0,this.resolveHazardTime-dt);
+      // The final shot keeps its full projectile chain and original hazard window;
+      // only the redundant settled observation before victory is shortened.
+      if(matchPolish(this.gameVersion)&&this.resolveHazardTime<=0&&this.tanks.every(t=>t.hp<=0||t.fallVelocity===0)&&new Set(this.tanks.filter(t=>t.hp>0).map(t=>t.team)).size<=1){this.checkWin();return;}
       if(this.resolveTime<=0&&this.tanks.every(t=>t.hp<=0||t.fallVelocity===0)) this.nextTurn();
     }
   }
