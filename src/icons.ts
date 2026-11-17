@@ -1,4 +1,8 @@
 const paths: Record<string,string> = {
+  flag:'<path d="M5 21V3m0 1h14l-3 5 3 5H5"/>',
+  crown:'<path d="m3 6 5 4 4-7 4 7 5-4-2 13H5L3 6Zm3 10h12"/><circle cx="12" cy="13" r="1"/>',
+  star:'<path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3-4.6-4.5 6.4-.9L12 3Z"/>',
+  box:'<path d="m3 7 9-4 9 4v12l-9 3-9-3V7Zm0 0 9 4 9-4m-9 4v11M7 5l9 4v5"/>',
   shell:'<path d="m9 18 9-9c3-3 4-7 4-7s-4 1-7 4l-9 9 3 3Z"/><path d="m7 13 4 4M5 17l-3 3m5 0-2 2m-2-7-2 2"/>',
   bomb:'<circle cx="11" cy="14" r="7"/><path d="m15 8 2-3h3l1-3M9 10l-2 2"/>',
   triple:'<path d="m3 18 8-8m-2 11 8-8m-2 8 7-7M8 7l3 3 2-5-5 2Zm6 3 3 3 2-5-5 2Zm5 1 3 3 1-4-4 1Z"/>',

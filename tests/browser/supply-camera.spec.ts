@@ -5,8 +5,8 @@ async function prepare(page:any,multi=false){
  await boot(page);
  await page.evaluate(multi=>{
   let q=(window as any).__qa;q.newMatch({...q.game.config,map:'factory',mapChoice:'factory',timer:45,fog:false,fireLine:false,slots:q.game.config.slots.map((s:any)=>({...s,controller:'human',vehicle:'cannon'}))},true);q=(window as any).__qa;q.recorder.detach();const g=q.game,r=q.renderer;
-  g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:i?100:1700,y:g.ground(i?100:1700)-18,fallVelocity:0}));g.turn=9;g.nextTurn();
-  if(g.phase!=='supply')throw Error('No delivery');const c=g.crates.find((c:any)=>c.falling);Object.assign(c,{x:multi?420:1700,y:-50,vx:0,vy:80,type:'medical'});
+  g.tanks.forEach((t:any,i:number)=>Object.assign(t,{x:i?100:1700,y:g.ground(i?100:1700)-18,fallVelocity:0}));g.turn=9;g.nextTurn();for(let i=0;i<4&&g.phase!=='supply';i++)g.nextTurn();
+  if(g.phase!=='supply')throw Error('No delivery');Object.assign(g.active,{x:100,y:g.ground(100)-18,fallVelocity:0});Object.assign(g.tanks.find((t:any)=>t.id!==g.current),{x:1700,y:g.ground(1700)-18,fallVelocity:0});const c=g.crates.find((c:any)=>c.falling);Object.assign(c,{x:multi?420:1700,y:-50,vx:0,vy:80,type:'medical'});
   if(multi){g.crates.push({x:1420,y:-50,vx:0,vy:80,type:'double',falling:true});g.supplyObservation.crates=[0,1];}
   // Controlled simulation steps, with the actual renderer and main event handler.
   (window as any).__supplyStep=g.update.bind(g);g.update=()=>{};r.follow();q.updateUI();

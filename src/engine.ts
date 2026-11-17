@@ -1,3 +1,4 @@
+import {playerSupplyTiming,rankIndex,aiRank,emptyCombat,type Competition,type MatchProgress,type CombatMetrics} from './progression';
 import {RESTORE_FRACTION,restoreRadius,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
 import {modernBackpack,backpackSlots,takeBackpackItem,putBackpackItem,SUPPLY_INTERVAL_ACTIONS} from './backpack';
 import {calibrationProfile,calibrationDisturbed,advanceCalibration,type AICalibration} from './ai-calibration';
@@ -31,7 +32,7 @@ export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
 export const SHOT_WIND_GAIN=3;
 export const BRIDGE_THICKNESS=180;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
-export interface Config {slots:Slot[];map:MapId;mapChoice?:MapChoice;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean;fallDamage?:boolean }
+export interface Config {competition?:Competition;slots:Slot[];map:MapId;mapChoice?:MapChoice;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean;fallDamage?:boolean }
 export interface Tank {
   id:number; name:string;crew:CrewId;slot:number;team:number;controller:'human'|'ai';difficulty:Difficulty; x:number; y:number; hp:number; shield:number; fuel:number;
   angle:number; power:number; direction:number; ammo:Record<WeaponId,number>;
@@ -49,7 +50,7 @@ export interface Particle { x:number; y:number; vx:number; vy:number; life:numbe
 export interface Blast { healing?:boolean;x:number;y:number;radius:number;life:number;maxLife:number;color:string;weapon?:WeaponId }
 export interface FloatingText { x:number;y:number;text:string;color:string;life:number;tankId?:number }
 export interface FireZone { x:number;y?:number;radius:number;turns:number;owner:number;weapon?:WeaponId;clock?:number }
-export interface Crate { x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
+export interface Crate { recipient?:number;x:number;y:number;type:'ammo'|'medical'|'double'|'homing'|'transfer'|'boost';falling?:boolean;vy?:number;vx?:number }
 export interface GameEvent { type:'shot'|'explosion'|'turn'|'item'|'hit'|'win'|'crate'|'crate-land'|'timeout'|'lock'|'weather'|'poison'|'defeat'|'wind'|'heal'; message:string; value?:number;x?:number;weapon?:WeaponId;transfer?:boolean }
 export interface Mine {x:number;y:number;owner:number;weapon:WeaponId;boost:number}
 export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;clock?:number}
@@ -65,6 +66,8 @@ export function makeRng(seed:number) { let a=seed>>>0; return () => { a+=0x6D2B7
 
 export class Game {
   readonly minimumShotPower:number;
+  progress:MatchProgress|null=null;
+  pendingSupply:{target:number;candidates:number[];queuedAction:number}|null=null;
   config:Config;
   land=new Terrain();
   terrain=this.land.surface;
@@ -118,7 +121,9 @@ export class Game {
     const participants=this.config.slots.map((slot,index)=>({...slot,index})).filter(s=>s.enabled);
     this.tanks=participants.map((seat,i)=>this.createTank(i,262+i*390,seat,seat.index));
     this.movingUntil=participants.map(()=>0);this.roundPending=this.tanks.map(t=>t.id);
-    this.placeStartingTanks();this.heardX=this.tanks.map(t=>Math.round(t.x/90)*90);
+    this.placeStartingTanks();
+    if(playerSupplyTiming(gameVersion)){this.nextSupplyAction=SUPPLY_INTERVAL_ACTIONS;this.progress={id:this.config.competition?.id??`local-${this.config.seed}`,map:this.config.map,competitors:this.tanks.map(t=>{const points=t.controller==='human'?this.config.competition?.points[t.crew]??0:0;return {id:t.id,crew:t.crew,team:t.team,controller:t.controller,difficulty:t.difficulty,points,tier:t.controller==='ai'?aiRank(t.difficulty):rankIndex(points),vehicle:t.vehicleId,metrics:emptyCombat()};})};}
+    this.heardX=this.tanks.map(t=>Math.round(t.x/90)*90);
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.targetX=this.tanks[1].x;
     this.trace.initial=traceClone({world:{width:WORLD_W,height:TERRAIN_H,bottomY:BOTTOM_Y},config:this.config,mapName:MAPS.find(m=>m.id===this.config.map)?.name??this.config.map,slots:this.config.slots.map((s,slot)=>{const id=this.tanks.find(t=>t.slot===slot)?.vehicleId;return {...s,slot,name:CREW[s.crew].name,flag:teamFlag(s.team),difficultyName:DIFFICULTIES.find(d=>d.id===s.difficulty)?.name,vehicleName:id?vehicleById(id).name:'原创炮手'};}),rules:this.traceRules(),deployed:this.traceTanks()});
@@ -156,6 +161,7 @@ export class Game {
     if(modernSupplyTiming(this.gameVersion))current.supplyObservation=this.supplyObservation;
     if(modernWeather(this.gameVersion))Object.assign(current,{restoring:this.restoring,firstSupplyChecked:this.firstSupplyChecked,nextSupplyAction:this.nextSupplyAction,weatherObservation:this.weatherObservation,weatherNextRound:this.weatherNextRound,weatherCooldownUntil:this.weatherCooldownUntil,weatherSnow:this.weatherSnow});
     if(modernBackpack(this.gameVersion))current.armedItemSlot=this.armedItemSlot;
+    if(playerSupplyTiming(this.gameVersion))Object.assign(current,{progress:this.progress,pendingSupply:this.pendingSupply});
     current.terrain={mask:packTerrain(this.land.mask),protectedMask:packTerrain(this.land.protectedMask),revision:this.land.revision};
     current.annotatedTanks=this.traceTanks();
     return this.trace.snapshot(this.gameVersion,current);
@@ -169,10 +175,16 @@ export class Game {
     if(modernSupplyTiming(g.gameVersion)&&state.supplyObservation)g.supplyObservation=state.supplyObservation;
     if(modernWeather(g.gameVersion))for(const key of ['restoring','firstSupplyChecked','nextSupplyAction','weatherObservation','weatherNextRound','weatherCooldownUntil','weatherSnow'] as const)if(key in state)(g as any)[key]=state[key];
     if(modernBackpack(g.gameVersion))g.armedItemSlot=state.armedItemSlot??null;
+    if(playerSupplyTiming(g.gameVersion)){g.progress=state.progress??g.progress;g.pendingSupply=state.pendingSupply??null;}
     unpackTerrain(state.terrain.mask,g.land.mask);unpackTerrain(state.terrain.protectedMask,g.land.protectedMask);g.land.rebuild();g.land.revision=state.terrain.revision;
     g.land.changes.length=0;
     g.projectiles.forEach(p=>p.trail=[]);g.trace.restore(snapshot);g.rng=g.diagnosticRng(makeRng(snapshot.rng.state));g.events=[];g.particles=[];return g;
   }
+  private credit(t:Tank|undefined,key:keyof CombatMetrics,amount=1){
+    const participant=t?.controller==='human'?this.progress?.competitors.find(c=>c.id===t.id&&c.controller==='human'):null;
+    if(participant&&amount>0)participant.metrics[key]+=amount;
+  }
+  medal(t:Tank){return t.controller==='ai'?aiRank(t.difficulty):this.progress?.competitors.find(c=>c.id===t.id)?.tier??rankIndex(this.config.competition?.points[t.crew]??0);}
   get active() { return this.tanks[this.current]; }
   get enemy() { return this.opponents(this.active).sort((a,b)=>Math.abs(a.x-this.active.x)-Math.abs(b.x-this.active.x))[0]??this.tanks.find(t=>t.team!==this.active.team)!; }
   opponents(t:Tank){return this.tanks.filter(e=>e.team!==t.team&&e.hp>0);}
@@ -416,6 +428,7 @@ export class Game {
   private consumeItem(id:ItemId,slot?:number) {
     const t=this.active,i=itemById(id);
     if(modernBackpack(this.gameVersion)&&TURN_ITEMS.includes(id))takeBackpackItem(t,id,slot);else t.items[id]--;
+    this.credit(t,'items');
     t.tactics-=i.cost;t.itemUsed=true;
     t.itemDelay+=200;
     t.itemReadyTurn[id]=t.turnsTaken+i.cooldown+1;if(!modernWeather(this.gameVersion))this.teleporting=false;
@@ -498,7 +511,7 @@ export class Game {
     if(healing){if(this.itemUnavailable('repair',ai,armedSlot))return false;this.consumeItem('repair',armedSlot);}
     this.observation={kind:'ground',target:null,point:null};this.phase='flying';this.teleporting=false;this.restoring=false;this.armedItemSlot=null;this.firedBy=t.id;
     if(!transfer&&!healing&&Number.isFinite(t.ammo[id])) t.ammo[id]--;
-    t.shots++;
+    t.shots++;this.credit(t,'shots');if(t.doubleShot&&t.boost)this.credit(t,'comboShots');
     if(modernWeather(this.gameVersion)&&t.controller==='ai'&&t.aiCalibration&&!healing&&!transfer)advanceCalibration(t.aiCalibration);
     t.lastPower=t.power;t.selectedWeapon=id;
     const spec=weaponById(id);
@@ -698,6 +711,7 @@ export class Game {
       if(!this.canRestore(target,p.owner)){this.recordBattle('heal-blocked',`${target.name}不受敌方恢复弹影响：友伤关闭`,{owner:p.owner,target:target.id,friendlyFire:!!this.config.friendlyFire});continue;}
       const falloff=this.minimumShotPower===MIN_POWER?impactDamageScale(target,p.x,p.y,this.tankSlope(target),radius,directTarget===target.id):1;
       const before=target.hp,base=target.maxHP*RESTORE_FRACTION,requested=Math.round(base*p.boost*falloff);target.hp=Math.min(target.maxHP,target.hp+requested);const actual=target.hp-before;
+      if(target.team===this.tanks[p.owner]?.team)this.credit(this.tanks[p.owner],'healed',actual);
       const factors=[{source:'基础恢复比例',value:RESTORE_FRACTION},{source:`fireBoosted（${p.boostSources?.fire??'无强化'}）`,value:p.fireBoosted?1.5:1},{source:this.minimumShotPower===MIN_POWER?'命中／距离衰减':'恢复弹范围内',value:falloff}];
       this.recordBattle('heal',`${this.tanks[p.owner].name}→${target.name}恢复弹：最大HP${target.maxHP}${factors.map(f=>` ×${f.value}[${f.source}]`).join('')}，恢复${actual}，HP ${before}→${target.hp}`,{owner:p.owner,target:target.id,weapon:'cannon-normal',projectile:p.traceId,base:target.maxHP,factors,requested,actual,hpBefore:before,hpAfter:target.hp,boostSources:p.boostSources,friendlyFire:!!this.config.friendlyFire,poisoned:target.poisoned,...(this.minimumShotPower===MIN_POWER?{falloff,distance:Math.hypot(target.x-p.x,target.y-p.y),directHit:directTarget===target.id}:{} )});
       if(actual){this.float(target.x,target.y-40,`+${actual}`,'#568949',target.id);this.itemCues.push({tank:target.id,item:'repair',age:0});this.observe('hit',target);this.emit('heal',`${target.name}恢复了${actual}点生命。`,actual,target.x);}
@@ -784,6 +798,7 @@ export class Game {
     if(t.hp<=redHealthLimit(t))t.poisoned=false;
     if(amount>0) t.reaction={kind:actual>0?reaction:'graze',remaining:reaction==='direct'?1.4:reaction==='fall'?1.2:0.7};
     if(owner!==t.id&&actual>0) this.tanks[owner].damage+=actual;
+    if(actual>0&&this.tanks[owner]?.team!==t.team){this.credit(this.tanks[owner],'damage',actual);if(t.hp<=0)this.credit(this.tanks[owner],'kills');}
     if(absorbed) this.float(t.x+16,t.y-43,`护盾 −${absorbed}`,'#75a7af');
     if(actual&&status==='poison'){
       this.texts=this.texts.filter(text=>text.tankId!==t.id);
@@ -858,6 +873,7 @@ export class Game {
         if(t.ammo.homing>0)return true;
         t.ammo.homing=1;name='猎星追踪弹';
       }
+      this.credit(t,'pickups');
       this.float(t.x,t.y-40,`${name} +1`,'#ad9261');
       this.recordBattle('crate-pickup',`${t.name}拾取${name}，填入空槽`,{target:t.id,crate:c,item,...(slot===undefined?{}:{slot,itemSlots:t.itemSlots}),items:t.items,ammo:t.ammo});
       this.emit('crate',`${t.name}拾取了${name}补给。`,undefined,t.x);return false;
@@ -932,7 +948,8 @@ export class Game {
     this.gases=this.gases.filter(gas=>gas.turns>0);
     if(this.turn>=40) {this.damage(this.active,Math.ceil(this.active.maxHP*.08),this.active.id,true,'fall',undefined,{cause:'sudden',base:this.active.maxHP,factors:[{source:'第40次行动后决胜扣血',value:.08}],formula:'ceil(maxHP × 8%)，绕过护盾与伤害开关'});this.float(this.active.x,this.active.y-55,'决胜时刻','#bd765d');}
     if(this.checkWin()) return;
-    if(this.shouldCheckSupply(completedRound)&&this.crates.length<3) {
+    if(playerSupplyTiming(this.gameVersion))this.prepareHumanSupply();
+    else if(this.shouldCheckSupply(completedRound)&&this.crates.length<3) {
       const humans=this.tanks.filter(t=>t.controller==='human'&&t.hp>0),candidates=humans.length?humans:this.tanks.filter(t=>t.hp>0);
       const order=[...candidates];if(modernBackpack(this.gameVersion))for(let i=order.length-1;i>0;i--){const j=Math.floor(this.rng()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
       for(let tries=0;tries<(modernBackpack(this.gameVersion)?50*order.length:50);tries++) {
@@ -957,6 +974,34 @@ export class Game {
     this.supplySettling=modernSupplyTiming(this.gameVersion)?SUPPLY_LANDING_SECONDS:.35;
     this.supplyObservation=this.phase==='supply'&&modernSupplyTiming(this.gameVersion)?{approach:SUPPLY_APPROACH_SECONDS,crates:this.crates.flatMap((c,i)=>c.falling?[i]:[])}:null;
     this.emit('turn',`${this.active.name}，轮到你了。`);
+  }
+  private prepareHumanSupply(){
+    const candidates=this.tanks.filter(t=>t.controller==='human'&&t.hp>0);
+    if(this.pendingSupply&&!candidates.some(t=>t.id===this.pendingSupply!.target)){
+      this.recordBattle('supply-cancel','预定补给取消：对应人类炮手已出局或交给AI',{...this.pendingSupply});this.pendingSupply=null;
+    }
+    if(!this.pendingSupply&&this.turn>=this.nextSupplyAction&&this.crates.length<3){
+      this.nextSupplyAction=this.turn+SUPPLY_INTERVAL_ACTIONS;
+      if(candidates.length){const target=candidates[Math.floor(this.rng()*candidates.length)].id;this.pendingSupply={target,candidates:candidates.map(t=>t.id),queuedAction:this.turn};this.recordBattle('supply-queued','补给已预定，在对应人类炮手行动前投放',{...this.pendingSupply,nextAction:this.nextSupplyAction});}
+    }
+    if(!this.pendingSupply||this.pendingSupply.target!==this.active.id||this.crates.length>=3)return;
+    const scheduled=this.pendingSupply,human=this.active;this.pendingSupply=null;
+    // Wind, terrain and human position are evaluated NOW, not when this drop was queued.
+    for(let tries=0;tries<50;tries++){
+      const maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
+      const desired=human.x+(this.rng()<.5?-1:1)*(45+this.rng()*Math.max(0,maxDistance-45));
+      if(!this.stablePlatform(desired)||this.traversable(human,desired)===null)continue;
+      const distance=this.ground(desired)+50,capTime=(250-80)/220,capDistance=80*capTime+110*capTime*capTime;
+      const time=distance>capDistance?capTime+(distance-capDistance)/250:(-80+Math.sqrt(6400+440*distance))/220;
+      const drift=this.wind*2.5*(time/.35-(1-Math.exp(-.35*time))/.35**2),start=desired-drift,landing=this.predictSupply(start);
+      const reachable=landing?this.traversable(human,landing.x):null;
+      if(start<32||start>WORLD_W-32||!landing||landing.x<40||landing.x>WORLD_W-40||!this.stablePlatform(landing.x)||reachable===null||Math.abs(landing.y+14-reachable)>MAX_STEP_HEIGHT||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45))continue;
+      const roll=this.rng(),type=roll<.3?'medical':roll<.5?'double':roll<.65?'transfer':roll<.8?'boost':'homing';
+      this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0,recipient:human.id});
+      this.recordBattle('supply-selection','补给在对应人类炮手行动前落下',{candidates:scheduled.candidates,target:human.id,startX:start,landing,queuedAction:scheduled.queuedAction,deliveryAction:this.turn,nextAction:this.nextSupplyAction});
+      this.emit('crate','补给空降中，回合计时暂停。');return;
+    }
+    this.recordBattle('supply-cancel','本次补给取消：没有可安全拾取的落点',{target:human.id,queuedAction:scheduled.queuedAction});
   }
   private shouldCheckSupply(completedRound:boolean){
     if(modernBackpack(this.gameVersion))return this.turn>0&&this.turn%SUPPLY_INTERVAL_ACTIONS===0;

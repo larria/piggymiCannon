@@ -1,0 +1,61 @@
+{
+  "formatVersion": 1,
+  "version": "4.0.0",
+  "node": {
+    "passed": 334,
+    "failed": 0,
+    "newTests": 15,
+    "summary": "ℹ tests 334\nℹ suites 0\nℹ pass 334\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 83831.321792"
+  },
+  "chromium": {
+    "passed": 27,
+    "failed": 0,
+    "summary": "  27 passed (58.1s)"
+  },
+  "webkit": {
+    "passed": 27,
+    "failed": 0,
+    "summary": "  27 passed (1.1m)"
+  },
+  "recipientSeeds": 96,
+  "recipients": [
+    24,
+    23,
+    27,
+    22
+  ],
+  "aiTierMapping": {
+    "easy": "bronze",
+    "normal": "silver",
+    "hard": "gold",
+    "expert": "king"
+  },
+  "tierThresholds": [
+    0,
+    200,
+    600,
+    1200
+  ],
+  "achievements": 14,
+  "controlsNotReduced": true,
+  "aiProfilesNeverScored": true,
+  "replayDoesNotScore": true,
+  "exactLiveRecordingRestored": true,
+  "quotaFailureRetainsInMemory": true,
+  "readOnlyQueriesDoNotCount": true,
+  "visualEmulation": {
+    "viewports": [
+      [
+        1194,
+        834
+      ],
+      [
+        1210,
+        834
+      ]
+    ],
+    "deviceScaleFactor": 2,
+    "hasTouch": true,
+    "realIPadHardware": false
+  }
+}

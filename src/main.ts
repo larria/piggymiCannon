@@ -1,3 +1,6 @@
+import {readProgression,freshProgression,rankIndex,settleProgression,PROGRESSION_KEY,type Settlement,type Competition} from './progression';
+import {medalSvg} from './medal-art';
+import {progressionMarkup,settlementMarkup} from './progression-ui';
 import {modernWeather} from './weather';
 import {repairGameAssets,assetRepairDiagnostics,retryBrokenMaterialImages,retryMaterialFonts} from './asset-repair';
 import {retryBattleSprites} from './battle-sprites';
@@ -42,10 +45,15 @@ const APP_VERSION=__APP_VERSION__;
 const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
 const safeRead=(key:string)=>{try{return JSON.parse(localStorage.getItem(key)||'null');}catch{return null;}};
 const save=(key:string,value:unknown)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private browsing can disable storage. */}};
+let progression=(()=>{try{return readProgression(localStorage);}catch{return freshProgression();}})();
+let rankSettlement:Settlement[]=[];
+let progressionUnsaved=false;
+function newCompetition():Competition{return {id:crypto.randomUUID(),points:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.points]))};}
 const saved=safeRead('piggy-settings');
 let config:Config={slots:defaultSlots(),map:'valley',timer:DEFAULT_TURN_TIMER,seed:Date.now(),...(saved?.config||{})};
 config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:storedTurnTimer(config.timer,saved?.timerPreferenceVersion),seed:Date.now(),snow:undefined,fog:undefined,fireLine:undefined,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,fallDamage:!!config.fallDamage,allowDragon:config.allowDragon};
 if(config.slots.filter(s=>s.enabled).length<2||new Set(config.slots.filter(s=>s.enabled).map(s=>s.team)).size<2)config.slots=defaultSlots();
+config.competition=newCompetition();
 let game=new Game(config,APP_VERSION);config={...game.config};
 let recorder:ReplayRecorder|null=null,playback:ReplayPlayer|null=null;
 let impactProfiler:ImpactProfiler|null=null;
@@ -140,6 +148,8 @@ $('.wait-readout').dataset.helpName='行动等待';$('.wait-readout').dataset.he
 installControlHints(()=>{if(!game.paused)audio.unlock();audio.play('aim');});
 installMobileGestureGuards($('#app'));
 const renderer=new Renderer($('#battlefield'),game);
+const displayMedal=(tank:Game['tanks'][number])=>!playback&&game.phase==='ended'&&tank.controller==='human'?rankIndex(progression.profiles[tank.crew].points):game.medal(tank);
+renderer.medalFor=displayMedal;
 $('.dash-angle').insertAdjacentHTML('beforeend','<span class="angle-readout relative"><small>车身</small><b id="relative-angle">45°</b></span><span class="angle-readout absolute"><small>水平</small><b id="absolute-angle">45°</b></span>');
 const dashboard=new DashboardView($('#angle-dial'),$('#minimap'));
 function paintMapChoices(){
@@ -226,9 +236,9 @@ function updateUI() {
   $('#move-right .icon').style.transform='';
   $('#mode-label').textContent='自定义战场';
   $('#difficulty-label').textContent=`${game.tanks.length} 名炮手 · ${new Set(game.tanks.map(t=>t.team)).size} 面队旗`;
-  const hudSignature=game.tanks.map(t=>`${t.id}:${t.crew}:${t.vehicleId}:${t.controller}:${t.difficulty}:${t.team}`).join('|');
+  const hudSignature=game.tanks.map(t=>`${t.id}:${t.crew}:${t.vehicleId}:${t.controller}:${t.difficulty}:${t.team}:${displayMedal(t)}`).join('|');
   if(hudSignature!==lastHud){
-    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud team-${tank.team}" data-hud="${tank.id}" data-slot-id="${tank.slot}" style="--flag-ink:${teamFlag(tank.team).color};--flag-paper:${teamFlag(tank.team).paper}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="定位${tank.name}；长按查看大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button></span><div class="player-info"><div class="player-name">${flagIcon(tank.team)}${nameMarkup(tank.name,tank.team)}<span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
+    $('.scoreboard').innerHTML=game.tanks.map(tank=>`<div class="player-hud team-${tank.team}" data-hud="${tank.id}" data-slot-id="${tank.slot}" style="--flag-ink:${teamFlag(tank.team).color};--flag-paper:${teamFlag(tank.team).paper}"><span class="avatar"><button class="portrait-button" data-portrait="${tank.id}" aria-label="定位${tank.name}；长按查看大头像">${crewAvatar(tank.crew,import.meta.env.BASE_URL)}</button>${medalSvg(displayMedal(tank))}</span><div class="player-info"><div class="player-name">${flagIcon(tank.team)}${nameMarkup(tank.name,tank.team)}<span class="player-role" id="role-${tank.id}">${tank.controller==='human'?'人类':DIFFICULTIES.find(d=>d.id===tank.difficulty)!.name+' AI'}</span></div><div class="health-line"><div class="health-track"><span id="hp-bar-${tank.id}"></span></div><span class="hp-value" id="hp-${tank.id}"></span></div><div class="status-line" id="status-${tank.id}"></div></div><span class="hud-vehicle" title="${tank.vehicleId?vehicleById(tank.vehicleId).name:''}">${tank.vehicleId?vehicleIcon(vehicleById(tank.vehicleId)):''}</span></div>`).join('');lastHud=hudSignature;
   }
   game.tanks.forEach((tank,i)=>{
     $(`#hp-${i}`).innerHTML=`${tank.hp} <small>/ ${tank.maxHP}</small>`;
@@ -311,12 +321,20 @@ function updateOverlay() {
     recordStats();
     if(game.resultAge<3){el.classList.add('hidden');el.innerHTML='';return;}
     el.classList.remove('hidden');const draw=game.winner===null,winner=draw?'各位炮手':game.tanks.filter(t=>t.team===game.winner).map(t=>nameMarkup(t.name,t.team)).join('与');
-    el.innerHTML=`<div class="overlay-card result"><span class="overlay-symbol">${icon('trophy')}</span><div class="eyebrow">一场漂亮的对决</div><h2>${draw?'握手言和。':`${winner}，好准头！`}</h2><p>${draw?'全部出局，平局也是一种默契。':`${winner}赢得了胜利。下一发，会更精彩。`}</p><div class="result-stats"><div><strong>${game.round}</strong><span>交战轮数</span></div><div><strong>${game.tanks.reduce((n,t)=>n+t.shots,0)}</strong><span>发射炮弹</span></div><div><strong>${game.tanks.find(t=>t.crew==='mimi')?.damage??game.tanks.reduce((n,t)=>n+t.damage,0)}</strong><span>${game.tanks.some(t=>t.crew==='mimi')?nameMarkup('咪猪头',game.tanks.find(t=>t.crew==='mimi')!.team)+'伤害':'总计伤害'}</span></div></div><button class="button button-dark" data-action="rematch">再来一局 ${icon('refresh')}</button><button class="text-button" data-dialog="setup">调整槽位与战场</button><button class="text-button" data-action="save-replay">保存本局录像</button></div>`;
+    el.innerHTML=`<div class="overlay-card result"><span class="overlay-symbol">${icon('trophy')}</span><div class="eyebrow">一场漂亮的对决</div><h2>${draw?'握手言和。':`${winner}，好准头！`}</h2><p>${draw?'全部出局，平局也是一种默契。':`${winner}赢得了胜利。下一发，会更精彩。`}</p><div class="result-stats"><div><strong>${game.round}</strong><span>交战轮数</span></div><div><strong>${game.tanks.reduce((n,t)=>n+t.shots,0)}</strong><span>发射炮弹</span></div><div><strong>${game.tanks.find(t=>t.crew==='mimi')?.damage??game.tanks.reduce((n,t)=>n+t.damage,0)}</strong><span>${game.tanks.some(t=>t.crew==='mimi')?nameMarkup('咪猪头',game.tanks.find(t=>t.crew==='mimi')!.team)+'伤害':'总计伤害'}</span></div></div>${settlementMarkup(rankSettlement)}<button class="button button-dark" data-action="rematch">再来一局 ${icon('refresh')}</button><button class="text-button" data-dialog="setup">调整槽位与战场</button><button class="text-button" data-action="save-replay">保存本局录像</button></div>`;
   } else {el.classList.add('hidden');el.innerHTML='';}
 }
 function recordStats() {
   if(playback)return;
-  if(statsRecorded) return;statsRecorded=true;stats.games++;if(game.winner===game.tanks.find(t=>t.crew==='mimi')?.team) stats.wins++;stats.damage+=game.tanks.find(t=>t.crew==='mimi')?.damage??0;stats.shots+=game.tanks.find(t=>t.crew==='mimi')?.shots??0;save('piggy-stats',stats);
+  if(statsRecorded) return;statsRecorded=true;
+  if(game.progress){
+    // Read once at settlement to avoid overwriting a different tab's completed match.
+    let latest=progression;try{const stored=localStorage.getItem(PROGRESSION_KEY);if(stored&&!progressionUnsaved)latest=readProgression(localStorage);}catch{/* In-memory progress remains usable. */}
+    const settled=settleProgression(latest,game.progress,game.winner,{ended:game.phase==='ended'});progression=settled.state;rankSettlement=settled.results;
+    if(rankSettlement.length){try{localStorage.setItem(PROGRESSION_KEY,JSON.stringify(progression));progressionUnsaved=false;}catch{progressionUnsaved=true;toast('本机存储不可用，积分仅在本次打开期间保留。');}renderer.invalidate();lastHud='';}
+  }
+  if(!game.tanks.some(t=>t.controller==='human'))return;
+  stats.games++;if(game.winner===game.tanks.find(t=>t.crew==='mimi'&&t.controller==='human')?.team) stats.wins++;stats.damage+=game.tanks.find(t=>t.crew==='mimi'&&t.controller==='human')?.damage??0;stats.shots+=game.tanks.find(t=>t.crew==='mimi'&&t.controller==='human')?.shots??0;save('piggy-stats',stats);
 }
 function setImmersive(value:boolean) {
   immersive=value;document.body.classList.toggle('combat-mode',value);setDrawer(false);
@@ -343,7 +361,7 @@ function newMatch(next:Config,start=true) {
   audio.resetEffects();
   audio.setSelectionMusic(false);
   audio.pause(false);
-  config={...next,snow:undefined,fog:undefined,fireLine:undefined,seed:freshMatchSeed(Date.now(),playedSeeds)};game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);refreshImpactProfiler();statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
+  config={...next,snow:undefined,fog:undefined,fireLine:undefined,seed:freshMatchSeed(Date.now(),playedSeeds),competition:newCompetition()};rankSettlement=[];game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);refreshImpactProfiler();statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}
 }
 function togglePause() {
@@ -353,17 +371,18 @@ function togglePause() {
   cancelCharge();game.paused=!game.paused;moveHeld=0;keys.clear();audio.pause(game.paused);updateOverlay();updateUI();
 }
 
+function profileClick(event:Event){const button=(event.target as HTMLElement).closest<HTMLElement>('[data-profile]');if(!button)return;const crew=button.dataset.profile as keyof typeof CREW;if(!CREW[crew])return;$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);}
 function showDialog(type:string) {
   if(playback&&type==='setup'){toast('请先退出录像，再调整对局。');return;}
   if(renderer.touring)renderer.finishTour();
   const dialog=$<HTMLDialogElement>('#dialog');
   if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;audio.pause(true);moveHeld=0;keys.clear();}
-  dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');
+  dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');content.removeEventListener('click',profileClick);
   dialog.classList.toggle('settings-dialog',type==='settings');
   if(type.startsWith('portrait:')) {
     const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name,team=game.tanks[id].team;
     const sayings=crew==='fox'?['尾巴翘翘，准头好好！','摸摸狐狸耳朵，听听风。','阿狸把星星装进炮弹了。']:crew==='fish'?['咕噜咕噜，轮到小黄鱼！','摆摆尾巴，借一阵风。','泡泡飞过的地方，也藏着好准头。']:crew==='mimi'?['今天也要可可爱爱地开炮！','摸摸猪头，准头 +1！','这发炮弹，带一点甜。','先听听风，再认真瞄准。']:['别怕，大猪头也会打歪。','装甲厚一点，心软一点。','哼哼，轮到大猪头了！','不着急，咱们慢慢瞄。'];
-    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}">${crewAvatar(crew,import.meta.env.BASE_URL)}<span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
+    content.innerHTML=`<div class="portrait-view"><span class="eyebrow">认识一下，你的炮手</span><h2>${nameMarkup(name,team)}</h2><button id="portrait-art" class="portrait-art" aria-label="戳戳${name}">${crewAvatar(crew,import.meta.env.BASE_URL)}${medalSvg(displayMedal(game.tanks[id]))}<span class="portrait-touch-hint">轻轻戳一下</span></button><p id="portrait-saying" class="portrait-saying">${colorNames(sayings[0])}</p><button class="button button-dark dialog-primary" data-action="close">带着好心情，回战场 ${icon('arrow')}</button></div>`;
     let taps=0;
     $('#portrait-art').addEventListener('click',()=>{
       $('#portrait-saying').innerHTML=colorNames(sayings[++taps%sayings.length]);
@@ -375,7 +394,7 @@ function showDialog(type:string) {
   } else if(type==='setup') {
     audio.setSelectionMusic(true);
     content.innerHTML=setupMarkup(config,import.meta.env.BASE_URL);
-    mountSetup(content,config,import.meta.env.BASE_URL,toast,next=>{closeDialog();newMatch(next);},{soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,change:(key,value)=>{if(key==='soundEnabled')audio.setSoundEnabled(value);else if(key==='musicEnabled')audio.setMusicEnabled(value);else{config[key]=value;game.setBattleRule(key,value);}updateSound();persistSettings();}});paintMapChoices();
+    mountSetup(content,{...config,competition:newCompetition()},import.meta.env.BASE_URL,toast,next=>{closeDialog();newMatch(next);},{soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,change:(key,value)=>{if(key==='soundEnabled')audio.setSoundEnabled(value);else if(key==='musicEnabled')audio.setMusicEnabled(value);else{config[key]=value;game.setBattleRule(key,value);}updateSound();persistSettings();}});paintMapChoices();
   } else if(type==='exit') {content.innerHTML=`<span class="eyebrow">暂别这一场炮火</span><h2>回演习场歇一歇？</h2><p class="dialog-intro">当前对局会结束，坦克选择与设置会保留。</p><button class="button button-dark dialog-primary" data-action="leave-match">回到演习场</button><button class="text-button" data-action="close">继续这场对局</button>`;
   } else if(type==='install') {
     content.innerHTML=`<span class="eyebrow">把战场装进口袋</span><h2>安装到 iPad。</h2><p class="dialog-intro">首次打开并完成离线缓存后，就能从主屏幕直接进入游戏，离线也可以开战。</p><div class="install-art"><img src="${import.meta.env.BASE_URL}icons/icon-192.png" alt="咪猪头坦克图标"/><strong>咪猪头的疯狂坦克</strong></div><ol class="install-steps"><li>用 Safari 打开游戏。</li><li>点击分享按钮，选择「添加到主屏幕」。</li><li>点「添加」，再从主屏幕打开。横过 iPad，就可以开始了。</li></ol><button class="button button-dark dialog-primary" data-action="close">知道啦 ${icon('check')}</button>`;
@@ -387,7 +406,8 @@ function showDialog(type:string) {
   } else if(type==='guide') {
     content.innerHTML=guideMarkup(config.allowDragon);
   } else if(type==='stats') {
-    content.innerHTML=`<span class="eyebrow">每一发，都算数</span><h2>你的炮手履历。</h2><p class="dialog-intro">留在这台设备上的小小战绩，记录咪猪头完成的对局。</p><div class="stats-grid"><div><strong>${stats.games}</strong><span>完成对局</span></div><div><strong>${stats.wins}</strong><span>咪猪头获胜</span></div><div><strong>${stats.shots}</strong><span>发射次数</span></div><div><strong>${stats.damage}</strong><span>累计伤害</span></div></div><div class="stats-empty">${icon('trophy')}<p>${stats.games?'好准头都是练出来的。下一局，也许更漂亮。':'第一枚勋章，正等着你的第一场胜利。'}</p></div><button class="button button-dark dialog-primary" data-action="close">回到战场 ${icon('arrow')}</button>`;
+    content.innerHTML=progressionMarkup(progression,'mimi',import.meta.env.BASE_URL);
+    content.addEventListener('click',profileClick);
   } else if(type==='log') {
     content.innerHTML=`<span class="eyebrow">战场里的那些瞬间</span><h2>作战记录。</h2><p class="dialog-intro">最近 24 条事件 · 当前第 ${game.round} 轮</p><ol class="battle-log">${game.log.length?game.log.map((line,i)=>`<li><span>${String(game.log.length-i).padStart(2,'0')}</span>${colorNames(line)}</li>`).join(''):'<li>战场很安静。第一发炮弹会写下故事。</li>'}</ol><button class="button button-dark dialog-primary" data-action="close">返回对局 ${icon('arrow')}</button>`;
   } else {

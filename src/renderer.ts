@@ -1,3 +1,5 @@
+import {paintMedal} from './medal-art';
+import type {RankIndex} from './progression';
 import {fireLineVisual,weatherCameraPoint,modernWeather} from './weather';
 import type {TerrainChange} from './terrain';
 import {paintTurnMarker} from './turn-marker';
@@ -32,6 +34,7 @@ const PALETTES:Record<string,Palette>={
 const rr=(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number) => {ctx.beginPath();ctx.roundRect(x,y,w,h,r);};
 
 export class Renderer {
+  medalFor:((tank:Tank)=>RankIndex)|null=null;
   canvas:HTMLCanvasElement; ctx:CanvasRenderingContext2D; background:HTMLCanvasElement;terrainCanvas=document.createElement('canvas');terrainRevision=-1;
   game:Game; palette:Palette; ratio=1;time=0;viewHeight=WORLD_H;viewWidth=WORLD_W;
   readonly zoom=BATTLE_ZOOM;
@@ -302,7 +305,7 @@ export class Renderer {
     for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132);paintItemCue(ctx,cue,clamp(t.x,this.offsetX+48,this.offsetX+this.viewWidth-48),Math.max(this.offsetY+38,top),teamFlag(t.team).color,this.reducedMotion);}
     // The portrait stays upright; its frame carries the team colour.
     const celebrateOffset=celebrating?-26:0;let labelOffset=0;
-    const box=()=>({left:t.x-25,right:t.x+(t.poisoned?76:25),top:t.y-108+celebrateOffset+labelOffset,bottom:t.y-53+celebrateOffset+labelOffset});
+    const box=()=>({left:t.x-25,right:t.x+(t.poisoned?82:43),top:t.y-108+celebrateOffset+labelOffset,bottom:t.y-53+celebrateOffset+labelOffset});
     for(let attempt=0;attempt<4;attempt++){const b=box();if(!this.labelRects.some(a=>b.left<a.right+4&&b.right>a.left-4&&b.top<a.bottom+4&&b.bottom>a.top-4))break;labelOffset-=55;}
     this.labelRects.push({...box(),tank:t.id});
     this.portraitHits.push({x:t.x,y:t.y-85+celebrateOffset+labelOffset,id:t.id});
@@ -314,8 +317,9 @@ export class Renderer {
     const portrait=crewPortrait(t.crew);
     ctx.save();ctx.beginPath();ctx.arc(0,-85,19,0,Math.PI*2);ctx.clip();if(portrait)ctx.drawImage(portrait,-20,-105,40,40);ctx.restore();
     ctx.strokeStyle=teamFlag(t.team).color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-85,20,0,Math.PI*2);ctx.stroke();
+    paintMedal(ctx,this.medalFor?.(t)??g.medal(t),14,-92,24);
     ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-59,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,-59,46*t.hp/t.maxHP,3,1.5);ctx.fill();
-    if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,30,-95,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.textAlign='center';ctx.fillText('中毒',47,-83);}
+    if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,44,-95,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.textAlign='center';ctx.fillText('中毒',61,-83);}
     ctx.restore();
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}
     if(t.boost) {ctx.fillStyle='#f5cc83';ctx.font='bold 17px sans-serif';ctx.fillText('↑',34,-29);}
