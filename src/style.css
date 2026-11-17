@@ -264,3 +264,6 @@ dialog,.arsenal{scrollbar-gutter:stable}
 .combat-mode .combat-column{gap:0}
 
 #power-memory-fill,#charge-fill{height:auto}
+
+.replay-tools{display:flex;align-items:center;gap:12px;margin-top:16px}.replay-tools small{font-size:11px;color:#7d8970}.replay-tools .button,.replay-entry .button,.replay-entry .text-button{min-height:44px;min-width:44px}.replay-entry{flex-wrap:wrap}.replay-entry>div{flex-basis:180px}.replay-entry .button{padding:8px 12px}
+@media(max-width:600px){.replay-entry>div{flex-basis:100%}.replay-tools{flex-wrap:wrap}}

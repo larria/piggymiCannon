@@ -9,7 +9,7 @@ const finish=(g:Game)=>{for(let i=0;i<1600&&g.projectiles.length;i++)g.update(.0
 function hit(g:Game,double=false){g.active.doubleShot=double;assert.ok(g.fire());g.projectiles.forEach(p=>Object.assign(p,{x:700,y:408,vx:0,vy:500,age:2}));}
 test('every direct crater keeps full width and subtracts the same 65 depth after dig boost, except satellite',()=>{
  for(const w of ALL_WEAPONS)for(const boost of [1,1.15]){const full=excavation(w.id,false,'4.0.2',boost),direct=excavation(w.id,true,'4.0.2',boost);assert.equal(direct.radius,full.radius,w.id);assert.equal(direct.depth,w.id==='ion-special'?full.depth:Math.max(0,full.depth-DIRECT_DIG_DEPTH_REDUCTION),w.id);}
- const full=excavation('cannon-normal',false),direct=excavation('cannon-normal',true);assert.equal(direct.depth,full.depth/3);assert.equal(excavation('cannon-special',true).depth,0);assert.equal(excavation('missile-normal',true).depth,0);
+ const full=excavation('cannon-normal',false,'4.0.2'),direct=excavation('cannon-normal',true,'4.0.2');assert.equal(direct.depth,full.depth/3);assert.equal(excavation('cannon-special',true,'4.0.2').depth,0);assert.equal(excavation('missile-normal',true,'4.0.2').depth,0);
 });
 test('actual head contact digs a same-width one-third shallow cannon crater and red bean removes no terrain',()=>{
  for(const id of ['cannon-normal','cannon-special'] as const){const g=ready(),e=g.tanks[1],mask=g.land.mask.slice();const p={...g.launch(g.active,id),x:e.x,y:e.y-20};(g as any).explode(p,e.id);
@@ -38,7 +38,7 @@ test('self/friendly protection and first-section kill remain authoritative; no c
 test('terrain-only Flyfire still penetrates forward with full depth and tapered width',()=>{const g=ready();g.tanks[1].x=1750;assert.ok(g.fire());Object.assign(g.projectiles[0],{x:960,y:449,vx:0,vy:500,age:2});finish(g);assert.equal(ev(g,'impact').length,4);assert.equal(ev(g,'pierce-contact').length,0);const digs=ev(g,'terrain');assert.deepEqual(digs.map(e=>e.data.depth),[39,39,39,39]);assert.ok(digs[3].data.y>digs[0].data.y+70);});
 test('bowl normal crater is modestly smaller; satellite full curved crater lies between cannon and laser even on direct hit',()=>{
  const before=excavation('bowl-normal',false,'4.0.1'),after=excavation('bowl-normal',false,'4.0.2');assert.ok(after.radius<before.radius&&after.radius>before.radius*.85);assert.ok(after.depth<before.depth&&after.depth>before.depth*.85);
- const cannon=excavation('cannon-normal',false),ion=excavation('ion-special',true),laser=excavation('laser-normal',false);assert.ok(cannon.radius>ion.radius&&ion.radius>laser.radius);assert.ok(cannon.depth>ion.depth&&ion.depth>laser.depth);assert.ok(Math.abs(cannon.radius/cannon.depth-ion.radius/ion.depth)<.03);
+ const cannon=excavation('cannon-normal',false,'4.0.2'),ion=excavation('ion-special',true,'4.0.2'),laser=excavation('laser-normal',false,'4.0.2');assert.ok(cannon.radius>ion.radius&&ion.radius>laser.radius);assert.ok(cannon.depth>ion.depth&&ion.depth>laser.depth);assert.ok(Math.abs(cannon.radius/cannon.depth-ion.radius/ion.depth)<.03);
  const a=ready(),b=ready();for(const [g,direct] of [[a,true],[b,false]] as const){const e=g.tanks[1];(g as any).explode({...g.launch(g.active,'ion-special'),x:e.x,y:450,sub:true},direct?1:undefined);}assert.deepEqual(a.land.mask,b.land.mask);assert.deepEqual(ev(a,'terrain').map(e=>[e.data.radius,e.data.depth]),[[91.80000000000001,90]]);assert.equal(ev(a,'excavation-profile')[0].data.depthReduction,0);
 });
 test('AI direct estimate shares all four section bases and rounding without mutating RNG or terrain',()=>{

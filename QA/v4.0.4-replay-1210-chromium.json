@@ -1,0 +1,13 @@
+{
+  "width": 1210,
+  "browserName": "chromium",
+  "bytes": 37560,
+  "seed": 3925418346,
+  "actualMap": "factory",
+  "commands": 140,
+  "duration": 1.6664999999999994,
+  "exactStateVerified": true,
+  "statsUnchanged": true,
+  "localReload": true,
+  "deleted": true
+}

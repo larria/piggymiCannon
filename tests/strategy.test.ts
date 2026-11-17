@@ -77,7 +77,7 @@ test('descending valid slopes and small steps stays grounded even with large mov
 test('all weapons separate blast damage from excavation and dig more on a ground hit',()=>{
   const profiles=new Set<string>();
   for(const w of WEAPONS) {
-    const direct=excavation(w.id,true),miss=excavation(w.id,false);
+    const direct=excavation(w.id,true,'4.0.3'),miss=excavation(w.id,false,'4.0.3');
     assert.ok(miss.radius===direct.radius&&miss.depth>direct.depth);
     profiles.add(`${w.digRadius},${w.digDepth}`);
   }

@@ -62,7 +62,7 @@ test('flight and resolving targets keep their existing framing; tour wins and re
  await prepare(page);await step(page,100,100);
  const result=await page.evaluate(()=>{const q=(window as any).__qa,g=q.game,r=q.renderer,c=r.camera;
   g.crates=[];g.supplyObservation=null;g.phase='flying';g.fog=false;const p=g.launch(g.active,'cannon-normal');Object.assign(p,{x:1400,y:40,delay:0});g.projectiles=[p];r.follow(false);r.draw(.3);
-  const flight={x:r.offsetX,y:r.offsetY,expectedX:Math.max(0,Math.min(640,p.x-r.viewWidth/2)),expectedY:Math.min(g.active.y-r.viewHeight/2,p.y-r.viewHeight*.3),stale:r.supplyCrates.length};
+  const flight={x:r.offsetX,y:r.offsetY,expectedX:Math.max(0,Math.min(640,p.x-r.viewWidth/2)),expectedY:p.y-r.viewHeight*.5,stale:r.supplyCrates.length};
   g.phase='resolving';g.projectiles=[];g.observation={target:0,point:null,kind:'hit'};r.draw(.3);const resolved={x:r.offsetX,y:r.offsetY,expected:c.target(g.tanks[0].x,g.tanks[0].y)};
   g.phase='supply';g.crates=[{x:1700,y:-50,falling:true,type:'double'}];g.supplyObservation={approach:.55,crates:[0]};g.paused=true;r.follow();r.invalidate();r.draw(.05);const frames=r.frames,pos={x:r.offsetX,y:r.offsetY};for(let i=0;i<90;i++)r.draw(.05);const frozen={frames:r.frames-frames,x:r.offsetX-pos.x,y:r.offsetY-pos.y};
   let finished=false;r.startTour(()=>{finished=true;});const seen=new Set();for(let i=0;i<100&&!finished;i++){seen.add(r.tourPlayer);r.draw(.05);}return {flight,resolved,frozen,tour:{finished,seen:[...seen]}};

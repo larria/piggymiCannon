@@ -6,7 +6,7 @@ import type {TerrainChange} from './terrain';
 import {paintTurnMarker} from './turn-marker';
 import {loadBattleSprites,paintBattleSprite,battleSpriteRevision} from './battle-sprites';
 import type {PixiStage} from './pixi-stage';
-import {BattleCamera,BATTLE_ZOOM,BATTLE_VIEW_WIDTH} from './camera';
+import {BattleCamera,BATTLE_ZOOM,BATTLE_VIEW_WIDTH,lowestFlightFocus} from './camera';
 import {supplyCameraTarget} from './supply-camera';
 import { Game, WORLD_W, WORLD_H, BOTTOM_Y, clamp, makeRng, type Tank,type Crate } from './engine';
 import { weaponById,weaponHasTrail,MODERN_TRAIL_ALPHA,MODERN_TRAIL_WIDTH } from './catalog';
@@ -35,6 +35,8 @@ const PALETTES:Record<string,Palette>={
 const rr=(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number) => {ctx.beginPath();ctx.roundRect(x,y,w,h,r);};
 
 export class Renderer {
+  private flightFloor:{x:number;y:number}|null=null;private flightActive=false;
+
   medalFor:((tank:Tank)=>RankIndex)|null=null;
   canvas:HTMLCanvasElement; ctx:CanvasRenderingContext2D; background:HTMLCanvasElement;terrainCanvas=document.createElement('canvas');terrainRevision=-1;
   game:Game; palette:Palette; ratio=1;time=0;viewHeight=WORLD_H;viewWidth=WORLD_W;
@@ -92,7 +94,7 @@ export class Renderer {
     }catch{stage?.destroy();layer.remove();this.backend='canvas';this.invalidate();}
   }
   destroy(){if(this.destroyed)return;this.destroyed=true;this.stage?.destroy();this.stage=null;}
-  setGame(game:Game) {this.camera.reset();this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.paintBackground();this.invalidate();}
+  setGame(game:Game) {this.flightFloor=null;this.flightActive=false;this.camera.reset();this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.paintBackground();this.invalidate();}
   resize() {
     this.ratio=Math.min(window.devicePixelRatio||1,2)*this.zoom;
     this.viewWidth=BATTLE_VIEW_WIDTH;
@@ -342,10 +344,14 @@ export class Renderer {
     const actor=g.active;let camera=actor.y-this.viewHeight*.5,targetX=actor.x-this.viewWidth*.5;
     const enteringSupply=g.phase==='supply'&&!this.supplyPhase,supply=this.supplyView();
     if(enteringSupply&&!this.camera.manual&&!this.touring)this.follow();
-    if(g.phase==='flying'&&g.projectiles.some(p=>this.visibleAt(p.x)&&p.delay<=0)) camera=Math.min(camera,Math.min(...g.projectiles.filter(p=>this.visibleAt(p.x)&&p.delay<=0).map(p=>p.y))-this.viewHeight*0.3);
+    const inFlight=g.phase==='flying';
+    if(!inFlight||!this.flightActive)this.flightFloor=null;
+    this.flightActive=inFlight;
+    const landed=inFlight?g.observation?.point:null;
+    if(landed&&(!this.flightFloor||landed.y>this.flightFloor.y))this.flightFloor={...landed};
+    const lowest=inFlight?lowestFlightFocus(g.projectiles,this.flightFloor):null;
+    if(lowest){targetX=lowest.x-this.viewWidth*.5;camera=lowest.y-this.viewHeight*.5;}
     if(supply){camera=supply.y;targetX=supply.x;}
-    const flying=g.projectiles.filter(p=>p.delay<=0&&this.visibleAt(p.x));
-    if(g.phase==='flying'&&flying.length)targetX=flying.reduce((x,p)=>x+p.x,0)/flying.length-this.viewWidth*.5;
     if(g.phase==='resolving'&&g.observation){const falling=g.tanks.find(t=>t.hp>0&&t.fallVelocity>0),t=falling??(g.observation.target===null?null:g.tanks[g.observation.target]),point=t?(t.defeat??t):g.observation.point;if(point){targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}}
     if(actor.parachute&&(g.phase==='flying'||g.phase==='resolving')){targetX=actor.x-this.viewWidth*.5;camera=actor.y-70-this.viewHeight*.5;}
     if(g.weatherObservation){const point=weatherCameraPoint(g.weatherObservation,actor);targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}

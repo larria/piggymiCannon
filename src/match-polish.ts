@@ -9,3 +9,6 @@ export function impactPolish(version:string){const v=version.match(/^v?(\d+)\.(\
 
 /** 4.0.3 precise contact, mine and abandonment rules. */
 export function precisionPolish(version:string){const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);return !v||+v[1]>4||+v[1]===4&&(+v[2]>0||+v[2]===0&&+v[3]>=3);}
+
+/** 4.0.4 geometric excavation; earlier tapes retain their terrain model. */
+export function ellipseExcavation(version:string){const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);return !v||+v[1]>4||+v[1]===4&&(+v[2]>0||+v[2]===0&&+v[3]>=4);}

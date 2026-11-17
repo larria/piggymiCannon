@@ -63,7 +63,7 @@ test('one shared 50% boost for item, fire line, both, double volleys and transfe
  const g=flat({fireLine:true,vehicle0:'dragon'},'3.2.6');g.active.boost=true;g.active.doubleShot=true;g.selectWeapon('dragon-special');g.fire();assert.equal(g.projectiles.length,18);assert.ok(g.projectiles.every(p=>p.fireBoosted&&p.boost===1.5));g.projectiles=[];g.nextTurn();assert.equal(g.fireLineTurnsRemaining,1);g.nextTurn();assert.equal(g.fireLine,null);assert.equal(g.fireLineTurnsRemaining,0);
  const t=flat({fireLine:true},'3.2.7');t.teleporting=true;t.active.boost=true;t.fire();assert.equal(t.projectiles[0].fireBoosted,false);assert.equal(t.projectiles[0].boost,1);
 });
-function ledge(map='valley',dynamic=false){const g=flat({map});g.land=new Terrain();for(let x=0;x<=1280;x++){g.land.column(x,550,554,true);if(x<350||dynamic)g.land.column(x,280,330);}g.land.rebuild();g.active.x=320;g.active.y=262;g.enemy.x=1000;g.enemy.y=532;if(dynamic)g.crater(500,280,180,250);return g;}
+function ledge(map='valley',dynamic=false){const g=flat({map},'3.2.6');g.land=new Terrain();for(let x=0;x<=1280;x++){g.land.column(x,550,554,true);if(x<350||dynamic)g.land.column(x,280,330);}g.land.rebuild();g.active.x=320;g.active.y=262;g.enemy.x=1000;g.enemy.y=532;if(dynamic)g.crater(500,280,180,250);return g;}
 test('generic downward edges enter continuous free fall on multi-layer, ordinary and destroyed terrain',()=>{
  for(const map of ['factory','temple','valley'])for(const dynamic of [false,true]){
   const g=ledge(map,dynamic),t=g.active,hp=t.hp,from=t.y;let fell=false;

@@ -1,0 +1,635 @@
+{
+  "phase": "resolving",
+  "rounds": 0,
+  "impacts": [
+    {
+      "projectile": 1,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 972.5,
+      "y": 799.25575,
+      "age": 2.005,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 1,
+      "bullseye": false,
+      "bodyContact": true
+    },
+    {
+      "projectile": 2,
+      "parent": 1,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 972.5,
+      "y": 799.25575,
+      "age": 2.0299999999999994,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 2,
+      "bullseye": false,
+      "bodyContact": true
+    },
+    {
+      "projectile": 3,
+      "parent": 2,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 972.5,
+      "y": 799.25575,
+      "age": 2.054999999999999,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 3,
+      "bullseye": false,
+      "bodyContact": true
+    },
+    {
+      "projectile": 4,
+      "parent": 3,
+      "owner": 0,
+      "weapon": "missile-normal",
+      "directTarget": 1,
+      "x": 972.5,
+      "y": 799.25575,
+      "age": 2.0799999999999983,
+      "boost": 1,
+      "scale": 1,
+      "fireBoosted": false,
+      "sources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "section": 4,
+      "bullseye": false,
+      "bodyContact": true
+    }
+  ],
+  "damage": [
+    {
+      "cause": "direct",
+      "weapon": "missile-normal",
+      "projectile": 1,
+      "impact": 21,
+      "base": 210,
+      "factors": [
+        {
+          "source": "系别相克（本作规则）现代系→古代系",
+          "value": 0.8
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "飞火第1/4段递减（本作参数）",
+          "value": 1
+        },
+        {
+          "source": "未强化",
+          "value": 1
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.5190978517063134
+        }
+      ],
+      "bullseye": false,
+      "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)",
+      "dig": {
+        "radius": 41.85,
+        "depth": 27.900000000000002,
+        "digBoost": 1,
+        "source": "武器挖土（不乘入伤害）"
+      },
+      "origin": {
+        "projectileStart": 1,
+        "section": 1,
+        "launch": {
+          "action": 1,
+          "time": 0.01669999999999993,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "missile",
+          "hp": 1100,
+          "maxHP": 1100,
+          "x": 171.79912999786626,
+          "y": 738.9135902029535,
+          "vx": 25.361047495755155,
+          "vy": -13.002587047124559,
+          "relative": 32.5,
+          "absolute": 27.14417495714481,
+          "power": 1,
+          "wind": 0,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 972.5,
+          "y": 799.25575,
+          "age": 2.005
+        },
+        "boost": 1,
+        "fireBoosted": false,
+        "weaponBase": 210,
+        "fullDamageArea": {
+          "blastDistance": 6,
+          "directCore": {
+            "xRadius": 10,
+            "yRadius": 14,
+            "yCenter": -9
+          }
+        },
+        "dragon": null
+      },
+      "requested": 87,
+      "actual": 87,
+      "hpBefore": 950,
+      "hpAfter": 863,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "大猪头",
+      "weaponName": "飞火弹",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "normalised-era-cycle-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": false
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 960,
+        "y": 780
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    },
+    {
+      "cause": "direct",
+      "weapon": "missile-normal",
+      "projectile": 2,
+      "impact": 29,
+      "base": 210,
+      "factors": [
+        {
+          "source": "系别相克（本作规则）现代系→古代系",
+          "value": 0.8
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "飞火第2/4段递减（本作参数）",
+          "value": 0.8
+        },
+        {
+          "source": "未强化",
+          "value": 1
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.5190978517063134
+        }
+      ],
+      "bullseye": false,
+      "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)",
+      "dig": {
+        "radius": 37.665,
+        "depth": 27.900000000000002,
+        "digBoost": 1,
+        "source": "武器挖土（不乘入伤害）"
+      },
+      "origin": {
+        "projectileStart": 2,
+        "parent": 1,
+        "section": 2,
+        "launch": {
+          "action": 1,
+          "time": 0.01669999999999993,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "missile",
+          "hp": 1100,
+          "maxHP": 1100,
+          "x": 171.79912999786626,
+          "y": 738.9135902029535,
+          "vx": 25.361047495755155,
+          "vy": -13.002587047124559,
+          "relative": 32.5,
+          "absolute": 27.14417495714481,
+          "power": 1,
+          "wind": 0,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 972.5,
+          "y": 799.25575,
+          "age": 2.0299999999999994
+        },
+        "boost": 1,
+        "fireBoosted": false,
+        "weaponBase": 210,
+        "fullDamageArea": {
+          "blastDistance": 6,
+          "directCore": {
+            "xRadius": 10,
+            "yRadius": 14,
+            "yCenter": -9
+          }
+        },
+        "dragon": null
+      },
+      "requested": 70,
+      "actual": 70,
+      "hpBefore": 863,
+      "hpAfter": 793,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "大猪头",
+      "weaponName": "飞火弹",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "normalised-era-cycle-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": false
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 960,
+        "y": 780
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    },
+    {
+      "cause": "direct",
+      "weapon": "missile-normal",
+      "projectile": 3,
+      "impact": 37,
+      "base": 210,
+      "factors": [
+        {
+          "source": "系别相克（本作规则）现代系→古代系",
+          "value": 0.8
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "飞火第3/4段递减（本作参数）",
+          "value": 0.6
+        },
+        {
+          "source": "未强化",
+          "value": 1
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.5190978517063134
+        }
+      ],
+      "bullseye": false,
+      "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)",
+      "dig": {
+        "radius": 33.480000000000004,
+        "depth": 27.900000000000002,
+        "digBoost": 1,
+        "source": "武器挖土（不乘入伤害）"
+      },
+      "origin": {
+        "projectileStart": 3,
+        "parent": 2,
+        "section": 3,
+        "launch": {
+          "action": 1,
+          "time": 0.01669999999999993,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "missile",
+          "hp": 1100,
+          "maxHP": 1100,
+          "x": 171.79912999786626,
+          "y": 738.9135902029535,
+          "vx": 25.361047495755155,
+          "vy": -13.002587047124559,
+          "relative": 32.5,
+          "absolute": 27.14417495714481,
+          "power": 1,
+          "wind": 0,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 972.5,
+          "y": 799.25575,
+          "age": 2.054999999999999
+        },
+        "boost": 1,
+        "fireBoosted": false,
+        "weaponBase": 210,
+        "fullDamageArea": {
+          "blastDistance": 6,
+          "directCore": {
+            "xRadius": 10,
+            "yRadius": 14,
+            "yCenter": -9
+          }
+        },
+        "dragon": null
+      },
+      "requested": 52,
+      "actual": 52,
+      "hpBefore": 793,
+      "hpAfter": 741,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "大猪头",
+      "weaponName": "飞火弹",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "normalised-era-cycle-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": false
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 960,
+        "y": 780
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    },
+    {
+      "cause": "direct",
+      "weapon": "missile-normal",
+      "projectile": 4,
+      "impact": 45,
+      "base": 210,
+      "factors": [
+        {
+          "source": "系别相克（本作规则）现代系→古代系",
+          "value": 0.8
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "飞火第4/4段递减（本作参数）",
+          "value": 0.4
+        },
+        {
+          "source": "未强化",
+          "value": 1
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.5190978517063134
+        }
+      ],
+      "bullseye": false,
+      "formula": "round(base × scale × boost × mineScale × distanceScale × eraScale × sectionScale)",
+      "dig": {
+        "radius": 29.294999999999998,
+        "depth": 27.900000000000002,
+        "digBoost": 1,
+        "source": "武器挖土（不乘入伤害）"
+      },
+      "origin": {
+        "projectileStart": 4,
+        "parent": 3,
+        "section": 4,
+        "launch": {
+          "action": 1,
+          "time": 0.01669999999999993,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "missile",
+          "hp": 1100,
+          "maxHP": 1100,
+          "x": 171.79912999786626,
+          "y": 738.9135902029535,
+          "vx": 25.361047495755155,
+          "vy": -13.002587047124559,
+          "relative": 32.5,
+          "absolute": 27.14417495714481,
+          "power": 1,
+          "wind": 0,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 972.5,
+          "y": 799.25575,
+          "age": 2.0799999999999983
+        },
+        "boost": 1,
+        "fireBoosted": false,
+        "weaponBase": 210,
+        "fullDamageArea": {
+          "blastDistance": 6,
+          "directCore": {
+            "xRadius": 10,
+            "yRadius": 14,
+            "yCenter": -9
+          }
+        },
+        "dragon": null
+      },
+      "requested": 35,
+      "actual": 35,
+      "hpBefore": 741,
+      "hpAfter": 706,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "大猪头",
+      "weaponName": "飞火弹",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "normalised-era-cycle-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": false
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 960,
+        "y": 780
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    }
+  ],
+  "protectedRemaining": true
+}

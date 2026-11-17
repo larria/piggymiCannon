@@ -1,0 +1,27 @@
+{
+  "version": "4.0.4",
+  "source": "本机 ft2 目录/原版分析",
+  "files": [
+    {
+      "file": "sim_fix.py",
+      "sha256": "982e4ec7ea2c818da774f18c10911b402288bed40ca8ec7f5b0b61dc4798a561",
+      "bytes": 1255
+    },
+    {
+      "file": "01_CMap.Bombing__挖土形状核心.il.txt",
+      "sha256": "dff0f19fc6f9f08d8bd3dd0697828c1eafddc813040fff381fc33cfabda20fa6",
+      "bytes": 3534
+    },
+    {
+      "file": "04_CBullet.ClashCharacter__命中敌人重定位爆心.il.txt",
+      "sha256": "a5ad2000c667ec965a035753034b8e19cc1dd9eaa370070766fe228ff976cc18",
+      "bytes": 2117
+    },
+    {
+      "file": "09_CBullet.CharacterDamage__伤害半径公式对比.il.txt",
+      "sha256": "15ee935ba0292d45bddf79be11fb57a5de9eb08c96a5681d0fbb9a15e616c0e8",
+      "bytes": 2581
+    }
+  ],
+  "boundary": "仅确证指令调用、爆点采样与椭圆形状；本作半轴仍为本作尺度校准"
+}

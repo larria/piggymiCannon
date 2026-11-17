@@ -1,3 +1,7 @@
+import {CREW} from './crew';
+import {WORLD_W,TERRAIN_H} from './terrain';
+import {ALL_WEAPONS,ITEMS,MAPS,DIFFICULTIES} from './catalog';
+import {VEHICLES} from './vehicles';
 import {Game} from './engine';
 import {traceClone,type BattleSnapshot} from './battle-trace';
 
@@ -116,4 +120,50 @@ export function saveReplay(storage:ReplayStorage,recording:BattleReplay){
 export function deleteReplay(storage:ReplayStorage,id:string){
  const list=readReplays(storage).filter(r=>r.id!==id);
  try{storage.setItem(REPLAY_STORAGE_KEY,JSON.stringify(list));}catch{throw Error('删除失败，请检查本机存储权限。');}
+}
+
+
+/** Files are untrusted input. Bound before JSON parsing, then verify terrain
+ * and executable state separately from the local recording format. */
+export const MAX_REPLAY_FILE_BYTES=8_000_000;
+export function exportReplay(recording:BattleReplay){validateReplay(recording);return JSON.stringify(recording);}
+export function replayFilename(recording:BattleReplay){return `piggy-replay-${recording.initial.initial.config.map}-${new Date(recording.createdAt).toISOString().replace(/[:.]/g,'-')}.json`;}
+export function parseReplayFile(text:string,currentVersion:string):BattleReplay{
+ if(new TextEncoder().encode(text).byteLength>MAX_REPLAY_FILE_BYTES)throw Error('录像文件超过8MB，无法导入。');
+ let value:any;try{value=JSON.parse(text);}catch{throw Error('请导入导出的录像 JSON 文件。');}
+ // A recursive shape/size guard prevents pathological restored arrays or keys.
+ let nodes=0;const visit=(v:any,depth=0)=>{if(++nodes>1_000_000||depth>24)throw Error('录像结构过大或过深。');if(typeof v==='number'&&!Number.isFinite(v))throw Error('录像数值损坏。');if(v&&typeof v==='object'){for(const k of Object.keys(v)){if(['__proto__','prototype','constructor'].includes(k))throw Error('录像包含无效字段。');visit(v[k],depth+1);}}};visit(value);
+ validateReplay(value);
+ const finite=(n:any)=>typeof n==='number'&&Number.isFinite(n),integer=(n:any)=>Number.isSafeInteger(n)&&n>=0;
+ const version=(v:any)=>typeof v==='string'&&/^\d+\.\d+\.\d+$/.test(v)?v.split('.').map(Number):null;
+ const v=version(value.gameVersion),now=version(currentVersion);
+ if(!v||!now||v.some((n:number,i:number)=>n>now[i]&&v.slice(0,i).every((a:number,j:number)=>a===now[j])))throw Error('录像来自更新的游戏版本，请先更新游戏。');
+ if(value.id.length>160||!value.id.length||value.createdAt<0||value.createdAt>8.64e15||value.duration>16000||! /^[0-9a-f]{1,8}$/.test(value.finalDigest))throw Error('录像信息损坏。');
+ const snap=value.initial,state=snap.current,config=snap.initial?.config;
+ if(snap.formatVersion!==1||snap.gameVersion!==value.gameVersion||!state||!config||!MAPS.some(m=>m.id===config.map)||!integer(config.seed)||config.seed>0xffffffff||!Array.isArray(config.slots)||config.slots.length!==4||!Array.isArray(snap.initial.slots)||snap.initial.slots.length!==4||typeof snap.initial.mapName!=='string')throw Error('录像开局信息损坏。');
+ if(snap.rng?.algorithm!=='mulberry32'||!integer(snap.rng.index)||snap.rng.index>100_000_000||!integer(snap.rng.seed)||!integer(snap.rng.state)||snap.rng.state>0xffffffff||!Array.isArray(snap.events)||snap.events.length>1000||!Array.isArray(snap.critical)||snap.critical.length>64||!integer(snap.truncation?.dropped))throw Error('录像随机状态或日志损坏。');
+ if(state.config?.map!==config.map||state.config?.seed!==config.seed||!Array.isArray(state.config?.slots)||state.config.slots.length!==4)throw Error('录像配置与开局不一致。');
+ const length=(WORLD_W+1)*TERRAIN_H;
+ for(const packed of [state.terrain?.mask,state.terrain?.protectedMask]){
+  if(packed?.length!==length)throw Error('录像地形尺寸不匹配。');
+  if(packed.encoding==='rle'){if(!Array.isArray(packed.data)||packed.data.length>10002||![0,1].includes(packed.data[0])||packed.data.slice(1).some((n:any)=>!integer(n)||n===0)||packed.data.slice(1).reduce((a:number,b:number)=>a+b,0)!==length)throw Error('录像地形游程损坏。');}
+  else if(packed.encoding==='bits'){const bytes=Math.ceil(length/8);if(typeof packed.data!=='string'||packed.data.length!==4*Math.ceil(bytes/3)||! /^[A-Za-z0-9+/]*={0,2}$/.test(packed.data)||atob(packed.data).length!==bytes)throw Error('录像地形位图损坏。');}
+  else throw Error('录像地形格式不支持。');
+ }
+ if(!integer(state.terrain.revision)||!Array.isArray(state.tanks)||state.tanks.length<2||state.tanks.length>4||!integer(state.current)||state.current>=state.tanks.length||!['aiming','flying','resolving','handoff','supply','ended'].includes(state.phase))throw Error('录像战场状态损坏。');
+ const weapons=new Set(ALL_WEAPONS.map(w=>w.id)),items=new Set(ITEMS.map(i=>i.id));
+ for(const [i,t] of state.tanks.entries()){if(t.id!==i||!(t.crew in CREW)||!DIFFICULTIES.some(d=>d.id===t.difficulty)||!VEHICLES.some(v=>v.id===t.vehicleId)||typeof t.name!=='string'||t.name.length>80||/[<>&]/.test(t.name)||![t.x,t.y,t.hp,t.maxHP,t.angle,t.power].every(finite)||t.maxHP<=0||t.maxHP>10000||Math.abs(t.x)>10000||Math.abs(t.y)>10000||!['human','ai'].includes(t.controller)||![0,1,2,3].includes(t.team)||!weapons.has(t.selectedWeapon))throw Error('录像炮手状态损坏。');}
+ for(const [key,max] of [['projectiles',128],['blasts',512],['mines',32],['crates',32],['fires',64],['gases',64],['texts',512],['itemCues',64]] as const)if(!Array.isArray(state[key])||state[key].length>max)throw Error('录像实体数量异常。');
+ for(const p of state.projectiles)if(!weapons.has(p.weapon)||!integer(p.owner)||p.owner>=state.tanks.length||![p.x,p.y,p.vx,p.vy,p.delay,p.age].every(finite))throw Error('录像弹体损坏。');
+ for(const c of value.commands){const [m,...a]=c;const valid=m<0||m===0||m===1&&a.length===2&&a.every(finite)&&a[1]>=1&&a[1]<=100||m===2&&a.length===1&&[-1,1].includes(a[0])||m===3&&a.length===1&&weapons.has(a[0])||m===4&&a.length>=2&&a.length<=3&&[-1,1].includes(a[0])&&finite(a[1])&&a[1]>=0&&a[1]<=.1&&(a.length===2||typeof a[2]==='boolean')||m===5&&a.length>=1&&a.length<=3&&items.has(a[0])&&(a.length<2||typeof a[1]==='boolean')&&(a.length<3||integer(a[2])&&a[2]<4)||[6,7,8,11,13].includes(m)&&a.length===0||m===9&&a.length===1&&typeof a[0]==='boolean'||m===10&&a.length===2||m===12&&a.length===1;if(!valid)throw Error('录像操作参数损坏。');if(m===-1&&(new Set(a[0].aims.map((r:number[])=>r[0])).size!==a[0].aims.length||a[0].aims.some((r:number[])=>r[0]>=state.tanks.length||r[2]<1||r[2]>100||![-1,1].includes(r[3]))))throw Error('录像炮手输入损坏。');}
+ const duration=value.commands.reduce((n:number,c:Command)=>n+(c[0]===0?c[1]:0),0);
+ if(Math.abs(duration-value.duration)>.000001)throw Error('录像时长与操作不一致。');
+ try{Game.fromBattleSnapshot(snap);}catch{throw Error('录像初始状态无法恢复。');}
+ return value;
+}
+export function importReplay(storage:ReplayStorage,recording:BattleReplay){
+ const existing=readReplays(storage),match=existing.find(r=>r.id===recording.id);
+ if(match&&exportReplay(match)===exportReplay(recording))return match;
+ const imported=match?{...recording,id:`${recording.id.slice(0,110)}-import-${Date.now()}-${existing.length}`}:recording;
+ saveReplay(storage,imported);return imported;
 }

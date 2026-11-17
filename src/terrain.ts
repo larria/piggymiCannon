@@ -51,13 +51,14 @@ export class Terrain {
     while(y<TERRAIN_H&&this.mask[y*this.stride+ix]) y++;
     return y;
   }
-  removeEllipse(cx:number,cy:number,rx:number,ry:number) {
+  removeEllipse(cx:number,cy:number,rx:number,ry:number,tidyRemnants=true) {
     const from=Math.max(0,Math.floor(cx-rx)),to=Math.min(WORLD_W,Math.ceil(cx+rx));let removed=0,top=TERRAIN_H,bottom=-1;
     for(let x=from;x<=to;x++) {
       const dy=ry*Math.sqrt(Math.max(0,1-((x-cx)/rx)**2));
       for(let y=Math.max(0,Math.ceil(cy-dy));y<=Math.min(TERRAIN_H-1,Math.floor(cy+dy));y++) {
         const index=y*this.stride+x;if(this.mask[index]&&!this.protectedMask[index]) {this.mask[index]=0;removed++;top=Math.min(top,y);bottom=Math.max(bottom,y);}
       }
+      if(!tidyRemnants)continue;
       // Paper-thin remnants cannot hold a tank up after their foundation is excavated.
       const lower=cy-dy-5,upper=cy+dy+5,scanFrom=Math.max(0,Math.ceil(lower)-5),scanTo=Math.min(TERRAIN_H,Math.floor(upper)+6);
       // Only <=5px runs intersecting this window can be removed. A run

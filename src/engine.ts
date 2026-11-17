@@ -1,6 +1,6 @@
 import {planAIRestoration} from './ai-restoration';
 import {abandonmentWinner} from './exit-rules';
-import {precisionPolish,impactPolish,matchPolish,startingAngle} from './match-polish';
+import {ellipseExcavation,precisionPolish,impactPolish,matchPolish,startingAngle} from './match-polish';
 import {playerSupplyTiming,rankIndex,aiRank,emptyCombat,type Competition,type MatchProgress,type CombatMetrics} from './progression';
 import {RESTORE_FRACTION,restoreRadius,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
 import {modernBackpack,backpackSlots,takeBackpackItem,putBackpackItem,SUPPLY_INTERVAL_ACTIONS} from './backpack';
@@ -666,7 +666,7 @@ export class Game {
       }
       if(effect==='orbital'&&!p.sub) {
         const markerCore=hitTank&&preciseContact(hitTank,p.x,p.y,this.tankSlope(hitTank),this.gameVersion,{vx:p.vx,vy:p.vy},p.weapon);
-        this.excavateImpact(p,12,impactPolish(this.gameVersion)&&markerCore?0:8,markerCore?hitTank?.id:undefined);this.burst(p.x,p.y,12,'#b8cfea');
+        this.excavateImpact(p,12,!ellipseExcavation(this.gameVersion)&&impactPolish(this.gameVersion)&&markerCore?0:8,markerCore?hitTank?.id:undefined);this.burst(p.x,p.y,12,'#b8cfea');
         this.projectiles.push(this.traceProjectile({...p,x:p.x,y:-50,vx:0,vy:680,sub:true,trail:[],age:0,delay:0.3},p.traceId));return true;
       }
       if(p.weapon==='drill'&&!hitTank) {
@@ -706,7 +706,7 @@ export class Game {
       return floor<BOTTOM_Y&&Math.abs(floor-(c.y+14))<=4&&this.land.protectedMask[floor*this.land.stride+x]===1;
     })):new Set<Crate>();
     const mineSupports=precisionPolish(this.gameVersion)?this.mines.map(m=>({m,ground:this.ground(m.x,m.y)})):[];
-    const removed=this.land.removeEllipse(x,y,radius,depth);
+    const removed=this.land.removeEllipse(x,y,radius,depth,!ellipseExcavation(this.gameVersion));
     const event=this.recordBattle('terrain',`挖土(${x.toFixed(2)},${y.toFixed(2)})，半径${radius.toFixed(2)}／深${depth.toFixed(2)}，移除${removed}像素（永久层保留）`,{x,y,radius,depth,removed,source});
     if(removed&&radius>0&&depth>0)for(const {m,ground} of mineSupports){
       const covered=((m.x-x)/radius)**2+((m.y-y)/depth)**2<=1;
@@ -738,7 +738,7 @@ export class Game {
   private excavateImpact(p:Projectile,radius:number,depth:number,directTarget?:number){
     if(radius<=0||depth<=0)return;
     let x=p.x,y=p.y;
-    if(directTarget!==undefined){
+    if(!ellipseExcavation(this.gameVersion)&&directTarget!==undefined){
       const target=this.tanks[directTarget],foot=target.y+18,surface=this.support(target.x,foot);
       if(surface<BOTTOM_Y&&Math.abs(surface-foot)<=28){
         x=clamp(p.x,target.x-16,target.x+16);y=surface;
@@ -779,7 +779,8 @@ export class Game {
     this.burst(p.x,p.y,Math.round(radius*0.6),color);
     this.shake=Math.min(10,radius/10);
     const dig=excavation(p.weapon,direct,this.gameVersion,p.digBoost);
-    if(impactPolish(this.gameVersion))this.recordBattle('excavation-profile',direct&&!fullContactExcavation(p.weapon,this.gameVersion)?`机体直击：宽度不变，深度减去固定${contactDepthReduction(p.weapon,this.gameVersion)}；不大于0则不挖土`:fullContactExcavation(p.weapon,this.gameVersion)?'特殊挖土例外：正中／地形命中都保留完整弹坑':'地形命中：完整挖土范围',{projectile:p.traceId,weapon:p.weapon,direct,directTarget,contact:p.pierceContact,full:excavation(p.weapon,false,this.gameVersion,p.digBoost),depthReduction:direct?contactDepthReduction(p.weapon,this.gameVersion):0,result:{...dig}});
+    if(ellipseExcavation(this.gameVersion))this.recordBattle('excavation-profile','完整椭圆以实际爆点为中心，仅移除与可破坏地形相交的部分；正中不扣深度',{projectile:p.traceId,weapon:p.weapon,direct,directTarget,center:{x:p.x,y:p.y},model:'impact-ellipse',result:{...dig}});
+    else if(impactPolish(this.gameVersion))this.recordBattle('excavation-profile',direct&&!fullContactExcavation(p.weapon,this.gameVersion)?`机体直击：宽度不变，深度减去固定${contactDepthReduction(p.weapon,this.gameVersion)}；不大于0则不挖土`:fullContactExcavation(p.weapon,this.gameVersion)?'特殊挖土例外：正中／地形命中都保留完整弹坑':'地形命中：完整挖土范围',{projectile:p.traceId,weapon:p.weapon,direct,directTarget,contact:p.pierceContact,full:excavation(p.weapon,false,this.gameVersion,p.digBoost),depthReduction:direct?contactDepthReduction(p.weapon,this.gameVersion):0,result:{...dig}});
     if(matchPolish(this.gameVersion)&&p.weapon==='missile-normal'){const taper=piercingDigScale(p.penetrations);dig.radius*=taper.radius;dig.depth*=taper.depth;this.recordBattle('pierce-dig','飞火普通弹第'+(p.penetrations+1)+'段挖土逐渐收尖',{projectile:p.traceId,section:p.penetrations+1,scale:taper,radius:dig.radius,depth:dig.depth});}
     this.excavateImpact(p,dig.radius,dig.depth,direct?directTarget:undefined);
     for(const {tank:t,distance,scale:distanceScale} of damageGeometry) {
@@ -810,7 +811,7 @@ export class Game {
       this.mines.splice(index,1);
       this.explode({...this.launch(this.tanks[mine.owner],mine.weapon),x:mine.x,y:mine.y,boost:mine.boost,boostSources:mine.boostSources??{fire:null,rage:1,snow:1,inherited:mine.boost},traceParent:mine.traceOrigin,traceLaunch:mine.traceLaunch,mineArmed:true});
     }
-    this.emit('explosion',`${w.name}${direct?'直接命中，集中伤害':'命中地形，扩大挖地'}。`,undefined,p.x,p.weapon);
+    this.emit('explosion',`${w.name}${direct?'正中目标':'命中地形／爆炸波及'}。`,undefined,p.x,p.weapon);
     // A point-blank collision can kill before the .18s guidance acquisition.
     // Only use that victim when no primary target was acquired: collateral
     // deaths must not cancel a volley still pursuing a living primary target.

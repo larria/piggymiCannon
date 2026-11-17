@@ -1,4 +1,4 @@
-import {precisionPolish,impactPolish} from './match-polish';
+import {ellipseExcavation,precisionPolish,impactPolish} from './match-polish';
 import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
@@ -66,6 +66,9 @@ export const fullContactExcavation=(id:WeaponId,version='development')=>id==='io
 export const contactDepthReduction=(id:WeaponId,version='development')=>fullContactExcavation(id,version)?0:precisionPolish(version)&&id==='mine-normal'?30:precisionPolish(version)&&id==='beetle-normal'?34:DIRECT_DIG_DEPTH_REDUCTION;
 export const excavation = (id:WeaponId,direct:boolean,version='development',digBoost=1) => {
   const modern=impactPolish(version),{radius,depth}=weaponDigProfile(id,version);
+  // Native rounds share the reviewed 3:2 ellipse. Width remains calibrated
+  // to our world/art scale; contact never shrinks the ellipse itself.
+  if(ellipseExcavation(version)){const halfWidth=radius*1.35*digBoost;return {radius:halfWidth,depth:VEHICLE_WEAPONS.some(w=>w.id===id)?halfWidth/1.5:depth*1.5*digBoost};}
   if(!modern){const full=id==='ion-special'||!direct;return {radius:radius*(full?1.35:.6)*digBoost,depth:depth*(full?1.5:.65)*digBoost};}
   return {radius:radius*1.35*digBoost,depth:Math.max(0,depth*1.5*digBoost-(direct?contactDepthReduction(id,version):0))};
 };
