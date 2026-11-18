@@ -1,7 +1,8 @@
 import type {VehicleId} from './vehicles';
 import type {WeaponId} from './catalog';
-/** Source grid -> logic is x3. Our existing ~60-wide entity sets 1 logic unit
- * to 1 world unit. Artwork and the 1920x960 world remain unchanged. */
+import {referenceCalibration} from './reference-calibration';
+/** Source grid -> logic/world is x3. The 60x51 collider and weapon units stay fixed; world
+ * dimensions are recorded per match; battlefield artwork is calibrated separately by version. */
 export const SOURCE_CELL=3,SOURCE_BODY_WIDTH=60,SOURCE_BODY_HEIGHT=51;
 const versions=new Map<string,boolean>();
 export function originalBallistics(version:string){const cached=versions.get(version);if(cached!==undefined)return cached;const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);const result=!v||+v[1]>4||+v[1]===4&&(+v[2]>0||+v[2]===0&&+v[3]>=5);if(versions.size>=128)versions.clear();versions.set(version,result);return result;}
@@ -33,8 +34,8 @@ export function originalCrater(round:number):readonly CraterRow[]{
 const axes=new Map<number,{radius:number;depth:number}>();
 export function originalCraterAxes(round:number){const old=axes.get(round);if(old)return old;const rows=originalCrater(round);const value= {radius:Math.max(...rows.flatMap(r=>[-r.left,r.left+r.width]))*SOURCE_CELL,depth:Math.max(...rows.map(r=>Math.abs(r.y)))*SOURCE_CELL};axes.set(round,value);return value;}
 for(const id of Object.keys(ORIGINAL_TANKS) as VehicleId[])for(const slot of ['normal','special'] as const)for(let i=0;i<(id==='missile'&&slot==='normal'?4:1);i++)originalCraterAxes(originalWeapon(`${id}-${slot}`,i)!.round);
-export function sourceDamagePoint(t:{x:number;y:number},slope:number,weapon?:WeaponId){const foot=weapon==='mine-special'||weapon==='ion-special',y=foot?18:18-SOURCE_BODY_HEIGHT;return {x:t.x-Math.sin(slope)*y,y:t.y+Math.cos(slope)*y};}
-export function sourceDistance(t:{x:number;y:number},x:number,y:number,slope:number,weapon?:WeaponId){const p=sourceDamagePoint(t,slope,weapon);const d=Math.hypot(Math.floor(x/SOURCE_CELL)-Math.floor(p.x/SOURCE_CELL),Math.floor(y/SOURCE_CELL)-Math.floor(p.y/SOURCE_CELL));return weapon==='sea-special'?(Math.hypot(x-p.x,y-p.y)<=1?0:Math.max(1,d)):d;}
+export function sourceDamagePoint(t:{x:number;y:number},slope:number,weapon?:WeaponId,version='4.0.5'){const foot=weapon==='mine-special'||weapon==='ion-special',y=foot?18:18-SOURCE_BODY_HEIGHT;if(referenceCalibration(version))return {x:t.x,y:t.y+y};return {x:t.x-Math.sin(slope)*y,y:t.y+Math.cos(slope)*y};}
+export function sourceDistance(t:{x:number;y:number},x:number,y:number,slope:number,weapon?:WeaponId,version='4.0.5'){const p=sourceDamagePoint(t,slope,weapon,version);const d=Math.hypot(Math.floor(x/SOURCE_CELL)-Math.floor(p.x/SOURCE_CELL),Math.floor(y/SOURCE_CELL)-Math.floor(p.y/SOURCE_CELL));return weapon==='sea-special'?(Math.hypot(x-p.x,y-p.y)<=1?0:Math.max(1,d)):d;}
 export function sourceFalloff(distance:number,round:number){const radius=sourceRadius(round);return distance>=radius?0:Math.max(0,Math.floor(radius-distance)/Math.floor(radius));}
 
 export function sourceDamage(power:number,round:number,distance:number,defence=100,boost=1){const gap=Math.max(0,Math.floor(sourceRadius(round)-distance));return Math.trunc(Math.trunc(gap*Math.floor(power*boost)/round)*100/defence);}

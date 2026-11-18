@@ -7,7 +7,7 @@ import dnfile
 from dncil.cil.body import CilMethodBody
 from dncil.cil.body.reader import CilMethodBodyReaderBytes
 from dncil.clr.token import Token, StringToken
-p=argparse.ArgumentParser();p.add_argument('--client',type=Path,default=Path.home()/'Downloads/ft2逆向');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--client',type=Path,default=Path.home()/'Downloads/ft2');args=p.parse_args()
 root=Path(__file__).resolve().parents[1];client=args.client;assembly=client/'extracted/assets/Dlls/MyScripts.dll.bytes';language=client/'resources/config/decrypted/Language.txt';pe=dnfile.dnPE(str(assembly))
 methods={};owners={}
 for td in pe.net.mdtables.TypeDef:

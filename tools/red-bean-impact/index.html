@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>小红豆受击模型 · 临时测试页</title>
+  <style>
+    :root{color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#344c46;background:#f3f1e8;font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0;padding:24px}main{max-width:1440px;margin:auto}header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}h1{font-size:25px;margin:0 0 7px;letter-spacing:.02em}p{margin:0;font-size:13px;line-height:1.65;color:#65766c}.badge{border:1px solid #c7d1c4;padding:9px 14px;border-radius:12px;background:#e8eddf;font-size:13px;white-space:nowrap}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}.diagram,.details{background:#fffdf6;border:1px solid #d2d8cb;border-radius:20px;overflow:hidden}.toolbar{padding:12px 16px;border-bottom:1px solid #e0e4d8;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar label{display:flex;align-items:center;gap:6px;font-size:12px;min-height:34px}.toolbar input[type=range]{width:95px;accent-color:#57796b}.toolbar input[type=checkbox]{accent-color:#57796b}button{min-height:44px;padding:9px 13px;border:1px solid #c7d0c0;border-radius:10px;color:#344c46;background:#f1f2e6;font:inherit;font-size:13px;cursor:pointer}button:hover{background:#e4ead9}button:focus-visible,input:focus-visible{outline:3px solid #bc955a;outline-offset:2px}canvas{display:block;width:100%;height:490px;touch-action:none;cursor:crosshair}.legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid #e0e4d8;font-size:11px;color:#53685c}.legend span:before{content:"";display:inline-block;width:9px;height:9px;background:var(--c);margin-right:5px;border-radius:2px}
+    .details{padding:18px}h2{font-size:16px;margin:0 0 12px}h3{font-size:12px;margin:17px 0 9px;color:#65766c;font-weight:600}dl{margin:0}dl>div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #edf0e4;font-size:12px}dt{color:#68776c}dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}.score{display:flex;align-items:baseline;justify-content:space-between;padding:14px 0 6px}.score strong{font-size:31px;color:#a45b42}.score span{font-size:12px;color:#68776c}.formula{padding:9px 11px;border-radius:10px;background:#f3eddf;font-size:12px;line-height:1.7}.tiny{font-size:11px;color:#788172}.note{padding:11px 0 0}.note strong{color:#4e6759}table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:6px 2px;border-bottom:1px solid #edf0e4}th{font-weight:500;color:#68776c}.explore{border-top:1px solid #dce2d4;margin-top:14px;padding-top:13px}.explore button{width:100%;margin-top:9px}
+    @media(max-width:850px){body{padding:14px}.layout{grid-template-columns:1fr}header{align-items:start}.badge{font-size:11px;padding:8px}canvas{height:440px}.details{display:grid;grid-template-columns:1fr 1fr;gap:18px}.details h2{grid-column:1/-1}.explore{margin:0}.toolbar{gap:6px}}
+  </style>
+</head>
+<body><main>
+  <header><div><h1>这一发，碰到了哪里？</h1><p>阿狸 · 雷霆　／　老土「小红豆」双发 + 威力加强　／　第 4 轮，第 13 行动</p></div><div class="badge">v4.0.5 · 钢铁工厂 · 只读还原</div></header>
+  <div class="layout">
+    <section class="diagram" aria-label="受击模型示意图">
+      <div class="toolbar">
+        <label>放大 <input id="zoom" type="range" min="1.8" max="6" step=".1" value="3.2" aria-label="模型放大倍率"></label>
+        <label><input id="art" type="checkbox" checked>坦克外观</label>
+        <label><input id="heat" type="checkbox">伤害分布</label>
+        <label><input id="crater" type="checkbox">挖土轮廓</label>
+        <button id="reset">回到实际爆点</button>
+      </div>
+      <canvas id="model" aria-label="可点击探索爆点的坦克碰撞模型、伤害参照点与实际命中位置"></canvas>
+      <div class="legend"><span style="--c:#548694">碰撞矩形</span><span style="--c:#5d956d">伤害参照 / 满伤格</span><span style="--c:#c96e45">第 16 弹</span><span style="--c:#9271a4">第 17 弹（几乎重合）</span></div>
+    </section>
+    <aside class="details">
+      <h2>两发都是机体接触，非正中</h2>
+      <div>
+        <dl><div><dt>碰撞体</dt><dd>60 × 51 · 旋转矩形</dd></div><div><dt>车身倾角</dt><dd id="slope"></dd></div><div><dt>机体原点</dt><dd>(828.00, 780.00)</dd></div><div><dt>伤害参照点</dt><dd id="reference"></dd></div><div><dt>两爆点间距</dt><dd id="separation"></dd></div></dl>
+        <h3>真实记录 · 世界坐标</h3><table><thead><tr><th>炮弹</th><th>X</th><th>Y</th><th>扣血</th></tr></thead><tbody id="shots"></tbody></table>
+        <div class="score"><strong>325 + 325</strong><span>893 → 243 HP</span></div>
+        <div class="formula">威力加强 ×1.5（两发均生效）<br>古代 → 近代 ×0.8 · 防御 115<br>实际距离衰减 ×0.6667</div>
+      </div>
+      <div class="explore">
+        <h2 id="selection-title">实际爆点 · 第 16 弹</h2>
+        <dl><div><dt>距伤害参照点</dt><dd id="distance"></dd></div><div><dt>源网格距离</dt><dd id="grid-distance"></dd></div><div><dt>机体内 / 正中</dt><dd id="contact"></dd></div><div><dt>距离衰减</dt><dd id="falloff"></dd></div><div><dt>这一发伤害</dt><dd id="damage"></dd></div></dl>
+        <button id="perfect">对比：爆点放在满伤参照点</button>
+        <p class="tiny" style="margin-top:9px">点击图中任意位置，查看假设爆点的伤害。它只用于对比，不代表炮弹能穿过机体到达该点。</p>
+      </div>
+    </aside>
+  </div>
+  <p class="note"><strong>读图：</strong>炮弹从右向左，在旋转矩形右边界首次接触即爆炸；两发落点几乎完全重合，离顶边中点约 36.3 单位。绿色小格展示实际坐标取整后的满伤格，碰撞矩形不等于满伤区域。</p>
+  <p class="tiny">地形仅显示快照中未变化的永久支撑，不复用保存时的可挖地形来冒充命中时地形。坦克图层复用现有绘制代码；伤害与命中判定直接调用 v4.0.5 游戏函数。临时页面不修改游戏或录像。</p>
+</main><script type="module" src="./main.ts"></script></body>
+</html>

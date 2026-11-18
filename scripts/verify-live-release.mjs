@@ -9,13 +9,17 @@ const portraitSource=readFileSync('src/portrait-assets.ts','utf8');
 const portraitSpecs=JSON.parse(portraitSource.slice(portraitSource.indexOf('{'),portraitSource.lastIndexOf('}')+1));
 const portraitFiles=Object.entries(portraitSpecs).map(([id,s])=>({id,...s}));
 const files=readdirSync('dist/audio').filter(n=>n.endsWith('.mp3')).map(name=>({name,hash:hash(readFileSync(resolve('dist/audio',name)))}));
+console.log('Starting verification browser');
 const browser=await chromium.launch({channel:'chrome',headless:true,...(process.env.PIGGY_VERIFY_PROXY?{proxy:{server:process.env.PIGGY_VERIFY_PROXY}}:{})});
+console.log('Browser ready');
 const context=await browser.newContext({viewport:{width:1194,height:834},deviceScaleFactor:2,isMobile:true,hasTouch:true});
 context.on('requestfailed',r=>console.log('资源请求失败',new URL(r.url()).pathname,r.failure()?.errorText));
+console.log('Context ready');
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
 const check=(condition,message)=>{if(!condition)throw Error(message);};
 try{
  await page.addInitScript(()=>{window.__releaseMedia=[];const play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(...args){if(!window.__releaseMedia.includes(this))window.__releaseMedia.push(this);return play.apply(this,args);};Object.defineProperty(navigator.clipboard,'writeText',{value:async text=>{window.__releaseSnapshot=text;}});});
+ console.log('Opening verification target',base);
  await page.goto(base,{waitUntil:'domcontentloaded',timeout:60000});
  const liveVersion=await page.evaluate(async()=> (await (await fetch('version.json?verify='+Date.now(),{cache:'no-store'})).json()).version);check(liveVersion===version,`线上版本${liveVersion}，预期${version}`);
  const entry=await page.locator('script[type="module"][src]').getAttribute('src');const relative=entry.split('/piggymiCannon/').at(-1).replace(/^\//,'');
@@ -27,13 +31,13 @@ try{
  await context.setOffline(true);await page.reload({waitUntil:'networkidle'});await page.getByRole('button',{name:'进入战场',exact:true}).waitFor();
  const offline=await page.evaluate(async files=>Promise.all(files.map(async f=>{const r=await fetch('audio/'+f.name),b=await r.arrayBuffer();const actual=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b))).map(v=>v.toString(16).padStart(2,'0')).join('');return {name:f.name,ok:r.ok&&actual===f.hash};})),files);check(offline.every(r=>r.ok),'离线音频缺失或哈希不一致');
  const offlinePortraits=await page.evaluate(async specs=>Promise.all(specs.map(async s=>{const r=await fetch(s.file),data=await r.arrayBuffer();const actual=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data))).map(v=>v.toString(16).padStart(2,'0')).join('');return {id:s.id,ok:r.ok&&actual===s.sha256};})),portraitFiles);check(offlinePortraits.every(r=>r.ok),'离线头像缺失或哈希不一致');
- const range=await page.evaluate(async()=>{const r=await fetch('audio/bgm-temple.mp3',{headers:{Range:'bytes=-4096'}});return {status:r.status,bytes:(await r.arrayBuffer()).byteLength,range:r.headers.get('content-range')};});check(range.status===206&&range.bytes===4096,'离线完整配乐曲尾范围响应异常');
+ const range=await page.evaluate(async()=>{const r=await fetch('audio/bgm-stage-00010.mp3',{headers:{Range:'bytes=-4096'}});return {status:r.status,bytes:(await r.arrayBuffer()).byteLength,range:r.headers.get('content-range')};});check(range.status===206&&range.bytes===4096,'离线完整配乐曲尾范围响应异常');
  await page.getByRole('button',{name:'进入战场',exact:true}).click();await page.locator('[data-choice="cannon"]').click();await page.locator('[data-controller="1"]').selectOption('human');await page.locator('input[name="map"][value="temple"]').locator('..').click();
  for(const key of ['musicEnabled','soundEnabled']){const button=page.locator(`[data-setup-setting="${key}"]`);if(await button.getAttribute('aria-checked')!=='true')await button.click();}
  check(await page.locator('#turn-timer').inputValue()==='0','新默认回合不是不限时');
  await page.waitForFunction(specs=>specs.every(s=>{const image=document.querySelector('#slot-roster img[data-crew-portrait="'+s.id+'"]');return image&&['cache','network'].includes(image.dataset.portraitSource)&&image.complete&&image.naturalWidth===s.width&&image.naturalHeight===s.height;}),portraitFiles,{timeout:20000});
  await page.getByRole('button',{name:'开始对局',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#battlefield').dataset.renderBackend==='pixi',null,{timeout:20000});await page.locator('#fire-button:enabled').waitFor({timeout:15000});
- await page.waitForFunction(()=>window.__releaseMedia.some(a=>a.src.includes('bgm-temple.mp3')&&!a.paused&&a.currentTime>.2),null,{timeout:15000});
+ await page.waitForFunction(()=>window.__releaseMedia.some(a=>a.src.includes('bgm-stage-')&&!a.paused&&a.currentTime>.2),null,{timeout:15000});
  const parts=version.split('.').map(Number),polish=parts[0]>4||parts[0]===4&&(parts[1]>0||parts[2]>=1);let emptyMeterVerified=false,powerMarkerVerified=false,midpointAimVerified=false;
  if(polish){check(await page.locator('#power-value').textContent()==='0','新局力度条未置空');check((await page.locator('#charge-fill').boundingBox()).width===0,'新局填充未置空');emptyMeterVerified=true;const b=await page.locator('#power-meter').boundingBox();await page.touchscreen.tap(b.x+b.width*.55,b.y+b.height/2);await page.waitForFunction(()=>document.querySelector('#power-marker').dataset.power==='55');}
  let angleNudgesVerified=false;
@@ -45,7 +49,7 @@ try{
  await page.locator('.battle-stage [data-dialog="settings"]').click();if(await page.locator('#repair-assets').count()){await page.locator('#repair-assets').click();await page.waitForFunction(()=>!document.querySelector('#repair-assets').disabled,null,{timeout:40000});}
  await page.locator('#copy-battle-snapshot').click();const payload=await page.evaluate(()=>window.__releaseSnapshot),snapshot=JSON.parse(payload.match(/```json\n([\s\S]*?)\n```/)[1]);
  if(snapshot.assetResources)check(snapshot.assetResources.failed.length===0&&snapshot.assetResources.checked===snapshot.assetResources.total,'离线素材全检失败');
- check(snapshot.gameVersion===version&&snapshot.initial.config.map==='temple'&&snapshot.initial.world.width===1920&&snapshot.initial.world.height===960,'线上快照缺少实际版本／地图／新边界');
+ check(snapshot.gameVersion===version&&snapshot.initial.config.map==='temple'&&snapshot.initial.world.width===(version.split('.').map(Number).reduce((n,v)=>n*1000+v,0)>=4000006?2688:1920)&&snapshot.initial.world.height===(version.split('.').map(Number).reduce((n,v)=>n*1000+v,0)>=4000006?1344:960),'线上快照缺少实际版本／地图／新边界');
  if(polish){const tank=snapshot.current.tanks[0];check(tank.angle===(tank.minAngle+tank.maxAngle)/2,'开局射界未居中');check(tank.powerMarker===55&&tank.shots===0,'轻点未记录刻度或误发射');midpointAimVerified=true;powerMarkerVerified=true;}
  await page.locator('#close-dialog').click();await page.screenshot({path:`QA/v${version}-live-offline-1194.png`,scale:'css'});
  const progressionAtSave=await page.evaluate(()=>localStorage.getItem('piggy-progression-v1'));

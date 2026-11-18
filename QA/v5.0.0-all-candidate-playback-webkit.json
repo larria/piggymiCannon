@@ -1,0 +1,132 @@
+[
+  {
+    "number": 0,
+    "file": "bgm-stage-00000.mp3",
+    "seconds": 207.029116,
+    "duration": 207.07265306122449,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00000.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 2,
+    "file": "bgm-stage-00002.mp3",
+    "seconds": 333.02059,
+    "duration": 333.0612244897959,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00002.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 4,
+    "file": "bgm-stage-00004.mp3",
+    "seconds": 141.688163,
+    "duration": 141.71428571428572,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00004.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 5,
+    "file": "bgm-stage-00005.mp3",
+    "seconds": 295.427483,
+    "duration": 295.47102040816327,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00005.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 8,
+    "file": "bgm-stage-00008.mp3",
+    "seconds": 197.276735,
+    "duration": 197.30285714285714,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00008.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 9,
+    "file": "bgm-stage-00009.mp3",
+    "seconds": 318.902857,
+    "duration": 318.9289795918367,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00009.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 10,
+    "file": "bgm-stage-00010.mp3",
+    "seconds": 190.775147,
+    "duration": 190.82448979591837,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00010.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 11,
+    "file": "bgm-stage-00011.mp3",
+    "seconds": 294.684444,
+    "duration": 294.7134693877551,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00011.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 12,
+    "file": "bgm-stage-00012.mp3",
+    "seconds": 357.842721,
+    "duration": 357.8775510204082,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00012.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 14,
+    "file": "bgm-stage-00014.mp3",
+    "seconds": 320.017415,
+    "duration": 320.05224489795916,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00014.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 15,
+    "file": "bgm-stage-00015.mp3",
+    "seconds": 119.141587,
+    "duration": 119.17061224489795,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00015.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 21,
+    "file": "bgm-stage-00021.mp3",
+    "seconds": 90.0766,
+    "duration": 90.09632653061225,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00021.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  },
+  {
+    "number": 22,
+    "file": "bgm-stage-00022.mp3",
+    "seconds": 130.774785,
+    "duration": 130.82122448979592,
+    "error": null,
+    "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00022.mp3",
+    "loop": true,
+    "tailLoopPlayed": true
+  }
+]

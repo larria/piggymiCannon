@@ -1,0 +1,788 @@
+{
+  "rows": [
+    {
+      "map": "valley",
+      "choice": "valley",
+      "snapshot": "青苔峡谷",
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00002.mp3",
+      "hash": "d162110cd0092fb08b38fd35613330e5ae6fe281f850cec4dc5c92faacc7b312",
+      "duration": 333.0612244897959,
+      "error": null,
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "valley",
+        "mapNumber": null,
+        "musicRuleMapNumber": 6,
+        "number": 2,
+        "name": "The Profound",
+        "file": "bgm-stage-00002.mp3",
+        "candidates": [
+          2,
+          4,
+          10,
+          12
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2677580607,
+          "index": 1,
+          "value": 0.16636577155441046
+        }
+      },
+      "selection": {
+        "mapNumber": null,
+        "bgmNumber": 2,
+        "source": "Stage00002.mp3",
+        "seconds": 333.02059,
+        "basis": "Original valley uses the verified fairyland music rule only; not an original map-number claim.",
+        "durationMode": "full",
+        "candidates": [
+          2,
+          4,
+          10,
+          12
+        ],
+        "selection": "uniform-distinct",
+        "musicRuleMapNumber": 6
+      }
+    },
+    {
+      "map": "coast",
+      "choice": "coast",
+      "snapshot": "独木桥",
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00004.mp3",
+      "hash": "b3f8969508324c7a105b8742c3afc5514a1cae116297b5c16eff04ca6949b628",
+      "duration": 141.71428571428572,
+      "error": null,
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "coast",
+        "mapNumber": 8,
+        "musicRuleMapNumber": 8,
+        "number": 4,
+        "name": "Once in a Lifetime",
+        "file": "bgm-stage-00004.mp3",
+        "candidates": [
+          9,
+          4,
+          14
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 3113080119,
+          "index": 1,
+          "value": 0.465105511713773
+        }
+      },
+      "selection": {
+        "mapNumber": 8,
+        "bgmNumber": 4,
+        "source": "Stage00004.mp3",
+        "seconds": 141.688163,
+        "basis": "原客户端有效列表9/4/14，本作选其中4",
+        "durationMode": "full",
+        "candidates": [
+          9,
+          4,
+          14
+        ],
+        "selection": "uniform-distinct"
+      }
+    },
+    {
+      "map": "moon",
+      "choice": "moon",
+      "snapshot": "冰封溪谷",
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00009.mp3",
+      "hash": "b8eb26344f92dec9a49b6b7673bc08786bb9493cb5e72070344fe141236ed3c6",
+      "duration": 318.9289795918367,
+      "error": null,
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "moon",
+        "mapNumber": 16,
+        "musicRuleMapNumber": 16,
+        "number": 9,
+        "name": "Be Higher",
+        "file": "bgm-stage-00009.mp3",
+        "candidates": [
+          8,
+          9,
+          12
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 1585913460,
+          "index": 1,
+          "value": 0.6219660327769816
+        }
+      },
+      "selection": {
+        "mapNumber": 16,
+        "bgmNumber": 8,
+        "source": "Stage00008.mp3",
+        "seconds": 197.276735,
+        "basis": "用户更正地图为冰封溪谷；原客户端有效列表8/9/12，本作取首项8",
+        "durationMode": "full",
+        "candidates": [
+          8,
+          9,
+          12
+        ],
+        "selection": "uniform-distinct"
+      }
+    },
+    {
+      "map": "sky",
+      "choice": "sky",
+      "snapshot": "天空之城",
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00008.mp3",
+      "hash": "14841d08be33ec287e11c305d5c7cdabeab4d6139fef9c349ff338a26495ac01",
+      "duration": 197.30285714285714,
+      "error": null,
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "sky",
+        "mapNumber": 7,
+        "musicRuleMapNumber": 7,
+        "number": 8,
+        "name": "There's Something about Supertank",
+        "file": "bgm-stage-00008.mp3",
+        "candidates": [
+          4,
+          8,
+          9
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 1646804345,
+          "index": 1,
+          "value": 0.6593985999934375
+        }
+      },
+      "selection": {
+        "mapNumber": 7,
+        "bgmNumber": 9,
+        "source": "Stage00009.mp3",
+        "seconds": 318.902857,
+        "basis": "天空之城独立新增；原客户端有效列表4/8/9，本作选其中9",
+        "durationMode": "full",
+        "candidates": [
+          4,
+          8,
+          9
+        ],
+        "selection": "uniform-distinct"
+      }
+    },
+    {
+      "map": "factory",
+      "choice": "factory",
+      "snapshot": "钢铁工厂",
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00021.mp3",
+      "hash": "606fab2dfa36a8ed9397a6b635c61a47064fceaa0fc80014d850733f6dc6886d",
+      "duration": 90.09632653061225,
+      "error": null,
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "factory",
+        "mapNumber": 4,
+        "musicRuleMapNumber": 4,
+        "number": 21,
+        "name": "stage00021",
+        "file": "bgm-stage-00021.mp3",
+        "candidates": [
+          5,
+          11,
+          21
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 983476208,
+          "index": 1,
+          "value": 0.9984816994983703
+        }
+      },
+      "selection": {
+        "mapNumber": 4,
+        "bgmNumber": 5,
+        "source": "Stage00005.mp3",
+        "seconds": 295.427483,
+        "basis": "原客户端有效列表5/11/21，本作取首项5",
+        "durationMode": "full",
+        "candidates": [
+          5,
+          11,
+          21
+        ],
+        "selection": "uniform-distinct"
+      }
+    },
+    {
+      "map": "temple",
+      "choice": "temple",
+      "snapshot": "神圣殿堂",
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00010.mp3",
+      "hash": "95d3d73f8a40c088092d4821bba05ca8010936caadc0e0ba2f1dc122fa9a4a4a",
+      "duration": 190.82448979591837,
+      "error": null,
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "temple",
+        "mapNumber": 10,
+        "musicRuleMapNumber": 10,
+        "number": 10,
+        "name": "Tank Slayer",
+        "file": "bgm-stage-00010.mp3",
+        "candidates": [
+          10,
+          0
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2785876273,
+          "index": 1,
+          "value": 0.05138095375150442
+        }
+      },
+      "selection": {
+        "mapNumber": 10,
+        "bgmNumber": 10,
+        "source": "Stage00010.mp3",
+        "seconds": 190.775147,
+        "basis": "原客户端有效列表10/0/0/0，本作取首项10；0也是实际曲目",
+        "durationMode": "full",
+        "candidates": [
+          10,
+          0
+        ],
+        "selection": "uniform-distinct"
+      }
+    },
+    {
+      "map": "egypt",
+      "choice": "egypt",
+      "snapshot": "古老埃及",
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00022.mp3",
+      "hash": "1ad4703b16170eddebe67fda59653d50be4d19471aa1f863d37af36a20ef605d",
+      "duration": 130.82122448979592,
+      "error": null,
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "egypt",
+        "mapNumber": 9,
+        "musicRuleMapNumber": 9,
+        "number": 22,
+        "name": "Egyptian Rule2",
+        "file": "bgm-stage-00022.mp3",
+        "candidates": [
+          15,
+          22
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2867161157,
+          "index": 1,
+          "value": 0.7290375214070082
+        }
+      },
+      "selection": {
+        "mapNumber": 9,
+        "bgmNumber": 15,
+        "source": "Stage00015.mp3",
+        "seconds": 119.141587,
+        "basis": "原客户端有效列表15/22，本作取首项15",
+        "durationMode": "full",
+        "candidates": [
+          15,
+          22
+        ],
+        "selection": "uniform-distinct"
+      }
+    }
+  ],
+  "draws": [
+    {
+      "seed": 3980725136,
+      "map": "valley",
+      "choice": "random",
+      "name": "青苔峡谷",
+      "draw": {
+        "choice": "random",
+        "actual": "valley",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00012.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "valley",
+        "mapNumber": null,
+        "musicRuleMapNumber": 6,
+        "number": 12,
+        "name": "Life is so Beautiful",
+        "file": "bgm-stage-00012.mp3",
+        "candidates": [
+          2,
+          4,
+          10,
+          12
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2677628195,
+          "index": 1,
+          "value": 0.7513770575169474
+        }
+      }
+    },
+    {
+      "seed": 3980725709,
+      "map": "sky",
+      "choice": "random",
+      "name": "天空之城",
+      "draw": {
+        "choice": "random",
+        "actual": "sky",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00009.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "sky",
+        "mapNumber": 7,
+        "musicRuleMapNumber": 7,
+        "number": 9,
+        "name": "Be Higher",
+        "file": "bgm-stage-00009.mp3",
+        "candidates": [
+          4,
+          8,
+          9
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 1646907338,
+          "index": 1,
+          "value": 0.7104305438697338
+        }
+      }
+    },
+    {
+      "seed": 3980726291,
+      "map": "factory",
+      "choice": "random",
+      "name": "钢铁工厂",
+      "draw": {
+        "choice": "random",
+        "actual": "factory",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00021.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "factory",
+        "mapNumber": 4,
+        "musicRuleMapNumber": 4,
+        "number": 21,
+        "name": "stage00021",
+        "file": "bgm-stage-00021.mp3",
+        "candidates": [
+          5,
+          11,
+          21
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 983479599,
+          "index": 1,
+          "value": 0.8058863012120128
+        }
+      }
+    },
+    {
+      "seed": 3980726835,
+      "map": "moon",
+      "choice": "random",
+      "name": "冰封溪谷",
+      "draw": {
+        "choice": "random",
+        "actual": "moon",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00012.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "moon",
+        "mapNumber": 16,
+        "musicRuleMapNumber": 16,
+        "number": 12,
+        "name": "Life is so Beautiful",
+        "file": "bgm-stage-00012.mp3",
+        "candidates": [
+          8,
+          9,
+          12
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 1585901890,
+          "index": 1,
+          "value": 0.9927624317351729
+        }
+      }
+    },
+    {
+      "seed": 3980727667,
+      "map": "factory",
+      "choice": "random",
+      "name": "钢铁工厂",
+      "draw": {
+        "choice": "random",
+        "actual": "factory",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00005.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "factory",
+        "mapNumber": 4,
+        "musicRuleMapNumber": 4,
+        "number": 5,
+        "name": "The Invincible",
+        "file": "bgm-stage-00005.mp3",
+        "candidates": [
+          5,
+          11,
+          21
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 983478351,
+          "index": 1,
+          "value": 0.04798858077265322
+        }
+      }
+    },
+    {
+      "seed": 3980728310,
+      "map": "valley",
+      "choice": "random",
+      "name": "青苔峡谷",
+      "draw": {
+        "choice": "random",
+        "actual": "valley",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00004.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "valley",
+        "mapNumber": null,
+        "musicRuleMapNumber": 6,
+        "number": 4,
+        "name": "Once in a Lifetime",
+        "file": "bgm-stage-00004.mp3",
+        "candidates": [
+          2,
+          4,
+          10,
+          12
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2677621061,
+          "index": 1,
+          "value": 0.3083668944891542
+        }
+      }
+    },
+    {
+      "seed": 3980729006,
+      "map": "egypt",
+      "choice": "random",
+      "name": "古老埃及",
+      "draw": {
+        "choice": "random",
+        "actual": "egypt",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00022.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "egypt",
+        "mapNumber": 9,
+        "musicRuleMapNumber": 9,
+        "number": 22,
+        "name": "Egyptian Rule2",
+        "file": "bgm-stage-00022.mp3",
+        "candidates": [
+          15,
+          22
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2867166199,
+          "index": 1,
+          "value": 0.6953829580452293
+        }
+      }
+    },
+    {
+      "seed": 3980729652,
+      "map": "coast",
+      "choice": "random",
+      "name": "独木桥",
+      "draw": {
+        "choice": "random",
+        "actual": "coast",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00014.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "coast",
+        "mapNumber": 8,
+        "musicRuleMapNumber": 8,
+        "number": 14,
+        "name": "Fortress Gump",
+        "file": "bgm-stage-00014.mp3",
+        "candidates": [
+          9,
+          4,
+          14
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 3112972736,
+          "index": 1,
+          "value": 0.9887546461541206
+        }
+      }
+    },
+    {
+      "seed": 3980730396,
+      "map": "factory",
+      "choice": "random",
+      "name": "钢铁工厂",
+      "draw": {
+        "choice": "random",
+        "actual": "factory",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00005.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "factory",
+        "mapNumber": 4,
+        "musicRuleMapNumber": 4,
+        "number": 5,
+        "name": "The Invincible",
+        "file": "bgm-stage-00005.mp3",
+        "candidates": [
+          5,
+          11,
+          21
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 983467296,
+          "index": 1,
+          "value": 0.20782666141167283
+        }
+      }
+    },
+    {
+      "seed": 3980731375,
+      "map": "coast",
+      "choice": "random",
+      "name": "独木桥",
+      "draw": {
+        "choice": "random",
+        "actual": "coast",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00009.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "coast",
+        "mapNumber": 8,
+        "musicRuleMapNumber": 8,
+        "number": 9,
+        "name": "Be Higher",
+        "file": "bgm-stage-00009.mp3",
+        "candidates": [
+          9,
+          4,
+          14
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 3112963867,
+          "index": 1,
+          "value": 0.2865533537697047
+        }
+      }
+    },
+    {
+      "seed": 3980732142,
+      "map": "valley",
+      "choice": "random",
+      "name": "青苔峡谷",
+      "draw": {
+        "choice": "random",
+        "actual": "valley",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00004.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "valley",
+        "mapNumber": null,
+        "musicRuleMapNumber": 6,
+        "number": 4,
+        "name": "Once in a Lifetime",
+        "file": "bgm-stage-00004.mp3",
+        "candidates": [
+          2,
+          4,
+          10,
+          12
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2677633117,
+          "index": 1,
+          "value": 0.4242473617196083
+        }
+      }
+    },
+    {
+      "seed": 3980732741,
+      "map": "egypt",
+      "choice": "random",
+      "name": "古老埃及",
+      "draw": {
+        "choice": "random",
+        "actual": "egypt",
+        "available": [
+          "valley",
+          "coast",
+          "moon",
+          "sky",
+          "factory",
+          "temple",
+          "egypt"
+        ]
+      },
+      "src": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00015.mp3",
+      "bgm": {
+        "version": "seeded-distinct-map-bgm-v1",
+        "map": "egypt",
+        "mapNumber": 9,
+        "musicRuleMapNumber": 9,
+        "number": 15,
+        "name": "Egyptian Rule",
+        "file": "bgm-stage-00015.mp3",
+        "candidates": [
+          15,
+          22
+        ],
+        "rng": {
+          "algorithm": "mulberry32-independent-bgm",
+          "seed": 2867152924,
+          "index": 1,
+          "value": 0.2403811940457672
+        }
+      }
+    }
+  ],
+  "errors": []
+}

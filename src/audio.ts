@@ -1,7 +1,7 @@
 const asset=(name:string)=>`${import.meta.env.BASE_URL}audio/${name}`;
 import {weaponById,type WeaponId} from './catalog';
 import type {VehicleId} from './vehicles';
-import {BGM_TRACKS,COMMON_CLIPS,vehicleClips,weaponSoundClip,type AudioScene} from './audio-catalog';
+import {BGM_TRACKS,RUNTIME_BGM_FILES,COMMON_CLIPS,vehicleClips,weaponSoundClip,type AudioScene} from './audio-catalog';
 export class AudioManager {
   music=new Audio(asset(BGM_TRACKS.lobby));
   private selectionMusic=new Audio(asset(BGM_TRACKS.setup));private selectionActive=false;
@@ -44,7 +44,8 @@ export class AudioManager {
       this.pausedEffects.clear();
     }
   }
-  setScene(scene:AudioScene){if(this.scene===scene)return;this.scene=scene;this.music.pause();this.music.src=asset(BGM_TRACKS[scene]);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused)this.start();}
+  private sceneFile=BGM_TRACKS.lobby;
+  setScene(scene:AudioScene,selectedFile?:string){const file=selectedFile&&RUNTIME_BGM_FILES.has(selectedFile)?selectedFile:BGM_TRACKS[scene];if(this.scene===scene&&this.sceneFile===file)return;this.scene=scene;this.sceneFile=file;this.music.pause();this.music.src=asset(file);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused)this.start();}
   resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources])source.stop();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();}
   async retryAssets(vehicles:(VehicleId|null)[],restored:string[]=[],skipFiles:string[]=[]){
     const clips=restored.filter(url=>url.startsWith('audio/')).map(url=>url.slice(6));for(const name of clips){await this.loading.get(name);this.buffers.delete(name);this.lastSamples.delete(name);}

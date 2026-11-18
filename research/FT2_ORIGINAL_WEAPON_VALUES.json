@@ -8,7 +8,11 @@
       "A2Power": 150,
       "A2Round": 40,
       "Defence": 100,
-      "Range": 45
+      "Range": 45,
+      "Character": 132,
+      "A1": 128,
+      "A2": 132,
+      "Energy": 950
     },
     {
       "A1Power": 330,
@@ -16,7 +20,11 @@
       "A2Power": 100,
       "A2Round": 28,
       "Defence": 99,
-      "Range": 47
+      "Range": 47,
+      "Character": 136,
+      "A1": 128,
+      "A2": 136,
+      "Energy": 940
     },
     {
       "A1Power": 140,
@@ -24,7 +32,11 @@
       "A2Power": 420,
       "A2Round": 35,
       "Defence": 89,
-      "Range": 43
+      "Range": 43,
+      "Character": 128,
+      "A1": 128,
+      "A2": 128,
+      "Energy": 920
     },
     {
       "A1Power": 230,
@@ -32,7 +44,11 @@
       "A2Power": 150,
       "A2Round": 38,
       "Defence": 118,
-      "Range": 47
+      "Range": 47,
+      "Character": 64,
+      "A1": 64,
+      "A2": 64,
+      "Energy": 1000
     },
     {
       "A1Power": 240,
@@ -40,7 +56,11 @@
       "A2Power": 153,
       "A2Round": 43,
       "Defence": 123,
-      "Range": 49
+      "Range": 49,
+      "Character": 72,
+      "A1": 64,
+      "A2": 72,
+      "Energy": 1000
     },
     {
       "A1Power": 120,
@@ -48,7 +68,11 @@
       "A2Power": 90,
       "A2Round": 32,
       "Defence": 117,
-      "Range": 60
+      "Range": 60,
+      "Character": 32,
+      "A1": 32,
+      "A2": 32,
+      "Energy": 1100
     },
     {
       "A1Power": 175,
@@ -56,7 +80,11 @@
       "A2Power": 60,
       "A2Round": 28,
       "Defence": 115,
-      "Range": 53
+      "Range": 53,
+      "Character": 32,
+      "A1": 32,
+      "A2": 32,
+      "Energy": 1050
     },
     {
       "A1Power": 220,
@@ -64,7 +92,11 @@
       "A2Power": 99,
       "A2Round": 40,
       "Defence": 95,
-      "Range": 50
+      "Range": 50,
+      "Character": 18,
+      "A1": 18,
+      "A2": 18,
+      "Energy": 990
     },
     {
       "A1Power": 220,
@@ -72,7 +104,11 @@
       "A2Power": 320,
       "A2Round": 30,
       "Defence": 115,
-      "Range": 48
+      "Range": 48,
+      "Character": 65,
+      "A1": 64,
+      "A2": 65,
+      "Energy": 1150
     },
     {
       "A1Power": 200,
@@ -80,7 +116,11 @@
       "A2Power": 270,
       "A2Round": 66,
       "Defence": 91,
-      "Range": 60
+      "Range": 60,
+      "Character": 18,
+      "A1": 18,
+      "A2": 18,
+      "Energy": 970
     },
     {
       "A1Power": 230,
@@ -88,7 +128,11 @@
       "A2Power": 190,
       "A2Round": 43,
       "Defence": 105,
-      "Range": 47
+      "Range": 47,
+      "Character": 24,
+      "A1": 16,
+      "A2": 24,
+      "Energy": 1000
     },
     {
       "A1Power": 220,
@@ -96,7 +140,11 @@
       "A2Power": 166,
       "A2Round": 42,
       "Defence": 92,
-      "Range": 55
+      "Range": 55,
+      "Character": 18,
+      "A1": 18,
+      "A2": 18,
+      "Energy": 985
     },
     {
       "A1Power": 225,
@@ -104,7 +152,11 @@
       "A2Power": 80,
       "A2Round": 27,
       "Defence": 125,
-      "Range": 70
+      "Range": 70,
+      "Character": 255,
+      "A1": 32,
+      "A2": 32,
+      "Energy": 1000
     },
     {
       "A1Power": 200,
@@ -112,7 +164,11 @@
       "A2Power": 300,
       "A2Round": 30,
       "Defence": 100,
-      "Range": 43
+      "Range": 43,
+      "Character": 128,
+      "A1": 128,
+      "A2": 128,
+      "Energy": 950
     }
   ]
 }

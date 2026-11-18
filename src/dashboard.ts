@@ -1,6 +1,5 @@
 import type {Game,Tank} from './engine';
-import {WORLD_W,WORLD_H} from './engine';
-import {TERRAIN_H} from './terrain';
+import {WORLD_W} from './engine';
 import {paintMapOverview} from './map-preview';
 import {paintVehicle} from './vehicle-art';
 import {vehicleById} from './vehicles';
@@ -31,14 +30,14 @@ export class DashboardView {
     this.mapSignature=mapSignature;this.mapFrames++;
     const m=this.map.getContext('2d')!,base=this.terrain.getContext('2d')!;
     if(this.previousGame!==game||this.revision!==game.land.revision){paintMapOverview(base,game,300,168);this.previousGame=game;this.revision=game.land.revision;}
-    m.drawImage(this.terrain,0,0);m.strokeStyle='#f9f2d7b0';m.lineWidth=2;m.strokeRect(offsetX/WORLD_W*300+2,offset/TERRAIN_H*168,viewWidth/WORLD_W*300-4,viewHeight/TERRAIN_H*168);
-    if(game.fireLine){m.strokeStyle='#f5ae70';m.beginPath();m.moveTo(game.fireLine.x/WORLD_W*300,15);m.lineTo(game.fireLine.x/WORLD_W*300,145);m.stroke();}
+    m.drawImage(this.terrain,0,0);m.strokeStyle='#f9f2d7b0';m.lineWidth=2;m.strokeRect(offsetX/game.worldWidth*300+2,offset/game.worldHeight*168,viewWidth/game.worldWidth*300-4,viewHeight/game.worldHeight*168);
+    if(game.fireLine){m.strokeStyle='#f5ae70';m.beginPath();m.moveTo(game.fireLine.x/game.worldWidth*300,15);m.lineTo(game.fireLine.x/game.worldWidth*300,145);m.stroke();}
     for(const tank of game.tanks)if(tank.hp>0&&game.visible(tank)){
-      const x=tank.x/WORLD_W*300,y=tank.y/TERRAIN_H*168;
+      const x=tank.x/game.worldWidth*300,y=tank.y/game.worldHeight*168;
       m.save();m.translate(x,y);m.strokeStyle=teamFlag(tank.team).color;m.lineWidth=tank.id===game.current?2:1;m.fillStyle='#fff4df';m.beginPath();m.arc(0,0,tank.id===game.current?9:7,0,7);m.fill();m.stroke();
       if(tank.vehicleId){m.save();m.scale(.17,.17);paintVehicle(m,vehicleById(tank.vehicleId),20,0,0,false);m.restore();}
       const avatar=crewPortrait(tank.crew);if(avatar){m.save();m.beginPath();m.arc(0,0,7,0,7);m.clip();m.drawImage(avatar,-7,-7,14,14);m.restore();}m.fillStyle=teamFlag(tank.team).color;m.font='bold 9px sans-serif';m.fillText(String(tank.slot+1),8,-6);m.restore();
     }
-    for(const crate of game.crates)if(!game.fog||Math.abs(crate.x-game.tanks[game.viewer].x)<230){m.fillStyle='#e6ba75';m.fillRect(crate.x/WORLD_W*300-2,crate.y/TERRAIN_H*168-2,5,5);}
+    for(const crate of game.crates)if(!game.fog||Math.abs(crate.x-game.tanks[game.viewer].x)<230){m.fillStyle='#e6ba75';m.fillRect(crate.x/game.worldWidth*300-2,crate.y/game.worldHeight*168-2,5,5);}
   }
 }

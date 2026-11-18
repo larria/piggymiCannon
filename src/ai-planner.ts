@@ -3,10 +3,11 @@ import {precisionPolish,impactPolish} from './match-polish';
 import {salvoProfile} from './salvo';
 import {PIERCING_DAMAGE,permanentPiercingContact} from './piercing';
 import {impactDamageScale,preciseContact} from './impact-damage';
-import {eraDamageFactor} from './era-damage';
-import {SHOT_WIND_GAIN,WORLD_W,WORLD_H,BOTTOM_Y,type Game,type Tank} from './engine';
+import {damageAffinity,applyDamageAffinity} from './source-attributes';
+import {referenceCalibration,tankArtScale} from './reference-calibration';
+import {SHOT_WIND_GAIN,type Game,type Tank} from './engine';
 import {weaponById,weaponDamage,weaponBlastRadius,launchDamageScale,excavation,type WeaponId} from './catalog';
-import {aimGeometry} from './aim';
+import {aimGeometry,muzzleGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
 import {projectileSpeed} from './ballistics';
 
@@ -28,7 +29,8 @@ function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetI
 export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0,verticalScale=speedScale){
  const {game:g,shooter:t,slope}=w,modernGeometry=originalBallistics(g.gameVersion),spec=weaponById(weapon),v=aimGeometry(angle,slope,t.direction);
  const speed=projectileSpeed(Math.max(g.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*speedScale;
- let x=t.x+Math.sin(slope)*13+v.x*31,y=t.y-Math.cos(slope)*13+v.y*31,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
+ const muzzle=muzzleGeometry(t,angle,slope,t.direction,tankArtScale(g.gameVersion));
+ let x=muzzle.x,y=muzzle.y,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
  let age=0,wx=0,wy=0,lock:Body|undefined,boost=t.boost?1.5:1,orbital=false;
  let direct:Body|undefined,landed=false;
  for(let i=0;i<12/dt;i++){
@@ -56,17 +58,18 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
    if(spec.effect==='orbital'&&!orbital){y=-50;vx=0;vy=680;orbital=true;age=0;direct=undefined;continue;}
    landed=true;break;
   }
-  if(x< -50||x>WORLD_W+50||y>WORLD_H+70)break;
+  if(x< -50||x>g.worldWidth+50||y>g.worldHeight+70)break;
  }
  const hits=w.bodies.map(b=>{
   const d=Math.hypot(b.tank.x-x,b.tank.y-y),hit=direct?.tank.id===b.tank.id;
   const scale=impactDamageScale(b.tank,x,y,b.slope,weaponBlastRadius(weapon,g.gameVersion),hit,g.gameVersion,{vx,vy},weapon);
   const mine=spec.effect==='mine'?1/3:1;
   const rage=t.vehicleId==='sea'&&t.hp<t.maxHP*.5?1.5:1,snow=t.vehicleId==='water'&&g.snow?1.25:1;
-  const raw=(modernGeometry&&weapon!=='missile-normal'&&b.tank.vehicleId?100/ORIGINAL_TANKS[b.tank.vehicleId].defence:1)*weaponDamage(weapon,g.gameVersion)*launchDamageScale(!!t.vehicleId,weapon)*boost*rage*snow*mine*scale*eraDamageFactor(t.vehicleId,b.tank.vehicleId).value;
+  const affinity=damageAffinity(weapon,t.vehicleId,b.tank.vehicleId,g.gameVersion),beforeAffinity=(modernGeometry&&weapon!=='missile-normal'&&b.tank.vehicleId?100/ORIGINAL_TANKS[b.tank.vehicleId].defence:1)*weaponDamage(weapon,g.gameVersion)*launchDamageScale(!!t.vehicleId,weapon)*boost*rage*snow*mine*scale,raw=beforeAffinity*affinity.value;
   let damage=landed&&b.eligible&&(hit||d<=weaponBlastRadius(weapon,g.gameVersion)+26)?(hit&&weapon==='missile-normal'&&impactPolish(g.gameVersion)&&preciseContact(b.tank,x,y,b.slope,g.gameVersion,{vx,vy},weapon)?PIERCING_DAMAGE.reduce((n,f)=>n+Math.round(raw*f),0):Math.round(raw)):0;
   const native=modernGeometry&&weapon!=='missile-normal'?originalWeapon(weapon):null;
-  if(native&&landed&&b.eligible)damage=Math.round(sourceDamage(native.power,native.round,sourceDistance(b.tank,x,y,b.slope,weapon),b.tank.vehicleId?ORIGINAL_TANKS[b.tank.vehicleId].defence:100,boost*rage*snow)*mine*eraDamageFactor(t.vehicleId,b.tank.vehicleId).value);
+  if(referenceCalibration(g.gameVersion)&&damage>0&&!native)damage=hit&&weapon==='missile-normal'&&preciseContact(b.tank,x,y,b.slope,g.gameVersion,{vx,vy},weapon)?PIERCING_DAMAGE.reduce((n,f)=>n+applyDamageAffinity(Math.round(beforeAffinity*f),affinity),0):applyDamageAffinity(Math.round(beforeAffinity),affinity);
+  if(native&&landed&&b.eligible){const d=sourceDamage(native.power,native.round,sourceDistance(b.tank,x,y,b.slope,weapon,g.gameVersion),b.tank.vehicleId?ORIGINAL_TANKS[b.tank.vehicleId].defence:100,boost*rage*snow);damage=referenceCalibration(g.gameVersion)?Math.round(applyDamageAffinity(d,affinity)*mine):Math.round(d*mine*affinity.value);}
 
 
   return {body:b,damage,direct:hit};
@@ -98,7 +101,7 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
    if(!h.direct&&spec.digDepth>0){
     const dig=excavation(weapon,false,w.game.gameVersion),dx=Math.abs(impact.x-t.x),bottom=w.game.land.bottom(t.x,t.y+13);
     const reach=dx<dig.radius?dig.depth*Math.sqrt(1-(dx/dig.radius)**2):0;
-    if(dx<dig.radius-18&&impact.y-reach<=t.y+18&&impact.y+reach>=bottom&&bottom<BOTTOM_Y)utility+=45;
+    if(dx<dig.radius-18&&impact.y-reach<=t.y+18&&impact.y+reach>=bottom&&bottom<w.game.worldHeight)utility+=45;
    }
   }else if(h.body.eligible)utility-=h.damage*(t.id===w.shooter.id?3:1.8);
  }
@@ -159,7 +162,7 @@ export function chooseAIPosition(game:Game,tank:Tank,weapons:WeaponId[],targets:
  const stay=existingStay??solveAIShot(game,tank,weapons,targets),danger=game.fires.some(f=>Math.abs(f.x-tank.x)<f.radius&&game.canDamage(tank,f.owner));
  // A solid firing solution needs no gratuitous travel. Fuel, time and movement
  // delay all count, even though AI matches retain their cyclic turn order.
- const potential=Math.max(...weapons.map(id=>{const w=weaponById(id);return weaponDamage(id,game.gameVersion)*launchDamageScale(!!tank.vehicleId,id)*(w.shots??1)*(id==='missile-normal'&&impactPolish(game.gameVersion)?PIERCING_DAMAGE.reduce((n,f)=>n+f,0):1)*(w.effect==='mine'?1/3:1)*(tank.boost?1.5:1)*(tank.vehicleId==='sea'&&tank.hp<tank.maxHP*.5?1.5:1)*(tank.vehicleId==='water'&&game.snow?1.25:1)*Math.max(...targets.map(t=>eraDamageFactor(tank.vehicleId,t.vehicleId).value));}));
+ const potential=Math.max(...weapons.map(id=>{const w=weaponById(id);return weaponDamage(id,game.gameVersion)*launchDamageScale(!!tank.vehicleId,id)*(w.shots??1)*(id==='missile-normal'&&impactPolish(game.gameVersion)?PIERCING_DAMAGE.reduce((n,f)=>n+f,0):1)*(w.effect==='mine'?1/3:1)*(tank.boost?1.5:1)*(tank.vehicleId==='sea'&&tank.hp<tank.maxHP*.5?1.5:1)*(tank.vehicleId==='water'&&game.snow?1.25:1)*Math.max(...targets.map(t=>damageAffinity(id,tank.vehicleId,t.vehicleId,game.gameVersion).value));}));
  if(stay.effective&&stay.utility>=potential*.65&&!danger)return {stay,best:stay};
  let best=stay,bestValue=stay.utility-(danger?160:0);
  for(const position of safeAIPositions(game,tank,targets)){

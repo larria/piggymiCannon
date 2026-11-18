@@ -1,0 +1,386 @@
+{
+  "version": "5.0.0",
+  "rules": {
+    "minimumPower": 1,
+    "projectileOwnCollision": false,
+    "friendlyFireAllowsSelfSplash": true,
+    "restoreFalloff": "impact-distance-v1",
+    "weatherCycle": "full-rounds-v1",
+    "weatherCombinedChance": 0.025,
+    "weatherClearRounds": 5,
+    "eraDamageVersion": "source-projectile-bits-v1",
+    "bodyModel": "source-aabb-v1",
+    "damageReference": "fixed-foot-v1",
+    "battleArtScale": 1.4,
+    "bridgeThickness": 280,
+    "mapLayout": "expanded-platform-spacing-v1",
+    "雾": false,
+    "火线": false,
+    "雪": false,
+    "自伤": false,
+    "友伤": false,
+    "坠落伤害": false,
+    "直接选择暴龙": false
+  },
+  "damage": [
+    {
+      "cause": "direct",
+      "weapon": "cannon-special",
+      "projectile": 1,
+      "impact": 22,
+      "base": 468,
+      "factors": [
+        {
+          "source": "原属性无修正（0x80→0x41）",
+          "value": 1
+        },
+        {
+          "source": "原版防御换算",
+          "value": 0.8695652173913043
+        },
+        {
+          "source": "原版整数结算",
+          "value": 0.9989898989898991
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "威力加强（fireBoosted仅一次）",
+          "value": 1.5
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.8461538461538461
+        }
+      ],
+      "affinity": {
+        "model": "source-projectile-bits-v1",
+        "attackerAttrib": 128,
+        "defenderCharacter": 65,
+        "before": 516,
+        "after": 516,
+        "steps": []
+      },
+      "bullseye": false,
+      "formula": "源距离/威力/防御整数结算 → 高位×8/10 → 加trunc(d/10) → 低位×9/10 → 弹体/地雷修正",
+      "dig": {
+        "radius": 78,
+        "depth": 51,
+        "digBoost": 1,
+        "source": "原版Round；强化不改变挖土"
+      },
+      "origin": {
+        "projectileStart": 1,
+        "launch": {
+          "action": 1,
+          "time": 0.01680000000000007,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "cannon",
+          "hp": 920,
+          "maxHP": 920,
+          "x": 1029.1235389774354,
+          "y": 1125.6914934920699,
+          "vx": -729.7911365456267,
+          "vy": -17.461300622870638,
+          "relative": 25,
+          "absolute": 1.3706222693431798,
+          "power": 100,
+          "wind": 3.7016634785101026,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 810.1175782768629,
+          "y": 1131,
+          "age": 0.3015000000000002
+        },
+        "boost": 1.5,
+        "fireBoosted": true,
+        "weaponBase": 468,
+        "fullDamageArea": {
+          "blastDistance": 0.3839852790830989,
+          "directCore": {
+            "xRadius": 1.5,
+            "yRadius": 1.5,
+            "yCenter": -33
+          },
+          "reference": "head",
+          "model": "source-radial",
+          "coordinates": "axis-aligned-source-grid",
+          "bodyModel": "source-aabb-v1"
+        },
+        "dragon": null
+      },
+      "requested": 516,
+      "actual": 516,
+      "hpBefore": 893,
+      "hpAfter": 377,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "阿狸",
+      "weaponName": "小红豆",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "source-projectile-bits-v1",
+        "bodyModel": "source-aabb-v1",
+        "damageReference": "fixed-foot-v1",
+        "battleArtScale": 1.4,
+        "bridgeThickness": 280,
+        "mapLayout": "expanded-platform-spacing-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": false
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 828,
+        "y": 1164
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    },
+    {
+      "cause": "direct",
+      "weapon": "cannon-special",
+      "projectile": 2,
+      "impact": 31,
+      "base": 468,
+      "factors": [
+        {
+          "source": "原属性无修正（0x80→0x41）",
+          "value": 1
+        },
+        {
+          "source": "原版防御换算",
+          "value": 0.8695652173913043
+        },
+        {
+          "source": "原版整数结算",
+          "value": 0.9989898989898991
+        },
+        {
+          "source": "弹体scale（实际实现）",
+          "value": 1
+        },
+        {
+          "source": "威力加强（fireBoosted仅一次）",
+          "value": 1.5
+        },
+        {
+          "source": "海怪发怒",
+          "value": 1
+        },
+        {
+          "source": "水鬼雪天",
+          "value": 1
+        },
+        {
+          "source": "继承／外部boost修正",
+          "value": 1
+        },
+        {
+          "source": "地雷直击／踩踏系数",
+          "value": 1
+        },
+        {
+          "source": "距离衰减",
+          "value": 0.8461538461538461
+        }
+      ],
+      "affinity": {
+        "model": "source-projectile-bits-v1",
+        "attackerAttrib": 128,
+        "defenderCharacter": 65,
+        "before": 516,
+        "after": 516,
+        "steps": []
+      },
+      "bullseye": false,
+      "formula": "源距离/威力/防御整数结算 → 高位×8/10 → 加trunc(d/10) → 低位×9/10 → 弹体/地雷修正",
+      "dig": {
+        "radius": 78,
+        "depth": 51,
+        "digBoost": 1,
+        "source": "原版Round；强化不改变挖土"
+      },
+      "origin": {
+        "projectileStart": 2,
+        "launch": {
+          "action": 1,
+          "time": 0.01680000000000007,
+          "owner": 0,
+          "name": "咪猪头",
+          "vehicle": "cannon",
+          "hp": 920,
+          "maxHP": 920,
+          "x": 1029.1235389774354,
+          "y": 1125.6914934920699,
+          "vx": -729.7911365456267,
+          "vy": -17.461300622870638,
+          "relative": 25,
+          "absolute": 1.3706222693431798,
+          "power": 100,
+          "wind": 3.7016634785101026,
+          "rngIndex": 10
+        },
+        "impact": {
+          "x": 810.1175782768629,
+          "y": 1131,
+          "age": 0.3015000000000002
+        },
+        "boost": 1.5,
+        "fireBoosted": true,
+        "weaponBase": 468,
+        "fullDamageArea": {
+          "blastDistance": 0.3839852790830989,
+          "directCore": {
+            "xRadius": 1.5,
+            "yRadius": 1.5,
+            "yCenter": -33
+          },
+          "reference": "head",
+          "model": "source-radial",
+          "coordinates": "axis-aligned-source-grid",
+          "bodyModel": "source-aabb-v1"
+        },
+        "dragon": null
+      },
+      "requested": 516,
+      "actual": 377,
+      "hpBefore": 377,
+      "hpAfter": 0,
+      "shieldBefore": 0,
+      "shieldAfter": 0,
+      "absorbed": 0,
+      "ignoreShield": false,
+      "owner": 0,
+      "target": 1,
+      "sourceName": "咪猪头",
+      "targetName": "阿狸",
+      "weaponName": "小红豆",
+      "relation": "enemy",
+      "rules": {
+        "minimumPower": 1,
+        "projectileOwnCollision": false,
+        "friendlyFireAllowsSelfSplash": true,
+        "restoreFalloff": "impact-distance-v1",
+        "weatherCycle": "full-rounds-v1",
+        "weatherCombinedChance": 0.025,
+        "weatherClearRounds": 5,
+        "eraDamageVersion": "source-projectile-bits-v1",
+        "bodyModel": "source-aabb-v1",
+        "damageReference": "fixed-foot-v1",
+        "battleArtScale": 1.4,
+        "bridgeThickness": 280,
+        "mapLayout": "expanded-platform-spacing-v1",
+        "雾": false,
+        "火线": false,
+        "雪": false,
+        "自伤": false,
+        "友伤": false,
+        "坠落伤害": false,
+        "直接选择暴龙": false
+      },
+      "reaction": "direct",
+      "highDamage": false,
+      "position": {
+        "x": 828,
+        "y": 1164
+      },
+      "stateBefore": {
+        "poisoned": false,
+        "frozen": 0,
+        "immobile": 0,
+        "rage": false
+      }
+    }
+  ],
+  "impacts": [
+    {
+      "projectile": 1,
+      "owner": 0,
+      "weapon": "cannon-special",
+      "directTarget": 1,
+      "x": 810.1175782768629,
+      "y": 1131,
+      "age": 0.3015000000000002,
+      "boost": 1.5,
+      "scale": 1,
+      "fireBoosted": true,
+      "sources": {
+        "fire": "item",
+        "rage": 1,
+        "snow": 1
+      },
+      "bullseye": false,
+      "bodyContact": true
+    },
+    {
+      "projectile": 2,
+      "owner": 0,
+      "weapon": "cannon-special",
+      "directTarget": 1,
+      "x": 810.1175782768629,
+      "y": 1131,
+      "age": 0.3015000000000002,
+      "boost": 1.5,
+      "scale": 1,
+      "fireBoosted": true,
+      "sources": {
+        "fire": "item",
+        "rage": 1,
+        "snow": 1
+      },
+      "bullseye": false,
+      "bodyContact": true
+    }
+  ],
+  "bodyRects": [
+    {
+      "x": 1082.691920000002,
+      "y": 1033,
+      "id": 0
+    }
+  ],
+  "hp": 0,
+  "backend": "pixi"
+}

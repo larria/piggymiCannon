@@ -1,7 +1,9 @@
 import {originalBallistics,SOURCE_BODY_HEIGHT,SOURCE_BODY_WIDTH} from './original-ballistics';
 import type {Tank} from './engine';
-/** Body-local collision envelope; the new broad Dad/fox/fish heads are included. */
+import {referenceCalibration} from './reference-calibration';
+/** New rules use the source AABB; old recordings keep their OBB/art envelopes. */
 export function pointHitsTank(t:Tank,x:number,y:number,slope:number,version='4.0.4'){
+  if(referenceCalibration(version))return Math.abs(x-t.x)<=SOURCE_BODY_WIDTH/2+1e-7&&y>=t.y+18-SOURCE_BODY_HEIGHT-1e-7&&y<=t.y+18+1e-7;
   const dx=x-t.x,dy=y-t.y,c=Math.cos(slope),s=Math.sin(slope);
   const localX=(dx*c+dy*s)*t.direction,localY=-dx*s+dy*c;
   if(originalBallistics(version))return Math.abs(localX)<=SOURCE_BODY_WIDTH/2+1e-7&&localY>=18-SOURCE_BODY_HEIGHT-1e-7&&localY<=18+1e-7;
@@ -11,7 +13,8 @@ export function pointHitsTank(t:Tank,x:number,y:number,slope:number,version='4.0
 }
 
 /** Slab intersection in body-local coordinates; returns the first real contact. */
-export function tankSegmentContact(t:Tank,x:number,y:number,toX:number,toY:number,slope:number){
+export function tankSegmentContact(t:Tank,x:number,y:number,toX:number,toY:number,slope:number,version='4.0.5'){
+ if(referenceCalibration(version))slope=0;
  const c=Math.cos(slope),s=Math.sin(slope),px=(x-t.x)*c+(y-t.y)*s,py=-(x-t.x)*s+(y-t.y)*c,dx=(toX-x)*c+(toY-y)*s,dy=-(toX-x)*s+(toY-y)*c;
  let lo=0,hi=1;for(const [pos,delta,min,max] of [[px,dx,-30,30],[py,dy,18-SOURCE_BODY_HEIGHT,18]]){if(Math.abs(delta)<1e-12){if(pos<min||pos>max)return null;}else{const a=(min-pos)/delta,b=(max-pos)/delta;lo=Math.max(lo,Math.min(a,b));hi=Math.min(hi,Math.max(a,b));if(lo>hi)return null;}}
  return {x:x+(toX-x)*lo,y:y+(toY-y)*lo,fraction:lo};

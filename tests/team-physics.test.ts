@@ -1,7 +1,7 @@
 import {Game} from './legacy-fixture';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {MAX_CLIMB_ANGLE,WATER_Y} from '../src/engine';import {Terrain} from '../src/terrain';
-import {aimGeometry} from '../src/aim';import {defaultSlots} from '../src/crew';const defaultSeats=(f:any='1v1',m:any='ai')=>new Game({formation:f,mode:m}).config.slots.filter(s=>s.enabled);import {validChoice,resolveVehicle,VEHICLES} from '../src/vehicles';
+import {aimGeometry} from '../src/aim';import {tankArtScale} from '../src/reference-calibration';import {defaultSlots} from '../src/crew';const defaultSeats=(f:any='1v1',m:any='ai')=>new Game({formation:f,mode:m}).config.slots.filter(s=>s.enabled);import {validChoice,resolveVehicle,VEHICLES} from '../src/vehicles';
 const ready=(c:any={},version='development')=>{const g=new Game({seed:52,timer:0,fog:false,fireLine:false,vehicle0:'bowl',vehicle1:'cannon',...c},version);g.start();return g;};
 const flat=(c:any={},version='development')=>{const g=ready(c,version);g.land=new Terrain();g.terrain=g.land.surface;for(let x=0;x<=1280;x++)g.land.column(x,450,640);g.land.rebuild();g.tanks.forEach((t,i)=>{t.x=150+i*275;t.y=432;});g.wind=0;return g;};
 const run=(g:Game,n:number)=>{for(let i=0;i<n*120;i++)g.update(1/120);};
@@ -20,7 +20,7 @@ test('muzzle and launch use the same rotated axis, with relative min/max shiftin
  const g=flat(),t=g.active;t.x=300;
  for(const grade of [-.7,.7,0]){
   g.land=new Terrain();for(let x=0;x<=1280;x++)g.land.column(x,450+(x-300)*grade,640);g.land.rebuild();t.y=g.ground(t.x)-18;
-  for(const d of [-1,1])for(const angle of [t.minAngle,t.maxAngle,40]){t.direction=d;const a=g.aim(t,angle),s=g.tankSlope(t),m=g.muzzle(t,angle),p=g.launch(t,'bowl-normal',angle);near(m.x-t.x-Math.sin(s)*13,a.x*31);near(m.y-t.y+Math.cos(s)*13,a.y*31);near(p.vx/Math.hypot(p.vx,p.vy),a.x);near(p.vy/Math.hypot(p.vx,p.vy),a.y);}
+  for(const d of [-1,1])for(const angle of [t.minAngle,t.maxAngle,40]){t.direction=d;const a=g.aim(t,angle),s=g.tankSlope(t),m=g.muzzle(t,angle),p=g.launch(t,'bowl-normal',angle);const scale=tankArtScale(g.gameVersion),mount=31*scale-18;near(m.x-t.x-Math.sin(s)*mount,a.x*31*scale);near(m.y-t.y+Math.cos(s)*mount,a.y*31*scale);near(p.vx/Math.hypot(p.vx,p.vy),a.x);near(p.vy/Math.hypot(p.vx,p.vy),a.y);}
  }
  t.direction=1;const before=g.aim(t).absolute;g.crater(t.x+24,450,18,15);assert.notEqual(g.aim(t).absolute,before);
 });
@@ -29,7 +29,8 @@ test('AI solver on a slope searches relative angles and can hit, while each AI k
  g.current=1;const t=g.active;t.x=330;g.tanks[0].x=650;g.tanks[2].x=100;g.tanks[3].x=1050;
  g.land=new Terrain();for(let x=0;x<=1280;x++)g.land.column(x,x<400?450+(x-330)*.35:450,640);g.land.rebuild();g.tanks.forEach(t=>t.y=g.ground(t.x)-18);
  // Seeded repeated plans include hits but do not demand a perfect highest difficulty.
- t.difficulty='expert';let best=Infinity;for(let i=0;i<20;i++){g.planAI();const p=g.predict();best=Math.min(best,Math.hypot(p.x-g.enemy.x,p.y-g.enemy.y));assert.ok(t.angle>=t.minAngle&&t.angle<=t.maxAngle);}assert.ok(best<45,`closest ${best}`);
+ t.difficulty='expert';let best=Infinity;for(let i=0;i<20;i++){g.planAI();const p=g.predict();best=Math.min(best,...g.opponents(t).map(e=>Math.hypot(p.x-e.x,p.y-e.y))); // Utility may choose a valid foe other than the nearest-only enemy getter.
+assert.ok(t.angle>=t.minAngle&&t.angle<=t.maxAngle);}assert.ok(best<45,`closest ${best}`);
  assert.deepEqual(g.tanks.map(t=>t.difficulty),['easy','expert','hard','expert']);
 });
 test('all formations deploy distinct safe actors and solo allies/opponents have independent controls',()=>{

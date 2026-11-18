@@ -1,0 +1,110 @@
+[
+  {
+    "file": "bgm-lobby.mp3",
+    "mode": "cbr96",
+    "bytes": 1266146,
+    "original128Bytes": 1688180,
+    "saving": 0.24999348410714495,
+    "averageKbps": 96.06405291927167,
+    "snrDb": 19.453554491910307,
+    "sourceSeconds": 105.441814,
+    "runtimeSeconds": 105.441814,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-lobby.mp3",
+    "mode": "vbr5",
+    "bytes": 1777608,
+    "original128Bytes": 1688180,
+    "saving": -0.05297302420358019,
+    "averageKbps": 134.86930336763746,
+    "snrDb": 22.0644829796641,
+    "sourceSeconds": 105.441814,
+    "runtimeSeconds": 105.441814,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-lobby.mp3",
+    "mode": "vbr6",
+    "bytes": 1580905,
+    "original128Bytes": 1688180,
+    "saving": 0.06354476418391408,
+    "averageKbps": 119.94520503981467,
+    "snrDb": 20.175903433138537,
+    "sourceSeconds": 105.441814,
+    "runtimeSeconds": 105.441814,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-stage-00009.mp3",
+    "mode": "cbr96",
+    "bytes": 3827505,
+    "original128Bytes": 5103324,
+    "saving": 0.24999764859138862,
+    "averageKbps": 96.01682558773689,
+    "snrDb": 20.858662387021226,
+    "sourceSeconds": 318.902857,
+    "runtimeSeconds": 318.902857,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-stage-00009.mp3",
+    "mode": "vbr5",
+    "bytes": 5131399,
+    "original128Bytes": 5103324,
+    "saving": -0.005501316396920863,
+    "averageKbps": 128.72632244871988,
+    "snrDb": 23.5952362043082,
+    "sourceSeconds": 318.902857,
+    "runtimeSeconds": 318.902857,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-stage-00009.mp3",
+    "mode": "vbr6",
+    "bytes": 4477389,
+    "original128Bytes": 5103324,
+    "saving": 0.12265241242766478,
+    "averageKbps": 112.31982158127859,
+    "snrDb": 21.463276390768996,
+    "sourceSeconds": 318.902857,
+    "runtimeSeconds": 318.902857,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-stage-00012.mp3",
+    "mode": "cbr96",
+    "bytes": 4294888,
+    "original128Bytes": 5726501,
+    "saving": 0.24999786082286546,
+    "averageKbps": 96.01733382750575,
+    "snrDb": 22.874366943371335,
+    "sourceSeconds": 357.842721,
+    "runtimeSeconds": 357.842721,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-stage-00012.mp3",
+    "mode": "vbr5",
+    "bytes": 6345689,
+    "original128Bytes": 5726501,
+    "saving": -0.10812676012804334,
+    "averageKbps": 141.86543143349283,
+    "snrDb": 27.17389939596343,
+    "sourceSeconds": 357.842721,
+    "runtimeSeconds": 357.842721,
+    "sampleDifference": 0
+  },
+  {
+    "file": "bgm-stage-00012.mp3",
+    "mode": "vbr6",
+    "bytes": 5553381,
+    "original128Bytes": 5726501,
+    "saving": 0.03023137514513663,
+    "averageKbps": 124.1524429387513,
+    "snrDb": 24.829171170115075,
+    "sourceSeconds": 357.842721,
+    "runtimeSeconds": 357.842721,
+    "sampleDifference": 0
+  }
+]

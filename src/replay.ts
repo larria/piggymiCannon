@@ -1,5 +1,5 @@
 import {CREW} from './crew';
-import {WORLD_W,TERRAIN_H} from './terrain';
+import {recordedWorld} from './world-layout';
 import {ALL_WEAPONS,ITEMS,MAPS,DIFFICULTIES} from './catalog';
 import {VEHICLES} from './vehicles';
 import {Game} from './engine';
@@ -143,7 +143,7 @@ export function parseReplayFile(text:string,currentVersion:string):BattleReplay{
  if(snap.formatVersion!==1||snap.gameVersion!==value.gameVersion||!state||!config||!MAPS.some(m=>m.id===config.map)||!integer(config.seed)||config.seed>0xffffffff||!Array.isArray(config.slots)||config.slots.length!==4||!Array.isArray(snap.initial.slots)||snap.initial.slots.length!==4||typeof snap.initial.mapName!=='string')throw Error('录像开局信息损坏。');
  if(snap.rng?.algorithm!=='mulberry32'||!integer(snap.rng.index)||snap.rng.index>100_000_000||!integer(snap.rng.seed)||!integer(snap.rng.state)||snap.rng.state>0xffffffff||!Array.isArray(snap.events)||snap.events.length>1000||!Array.isArray(snap.critical)||snap.critical.length>64||!integer(snap.truncation?.dropped))throw Error('录像随机状态或日志损坏。');
  if(state.config?.map!==config.map||state.config?.seed!==config.seed||!Array.isArray(state.config?.slots)||state.config.slots.length!==4)throw Error('录像配置与开局不一致。');
- const length=(WORLD_W+1)*TERRAIN_H;
+ const size=recordedWorld(snap.initial.world,snap.gameVersion),length=(size.width+1)*size.height;
  for(const packed of [state.terrain?.mask,state.terrain?.protectedMask]){
   if(packed?.length!==length)throw Error('录像地形尺寸不匹配。');
   if(packed.encoding==='rle'){if(!Array.isArray(packed.data)||packed.data.length>10002||![0,1].includes(packed.data[0])||packed.data.slice(1).some((n:any)=>!integer(n)||n===0)||packed.data.slice(1).reduce((a:number,b:number)=>a+b,0)!==length)throw Error('录像地形游程损坏。');}

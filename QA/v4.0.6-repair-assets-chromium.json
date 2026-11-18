@@ -1,0 +1,53 @@
+{
+  "report": {
+    "formatVersion": 1,
+    "gameVersion": "4.0.6",
+    "total": 150,
+    "checked": 150,
+    "healthy": 145,
+    "repaired": 5,
+    "restored": [
+      "assets/canvasUtils-D0-2LgUk.js",
+      "audio/bgm-stage-00002.mp3",
+      "audio/sfx-fire-missile-normal.mp3",
+      "effects/ft2-water.png",
+      "fonts/manrope-bold.ttf"
+    ],
+    "failed": []
+  },
+  "verified": [
+    {
+      "url": "audio/bgm-stage-00002.mp3",
+      "valid": true
+    },
+    {
+      "url": "audio/sfx-fire-missile-normal.mp3",
+      "valid": true
+    },
+    {
+      "url": "effects/ft2-water.png",
+      "valid": true
+    },
+    {
+      "url": "fonts/manrope-bold.ttf",
+      "valid": true
+    },
+    {
+      "url": "portraits/dad.png",
+      "valid": true
+    },
+    {
+      "url": "portraits/mimi.png",
+      "valid": true
+    },
+    {
+      "url": "assets/canvasUtils-D0-2LgUk.js",
+      "valid": true
+    }
+  ],
+  "repairSeconds": 0.5764000000059605,
+  "battleUnchanged": true,
+  "rngUnchanged": true,
+  "storageUnchanged": true,
+  "noReload": true
+}

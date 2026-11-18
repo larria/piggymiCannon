@@ -1,6 +1,6 @@
 import {originalBallistics} from './original-ballistics';
 import {restoreRadius} from './item-combos';
-import type {Game,Tank} from './engine';import {SHOT_WIND_GAIN,WORLD_W,WORLD_H} from './engine';import {pointHitsTank} from './tank-hitbox';import {impactDamageScale} from './impact-damage';
+import type {Game,Tank} from './engine';import {SHOT_WIND_GAIN} from './engine';import {pointHitsTank} from './tank-hitbox';import {impactDamageScale} from './impact-damage';
 export interface RestorePlan {target:number;angle:number;power:number;direction:number;x:number;y:number;gain:number;score:number;self:boolean}
 /** Read-only healing flight: same launch, wind, collision grace, fire line and falloff. */
 type RestoreBody={tank:Tank;slope:number};
@@ -11,7 +11,7 @@ function evaluate(g:Game,t:Tank,target:Tank,angle:number,power:number,direction:
  for(let i=0;i<8/dt;i++){
   const oldX=p.x,oldY=p.y;p.age+=dt;p.vx+=g.wind*SHOT_WIND_GAIN*dt;p.vy+=g.gravity*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
   if(g.fireLine&&!boosted&&(oldX-g.fireLine.x)*(p.x-g.fireLine.x)<=0&&p.y>=g.fireLine.top&&p.y<=g.fireLine.bottom)boosted=true;
-  if(p.x< -50||p.x>WORLD_W+50||p.y>WORLD_H+70)return null;
+  if(p.x< -50||p.x>g.worldWidth+50||p.y>g.worldHeight+70)return null;
   if(modernGeometry){const c=g.firstImpact(p,oldX,oldY,p.x,p.y,bodies);if(c){p.x=c.x;p.y=c.y;hit=c.tank?.id;landed=true;break;}}
   else if(p.age>=.09)hit=bodies.find(b=>g.projectileCollisionAllowed(b.tank,t.id)&&g.canRestore(b.tank,t.id)&&Math.abs(b.tank.x-p.x)<50&&Math.abs(b.tank.y-p.y)<62&&pointHitsTank(b.tank,p.x,p.y,b.slope,g.gameVersion))?.tank.id;
   if(g.land.solid(p.x,p.y)||hit!==undefined){if(hit===undefined&&p.vx===0)p.y=g.ground(p.x,oldY);landed=true;break;}

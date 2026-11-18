@@ -1,0 +1,32 @@
+{
+  "formatVersion": 2,
+  "decodeSampleRate": 44100,
+  "comparisonSampleRate": 16000,
+  "files": [
+    {
+      "file": "bgm-moon.mp3",
+      "decodedSamples": 17399808,
+      "peak": 0.5754826068878174,
+      "rms": 0.07774805953842162,
+      "clippedSamples": 0,
+      "sourceDecodedFrames": 8699904,
+      "runtimeDecodedFrames": 8699904,
+      "durationDifferenceSeconds": 0.0,
+      "snrDb": 22.36246213168741,
+      "tailSnrDb": 22.456075519509287,
+      "loopBoundaryJump": 1.2537999372725598e-14,
+      "headRms20ms": 2.7787412804794288e-11,
+      "tailRms20ms": 7.678372215952765e-07
+    }
+  ],
+  "allDecodable": true,
+  "selection": [
+    "bgm-moon.mp3"
+  ],
+  "allSelectedBgmComplete": true,
+  "allNineBgmComplete": false,
+  "clippedSamples": 0,
+  "minimumBgmSnrDb": 22.36246213168741,
+  "maximumLoopBoundaryJump": 1.2537999372725598e-14,
+  "notes": "客观检查不等同于主观听感评测；音乐与完整原件解码样本数及全曲／末5秒对照，未截取；相同响度／极短淡化，检查编码误差、解码、削波和循环边缘。"
+}

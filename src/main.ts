@@ -14,8 +14,8 @@ import {retryBattleSprites} from './battle-sprites';
 import './style.css';
 import {ImpactProfiler} from './impact-profiler';
 import {snapshotText} from './battle-trace';
-import { Game, WORLD_W, clamp, type Config } from './engine';
-import {TERRAIN_H} from './terrain';
+import {legacyMapBgmFile} from './map-music';
+import { Game, clamp, type Config } from './engine';
 import { Renderer } from './renderer';
 import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,portraitDiagnostics} from './crew-portraits';
 import { AudioManager } from './audio';
@@ -165,7 +165,7 @@ const dashboard=new DashboardView($('#angle-dial'),$('#minimap'));
 function paintMapChoices(){
   document.querySelectorAll<HTMLCanvasElement>('canvas[data-map-preview]').forEach(canvas=>{
     const map=canvas.dataset.mapPreview as Config['map'];canvas.width=160;canvas.height=64;
-    const sample=new Game({map,seed:52,timer:0,fog:false,fireLine:false});paintMapOverview(canvas.getContext('2d')!,sample,160,64);
+    const sample=new Game({map,seed:52,timer:0,fog:false,fireLine:false},APP_VERSION);paintMapOverview(canvas.getContext('2d')!,sample,160,64);
   });
 }
 
@@ -363,7 +363,7 @@ function begin() {
   audio.unlock();audio.pause(false);game.start();recorder?.detach();recorder=new ReplayRecorder(game);const openingGame=game;
   const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');
   game.setIntroLocked(true);renderer.startTour(()=>{if(game===openingGame){game.setIntroLocked(false);renderer.follow();lastPhase='';updateUI();if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}});
-  playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));
+  playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map,game.matchBgm?.file??legacyMapBgmFile(game.config.map,game.gameVersion));void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));
   if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();
 }
 function newMatch(next:Config,start=true) {
@@ -618,7 +618,7 @@ bindMove('#move-left',-1);bindMove('#move-right',1);
 function aimOnField(e:Pick<PointerEvent,'clientX'|'clientY'>) {
   if(!canControlBattle()) return;
   const rect=$('#battlefield').getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y=(e.clientY-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY;
-  if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,WORLD_W-20);
+  if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,game.worldWidth-20);
   else {
     const t=game.active,slope=game.tankSlope(t),dx=x-t.x-Math.sin(slope)*13,dy=y-t.y+Math.cos(slope)*13;
     const aim=relativeAimForVector(dx,dy,slope,t.direction);game.face(aim.direction);game.setAim(aim.relative,t.power);
@@ -640,7 +640,7 @@ installMapGestures(battlefield,{
   hold:()=>{if(fieldPortrait!==null&&game.tanks[fieldPortrait]){focusPlayer(fieldPortrait);showDialog(`portrait:${fieldPortrait}`);}}
 });
 const mini=$<HTMLCanvasElement>('#minimap');
-const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*WORLD_W,(p.y-rect.top)/rect.height*TERRAIN_H);};
+const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*game.worldWidth,(p.y-rect.top)/rect.height*game.worldHeight);};
 installMapGestures(mini,{start:()=>{},pan:()=>{},tap:locateMini,hold:()=>{},locate:locateMini});
 let portraitTimer=0,portraitPointer=-1,portraitStart={x:0,y:0},suppressPortraitClick=false;
 document.addEventListener('pointerdown',e=>{const button=(e.target as HTMLElement).closest<HTMLElement>('[data-portrait]');if(!button)return;clearTimeout(portraitTimer);portraitPointer=e.pointerId;portraitStart={x:e.clientX,y:e.clientY};suppressPortraitClick=false;const id=Number(button.dataset.portrait);portraitTimer=window.setTimeout(()=>{suppressPortraitClick=true;if(game.tanks[id]){focusPlayer(id);showDialog(`portrait:${id}`);}},600);},true);
@@ -714,7 +714,7 @@ function frame(now:number) {
   const edge=edgePan.tick(dt);if(edge.x||edge.y)renderer.panBy(edge.x,edge.y);
   if(impactProfiler)impactProfiler.measure('scene',()=>renderer.draw(playback?.paused?0:dt*(playback?.speed??1)));else renderer.draw(playback?.paused?0:dt*(playback?.speed??1));dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight,renderer.offsetX,renderer.viewWidth);
   const moving=game.movingUntil.findIndex(until=>until>game.elapsed);
-  audio.setScene(game.phase==='lobby'?'lobby':game.phase==='ended'?'result':game.config.map);
+  audio.setScene(game.phase==='lobby'?'lobby':game.phase==='ended'?'result':game.config.map,game.phase==='lobby'||game.phase==='ended'?undefined:game.matchBgm?.file??legacyMapBgmFile(game.config.map,game.gameVersion));
   audio.updateMovement(moving>=0&&game.phase==='aiming'&&!game.paused&&!playback?.paused,game.tanks[Math.max(0,moving)].x,game.tanks[game.viewer].x,game.tanks[Math.max(0,moving)].vehicleId,game.active.fuel<=0);
   const tracking=game.projectiles.find(p=>p.homing);audio.updateTracking(Boolean(tracking)&&!game.paused&&game.phase==='flying',tracking?.weapon,tracking?.x??0,game.tanks[game.viewer].x);
   if(charge&&(!canControlBattle()||charge.tank!==game.current)) cancelCharge();

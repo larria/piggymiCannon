@@ -1,15 +1,23 @@
 {
-  "formatVersion": 2,
-  "source": "用户本机 ft2逆向/resources/sound 提取素材；仅用于本项目，未宣称官方授权",
+  "formatVersion": 3,
+  "source": "本机 ft2 目录/原版分析；来源素材仅用于本项目，未宣称官方授权",
   "mapping": "本作13载具分配Fire/Bomb组；1/2分配普通/特殊。经典地图选曲来自原客户端MapUtil有效列表，本作择一；原创峡谷自行选曲，不使用复刻web规则。",
   "mapBgmSelection": {
     "valley": {
       "mapNumber": null,
-      "bgmNumber": 0,
-      "source": "Stage00000.mp3",
-      "seconds": 207.029116,
-      "basis": "本作原创地图选曲，无原版地图编号",
-      "durationMode": "full"
+      "bgmNumber": 2,
+      "source": "Stage00002.mp3",
+      "seconds": 333.02059,
+      "basis": "Original valley uses the verified fairyland music rule only; not an original map-number claim.",
+      "durationMode": "full",
+      "candidates": [
+        2,
+        4,
+        10,
+        12
+      ],
+      "selection": "uniform-distinct",
+      "musicRuleMapNumber": 6
     },
     "coast": {
       "mapNumber": 8,
@@ -17,15 +25,41 @@
       "source": "Stage00004.mp3",
       "seconds": 141.688163,
       "basis": "原客户端有效列表9/4/14，本作选其中4",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        9,
+        4,
+        14
+      ],
+      "selection": "uniform-distinct"
     },
     "moon": {
+      "mapNumber": 16,
+      "bgmNumber": 8,
+      "source": "Stage00008.mp3",
+      "seconds": 197.276735,
+      "basis": "用户更正地图为冰封溪谷；原客户端有效列表8/9/12，本作取首项8",
+      "durationMode": "full",
+      "candidates": [
+        8,
+        9,
+        12
+      ],
+      "selection": "uniform-distinct"
+    },
+    "sky": {
       "mapNumber": 7,
       "bgmNumber": 9,
       "source": "Stage00009.mp3",
       "seconds": 318.902857,
-      "basis": "原客户端有效列表4/8/9，本作选其中9",
-      "durationMode": "full"
+      "basis": "天空之城独立新增；原客户端有效列表4/8/9，本作选其中9",
+      "durationMode": "full",
+      "candidates": [
+        4,
+        8,
+        9
+      ],
+      "selection": "uniform-distinct"
     },
     "factory": {
       "mapNumber": 4,
@@ -33,7 +67,13 @@
       "source": "Stage00005.mp3",
       "seconds": 295.427483,
       "basis": "原客户端有效列表5/11/21，本作取首项5",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        5,
+        11,
+        21
+      ],
+      "selection": "uniform-distinct"
     },
     "temple": {
       "mapNumber": 10,
@@ -41,7 +81,12 @@
       "source": "Stage00010.mp3",
       "seconds": 190.775147,
       "basis": "原客户端有效列表10/0/0/0，本作取首项10；0也是实际曲目",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        10,
+        0
+      ],
+      "selection": "uniform-distinct"
     },
     "egypt": {
       "mapNumber": 9,
@@ -49,7 +94,118 @@
       "source": "Stage00015.mp3",
       "seconds": 119.141587,
       "basis": "原客户端有效列表15/22，本作取首项15",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        15,
+        22
+      ],
+      "selection": "uniform-distinct"
+    }
+  },
+  "mapBgmTracks": {
+    "0": {
+      "number": 0,
+      "runtime": "bgm-stage-00000.mp3",
+      "source": "Stage00000.mp3",
+      "seconds": 207.029116,
+      "durationMode": "full",
+      "name": "Milyang Fortress"
+    },
+    "2": {
+      "number": 2,
+      "runtime": "bgm-stage-00002.mp3",
+      "source": "Stage00002.mp3",
+      "seconds": 333.02059,
+      "durationMode": "full",
+      "name": "The Profound"
+    },
+    "4": {
+      "number": 4,
+      "runtime": "bgm-stage-00004.mp3",
+      "source": "Stage00004.mp3",
+      "seconds": 141.688163,
+      "durationMode": "full",
+      "name": "Once in a Lifetime"
+    },
+    "5": {
+      "number": 5,
+      "runtime": "bgm-stage-00005.mp3",
+      "source": "Stage00005.mp3",
+      "seconds": 295.427483,
+      "durationMode": "full",
+      "name": "The Invincible"
+    },
+    "8": {
+      "number": 8,
+      "runtime": "bgm-stage-00008.mp3",
+      "source": "Stage00008.mp3",
+      "seconds": 197.276735,
+      "durationMode": "full",
+      "name": "There's Something about Supertank"
+    },
+    "9": {
+      "number": 9,
+      "runtime": "bgm-stage-00009.mp3",
+      "source": "Stage00009.mp3",
+      "seconds": 318.902857,
+      "durationMode": "full",
+      "name": "Be Higher"
+    },
+    "10": {
+      "number": 10,
+      "runtime": "bgm-stage-00010.mp3",
+      "source": "Stage00010.mp3",
+      "seconds": 190.775147,
+      "durationMode": "full",
+      "name": "Tank Slayer"
+    },
+    "11": {
+      "number": 11,
+      "runtime": "bgm-stage-00011.mp3",
+      "source": "Stage00011.mp3",
+      "seconds": 294.684444,
+      "durationMode": "full",
+      "name": "Welcome to Skull's Hell"
+    },
+    "12": {
+      "number": 12,
+      "runtime": "bgm-stage-00012.mp3",
+      "source": "Stage00012.mp3",
+      "seconds": 357.842721,
+      "durationMode": "full",
+      "name": "Life is so Beautiful"
+    },
+    "14": {
+      "number": 14,
+      "runtime": "bgm-stage-00014.mp3",
+      "source": "Stage00014.mp3",
+      "seconds": 320.017415,
+      "durationMode": "full",
+      "name": "Fortress Gump"
+    },
+    "15": {
+      "number": 15,
+      "runtime": "bgm-stage-00015.mp3",
+      "source": "Stage00015.mp3",
+      "seconds": 119.141587,
+      "durationMode": "full",
+      "name": "Egyptian Rule"
+    },
+    "21": {
+      "number": 21,
+      "runtime": "bgm-stage-00021.mp3",
+      "source": "stage00021.mp3",
+      "seconds": 90.0766,
+      "durationMode": "full",
+      "name": "stage00021"
+    },
+    "22": {
+      "number": 22,
+      "runtime": "bgm-stage-00022.mp3",
+      "source": "stage00022.mp3",
+      "seconds": 130.774785,
+      "durationMode": "full",
+      "name": "Egyptian Rule2"
     }
   },
   "mapBgmEvidence": "FT2_MAP_BGM_EVIDENCE.json",
@@ -69,10 +225,10 @@
     "stripMetadata": true
   },
   "sourceOriginalBytes": 261293324,
-  "selectedOriginalBytes": 84326125,
+  "selectedOriginalBytes": 148348622,
   "musicBitrate": 128000,
   "effectBitrate": 64000,
-  "totalBytes": 30556588,
+  "totalBytes": 58142609,
   "files": [
     {
       "runtime": "bgm-lobby.mp3",
@@ -156,7 +312,7 @@
       "runtimeSHA256": "f93a03f6bbf79e06e487dce43c74ecb06728e4472478b327cebc46b31f4e56db"
     },
     {
-      "runtime": "bgm-valley.mp3",
+      "runtime": "bgm-stage-00000.mp3",
       "source": "assets/ft2-audio/bgm/Stage00000.mp3",
       "sourceBytes": 8284097,
       "sourceSHA256": "8faa84f352c870887cdc1dea43688f7fa252580d4ad9b22e35d417cd12939ca5",
@@ -183,7 +339,34 @@
       "runtimeSHA256": "00c2acb3bac73766a8eddae905ecf498cdc9a71506127b91efc3a202a64caf44"
     },
     {
-      "runtime": "bgm-coast.mp3",
+      "runtime": "bgm-stage-00002.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00002.mp3",
+      "sourceBytes": 13323640,
+      "sourceSHA256": "89e2a2c836642e399488e7179b6279bd95bf19a2f58e9245f1e1cf99c0810337",
+      "durationMode": "full",
+      "sourceSeconds": 333.02059,
+      "seconds": 333.02059,
+      "runtimeSeconds": 333.02059,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=332.67059:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 5329440,
+      "runtimeSHA256": "d162110cd0092fb08b38fd35613330e5ae6fe281f850cec4dc5c92faacc7b312"
+    },
+    {
+      "runtime": "bgm-stage-00004.mp3",
       "source": "assets/ft2-audio/bgm/Stage00004.mp3",
       "sourceBytes": 5669762,
       "sourceSHA256": "abf8c4b3ebc081d953dc3881fc9d5a40628de8459b675c8bcec42d20f4de1516",
@@ -210,34 +393,7 @@
       "runtimeSHA256": "b3f8969508324c7a105b8742c3afc5514a1cae116297b5c16eff04ca6949b628"
     },
     {
-      "runtime": "bgm-moon.mp3",
-      "source": "assets/ft2-audio/bgm/Stage00009.mp3",
-      "sourceBytes": 12758350,
-      "sourceSHA256": "9e0671936bff8a5322d18dbb2ad6a217465ea979a684a291cd0d6d1c54f2d949",
-      "durationMode": "full",
-      "sourceSeconds": 318.902857,
-      "seconds": 318.902857,
-      "runtimeSeconds": 318.902857,
-      "encodingArguments": [
-        "-vn",
-        "-map_metadata",
-        "-1",
-        "-af",
-        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=318.55285699999996:d=0.35",
-        "-ac",
-        "2",
-        "-ar",
-        "44100",
-        "-codec:a",
-        "libmp3lame",
-        "-b:a",
-        "128k"
-      ],
-      "bytes": 5103324,
-      "runtimeSHA256": "b8eb26344f92dec9a49b6b7673bc08786bb9493cb5e72070344fe141236ed3c6"
-    },
-    {
-      "runtime": "bgm-factory.mp3",
+      "runtime": "bgm-stage-00005.mp3",
       "source": "assets/ft2-audio/bgm/Stage00005.mp3",
       "sourceBytes": 11820031,
       "sourceSHA256": "79436b87a9ad6af85a1aa8788c10dca758dd6dc857f712834fc3a8590d448e01",
@@ -264,7 +420,61 @@
       "runtimeSHA256": "af5fe96392b480586b552dc9e530261cfed9105d8c947e15eef8286de5e8eb76"
     },
     {
-      "runtime": "bgm-temple.mp3",
+      "runtime": "bgm-stage-00008.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00008.mp3",
+      "sourceBytes": 7893305,
+      "sourceSHA256": "f30e44246163a5e836e591ec46916070fab5e19eb4c011457b6317c3b1f6389c",
+      "durationMode": "full",
+      "sourceSeconds": 197.276735,
+      "seconds": 197.276735,
+      "runtimeSeconds": 197.276735,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=196.926735:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 3157306,
+      "runtimeSHA256": "14841d08be33ec287e11c305d5c7cdabeab4d6139fef9c349ff338a26495ac01"
+    },
+    {
+      "runtime": "bgm-stage-00009.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00009.mp3",
+      "sourceBytes": 12758350,
+      "sourceSHA256": "9e0671936bff8a5322d18dbb2ad6a217465ea979a684a291cd0d6d1c54f2d949",
+      "durationMode": "full",
+      "sourceSeconds": 318.902857,
+      "seconds": 318.902857,
+      "runtimeSeconds": 318.902857,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=318.55285699999996:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 5103324,
+      "runtimeSHA256": "b8eb26344f92dec9a49b6b7673bc08786bb9493cb5e72070344fe141236ed3c6"
+    },
+    {
+      "runtime": "bgm-stage-00010.mp3",
       "source": "assets/ft2-audio/bgm/Stage00010.mp3",
       "sourceBytes": 7634170,
       "sourceSHA256": "7a6864c8f86d6d7257ab758471c85b3081c1f1dbb923906238a84685bc7f711b",
@@ -291,7 +501,88 @@
       "runtimeSHA256": "95d3d73f8a40c088092d4821bba05ca8010936caadc0e0ba2f1dc122fa9a4a4a"
     },
     {
-      "runtime": "bgm-egypt.mp3",
+      "runtime": "bgm-stage-00011.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00011.mp3",
+      "sourceBytes": 11789729,
+      "sourceSHA256": "99976aa83298d3d4d2dc4addefca2d373019a315356231b229ca7df43ccf0841",
+      "durationMode": "full",
+      "sourceSeconds": 294.684444,
+      "seconds": 294.684444,
+      "runtimeSeconds": 294.684444,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=294.33444399999996:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 4715876,
+      "runtimeSHA256": "f7646d0f2601d2db0b937baccfb1d427da0bfb0480a616a358c774020cc7b926"
+    },
+    {
+      "runtime": "bgm-stage-00012.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00012.mp3",
+      "sourceBytes": 14316293,
+      "sourceSHA256": "88b187a520636e4499fcd81bfd86f75fed3b54cf5faf0714756d5f58d4ed6cbc",
+      "durationMode": "full",
+      "sourceSeconds": 357.842721,
+      "seconds": 357.842721,
+      "runtimeSeconds": 357.842721,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=357.49272099999996:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 5726501,
+      "runtimeSHA256": "20212cd701d762570324c3b1774683e1e848c5ba0be34a7476ce812aefcbc58c"
+    },
+    {
+      "runtime": "bgm-stage-00014.mp3",
+      "source": "assets/ft2-audio/bgm/Stage00014.mp3",
+      "sourceBytes": 12803280,
+      "sourceSHA256": "8cbc9b98e5f453cb45193338298ff7596231e565078a4ec8798f808651e3f1dc",
+      "durationMode": "full",
+      "sourceSeconds": 320.017415,
+      "seconds": 320.017415,
+      "runtimeSeconds": 320.017415,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=319.667415:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 5121296,
+      "runtimeSHA256": "3af9d33dbd958b3f305f964fe8ec95eb91a262c26de2e4e8b7c73ed9f6c2230f"
+    },
+    {
+      "runtime": "bgm-stage-00015.mp3",
       "source": "assets/ft2-audio/bgm/Stage00015.mp3",
       "sourceBytes": 4768015,
       "sourceSHA256": "62d77d592b3309ca742519a58ac5165ea1a17d98878ea77ffaf7adc30d25913b",
@@ -316,6 +607,60 @@
       ],
       "bytes": 1907190,
       "runtimeSHA256": "2874b39a928c9c17e41556c6c354ffec2530eb53184faee6bf67833d030118cb"
+    },
+    {
+      "runtime": "bgm-stage-00021.mp3",
+      "source": "assets/ft2-audio/bgm/stage00021.mp3",
+      "sourceBytes": 1802556,
+      "sourceSHA256": "0990c2395fdbf76035b3e0cf4fbb1c691fd9dbed374102516c72c3940795d79d",
+      "durationMode": "full",
+      "sourceSeconds": 90.0766,
+      "seconds": 90.0766,
+      "runtimeSeconds": 90.070204,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=89.7266:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 1442002,
+      "runtimeSHA256": "606fab2dfa36a8ed9397a6b635c61a47064fceaa0fc80014d850733f6dc6886d"
+    },
+    {
+      "runtime": "bgm-stage-00022.mp3",
+      "source": "assets/ft2-audio/bgm/stage00022.mp3",
+      "sourceBytes": 2093694,
+      "sourceSHA256": "076d8bceb5d34a1c928a3ab7ed1b847b0a229b27cba6641af135ddd1f41fb99b",
+      "durationMode": "full",
+      "sourceSeconds": 130.774785,
+      "seconds": 130.774785,
+      "runtimeSeconds": 130.774785,
+      "encodingArguments": [
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,afade=t=in:d=0.12,afade=t=out:st=130.424785:d=0.35",
+        "-ac",
+        "2",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "128k"
+      ],
+      "bytes": 2093600,
+      "runtimeSHA256": "1ad4703b16170eddebe67fda59653d50be4d19471aa1f863d37af36a20ef605d"
     },
     {
       "runtime": "sfx-fire-bowl-normal.mp3",
@@ -2580,6 +2925,35 @@
       "runtimeSHA256": "5ad36a89907b4f495a7c7075f44ecae5b7bf597a6e454251c35e94e8407c18ba"
     },
     {
+      "runtime": "sfx-denied.mp3",
+      "source": "assets/ft2-audio/sfx/Push2.wav",
+      "sourceBytes": 37374,
+      "sourceSHA256": "0829d047c3629c7890792bcf6063f9d10b32aa2ac2cccda0b5ca89b89ccf8509",
+      "durationMode": "bounded-effect",
+      "sourceSeconds": 0.377324,
+      "seconds": 0.377324,
+      "runtimeSeconds": 0.377324,
+      "encodingArguments": [
+        "-t",
+        "0.377324",
+        "-vn",
+        "-map_metadata",
+        "-1",
+        "-af",
+        "loudnorm=I=-20:TP=-2:LRA=9,volume=0.7",
+        "-ac",
+        "1",
+        "-ar",
+        "44100",
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "64k"
+      ],
+      "bytes": 3595,
+      "runtimeSHA256": "5c1074cc9778e1dc7b6f7c33744c838f8a8986e16311708f0bc131ebe43c95dd"
+    },
+    {
       "runtime": "sfx-click.mp3",
       "source": "assets/ft2-audio/sfx/Push1.wav",
       "sourceBytes": 23388,
@@ -2955,35 +3329,6 @@
       ],
       "bytes": 15089,
       "runtimeSHA256": "6caaf145dbe279ee93491e77b9df05408a8c313634aa5c38593feb0b30d82b53"
-    },
-    {
-      "runtime": "sfx-denied.mp3",
-      "source": "assets/ft2-audio/sfx/Push2.wav",
-      "sourceBytes": 37374,
-      "sourceSHA256": "0829d047c3629c7890792bcf6063f9d10b32aa2ac2cccda0b5ca89b89ccf8509",
-      "durationMode": "bounded-effect",
-      "sourceSeconds": 0.377324,
-      "seconds": 0.377324,
-      "runtimeSeconds": 0.377324,
-      "encodingArguments": [
-        "-t",
-        "0.377324",
-        "-vn",
-        "-map_metadata",
-        "-1",
-        "-af",
-        "loudnorm=I=-20:TP=-2:LRA=9,volume=0.7",
-        "-ac",
-        "1",
-        "-ar",
-        "44100",
-        "-codec:a",
-        "libmp3lame",
-        "-b:a",
-        "64k"
-      ],
-      "bytes": 3595,
-      "runtimeSHA256": "5c1074cc9778e1dc7b6f7c33744c838f8a8986e16311708f0bc131ebe43c95dd"
     }
   ]
 }

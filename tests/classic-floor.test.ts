@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {WORLD_W,TERRAIN_H} from '../src/terrain';
 import {Game,WATER_Y} from '../src/engine';import {defaultSlots} from '../src/crew';import {factoryFloor,templeCap,templeNode,templeRail,TEMPLE_NODES} from '../src/classic-maps';
-import {ALL_WEAPONS,excavation} from '../src/catalog';import {solveAIShot,safeAIPositions,predictAIImpact} from '../src/ai-planner';
+import {ALL_WEAPONS,excavation} from '../src/catalog';import {tankArtScale} from '../src/reference-calibration';import {solveAIShot,safeAIPositions,predictAIImpact} from '../src/ai-planner';
 function ready(map:'factory'|'temple',seed=52){const slots=defaultSlots();slots.forEach(s=>Object.assign(s,{controller:'human',vehicle:'cannon'}));const g=new Game({slots,map,seed,timer:0,fog:false,fireLine:false});g.start();return g;}
 function permanentOnly(g:Game){for(let i=0;i<g.land.mask.length;i++)if(!g.land.protectedMask[i])g.land.mask[i]=0;g.land.rebuild();}
 function place(g:Game,x:number,top:number){const t=g.active;t.x=x;t.y=g.support(x,top+1)-18;t.fallVelocity=0;return t;}
@@ -19,7 +19,7 @@ test('every weapon preserves the Z floor and units cannot fall through it after 
 test('normal movement across several Z folds neither blocks nor falls and all aim transforms follow the body',()=>{
  for(const direction of [-1,1]){const g=ready('factory');permanentOnly(g);g.enemy.x=1220;g.enemy.y=g.support(1220,factoryFloor(1220)+1)-18;const t=place(g,direction===1?40:420,factoryFloor(direction===1?40:420));let last=g.tankSlope(t),maxDelta=0,min=99,max=-99;
   for(let i=0;i<650;i++){if(t.fuel<1)refuel(g);const y=t.y;assert.ok(g.move(direction,1/120),`${direction}/${t.x}`);g.update(1/120);assert.equal(t.fallVelocity,0);assert.ok(Math.abs(t.y-y)<=1);const slope=g.tankSlope(t),deg=slope*180/Math.PI;min=Math.min(min,deg);max=Math.max(max,deg);maxDelta=Math.max(maxDelta,Math.abs(slope-last)*180/Math.PI);last=slope;
-   for(const angle of [t.minAngle,35,t.maxAngle,105,-5]){const aim=g.aim(t,angle);assert.ok(Math.abs(aim.absolute-(angle-direction*deg))<1e-8);const p=g.launch(t,'cannon-normal',angle,40),m=g.muzzle(t,angle);assert.ok(Math.abs(Math.atan2(-p.vy,Math.abs(p.vx))*180/Math.PI-aim.absolute)<1e-8||aim.absolute>90||aim.absolute< -90);assert.ok(Math.hypot(m.x-(t.x+Math.sin(slope)*13+aim.x*31),m.y-(t.y-Math.cos(slope)*13+aim.y*31))<1e-8);}
+   for(const angle of [t.minAngle,35,t.maxAngle,105,-5]){const aim=g.aim(t,angle);assert.ok(Math.abs(aim.absolute-(angle-direction*deg))<1e-8);const p=g.launch(t,'cannon-normal',angle,40),m=g.muzzle(t,angle);assert.ok(Math.abs(Math.atan2(-p.vy,Math.abs(p.vx))*180/Math.PI-aim.absolute)<1e-8||aim.absolute>90||aim.absolute< -90);const scale=tankArtScale(g.gameVersion),mount=31*scale-18;assert.ok(Math.hypot(m.x-(t.x+Math.sin(slope)*mount+aim.x*31*scale),m.y-(t.y-Math.cos(slope)*mount+aim.y*31*scale))<1e-8);}
   }
   assert.ok(min< -15&&max>15);assert.ok(maxDelta<4);const stop={x:t.x,y:t.y,slope:g.tankSlope(t)};for(let i=0;i<30;i++)g.update(1/120);assert.deepEqual({x:t.x,y:t.y,slope:g.tankSlope(t)},stop);
  }

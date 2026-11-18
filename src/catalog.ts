@@ -1,9 +1,10 @@
+import {referenceCalibration} from './reference-calibration';
 import {originalBallistics,originalWeapon,originalCraterAxes,sourceRadius,sourceMaximum} from './original-ballistics';
 import {ellipseExcavation,precisionPolish,impactPolish} from './match-polish';
 import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
 export type WeaponId = 'shell' | 'heavy' | 'triple' | 'cluster' | 'drill' | 'bounce' | 'napalm' | 'ice' | 'emp' | 'airstrike' | 'quake' | 'sniper' | 'homing' | `${VehicleId}-${'normal'|'special'}`;
 export type ItemId = 'repair' | 'shield' | 'fuel' | 'boost' | 'teleport' | 'wind' | 'double';
-export type MapId = 'valley' | 'coast' | 'moon' | 'factory' | 'temple' | 'egypt';
+export type MapId = 'valley' | 'coast' | 'moon' | 'sky' | 'factory' | 'temple' | 'egypt';
 export type MapChoice = MapId | 'random';
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'expert';
 export interface Weapon { id: WeaponId; name: string; english: string; description: string; damage: number; radius: number; digRadius:number; digDepth:number; ammo: number; color: string; icon: string; tag: string;effect?:WeaponEffect;shots?:number;spread?:number;speed?:number;gravity?:number;sound?:number;shape?:string;extraDelay?:number;homingMode?:'nearest'|'volley';homingRadius?:number }
@@ -35,12 +36,14 @@ export const ITEMS: { id:ItemId; name:string; description:string; count:number; 
 ];
 export const MAPS: { id:MapId; name:string; sub:string; color:string;description:string }[] = [
   { id:'valley', name:'青苔峡谷', sub:'高地掩护 · 中央断崖', color:'#809b75',description:'本作原创峡谷，高地与断崖构成攻防。' },
-  { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'经典独木桥主题。游侠攻略确认地形简单、容易激战；按用户手感校准210像素桥面：无人落点老土普通弹单发约挖去57%且不超过60%，两发可穿中段，连续挖掘仍可击落。桥宽、厚度与比例为本作配置。' },
-  { id:'moon', name:'天空之城', sub:'薄雪浮岛 · S形枝层', color:'#91aab6',description:'按用户要求自绘：上层58像素，大多数位置可被老土普通弹一发击穿；下层中间70%为4像素S形树枝与细枝。保持本作3.1.0布局和低重力，不采用原网格规格。' },
+  { id:'coast', name:'独木桥', sub:'厚桥争夺 · 多次挖穿', color:'#c58b6c',description:'完整桥面需要持续开挖。老土普通弹垂直正中同一坦克两次，中段仍会保留支撑；命中高处留下浅坑，继续轰击地面可削弱桥面、击落对手。' },
+  { id:'moon', name:'冰封溪谷', sub:'起伏冰脊 · 独立S形细枝', color:'#91aab6',description:'连绵起伏的冰层贯穿战场，右侧冰峰更高；下方独立的S形细枝可接住掉落的炮手。冰层58像素、细枝4像素，均可破坏，保留轻盈弹道。' },
+  { id:'sky', name:'天空之城', sub:'连绵雪丘 · 厚云台', color:'#aac4ce',description:'连绵的厚雪地与云台贯穿战场，中央雪丘更高，需要持续轰击才能挖穿；没有冰封溪谷的下层S枝。沿用暖纸色画风，自绘平台厚度与细节。' },
   { id:'factory', name:'钢铁工厂', sub:'永久 Z 形底板 · 钢梁',color:'#8f9998',description:'用户确认底层是永久Z形连续斜面，圆滑折点可移位调角；上层90像素钢梁，按统一Round小红豆连续两发可穿；中层钢梁仍可破。坠落伤害可开关且默认关闭。参照游侠攻略“不会被打掉下去”，坐标与坡面为本作重绘。' },
   { id:'temple', name:'神圣殿堂', sub:'小蘑菇永久节点 · 易碎薄轨',color:'#bba883',description:'用户确认永久蘑菇节点缩至原尺寸约1/3：圆顶伞盖、窄柄／小基座，可微移调角。非节点薄轨保持4像素且易碎，上层殿堂可破。参照游侠攻略，五节点坐标／弧度为本作重绘，不宣称逐像素复刻。' },
   { id:'egypt', name:'古老埃及', sub:'金字塔高地 · 主题重绘',color:'#c4a274',description:'月光 2003 年赛事记录确认古老埃及场景名；未取得原版地形细节。金字塔、方尖碑和薄桥是本作战术主题重绘，不能称为原图复原。' },
 ];
+export const mapsForVersion=(version:string)=>referenceCalibration(version)?MAPS:MAPS.filter(m=>m.id!=='sky');
 export const DIFFICULTIES: { id:Difficulty; name:string; sub:string; error:number;missChance:number }[] = [
   { id:'easy', name:'新兵', sub:'默认推荐 · 瞄准误差较大，适合练习', error:115,missChance:0.65 },
   { id:'normal', name:'老兵', sub:'温和挑战 · 偶尔使用特殊武器', error:75,missChance:0.48 },

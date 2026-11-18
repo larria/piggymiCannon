@@ -10,11 +10,12 @@ SELECTION = json.loads((ROOT / 'research/FT2_MAP_BGM_SELECTION.json').read_text(
 EVIDENCE = json.loads((ROOT / 'research/FT2_MAP_BGM_EVIDENCE.json').read_text())
 # Validate against original MapUtil / FieldRVA evidence, not web remake rules.
 for scene, choice in SELECTION['maps'].items():
-    if choice['mapNumber'] is not None:
-        stage = next(m for m in EVIDENCE['maps'] if m['mapNumber'] == choice['mapNumber'])
-        assert choice['bgmNumber'] in stage['availableBgmNumbers'], (scene, choice)
+    rule_map = choice.get('musicRuleMapNumber', choice['mapNumber'])
+    if rule_map is not None:
+        stage = next(m for m in EVIDENCE['maps'] if m['mapNumber'] == rule_map)
+        assert set(choice['candidates']).issubset(stage['availableBgmNumbers']), (scene, choice)
 BGM = {'lobby': 'GM01.mp3', 'setup': 'GM02.mp3', 'result': 'GM04.mp3',
-       **{scene: choice['source'] for scene, choice in SELECTION['maps'].items()}}
+       **{f'stage-{int(n):05d}': track['source'] for n, track in SELECTION['tracks'].items()}}
 COMMON = {'denied': 'Push2.wav', 'click': 'Push1.wav', 'select': 'Select1.wav',
           'win': 'logo.wav', 'turn': 'Turn.wav', 'wind': 'Wind.wav',
           'firewall': 'Firewall.wav', 'lock': 'Homming.wav', 'crate-land': 'BoxLanding.wav',
@@ -30,7 +31,7 @@ def build(only=None):
         # Windows extraction retains inconsistent casing, including Move1 / UnMove5.
         path = next(p for p in (SOURCE / folder).iterdir() if p.name.lower() == source.lower())
         duration = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', str(path)]))
-        # Music decodes to EOF; only sound effects have time limits.
+        # Music always decodes to EOF; effects keep their established brief cues.
         length = duration if music else min(duration, limit)
         target = OUTPUT / name
         filters = 'loudnorm=I=-20:TP=-2:LRA=9'
@@ -57,8 +58,8 @@ def build(only=None):
         return True
     for scene, source in BGM.items():
         converted = convert('bgm', source, f'bgm-{scene}.mp3', music=True)
-        if converted and scene in SELECTION['maps']:
-            choice = SELECTION['maps'][scene]
+        if converted and scene.startswith('stage-'):
+            choice = SELECTION['tracks'][str(int(scene[6:]))]
             assert choice['durationMode'] == 'full'
             assert abs(choice['seconds'] - entries[-1]['sourceSeconds']) < .001
     for group, vehicle in enumerate(VEHICLES, 1):
@@ -74,9 +75,14 @@ def build(only=None):
         merged = {e['runtime']: e for e in previous['files']}
         merged.update({e['runtime']: e for e in entries})
         entries = list(merged.values())
-    manifest = {'formatVersion': 2, 'source': '用户本机 ft2逆向/resources/sound 提取素材；仅用于本项目，未宣称官方授权',
+    valid_runtime = {f'bgm-{scene}.mp3' for scene in BGM}
+    entries = [e for e in entries if not e['runtime'].startswith('bgm-') or e['runtime'] in valid_runtime]
+    for target in OUTPUT.glob('bgm-*.mp3'):
+        if target.name not in valid_runtime:
+            target.unlink()
+    manifest = {'formatVersion': 3, 'source': '本机 ft2 目录/原版分析；来源素材仅用于本项目，未宣称官方授权',
                 'mapping': '本作13载具分配Fire/Bomb组；1/2分配普通/特殊。经典地图选曲来自原客户端MapUtil有效列表，本作择一；原创峡谷自行选曲，不使用复刻web规则。',
-                'mapBgmSelection': SELECTION['maps'],
+                'mapBgmSelection': SELECTION['maps'], 'mapBgmTracks': SELECTION['tracks'],
                 'mapBgmEvidence': 'FT2_MAP_BGM_EVIDENCE.json',
                 'ffmpegVersion': subprocess.check_output(['ffmpeg', '-version'], text=True).splitlines()[0],
                 'settings': {'codec': 'libmp3lame', 'sampleRate': 44100, 'musicChannels': 2, 'effectChannels': 1,

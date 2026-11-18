@@ -1,0 +1,95 @@
+{
+  "hp": 518,
+  "plans": [
+    {
+      "plan": {
+        "target": 2,
+        "angle": 42,
+        "power": 16,
+        "direction": 1,
+        "x": 549.1146651459072,
+        "y": 399,
+        "gain": 368,
+        "score": 522,
+        "self": false
+      }
+    }
+  ],
+  "heals": [
+    {
+      "owner": 0,
+      "target": 0,
+      "weapon": "cannon-normal",
+      "projectile": 1,
+      "base": 920,
+      "factors": [
+        {
+          "source": "基础恢复比例",
+          "value": 0.4
+        },
+        {
+          "source": "fireBoosted（无强化）",
+          "value": 1
+        },
+        {
+          "source": "命中／距离衰减",
+          "value": 0.16091954022988506
+        }
+      ],
+      "requested": 59,
+      "actual": 0,
+      "hpBefore": 920,
+      "hpAfter": 920,
+      "boostSources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "friendlyFire": false,
+      "poisoned": false,
+      "falloff": 0.16091954022988506,
+      "distance": 221.47772423555415,
+      "directHit": false
+    },
+    {
+      "owner": 0,
+      "target": 2,
+      "weapon": "cannon-normal",
+      "projectile": 1,
+      "base": 920,
+      "factors": [
+        {
+          "source": "基础恢复比例",
+          "value": 0.4
+        },
+        {
+          "source": "fireBoosted（无强化）",
+          "value": 1
+        },
+        {
+          "source": "命中／距离衰减",
+          "value": 1
+        }
+      ],
+      "requested": 368,
+      "actual": 368,
+      "hpBefore": 150,
+      "hpAfter": 518,
+      "boostSources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "friendlyFire": false,
+      "poisoned": false,
+      "falloff": 1,
+      "distance": 33.014983742044414,
+      "directHit": true
+    },
+    {
+      "value": 368,
+      "x": 550,
+      "transfer": false
+    }
+  ]
+}

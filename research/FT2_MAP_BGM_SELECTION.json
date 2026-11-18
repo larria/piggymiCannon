@@ -1,15 +1,23 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "evidence": "FT2_MAP_BGM_EVIDENCE.json",
-  "policy": "Classic scenes select one verified entry from the extracted original client's allowed list. No map-number-to-Stage-number assumption; no replica web rules. Valley is original editorial selection. Original server-selected rotation is not claimed or implemented.",
+  "policy": "Uniform seeded selection among distinct verified allowed tracks, AFTER the actual map is resolved. Independent music RNG preserves gameplay RNG. Defaults only support legacy scenes; original server weights are not claimed.",
   "maps": {
     "valley": {
       "mapNumber": null,
-      "bgmNumber": 0,
-      "source": "Stage00000.mp3",
-      "seconds": 207.029116,
-      "basis": "本作原创地图选曲，无原版地图编号",
-      "durationMode": "full"
+      "bgmNumber": 2,
+      "source": "Stage00002.mp3",
+      "seconds": 333.02059,
+      "basis": "Original valley uses the verified fairyland music rule only; not an original map-number claim.",
+      "durationMode": "full",
+      "candidates": [
+        2,
+        4,
+        10,
+        12
+      ],
+      "selection": "uniform-distinct",
+      "musicRuleMapNumber": 6
     },
     "coast": {
       "mapNumber": 8,
@@ -17,15 +25,41 @@
       "source": "Stage00004.mp3",
       "seconds": 141.688163,
       "basis": "原客户端有效列表9/4/14，本作选其中4",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        9,
+        4,
+        14
+      ],
+      "selection": "uniform-distinct"
     },
     "moon": {
+      "mapNumber": 16,
+      "bgmNumber": 8,
+      "source": "Stage00008.mp3",
+      "seconds": 197.276735,
+      "basis": "用户更正地图为冰封溪谷；原客户端有效列表8/9/12，本作取首项8",
+      "durationMode": "full",
+      "candidates": [
+        8,
+        9,
+        12
+      ],
+      "selection": "uniform-distinct"
+    },
+    "sky": {
       "mapNumber": 7,
       "bgmNumber": 9,
       "source": "Stage00009.mp3",
       "seconds": 318.902857,
-      "basis": "原客户端有效列表4/8/9，本作选其中9",
-      "durationMode": "full"
+      "basis": "天空之城独立新增；原客户端有效列表4/8/9，本作选其中9",
+      "durationMode": "full",
+      "candidates": [
+        4,
+        8,
+        9
+      ],
+      "selection": "uniform-distinct"
     },
     "factory": {
       "mapNumber": 4,
@@ -33,7 +67,13 @@
       "source": "Stage00005.mp3",
       "seconds": 295.427483,
       "basis": "原客户端有效列表5/11/21，本作取首项5",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        5,
+        11,
+        21
+      ],
+      "selection": "uniform-distinct"
     },
     "temple": {
       "mapNumber": 10,
@@ -41,7 +81,12 @@
       "source": "Stage00010.mp3",
       "seconds": 190.775147,
       "basis": "原客户端有效列表10/0/0/0，本作取首项10；0也是实际曲目",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        10,
+        0
+      ],
+      "selection": "uniform-distinct"
     },
     "egypt": {
       "mapNumber": 9,
@@ -49,7 +94,118 @@
       "source": "Stage00015.mp3",
       "seconds": 119.141587,
       "basis": "原客户端有效列表15/22，本作取首项15",
-      "durationMode": "full"
+      "durationMode": "full",
+      "candidates": [
+        15,
+        22
+      ],
+      "selection": "uniform-distinct"
+    }
+  },
+  "tracks": {
+    "0": {
+      "number": 0,
+      "runtime": "bgm-stage-00000.mp3",
+      "source": "Stage00000.mp3",
+      "seconds": 207.029116,
+      "durationMode": "full",
+      "name": "Milyang Fortress"
+    },
+    "2": {
+      "number": 2,
+      "runtime": "bgm-stage-00002.mp3",
+      "source": "Stage00002.mp3",
+      "seconds": 333.02059,
+      "durationMode": "full",
+      "name": "The Profound"
+    },
+    "4": {
+      "number": 4,
+      "runtime": "bgm-stage-00004.mp3",
+      "source": "Stage00004.mp3",
+      "seconds": 141.688163,
+      "durationMode": "full",
+      "name": "Once in a Lifetime"
+    },
+    "5": {
+      "number": 5,
+      "runtime": "bgm-stage-00005.mp3",
+      "source": "Stage00005.mp3",
+      "seconds": 295.427483,
+      "durationMode": "full",
+      "name": "The Invincible"
+    },
+    "8": {
+      "number": 8,
+      "runtime": "bgm-stage-00008.mp3",
+      "source": "Stage00008.mp3",
+      "seconds": 197.276735,
+      "durationMode": "full",
+      "name": "There's Something about Supertank"
+    },
+    "9": {
+      "number": 9,
+      "runtime": "bgm-stage-00009.mp3",
+      "source": "Stage00009.mp3",
+      "seconds": 318.902857,
+      "durationMode": "full",
+      "name": "Be Higher"
+    },
+    "10": {
+      "number": 10,
+      "runtime": "bgm-stage-00010.mp3",
+      "source": "Stage00010.mp3",
+      "seconds": 190.775147,
+      "durationMode": "full",
+      "name": "Tank Slayer"
+    },
+    "11": {
+      "number": 11,
+      "runtime": "bgm-stage-00011.mp3",
+      "source": "Stage00011.mp3",
+      "seconds": 294.684444,
+      "durationMode": "full",
+      "name": "Welcome to Skull's Hell"
+    },
+    "12": {
+      "number": 12,
+      "runtime": "bgm-stage-00012.mp3",
+      "source": "Stage00012.mp3",
+      "seconds": 357.842721,
+      "durationMode": "full",
+      "name": "Life is so Beautiful"
+    },
+    "14": {
+      "number": 14,
+      "runtime": "bgm-stage-00014.mp3",
+      "source": "Stage00014.mp3",
+      "seconds": 320.017415,
+      "durationMode": "full",
+      "name": "Fortress Gump"
+    },
+    "15": {
+      "number": 15,
+      "runtime": "bgm-stage-00015.mp3",
+      "source": "Stage00015.mp3",
+      "seconds": 119.141587,
+      "durationMode": "full",
+      "name": "Egyptian Rule"
+    },
+    "21": {
+      "number": 21,
+      "runtime": "bgm-stage-00021.mp3",
+      "source": "stage00021.mp3",
+      "seconds": 90.0766,
+      "durationMode": "full",
+      "name": "stage00021"
+    },
+    "22": {
+      "number": 22,
+      "runtime": "bgm-stage-00022.mp3",
+      "source": "stage00022.mp3",
+      "seconds": 130.774785,
+      "durationMode": "full",
+      "name": "Egyptian Rule2"
     }
   }
 }

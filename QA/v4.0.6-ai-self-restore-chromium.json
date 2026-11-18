@@ -1,0 +1,61 @@
+{
+  "power": 1,
+  "hp": 468,
+  "plans": [
+    {
+      "plan": {
+        "target": 0,
+        "angle": 35,
+        "power": 1,
+        "direction": -1,
+        "x": 250,
+        "y": 450.6133680555555,
+        "gain": 368,
+        "score": 532,
+        "self": true
+      }
+    }
+  ],
+  "heals": [
+    {
+      "owner": 0,
+      "target": 0,
+      "weapon": "cannon-normal",
+      "projectile": 1,
+      "base": 920,
+      "factors": [
+        {
+          "source": "基础恢复比例",
+          "value": 0.4
+        },
+        {
+          "source": "fireBoosted（无强化）",
+          "value": 1
+        },
+        {
+          "source": "原地恢复弹正中自身",
+          "value": 1
+        }
+      ],
+      "requested": 368,
+      "actual": 368,
+      "hpBefore": 100,
+      "hpAfter": 468,
+      "boostSources": {
+        "fire": null,
+        "rage": 1,
+        "snow": 1
+      },
+      "friendlyFire": false,
+      "poisoned": false,
+      "falloff": 1,
+      "distance": 18,
+      "directHit": false
+    },
+    {
+      "value": 368,
+      "x": 250,
+      "transfer": false
+    }
+  ]
+}

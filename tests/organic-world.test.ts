@@ -1,0 +1,48 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+import {Game} from '../src/engine';import {Terrain} from '../src/terrain';import {MAPS,excavation} from '../src/catalog';import {defaultSlots} from '../src/crew';
+import {worldSize,recordedWorld,battleViewWidth,LEGACY_WORLD,EXPANDED_WORLD} from '../src/world-layout';import {tankArtScale} from '../src/reference-calibration';
+import {factoryFloor,templeCap,templeRail,templeNode,templeNodes,FACTORY_FLOOR_PERIOD} from '../src/classic-maps';import {VEHICLE_WEAPONS} from '../src/vehicles';import {iceValleyBranch,iceValleySurface,ICE_BRANCH_FROM,ICE_BRANCH_TO,SKY_BRANCH_THICKNESS} from '../src/sky-map';
+import {ReplayRecorder,ReplayPlayer,parseReplayFile,exportReplay} from '../src/replay';import {tankSegmentContact} from '../src/tank-hitbox';import {predictAIImpact,solveAIShot} from '../src/ai-planner';import {BattleCamera} from '../src/camera';
+const version='4.0.6';
+const ready=(map='factory',seed=52,size=EXPANDED_WORLD)=>{const slots=defaultSlots().map((s,i)=>({...s,enabled:true,team:i%2,controller:'human' as const,vehicle:'cannon' as const}));const g=new Game({slots,map:map as any,seed,timer:0,fog:false,fireLine:false},version,size);g.start();return g;};
+const place=(g:Game,x:number,from=0)=>{const t=g.active;Object.assign(t,{x,y:g.support(x,from+1)-18,fallVelocity:0});return t;};
+test('expanded map/view cancel art enlargement, while old releases and standalone terrain keep their original sizes',()=>{
+ assert.deepEqual(worldSize(version),EXPANDED_WORLD);assert.deepEqual(worldSize('4.0.5'),LEGACY_WORLD);assert.equal(new Terrain().width,1920);
+ assert.ok(Math.abs(tankArtScale(version)/battleViewWidth(EXPANDED_WORLD.width)-tankArtScale('4.0.5')/battleViewWidth(1920))<1e-12);
+ assert.equal(battleViewWidth(2688),1792);assert.deepEqual(recordedWorld(LEGACY_WORLD,version),LEGACY_WORLD);assert.throws(()=>recordedWorld(EXPANDED_WORLD,'4.0.5'));assert.throws(()=>recordedWorld({width:99999,height:99999},version));
+});
+test('each self-drawn map extends both world axes and has safe reproducible spawn sites across its extended width',()=>{
+ for(const m of MAPS)for(const seed of [1,7,52,210]){const g=ready(m.id,seed),copy=ready(m.id,seed);assert.equal(g.worldWidth,2688);assert.equal(g.worldHeight,1344);assert.equal(g.land.mask.length,2689*1344);assert.deepEqual(g.tanks.map(t=>[t.x,t.y]),copy.tanks.map(t=>[t.x,t.y]));assert.ok(g.tanks.every(t=>t.x>32&&t.x<g.worldWidth-32&&t.hp===t.maxHP&&t.fallVelocity===0&&g.stablePlatform(t.x)));if(['moon','temple'].includes(m.id))assert.ok(g.tanks.every(t=>t.y<1000));for(let i=0;i<15;i++)g.update(1/120);assert.ok(g.tanks.every(t=>t.hp===t.maxHP&&t.fallVelocity===0&&!t.outOfBounds));}
+});
+test('bridge and factory beam thicknesses stay280/90, and two vertical ordinary centre hits leave the bridge intact',()=>{
+ const coast=ready('coast'),x=coast.worldWidth/2,top=coast.ground(x),bottom=coast.land.bottom(x);assert.equal(bottom-top,280);const target=coast.tanks[1];Object.assign(target,{x,hp:10000});for(let i=0;i<2;i++){target.y=coast.ground(x)-18;(coast as any).explode({...coast.launch(coast.active,'cannon-normal'),x,y:target.y-33,vx:0,vy:500},target.id);assert.ok(coast.ground(x)<bottom);}assert.ok(bottom-coast.ground(x)>120);
+ const factory=ready();const beamX=300*factory.layoutScale,beamY=465*factory.layoutScale;assert.equal(factory.land.bottom(beamX,beamY)-factory.ground(beamX,beamY),90);
+});
+test('factory extension adds Z folds without stretching their pitch/rise or weakening permanent support',()=>{
+ const g=ready(),scale=g.layoutScale;assert.equal(FACTORY_FLOOR_PERIOD,224);for(let x=0;x<=g.worldWidth;x++){const y=Math.ceil(factoryFloor(x,scale));assert.equal(g.land.protectedMask[y*g.land.stride+x],1);assert.ok(Math.abs(factoryFloor(x,scale)-factoryFloor(x)-384)<1e-8);}const old=g.land.protectedMask.slice();g.crater(1344,1100,3000,2000);assert.deepEqual(g.land.protectedMask,old);
+ for(let i=0;i<g.land.mask.length;i++)if(!g.land.protectedMask[i])g.land.mask[i]=0;g.land.rebuild();g.tanks.slice(1).forEach((t,i)=>Object.assign(t,{x:1500+i*200,y:g.ground(1500+i*200)-18}));const t=place(g,40);let last=g.tankSlope(t),delta=0;for(let i=0;i<180;i++){assert.ok(g.move(1,1/120));g.update(1/120);assert.equal(t.fallVelocity,0);delta=Math.max(delta,Math.abs(g.tankSlope(t)-last)*180/Math.PI);last=g.tankSlope(t);}assert.ok(delta<4);
+});
+test('temple extends the spaces between fixed-size mushrooms; gaps and lower sky branch remain4px destructible',()=>{
+ const g=ready('temple'),scale=g.layoutScale;for(const [i,node] of templeNodes(scale).entries()){const old=templeNode(templeNodes()[i]),next=templeNode(node,scale);for(const key of ['radius','rise','stem','rim','stemStart','baseWidth'] as const)assert.equal(next[key],old[key]);assert.ok(Math.abs((next.bottom-templeRail(node,scale))-(old.bottom-templeRail(templeNodes()[i])))<.02);const cap=Math.ceil(templeCap(node,node,scale));g.crater(node,cap,200,200);assert.equal(g.land.protectedMask[cap*g.land.stride+node],1);assert.equal(g.land.solid(node,cap),true);const t=place(g,node,cap);g.update(1/120);assert.equal(t.fallVelocity,0);}
+ const rails=ready('temple'),gap=240*scale,y=rails.ground(gap,1000);assert.equal(rails.land.bottom(gap,y)-y,4);rails.crater(gap,y,30,20);assert.equal(rails.ground(gap,1000),rails.worldHeight);
+ const sky=ready('moon'),x=sky.worldWidth/2,branch=Math.ceil(iceValleyBranch(x,sky.worldWidth,sky.worldHeight));assert.equal(SKY_BRANCH_THICKNESS,4);assert.equal(sky.land.bottom(x,branch)-branch,4);sky.crater(x,branch,30,20);assert.equal(sky.ground(x,branch),sky.worldHeight);
+});
+test('right/bottom extension is rendered terrain, takes unchanged damage/dig, and matches AI prediction beyond old edges',()=>{
+ const g=ready('coast');g.land=new Terrain(g.worldWidth,g.worldHeight);g.terrain=g.land.surface;for(let x=0;x<=g.worldWidth;x++)g.land.column(x,1150,1344);g.land.rebuild();g.tanks.forEach((t,i)=>Object.assign(t,{x:i===0?2100:i===1?2350:100+i*100,y:1132,direction:i===0?1:-1}));g.wind=0;const shot=solveAIShot(g,g.active,['cannon-special'],[g.tanks[1]]);assert.ok(shot.effective);g.active.direction=shot.direction;g.setAim(shot.angle,shot.power);g.selected='cannon-special';const predicted=predictAIImpact(g,g.active,g.selected);const recorder=new ReplayRecorder(g);g.fire();for(let i=0;i<1500&&g.projectiles.length;i++)g.update(.005);const hit=g.battleSnapshot().events.filter(e=>e.type==='damage'&&e.data.target===1).map(e=>e.data);assert.ok(hit.length>0);assert.ok(Math.abs(predicted.hits.find(h=>h.body.tank.id===1)!.damage-hit[0].requested)<15);assert.equal(tankSegmentContact(g.tanks[1],2450,1132,2300,1132,0,version)!.x,2380);for(const w of VEHICLE_WEAPONS)assert.deepEqual(excavation(w.id,false,version),excavation(w.id,false,'4.0.5'));
+ const clip=parseReplayFile(exportReplay(recorder.export()),version),player=new ReplayPlayer(clip);for(let i=0;i<2000&&!player.done;i++)player.advance(.05);assert.equal(player.verified,true);assert.equal(player.game.worldWidth,2688);recorder.detach();
+});
+test('recorded dimensions round-trip for pre-expansion local drafts and every published replay fixture',()=>{
+ const g=ready('factory',52,LEGACY_WORLD);g.setAim(35,20);const r=new ReplayRecorder(g);g.fire();for(let i=0;i<100;i++)g.update(.01);const p=new ReplayPlayer(parseReplayFile(exportReplay(r.export()),version));for(let i=0;i<1000&&!p.done;i++)p.advance(.05);assert.equal(p.verified,true);assert.equal(p.game.worldWidth,1920);r.detach();
+ for(const f of ['replay-4.0.5.json','replay-4.0.5-ai.json','replay-4.0.4-ai.json']){const player=new ReplayPlayer(JSON.parse(readFileSync('tests/fixtures/'+f,'utf8')));for(let i=0;i<2000&&!player.done;i++)player.advance(.05);assert.equal(player.verified,true,f);assert.equal(player.game.worldWidth,1920);}
+});
+test('tour/manual/automatic camera can reach new edges and restore the actor without old-world clipping',()=>{
+ const camera=new BattleCamera();camera.configure(1792,690,2688,1344);camera.center(2600,1260,false);assert.equal(camera.x,896);assert.equal(camera.y,654);camera.pan(-99999,-99999);assert.equal(camera.x,0);camera.follow();camera.update(1,{x:896,y:654});assert.equal(camera.x,896);assert.equal(camera.y,654);let done=false;camera.startTour([{x:2600,y:1260,id:1}],()=>done=true,true);camera.update(1,{x:0,y:0});assert.equal(done,true);assert.equal(camera.x,896);
+});
+test('ice valley follows the supplied rolling ridge and independent S without altering thickness, walk limits or excavation',()=>{
+ const g=ready('moon'),w=g.worldWidth,h=g.worldHeight;
+ assert.ok(iceValleySurface(w*.72,w,h)<iceValleySurface(w*.21,w,h));assert.ok(iceValleySurface(w*.44,w,h)>iceValleySurface(w*.21,w,h));
+ for(let x=1;x<w;x+=3){const top=Math.ceil(iceValleySurface(x,w,h));assert.equal(g.ground(x),top);assert.equal(g.land.bottom(x,top)-top,58);assert.ok(Math.abs(iceValleySurface(x+1,w,h)-iceValleySurface(x,w,h))<Math.tan(Math.PI/3));}
+ const below=h*.6;assert.equal(g.ground(w*.18,below),h);assert.equal(g.ground(w*.8,below),h);
+ for(const frac of [ICE_BRANCH_FROM+.01,.4,.5,ICE_BRANCH_TO-.01]){const x=Math.round(w*frac),y=Math.ceil(iceValleyBranch(x,w,h));assert.ok(g.land.solid(x,y));assert.equal(g.land.bottom(x,y)-y,4);assert.equal(g.land.protectedMask[y*g.land.stride+x],0);}
+ const x=Math.round(w*.21),top=g.ground(x),bottom=g.land.bottom(x),t=g.active;g.tanks.slice(1).forEach((t,i)=>Object.assign(t,{x:w-200-i*100,y:g.ground(w-200-i*100)-18}));Object.assign(t,{x:100,y:g.ground(100)-18,direction:1});g.fire();Object.assign(g.projectiles[0],{x,y:top-2,vx:0,vy:500,age:1});for(let n=0;n<500&&g.projectiles.length;n++)g.update(.005);assert.ok(!g.land.solid(x,bottom-1));
+});

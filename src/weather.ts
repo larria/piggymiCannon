@@ -14,7 +14,7 @@ export function rollBattleWeather(rng:()=>number,fog=true,fire=true):BattleWeath
 export const weatherDuration=(rng:()=>number)=>rng()<.5?1:2;
 export const nextWeatherRound=(round:number,rng:()=>number)=>round+weatherDuration(rng);
 export function rollSnow(map:MapId,rng:()=>number){
- const chance:Record<MapId,number>={valley:.12,coast:.08,moon:.85,factory:.05,temple:.18,egypt:.02};
+ const chance:Record<MapId,number>={valley:.12,coast:.08,moon:.85,sky:.7,factory:.05,temple:.18,egypt:.02};
  return rng()<chance[map];
 }
 interface Player {id:number;team:number;hp:number;x:number;y:number;outOfBounds?:boolean}

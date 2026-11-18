@@ -3,7 +3,7 @@ from pathlib import Path
 import array, json, math, subprocess, argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-parser = argparse.ArgumentParser(); parser.add_argument('--output', type=Path, default=ROOT / 'QA/audio-quality.json'); args = parser.parse_args()
+parser = argparse.ArgumentParser(); parser.add_argument('--output', type=Path, default=ROOT / 'QA/audio-quality.json'); parser.add_argument('--only', nargs='+', help='Check only these runtime files'); args = parser.parse_args()
 manifest = json.loads((ROOT / 'research/FT2_AUDIO_SOURCES.json').read_text())
 
 def decode(path, filters=None, length=None, rate=16000, channels=1):
@@ -28,6 +28,8 @@ def decoded_frame_count(path, channels=2):
 
 rows = []
 for record in manifest['files']:
+    if args.only and record['runtime'] not in args.only:
+        continue
     music = record['runtime'].startswith('bgm-')
     channels = 2 if music else 1
     data = decode(ROOT / 'public/audio' / record['runtime'], rate=44100, channels=channels)
@@ -36,6 +38,11 @@ for record in manifest['files']:
     row = {'file': record['runtime'], 'decodedSamples': len(data), 'peak': peak, 'rms': rms,
            'clippedSamples': sum(abs(v) >= 1 for v in data)}
     assert rms > .0001, row
+    if not music and record['durationMode']=='full':
+        row['sourceDecodedFrames'] = decoded_frame_count(ROOT / record['source'], channels=1)
+        row['runtimeDecodedFrames'] = len(data)
+        row['durationDifferenceSeconds'] = (row['runtimeDecodedFrames'] - row['sourceDecodedFrames']) / 44100
+        assert abs(row['durationDifferenceSeconds']) < .002, row
     if music:
         assert record['durationMode'] == 'full'
         length = record['sourceSeconds']
@@ -65,9 +72,9 @@ for record in manifest['files']:
     rows.append(row)
 
 result = {'formatVersion': 2, 'decodeSampleRate': 44100, 'comparisonSampleRate': 16000, 'files': rows,
-          'allDecodable': True, 'allNineBgmComplete': sum('sourceDecodedFrames' in r for r in rows)==9, 'clippedSamples': sum(r['clippedSamples'] for r in rows),
-          'minimumBgmSnrDb': min(r['snrDb'] for r in rows if 'snrDb' in r),
-          'maximumLoopBoundaryJump': max(r['loopBoundaryJump'] for r in rows if 'loopBoundaryJump' in r),
+          'allDecodable': True, 'selection': args.only or 'all', 'allSelectedBgmComplete': all('sourceDecodedFrames' in r for r in rows if r['file'].startswith('bgm-')), 'allSelectedEffectsComplete': all('sourceDecodedFrames' in r for r in rows if r['file'].startswith('sfx-')), 'bgmCount': sum(r['file'].startswith('bgm-') for r in rows), 'clippedSamples': sum(r['clippedSamples'] for r in rows),
+          'minimumBgmSnrDb': min((r['snrDb'] for r in rows if 'snrDb' in r), default=None),
+          'maximumLoopBoundaryJump': max((r['loopBoundaryJump'] for r in rows if 'loopBoundaryJump' in r), default=None),
           'notes': '客观检查不等同于主观听感评测；音乐与完整原件解码样本数及全曲／末5秒对照，未截取；相同响度／极短淡化，检查编码误差、解码、削波和循环边缘。'}
 args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
 print(json.dumps({k:v for k,v in result.items() if k not in ['files','notes']}, ensure_ascii=False))

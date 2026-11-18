@@ -1,0 +1,1107 @@
+来源：本机 ft2 目录/原版分析。未使用 web 复刻规则。
+
+
+METHOD .CCharacterView.RunAnimation
+000C ldarg.1
+000D ldc.i4.0
+000E blt.s        21
+0010 ldarg.1
+0011 ldc.i4.s     13
+0013 blt.s        22
+0015 ret
+0016 ldarg.0
+0017 ldfld        .m_pSkeletonAnimation
+001C ldnull
+001D call         .op_Inequality
+0022 brfalse.s    60
+0024 ldarg.0
+0025 ldfld        .m_pSkeletonAnimation
+002A ldarga.s     argument(0x0001)
+002C constrained. .CharState
+0032 callvirt     .ToString
+0037 callvirt     .set_AnimationName
+003C ldarg.0
+003D ldfld        .m_pCharacter
+0042 ldnull
+0043 call         .op_Equality
+0048 brtrue.s     82
+004A ldarg.0
+004B ldfld        .ModeImage
+0050 brtrue.s     83
+0052 ret
+0053 ldarg.0
+0054 ldfld        .ModeImage
+0059 ldarg.1
+005A ldelem.i4
+005B stloc.0
+005C ldloc.0
+005D ldarg.0
+005E ldfld        .ModeCount
+0063 ldarg.1
+0064 ldelem.i4
+0065 ldarg.2
+0066 brtrue.s     107
+0068 ldc.i4.1
+0069 br.s         108
+006B ldc.i4.5
+006C mul
+006D add
+006E stloc.1
+006F ldarg.0
+0070 ldfld        .m_pCharacter
+0075 ldloc.0
+0076 ldloc.1
+0077 ldarg.2
+0078 brtrue.s     125
+007A ldc.i4.1
+007B br.s         126
+007D ldc.i4.5
+007E callvirt     .RebuildSpriteListChar
+0083 ret
+
+METHOD .CCharacterView.SetPos
+0001 ldarg.0
+0002 call         .get_transform
+0007 ldarg.1
+0008 call         CFightManage.get_Instance
+000D ldarg.2
+000E callvirt     CFightManage.GetViewY
+0013 conv.r4
+0014 ldc.r4       0.0
+0019 newobj       ..ctor
+001E callvirt     .set_localPosition
+0023 ret
+
+METHOD LuaFramework.Logic.CBullet.ClashTarget
+000C call         CFightManage.get_Instance
+0011 ldarg.1
+0012 ldarg.2
+0013 callvirt     CFightManage.GetTarget
+0018 brfalse.s    116
+001A ldarg.0
+001B ldfld        .m_pDPos
+0020 ldarg.1
+0021 callvirt     CPoint.set_x
+0026 ldarg.0
+0027 ldfld        .m_pDPos
+002C ldarg.2
+002D callvirt     CPoint.set_y
+0032 ldarg.0
+0033 ldfld        .m_pPos
+0038 ldarg.0
+0039 ldfld        .m_pDPos
+003E callvirt     CPoint.get_x
+0043 ldc.i4.s     100
+0045 mul
+0046 callvirt     CPoint.set_x
+004B ldarg.0
+004C ldfld        .m_pPos
+0051 ldarg.0
+0052 ldfld        .m_pDPos
+0057 callvirt     CPoint.get_y
+005C ldc.i4.s     100
+005E mul
+005F callvirt     CPoint.set_y
+0064 ldarg.0
+0065 ldc.i4.2
+0066 stfld        .Crush
+006B ldarg.0
+006C ldc.i4.1
+006D stfld        .Character
+0072 ldc.i4.1
+0073 ret
+0074 ldc.i4.0
+0075 ret
+
+METHOD LuaFramework.Logic.CBullet.CharacterDamage
+000C ldarg.3
+000D conv.r4
+000E conv.r8
+000F call         .Sqrt
+0014 ldarg.2
+0015 conv.r4
+0016 conv.r8
+0017 call         .Sqrt
+001C sub
+001D conv.i4
+001E stloc.0
+001F ldarg.0
+0020 ldfld        .PowerUp
+0025 brfalse.s    54
+0027 ldloc.0
+0028 ldarg.0
+0029 ldfld        .Power
+002E ldc.i4.3
+002F mul
+0030 ldc.i4.2
+0031 div
+0032 mul
+0033 stloc.0
+0034 br.s         63
+0036 ldloc.0
+0037 ldarg.0
+0038 ldfld        .Power
+003D mul
+003E stloc.0
+003F ldloc.0
+0040 ldarg.0
+0041 ldfld        .Round
+0046 div
+0047 stloc.0
+0048 ldloc.0
+0049 ldc.i4.s     100
+004B mul
+004C ldarg.1
+004D ldfld        .Defence
+0052 div
+0053 stloc.0
+0054 call         LuaHelper.GetXMLManager
+0059 ldarg.1
+005A ldfld        .Character
+005F ldc.i4.1
+0060 sub
+0061 callvirt     XMLManager.GetTankInfo
+0066 stloc.1
+0067 ldloc.1
+0068 brfalse.s    208
+006A ldloc.1
+006B ldfld        .Character
+0070 ldc.i4       240
+0075 and
+0076 ldarg.0
+0077 ldfld        .Attrib
+007C ldc.i4       240
+0081 and
+0082 and
+0083 brfalse.s    140
+0085 ldloc.0
+0086 ldc.i4.8
+0087 mul
+0088 ldc.i4.s     10
+008A div
+008B stloc.0
+008C ldloc.1
+008D ldfld        .Character
+0092 ldc.i4.s     16
+0094 and
+0095 ldc.i4.s     16
+0097 bne.un.s     179
+0099 ldarg.0
+009A ldfld        .Attrib
+009F ldc.i4       128
+00A4 and
+00A5 ldc.i4       128
+00AA bne.un.s     179
+00AC ldloc.0
+00AD ldloc.0
+00AE ldc.i4.s     10
+00B0 div
+00B1 add
+00B2 stloc.0
+00B3 ldloc.1
+00B4 ldfld        .Character
+00B9 ldc.i4.s     15
+00BB and
+00BC ldarg.0
+00BD ldfld        .Attrib
+00C2 ldc.i4.s     15
+00C4 and
+00C5 and
+00C6 brfalse.s    208
+00C8 ldloc.0
+00C9 ldc.i4.s     9
+00CB mul
+00CC ldc.i4.s     10
+00CE div
+00CF stloc.0
+00D0 ldloc.0
+00D1 ret
+
+METHOD LuaFramework.Logic.CBullet.CheckShield
+000C ldarg.0
+000D ldfld        .Round
+0012 ldarg.0
+0013 ldfld        .Round
+0018 mul
+0019 stloc.0
+001A ldloc.0
+001B ldloc.0
+001C ldc.i4.4
+001D div
+001E add
+001F stloc.0
+0020 ldc.i4.0
+0021 stloc.2
+0022 call         CFightManage.get_Instance
+0027 ldfld        .m_oCharacters
+002C callvirt     .get_Values
+0031 callvirt     .GetEnumerator
+0036 stloc.3
+0037 br.s         165
+0039 ldloca.s     local(0x0003)
+003B call         .get_Current
+0040 stloc.s      local(0x0004)
+0042 ldloc.s      local(0x0004)
+0044 brfalse.s    165
+0046 ldloc.s      local(0x0004)
+0048 ldfld        .Action
+004D ldc.i4.s     12
+004F beq.s        165
+0051 ldloc.s      local(0x0004)
+0053 ldfld        .DeadStatus
+0058 brtrue.s     165
+005A ldarg.1
+005B ldloc.s      local(0x0004)
+005D ldfld        .m_pPos
+0062 callvirt     CPoint.get_x
+0067 ldc.i4.3
+0068 div
+0069 sub
+006A ldarg.2
+006B ldloc.s      local(0x0004)
+006D ldfld        .m_pPos
+0072 callvirt     CPoint.get_y
+0077 ldc.i4.3
+0078 div
+0079 sub
+007A stloc.1
+007B dup
+007C mul
+007D ldloc.1
+007E ldloc.1
+007F mul
+0080 add
+0081 ldloc.0
+0082 bge.s        165
+0084 ldloc.s      local(0x0004)
+0086 callvirt     CCharacter.SetShield
+008B ldloc.s      local(0x0004)
+008D ldfld        .Shiled
+0092 call         LuaHelper.GetDataManager
+0097 callvirt     DataManager.get_SuperTankInfo
+009C ldfld        .m_dwTrue
+00A1 bne.un.s     165
+00A3 ldc.i4.1
+00A4 stloc.2
+00A5 ldloca.s     local(0x0003)
+00A7 call         .MoveNext
+00AC brtrue.s     57
+00AE leave.s      190
+00B0 ldloca.s     local(0x0003)
+00B2 constrained. .?
+00B8 callvirt     .Dispose
+00BD endfinally
+00BE ldloc.2
+00BF ret
+
+METHOD LuaFramework.Logic.CBullet.CheckTargetDamage
+000C ldarg.0
+000D ldfld        .Round
+0012 ldarg.0
+0013 ldfld        .Round
+0018 mul
+0019 stloc.0
+001A ldloc.0
+001B ldloc.0
+001C ldc.i4.4
+001D div
+001E add
+001F stloc.0
+0020 ldnull
+0021 stloc.3
+0022 call         LuaHelper.GetDataManager
+0027 callvirt     DataManager.get_SuperTankInfo
+002C callvirt     SuperTankInfo.get_Share
+0031 callvirt     Share.get_GameRoomInfo
+0036 callvirt     GameRoomInfo.get_Target
+003B stloc.s      local(0x0004)
+003D ldc.i4.0
+003E stloc.s      local(0x0005)
+0040 br.s         176
+0042 call         CFightManage.get_Instance
+0047 ldc.i4       7700
+004C ldloc.s      local(0x0005)
+004E callvirt     CFightManage.GetElement
+0053 castclass    .CTarget
+0058 stloc.3
+0059 ldloc.3
+005A brfalse.s    170
+005C ldloc.3
+005D callvirt     CTarget.isOut
+0062 brtrue.s     170
+0064 ldarg.0
+0065 ldfld        .m_pDPos
+006A callvirt     CPoint.get_x
+006F ldloc.3
+0070 callvirt     CTarget.getPosX
+0075 sub
+0076 ldarg.0
+0077 ldfld        .m_pDPos
+007C callvirt     CPoint.get_y
+0081 ldloc.3
+0082 callvirt     CTarget.getPosY
+0087 ldc.i4.s     17
+0089 sub
+008A sub
+008B stloc.2
+008C dup
+008D mul
+008E ldloc.2
+008F ldloc.2
+0090 mul
+0091 add
+0092 stloc.1
+0093 ldloc.1
+0094 ldloc.0
+0095 bge.s        170
+0097 ldarg.0
+0098 ldloc.3
+0099 ldloc.1
+009A ldloc.0
+009B call         CBullet.TargetDamage
+00A0 stloc.s      local(0x0006)
+00A2 ldloc.3
+00A3 ldloc.s      local(0x0006)
+00A5 callvirt     CTarget.setDamage
+00AA ldloc.s      local(0x0005)
+00AC ldc.i4.1
+00AD add
+00AE stloc.s      local(0x0005)
+00B0 ldloc.s      local(0x0005)
+00B2 ldloc.s      local(0x0004)
+00B4 blt.s        66
+00B6 ret
+
+METHOD LuaFramework.Logic.CCannN.ProcessElement
+000C ldarg.0
+000D ldarg.1
+000E call         CBullet.ProcessElement
+0013 ldarg.0
+0014 call         CBullet.GetDirect
+0019 ldarg.0
+001A ldfld        .Crush
+001F brfalse      173
+0024 ldarg.0
+0025 call         CBullet.DrawCircle
+002A ldarg.0
+002B call         CBullet.CheckDamage
+0030 ldarg.0
+0031 ldfld        .Camera
+0036 brfalse.s    79
+0038 call         LuaHelper.GetDataManager
+003D callvirt     DataManager.get_SuperTankInfo
+0042 ldarg.0
+0043 call         CBullet.GetNumber
+0048 ldc.i4.1
+0049 ldc.i4.0
+004A callvirt     SuperTankInfo.ChangeCamera
+004F ldarg.0
+0050 callvirt     CBullet.DestroyElement
+0055 call         CFightManage.get_Instance
+005A ldc.i4.1
+005B ldarg.0
+005C ldfld        .m_pDPos
+0061 callvirt     CPoint.get_x
+0066 ldarg.0
+0067 ldfld        .m_pDPos
+006C callvirt     CPoint.get_y
+0071 ldc.i4       8500
+0076 callvirt     CFightManage.Explosion
+007B call         CFightManage.get_Instance
+0080 ldarg.0
+0081 ldfld        .m_pDPos
+0086 callvirt     CPoint.get_x
+008B ldarg.0
+008C ldfld        .m_pDPos
+0091 callvirt     CPoint.get_y
+0096 ldarg.0
+0097 ldfld        .Round
+009C ldarg.0
+009D ldfld        .Round
+00A2 callvirt     CFightManage.Flame
+00A7 ldarg.0
+00A8 call         CBullet.CreateItemEffect
+00AD ret
+
+METHOD LuaFramework.Logic.CCannS.ProcessElement
+000C ldarg.0
+000D ldarg.1
+000E call         CBullet.ProcessElement
+0013 ldarg.0
+0014 call         CBullet.GetDirect
+0019 ldarg.0
+001A ldfld        .Crush
+001F brfalse      173
+0024 ldarg.0
+0025 call         CBullet.DrawCircle
+002A ldarg.0
+002B call         CBullet.CheckDamage
+0030 ldarg.0
+0031 ldfld        .Camera
+0036 brfalse.s    79
+0038 call         LuaHelper.GetDataManager
+003D callvirt     DataManager.get_SuperTankInfo
+0042 ldarg.0
+0043 call         CBullet.GetNumber
+0048 ldc.i4.1
+0049 ldc.i4.0
+004A callvirt     SuperTankInfo.ChangeCamera
+004F ldarg.0
+0050 callvirt     CBullet.DestroyElement
+0055 call         CFightManage.get_Instance
+005A ldc.i4.0
+005B ldarg.0
+005C ldfld        .m_pDPos
+0061 callvirt     CPoint.get_x
+0066 ldarg.0
+0067 ldfld        .m_pDPos
+006C callvirt     CPoint.get_y
+0071 ldc.i4       8550
+0076 callvirt     CFightManage.Explosion
+007B call         CFightManage.get_Instance
+0080 ldarg.0
+0081 ldfld        .m_pDPos
+0086 callvirt     CPoint.get_x
+008B ldarg.0
+008C ldfld        .m_pDPos
+0091 callvirt     CPoint.get_y
+0096 ldarg.0
+0097 ldfld        .Round
+009C ldarg.0
+009D ldfld        .Round
+00A2 callvirt     CFightManage.Flame
+00A7 ldarg.0
+00A8 call         CBullet.CreateItemEffect
+00AD ret
+
+METHOD LuaFramework.Logic.CMap.GetHeight
+000C ldarg.1
+000D ldc.i4.3
+000E div
+000F starg.s      argument(0x0001)
+0011 ldarg.2
+0012 ldc.i4.3
+0013 div
+0014 starg.s      argument(0x0002)
+0016 ldarg.1
+0017 ldc.i4.0
+0018 blt.s        35
+001A ldarg.1
+001B ldarg.0
+001C ldfld        .m_iWidthN
+0021 blt.s        41
+0023 ldc.i4       30000
+0028 ret
+0029 ldarg.2
+002A ldc.i4.0
+002B blt.s        95
+002D ldarg.2
+002E ldarg.0
+002F ldfld        .m_iHeightN
+0034 bge.s        95
+0036 br.s         76
+0038 ldarg.2
+0039 ldc.i4.1
+003A add
+003B dup
+003C starg.s      argument(0x0002)
+003E ldarg.0
+003F ldfld        .m_iHeightN
+0044 blt.s        76
+0046 ldc.i4       30000
+004B ret
+004C ldarg.0
+004D ldfld        .m_pMapPoint
+0052 ldarg.1
+0053 ldarg.2
+0054 call         .Get
+0059 brfalse.s    56
+005B ldarg.2
+005C ldc.i4.3
+005D mul
+005E ret
+005F ldc.i4.0
+0060 stloc.0
+0061 br.s         122
+0063 ldarg.0
+0064 ldfld        .m_pMapPoint
+0069 ldarg.1
+006A ldloc.0
+006B call         .Get
+0070 brfalse.s    118
+0072 ldloc.0
+0073 ldc.i4.3
+0074 mul
+0075 ret
+0076 ldloc.0
+0077 ldc.i4.1
+0078 add
+0079 stloc.0
+007A ldloc.0
+007B ldarg.0
+007C ldfld        .m_iHeightN
+0081 blt.s        99
+0083 ldc.i4       30000
+0088 ret
+
+METHOD LuaFramework.Logic.CMap.GetServerLogicY
+0001 ldarg.0
+0002 call         CMap.get_MapTopHeight
+0007 ldarg.1
+0008 add
+0009 ret
+
+METHOD LuaFramework.Logic.CPoint.get_x
+0001 ldarg.0
+0002 ldfld        ._x
+0007 ret
+
+METHOD LuaFramework.Logic.CPoint.set_x
+0001 ldarg.0
+0002 ldarg.1
+0003 stfld        ._x
+0008 ret
+
+METHOD LuaFramework.Logic.CPoint.get_y
+0001 ldarg.0
+0002 ldfld        ._y
+0007 ret
+
+METHOD LuaFramework.Logic.CPoint.set_y
+0001 ldarg.0
+0002 ldarg.1
+0003 stfld        ._y
+0008 ret
+
+
+METHOD LuaFramework.Logic.CMap.LoadPoint
+000C call         LuaHelper.GetResManager
+0011 ldarg.1
+0012 ldstr        "_bk"
+0017 call         .Concat
+001C ldstr        "Data/model/map/i16/"
+0021 ldstr        "Data/model/map"
+0026 ldstr        "txt"
+002B callvirt     .?
+0030 stloc.0
+0031 ldloc.0
+0032 ldnull
+0033 call         .op_Inequality
+0038 brfalse      345
+003D ldloc.0
+003E callvirt     .get_bytes
+0043 newobj       ..ctor
+0048 newobj       ..ctor
+004D stloc.1
+004E ldarg.0
+004F ldloc.1
+0050 callvirt     .ReadInt32
+0055 stfld        .m_iWidthN
+005A ldarg.0
+005B ldarg.0
+005C ldfld        .m_iWidthN
+0061 ldc.i4.3
+0062 mul
+0063 stfld        .m_iWidthX3
+0068 ldarg.0
+0069 ldloc.1
+006A callvirt     .ReadInt32
+006F stfld        .m_iHeightN
+0074 ldarg.0
+0075 ldarg.0
+0076 ldfld        .m_iHeightN
+007B ldc.i4.3
+007C mul
+007D stfld        .m_iHeightX3
+0082 ldloc.1
+0083 ldarg.0
+0084 ldfld        .m_iWidthN
+0089 ldarg.0
+008A ldfld        .m_iHeightN
+008F mul
+0090 ldc.i4.4
+0091 rem
+0092 conv.r8
+0093 ldc.r8       0.01
+009C bgt.s        175
+009E ldarg.0
+009F ldfld        .m_iWidthN
+00A4 ldarg.0
+00A5 ldfld        .m_iHeightN
+00AA mul
+00AB ldc.i4.4
+00AC div
+00AD br.s         192
+00AF ldarg.0
+00B0 ldfld        .m_iWidthN
+00B5 ldarg.0
+00B6 ldfld        .m_iHeightN
+00BB mul
+00BC ldc.i4.4
+00BD div
+00BE ldc.i4.1
+00BF add
+00C0 callvirt     .ReadBytes
+00C5 stloc.2
+00C6 ldarg.0
+00C7 ldarg.0
+00C8 ldfld        .m_iWidthN
+00CD ldarg.0
+00CE ldfld        .m_iHeightN
+00D3 newobj       ..ctor
+00D8 stfld        .m_pMapPoint
+00DD ldc.i4.0
+00DE stloc.3
+00DF br.s         336
+00E1 ldc.i4.0
+00E2 stloc.s      local(0x0004)
+00E4 br.s         322
+00E6 ldloc.3
+00E7 ldloc.s      local(0x0004)
+00E9 ldarg.0
+00EA ldfld        .m_iWidthN
+00EF mul
+00F0 add
+00F1 dup
+00F2 ldc.i4.4
+00F3 div
+00F4 stloc.s      local(0x0005)
+00F6 ldc.i4.4
+00F7 rem
+00F8 ldc.i4.2
+00F9 mul
+00FA stloc.s      local(0x0006)
+00FC ldloc.2
+00FD ldloc.s      local(0x0005)
+00FF ldelem.u1
+0100 ldloc.s      local(0x0006)
+0102 ldc.i4.s     31
+0104 and
+0105 shr
+0106 ldc.i4.1
+0107 and
+0108 ldc.i4.1
+0109 bne.un.s     316
+010B ldloc.2
+010C ldloc.s      local(0x0005)
+010E ldelem.u1
+010F ldloc.s      local(0x0006)
+0111 ldc.i4.1
+0112 add
+0113 ldc.i4.s     31
+0115 and
+0116 shr
+0117 ldc.i4.1
+0118 and
+0119 ldc.i4.1
+011A bne.un.s     301
+011C ldarg.0
+011D ldfld        .m_pMapPoint
+0122 ldloc.3
+0123 ldloc.s      local(0x0004)
+0125 ldc.i4.2
+0126 call         .Set
+012B br.s         316
+012D ldarg.0
+012E ldfld        .m_pMapPoint
+0133 ldloc.3
+0134 ldloc.s      local(0x0004)
+0136 ldc.i4.1
+0137 call         .Set
+013C ldloc.s      local(0x0004)
+013E ldc.i4.1
+013F add
+0140 stloc.s      local(0x0004)
+0142 ldloc.s      local(0x0004)
+0144 ldarg.0
+0145 ldfld        .m_iHeightN
+014A blt.s        230
+014C ldloc.3
+014D ldc.i4.1
+014E add
+014F stloc.3
+0150 ldloc.3
+0151 ldarg.0
+0152 ldfld        .m_iWidthN
+0157 blt.s        225
+0159 ret
+
+METHOD LuaFramework.Logic.CBullet.CheckDamage
+000C ldarg.0
+000D ldfld        .Round
+0012 ldarg.0
+0013 ldfld        .Round
+0018 mul
+0019 stloc.0
+001A ldloc.0
+001B ldloc.0
+001C ldc.i4.4
+001D div
+001E add
+001F stloc.0
+0020 call         CFightManage.get_Instance
+0025 ldfld        .m_oCharacters
+002A callvirt     .get_Values
+002F callvirt     .GetEnumerator
+0034 stloc.3
+0035 br           520
+003A ldloca.s     local(0x0003)
+003C call         .get_Current
+0041 stloc.s      local(0x0004)
+0043 ldloc.s      local(0x0004)
+0045 brfalse      520
+004A ldloc.s      local(0x0004)
+004C ldfld        .Team
+0051 ldc.i4       200
+0056 beq          520
+005B ldloc.s      local(0x0004)
+005D ldfld        .Action
+0062 ldc.i4.s     12
+0064 beq          520
+0069 ldloc.s      local(0x0004)
+006B ldfld        .DeadStatus
+0070 brtrue       520
+0075 ldarg.0
+0076 ldfld        .m_pDPos
+007B callvirt     CPoint.get_x
+0080 ldloc.s      local(0x0004)
+0082 ldfld        .m_pPos
+0087 callvirt     CPoint.get_x
+008C ldc.i4.3
+008D div
+008E sub
+008F ldarg.0
+0090 ldfld        .Iden
+0095 ldc.i4       18932
+009A bne.un.s     185
+009C ldarg.0
+009D ldfld        .m_pDPos
+00A2 callvirt     CPoint.get_y
+00A7 ldloc.s      local(0x0004)
+00A9 ldfld        .m_pPos
+00AE callvirt     CPoint.get_y
+00B3 ldc.i4.3
+00B4 div
+00B5 sub
+00B6 stloc.2
+00B7 br.s         215
+00B9 ldarg.0
+00BA ldfld        .m_pDPos
+00BF callvirt     CPoint.get_y
+00C4 ldloc.s      local(0x0004)
+00C6 ldfld        .m_pPos
+00CB callvirt     CPoint.get_y
+00D0 ldc.i4.3
+00D1 div
+00D2 ldc.i4.s     17
+00D4 sub
+00D5 sub
+00D6 stloc.2
+00D7 dup
+00D8 mul
+00D9 ldloc.2
+00DA ldloc.2
+00DB mul
+00DC add
+00DD stloc.1
+00DE call         LuaHelper.GetDataManager
+00E3 callvirt     DataManager.get_SuperTankInfo
+00E8 callvirt     SuperTankInfo.get_Share
+00ED callvirt     Share.get_GameRoomInfo
+00F2 callvirt     GameRoomInfo.get_Damage
+00F7 brtrue.s     253
+00F9 ldloc.1
+00FA ldloc.0
+00FB blt.s        308
+00FD call         LuaHelper.GetDataManager
+0102 callvirt     DataManager.get_SuperTankInfo
+0107 callvirt     SuperTankInfo.get_Share
+010C callvirt     Share.get_GameRoomInfo
+0111 callvirt     GameRoomInfo.get_Damage
+0116 brfalse      507
+011B ldloc.1
+011C ldloc.0
+011D bge          507
+0122 ldloc.s      local(0x0004)
+0124 ldfld        .Team
+0129 ldarg.0
+012A ldfld        .Team
+012F beq          507
+0134 ldarg.0
+0135 ldloc.s      local(0x0004)
+0137 ldloc.1
+0138 ldloc.0
+0139 call         CBullet.CharacterDamage
+013E stloc.s      local(0x0005)
+0140 ldloc.s      local(0x0004)
+0142 ldfld        .Team
+0147 ldarg.0
+0148 ldfld        .Team
+014D beq.s        343
+014F ldarg.0
+0150 ldloc.s      local(0x0005)
+0152 call         CBullet.SendUserDamage
+0157 ldloc.s      local(0x0004)
+0159 ldfld        .Shiled
+015E call         LuaHelper.GetDataManager
+0163 callvirt     DataManager.get_SuperTankInfo
+0168 ldfld        .m_dwFalse
+016D bne.un       520
+0172 ldloc.s      local(0x0004)
+0174 ldloc.s      local(0x0004)
+0176 ldfld        .CurrentEnergy
+017B ldloc.s      local(0x0005)
+017D add
+017E stfld        .CurrentEnergy
+0183 call         LuaHelper.GetDataManager
+0188 callvirt     DataManager.get_SuperTankInfo
+018D callvirt     SuperTankInfo.get_MyPlayer
+0192 ldloc.s      local(0x0004)
+0194 bne.un.s     415
+0196 ldloc.s      local(0x0004)
+0198 ldloc.s      local(0x0005)
+019A stfld        .m_nDamageEffect
+019F ldloc.s      local(0x0004)
+01A1 ldloc.s      local(0x0005)
+01A3 neg
+01A4 ldc.i4.1
+01A5 callvirt     CCharacter.SetImpact
+01AA ldloc.s      local(0x0004)
+01AC ldfld        .CurrentEnergy
+01B1 ldc.i4.0
+01B2 blt.s        496
+01B4 ldloc.s      local(0x0004)
+01B6 ldfld        .DeadStatus
+01BB brtrue.s     496
+01BD ldloc.s      local(0x0004)
+01BF ldc.i4.0
+01C0 stfld        .CurrentEnergy
+01C5 ldloc.s      local(0x0004)
+01C7 ldc.i4.1
+01C8 callvirt     CCharacter.SetDeadStatus
+01CD call         LuaHelper.GetDataManager
+01D2 callvirt     DataManager.get_SuperTankInfo
+01D7 callvirt     SuperTankInfo.get_MyPlayer
+01DC ldloc.s      local(0x0004)
+01DE bne.un.s     496
+01E0 call         LuaHelper.GetNetManager
+01E5 ldc.i4       17232
+01EA ldc.i4.0
+01EB callvirt     NetworkManager.sendMsg
+01F0 ldloc.s      local(0x0004)
+01F2 ldc.i4.5
+01F3 ldc.i4.0
+01F4 callvirt     CCharacter.ChangeAction
+01F9 br.s         520
+01FB ldloc.1
+01FC ldloc.0
+01FD bge.s        520
+01FF ldloc.s      local(0x0004)
+0201 ldc.i4.5
+0202 ldc.i4.0
+0203 callvirt     CCharacter.ChangeAction
+0208 ldloca.s     local(0x0003)
+020A call         .MoveNext
+020F brtrue       58
+0214 leave.s      548
+0216 ldloca.s     local(0x0003)
+0218 constrained. .?
+021E callvirt     .Dispose
+0223 endfinally
+0224 call         LuaHelper.GetDataManager
+0229 callvirt     DataManager.get_SuperTankInfo
+022E callvirt     SuperTankInfo.get_Share
+0233 callvirt     Share.get_GameRoomInfo
+0238 callvirt     GameRoomInfo.get_NormalMode
+023D brtrue.s     581
+023F ldarg.0
+0240 call         CBullet.CheckTargetDamage
+0245 ret
+
+METHOD LuaFramework.Logic.CFightManage.GetCharacter
+000C ldarg.0
+000D ldfld        .m_oCharacters
+0012 callvirt     .get_Values
+0017 callvirt     .GetEnumerator
+001C stloc.0
+001D br.s         111
+001F ldloca.s     local(0x0000)
+0021 call         .get_Current
+0026 stloc.1
+0027 ldloc.1
+0028 brfalse.s    111
+002A ldloc.1
+002B ldfld        .m_pPos
+0030 callvirt     CPoint.get_x
+0035 ldc.i4.s     30
+0037 sub
+0038 ldarg.1
+0039 bgt.s        111
+003B ldloc.1
+003C ldfld        .m_pPos
+0041 callvirt     CPoint.get_x
+0046 ldc.i4.s     30
+0048 add
+0049 ldarg.1
+004A blt.s        111
+004C ldloc.1
+004D ldfld        .m_pPos
+0052 callvirt     CPoint.get_y
+0057 ldc.i4.s     51
+0059 sub
+005A ldarg.2
+005B bgt.s        111
+005D ldloc.1
+005E ldfld        .m_pPos
+0063 callvirt     CPoint.get_y
+0068 ldarg.2
+0069 blt.s        111
+006B ldloc.1
+006C stloc.2
+006D leave.s      138
+006F ldloca.s     local(0x0000)
+0071 call         .MoveNext
+0076 brtrue.s     31
+0078 leave.s      136
+007A ldloca.s     local(0x0000)
+007C constrained. .?
+0082 callvirt     .Dispose
+0087 endfinally
+0088 ldnull
+0089 ret
+008A ldloc.2
+008B ret
+
+METHOD LuaFramework.Logic.CIonCannon.CheckDamage
+000C call         LuaHelper.GetDataManager
+0011 callvirt     DataManager.get_SuperTankInfo
+0016 stloc.0
+0017 ldc.i4.0
+0018 stloc.1
+0019 call         LuaHelper.GetXMLManager
+001E ldc.i4.s     9
+0020 callvirt     XMLManager.GetTankInfo
+0025 stloc.2
+0026 ldloc.2
+0027 brfalse.s    48
+0029 ldloc.2
+002A ldfld        .A2Round
+002F stloc.1
+0030 ldloc.1
+0031 ldloc.1
+0032 mul
+0033 stloc.1
+0034 ldloc.1
+0035 ldloc.1
+0036 ldc.i4.4
+0037 div
+0038 add
+0039 stloc.1
+003A call         CFightManage.get_Instance
+003F ldfld        .m_oCharacters
+0044 callvirt     .get_Values
+0049 callvirt     .GetEnumerator
+004E stloc.s      local(0x0005)
+0050 br           319
+0055 ldloca.s     local(0x0005)
+0057 call         .get_Current
+005C stloc.s      local(0x0006)
+005E ldloc.s      local(0x0006)
+0060 brfalse      319
+0065 ldloc.s      local(0x0006)
+0067 ldfld        .Action
+006C ldc.i4.s     12
+006E beq          319
+0073 ldloc.s      local(0x0006)
+0075 ldfld        .DeadStatus
+007A brtrue       319
+007F ldarg.0
+0080 ldfld        .m_pPos
+0085 callvirt     CPoint.get_x
+008A ldloc.s      local(0x0006)
+008C ldfld        .m_pPos
+0091 callvirt     CPoint.get_x
+0096 ldc.i4.3
+0097 div
+0098 sub
+0099 ldarg.0
+009A ldfld        .m_pPos
+009F callvirt     CPoint.get_y
+00A4 ldloc.s      local(0x0006)
+00A6 ldfld        .m_pPos
+00AB callvirt     CPoint.get_y
+00B0 ldc.i4.3
+00B1 div
+00B2 sub
+00B3 stloc.s      local(0x0004)
+00B5 dup
+00B6 mul
+00B7 ldloc.s      local(0x0004)
+00B9 ldloc.s      local(0x0004)
+00BB mul
+00BC add
+00BD stloc.3
+00BE ldloc.3
+00BF ldloc.1
+00C0 bge.s        319
+00C2 ldarg.0
+00C3 ldloc.s      local(0x0006)
+00C5 ldloc.3
+00C6 ldloc.1
+00C7 call         CIonCannon.CharacterDamage
+00CC stloc.s      local(0x0007)
+00CE ldloc.s      local(0x0006)
+00D0 ldfld        .Shiled
+00D5 ldloc.0
+00D6 ldfld        .m_dwFalse
+00DB bne.un.s     319
+00DD ldloc.s      local(0x0006)
+00DF ldloc.s      local(0x0006)
+00E1 ldfld        .CurrentEnergy
+00E6 ldloc.s      local(0x0007)
+00E8 add
+00E9 stfld        .CurrentEnergy
+00EE ldloc.s      local(0x0006)
+00F0 ldloc.s      local(0x0007)
+00F2 neg
+00F3 ldc.i4.1
+00F4 callvirt     CCharacter.SetImpact
+00F9 ldloc.s      local(0x0006)
+00FB ldfld        .CurrentEnergy
+0100 ldc.i4.0
+0101 blt.s        310
+0103 ldloc.s      local(0x0006)
+0105 ldfld        .DeadStatus
+010A brtrue.s     310
+010C ldloc.s      local(0x0006)
+010E ldc.i4.0
+010F stfld        .CurrentEnergy
+0114 ldloc.s      local(0x0006)
+0116 ldc.i4.1
+0117 callvirt     CCharacter.SetDeadStatus
+011C ldloc.0
+011D callvirt     SuperTankInfo.get_MyPlayer
+0122 ldloc.s      local(0x0006)
+0124 bne.un.s     310
+0126 call         LuaHelper.GetNetManager
+012B ldc.i4       17232
+0130 ldc.i4.0
+0131 callvirt     NetworkManager.sendMsg
+0136 ldloc.s      local(0x0006)
+0138 ldc.i4.5
+0139 ldc.i4.0
+013A callvirt     CCharacter.ChangeAction
+013F ldloca.s     local(0x0005)
+0141 call         .MoveNext
+0146 brtrue       85
+014B leave.s      347
+014D ldloca.s     local(0x0005)
+014F constrained. .?
+0155 callvirt     .Dispose
+015A endfinally
+015B ldloc.0
+015C callvirt     SuperTankInfo.get_Share
+0161 callvirt     Share.get_GameRoomInfo
+0166 callvirt     GameRoomInfo.get_NormalMode
+016B pop
+016C ret

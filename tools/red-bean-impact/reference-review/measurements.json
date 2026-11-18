@@ -1,0 +1,764 @@
+{
+  "source": "本机 ft2 目录/原版分析",
+  "versionCompared": "4.0.5",
+  "sourceHashes": [
+    {
+      "file": "/Users/larkin_1/Downloads/ft2/extracted/assets/Dlls/MyScripts.dll.bytes",
+      "sha256": "bda84cf8839f7d22afb68700285b0db21881e6f391c86d2c467c3bf2a3edd8a5"
+    },
+    {
+      "file": "/Users/larkin_1/Downloads/ft2/resources/config/decrypted/Character.txt",
+      "sha256": "8d8d84d1901a19cb8b28b005a8d06b2c14b8a4e6bf71ab06ea4dc264435d83d3"
+    },
+    {
+      "file": "/Users/larkin_1/Downloads/ft2/resources/tank/char03.png",
+      "sha256": "5b666ada4815bf29bc6549a8ad91cfc13f8c60d990c7e0e2d2c75a648602abad"
+    },
+    {
+      "file": "/Users/larkin_1/Downloads/ft2/resources/tank/char03.i16.bytes",
+      "sha256": "14071064354d33521cdf95c060b46ac4729f5c5fa24d843ebc14dc33389dc47e"
+    },
+    {
+      "file": "/Users/larkin_1/Downloads/ft2/resources/map/stageN_8f_bk",
+      "sha256": "39dc396506bc6a25d5c1b86437a3bda6e8aa9464e66504f762a2ac02815c6320"
+    }
+  ],
+  "referenceHashes": [
+    {
+      "file": "/Users/larkin_1/Downloads/piggymiCannonRefer/老土普通武器独木桥正中挖坑（分辨率有畸变）.png",
+      "sha256": "d20d978f682dae0f589ce3675c02be546360f158c30ba66f13c05a6631562c84"
+    },
+    {
+      "file": "/Users/larkin_1/Downloads/piggymiCannonRefer/老土普通武器独木桥未正中挖坑（分辨率有畸变）.png",
+      "sha256": "5fb286c68108774109f14903afb6ff22b9f09ae95258cff73cf8dfa41342ed2f"
+    }
+  ],
+  "body": {
+    "native": "axis-aligned 20x17 grid / 60x51 logical; not rotated",
+    "game": "60x51 logical rotated body (OBB)",
+    "nativeOrdinaryDamageReference": "x=foot.x; y=foot.y-51"
+  },
+  "attributeRule": {
+    "highOverlap": 0.8,
+    "lowOverlap": 0.9,
+    "specialIncrease": {
+      "attackerAttribBit": "0x80",
+      "defenderCharacterBit": "0x10",
+      "operation": "damage += trunc(damage/10)"
+    },
+    "cannonSpecial": {
+      "sourceIndex": 3,
+      "attrib": 128,
+      "power": 420,
+      "round": 35
+    },
+    "mineDefender": {
+      "sourceIndex": 9,
+      "character": 65,
+      "defence": 115,
+      "energy": 1150
+    },
+    "nativeCannonToMineFactor": 1,
+    "currentCannonToMineFactor": 0.8
+  },
+  "smallRedBean": {
+    "impact": [
+      851.0771180910398,
+      757.0979089663879
+    ],
+    "currentReference": [
+      815.579557450454,
+      749.4266029549638
+    ],
+    "nativeConventionReference": [
+      828,
+      747
+    ],
+    "sameImpactComparison": {
+      "current": 325,
+      "sameRotatedReferenceNativeAttributes": 406,
+      "nativeReferenceCurrentEra": 388,
+      "nativeReferenceNativeAttributes": 485,
+      "nativeMaximum": 610
+    },
+    "aabbFirstContactTangentApproximation": {
+      "point": {
+        "x": 858,
+        "y": 756.6727142630555,
+        "fraction": 0.9202767002281671
+      },
+      "distance": 10.44030650891055,
+      "sourceOnlyDamage": 438
+    },
+    "caution": "485 preserves the logged impact; it is not a complete source-game replay. Changing to AABB shifts first contact and gives about438 on the same local incoming ray."
+  },
+  "spriteMatching": [
+    {
+      "file": "/Users/larkin_1/Downloads/piggymiCannonRefer/老土普通武器独木桥正中挖坑（分辨率有畸变）.png",
+      "cropOrigin": [
+        210,
+        0
+      ],
+      "best": [
+        [
+          0.006959620005731736,
+          82,
+          true,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          230,
+          15,
+          94,
+          63
+        ],
+        [
+          0.007070606514627398,
+          81,
+          true,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          230,
+          15,
+          94,
+          63
+        ],
+        [
+          0.007070606514627398,
+          83,
+          true,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          230,
+          15,
+          94,
+          63
+        ],
+        [
+          0.007070606514627398,
+          85,
+          true,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          230,
+          15,
+          94,
+          63
+        ],
+        [
+          0.007252579698389714,
+          86,
+          true,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          230,
+          15,
+          94,
+          63
+        ],
+        [
+          0.009175643717978035,
+          82,
+          true,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          228,
+          15,
+          97,
+          63
+        ],
+        [
+          0.009280404488108521,
+          81,
+          true,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          228,
+          15,
+          97,
+          63
+        ],
+        [
+          0.009280404488108521,
+          83,
+          true,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          228,
+          15,
+          97,
+          63
+        ],
+        [
+          0.009280404488108521,
+          85,
+          true,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          228,
+          15,
+          97,
+          63
+        ],
+        [
+          0.009634960552011221,
+          86,
+          true,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          228,
+          15,
+          97,
+          63
+        ],
+        [
+          0.010098212856089594,
+          82,
+          true,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          231,
+          15,
+          92,
+          63
+        ],
+        [
+          0.010165944251631137,
+          81,
+          true,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          231,
+          15,
+          92,
+          63
+        ],
+        [
+          0.010165944251631137,
+          83,
+          true,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          231,
+          15,
+          92,
+          63
+        ],
+        [
+          0.010165944251631137,
+          85,
+          true,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          231,
+          15,
+          92,
+          63
+        ],
+        [
+          0.010254420433321738,
+          86,
+          true,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          231,
+          15,
+          92,
+          63
+        ]
+      ],
+      "atlasBox": [
+        1916,
+        790,
+        99,
+        93
+      ]
+    },
+    {
+      "file": "/Users/larkin_1/Downloads/piggymiCannonRefer/老土普通武器独木桥未正中挖坑（分辨率有畸变）.png",
+      "cropOrigin": [
+        530,
+        25
+      ],
+      "best": [
+        [
+          0.010211218951354802,
+          82,
+          false,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          94,
+          63
+        ],
+        [
+          0.010779982492609377,
+          81,
+          false,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          94,
+          63
+        ],
+        [
+          0.010779982492609377,
+          83,
+          false,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          94,
+          63
+        ],
+        [
+          0.010779982492609377,
+          85,
+          false,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          94,
+          63
+        ],
+        [
+          0.011298418512991973,
+          86,
+          false,
+          0.9500000000000002,
+          0.6750000000000002,
+          0,
+          551,
+          46,
+          94,
+          63
+        ],
+        [
+          0.01250979952469839,
+          82,
+          false,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          550,
+          46,
+          97,
+          63
+        ],
+        [
+          0.012586438517177273,
+          82,
+          false,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          92,
+          63
+        ],
+        [
+          0.012882380249722837,
+          81,
+          false,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          92,
+          63
+        ],
+        [
+          0.012882380249722837,
+          83,
+          false,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          92,
+          63
+        ],
+        [
+          0.012882380249722837,
+          85,
+          false,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          92,
+          63
+        ],
+        [
+          0.013057074071389339,
+          86,
+          false,
+          0.9250000000000002,
+          0.6750000000000002,
+          0,
+          552,
+          46,
+          92,
+          63
+        ],
+        [
+          0.013156243857988652,
+          81,
+          false,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          550,
+          46,
+          97,
+          63
+        ],
+        [
+          0.013156243857988652,
+          83,
+          false,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          550,
+          46,
+          97,
+          63
+        ],
+        [
+          0.013156243857988652,
+          85,
+          false,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          550,
+          46,
+          97,
+          63
+        ],
+        [
+          0.014034502177651653,
+          86,
+          false,
+          0.9750000000000002,
+          0.6750000000000002,
+          0,
+          550,
+          46,
+          97,
+          63
+        ]
+      ],
+      "atlasBox": [
+        1916,
+        790,
+        99,
+        93
+      ]
+    }
+  ],
+  "screenshotScale": {
+    "x": 0.95,
+    "y": 0.675,
+    "xRange": [
+      0.925,
+      0.975
+    ],
+    "yRange": [
+      0.65,
+      0.7
+    ],
+    "method": "masked RGB matching against source char03 atlas; 99x93 crop; frame number not established"
+  },
+  "measurements": {
+    "hit": {
+      "imageSize": [
+        446,
+        452
+      ],
+      "tankBox": [
+        230,
+        15,
+        94,
+        63
+      ],
+      "openingWidth": [
+        274,
+        290
+      ],
+      "visibleDepthAgainstRimChord": [
+        36,
+        44
+      ],
+      "rimPoints": [
+        [
+          136,
+          38
+        ],
+        [
+          422,
+          34
+        ]
+      ],
+      "floorEstimate": [
+        276.5,
+        75.35
+      ],
+      "occlusion": "tank masks central floor; original unbroken ground profile not provided",
+      "sourceContourFit": {
+        "center": [
+          276.53992344,
+          -5.65006463
+        ],
+        "scale": [
+          0.95,
+          0.675
+        ],
+        "medianAbsolutePixelError": 1.7406409291
+      },
+      "sourceBodyProjection": {
+        "foot": [
+          278.45,
+          75.75
+        ],
+        "box": [
+          249.95,
+          41.325,
+          306.95,
+          75.75
+        ],
+        "note": "Inferred post-impact body projection from the matched frame anchor; not a recorded pre-impact collider."
+      }
+    },
+    "miss": {
+      "imageSize": [
+        1086,
+        544
+      ],
+      "tankBox": [
+        552,
+        46,
+        94,
+        63
+      ],
+      "openingWidth": [
+        333,
+        339
+      ],
+      "pitDepth": [
+        81,
+        89
+      ],
+      "bridgeThickness": [
+        187,
+        192
+      ],
+      "rimPoints": [
+        [
+          675,
+          113
+        ],
+        [
+          1011,
+          113
+        ]
+      ],
+      "floorEstimate": [
+        842.85,
+        197.68
+      ],
+      "sourceContourFit": {
+        "center": [
+          842.84994827,
+          116.67771778
+        ],
+        "scale": [
+          0.95,
+          0.675
+        ],
+        "medianAbsolutePixelError": 1.3972822182
+      },
+      "freeContourFit": {
+        "center": [
+          842.751417,
+          117.642264
+        ],
+        "scale": [
+          0.945390524,
+          0.66754364
+        ],
+        "medianAbsolutePixelError": 1.260391623
+      },
+      "sourceBodyProjection": {
+        "foot": [
+          597.6,
+          106.75
+        ],
+        "box": [
+          569.1,
+          72.325,
+          626.1,
+          106.75
+        ],
+        "note": "Inferred using the matched source frame anchor."
+      }
+    }
+  },
+  "currentArt": [
+    {
+      "crew": "mimi",
+      "width": 68,
+      "height": 71,
+      "localBounds": {
+        "left": -35,
+        "top": -49,
+        "right": 33,
+        "bottom": 22
+      }
+    },
+    {
+      "crew": "dad",
+      "width": 67.5,
+      "height": 70.25,
+      "localBounds": {
+        "left": -34.5,
+        "top": -48.25,
+        "right": 33,
+        "bottom": 22
+      }
+    },
+    {
+      "crew": "fox",
+      "width": 71,
+      "height": 74,
+      "localBounds": {
+        "left": -38,
+        "top": -52,
+        "right": 33,
+        "bottom": 22
+      }
+    },
+    {
+      "crew": "fish",
+      "width": 68,
+      "height": 67,
+      "localBounds": {
+        "left": -35,
+        "top": -45,
+        "right": 33,
+        "bottom": 22
+      }
+    }
+  ],
+  "currentFlatSoilCases": [
+    {
+      "scenario": "平地：无人地面命中",
+      "removed": 32994,
+      "bounds": {
+        "left": 825,
+        "right": 1175,
+        "top": 450,
+        "bottom": 569
+      },
+      "width": 351,
+      "depth": 120,
+      "centerDepth": 120,
+      "bridgeThickness": 210
+    },
+    {
+      "scenario": "平地：头部参照点命中",
+      "removed": 15606,
+      "bounds": {
+        "left": 843,
+        "right": 1157,
+        "top": 450,
+        "bottom": 518
+      },
+      "width": 315,
+      "depth": 69,
+      "centerDepth": 69,
+      "bridgeThickness": 210
+    }
+  ],
+  "sourceMap": {
+    "filename": "stageN_8f_bk",
+    "width": 1536,
+    "height": 238,
+    "decode": "idx=x+y*width; lowbit0->air; lowbit1/highbit0->solid1; lowbit1/highbit1->special2",
+    "samples": [
+      {
+        "fraction": 0.2,
+        "gridX": 307,
+        "top": 32,
+        "bottom": 123,
+        "thicknessGrid": 92,
+        "thicknessLogical": 276
+      },
+      {
+        "fraction": 0.3,
+        "gridX": 461,
+        "top": 31,
+        "bottom": 123,
+        "thicknessGrid": 93,
+        "thicknessLogical": 279
+      },
+      {
+        "fraction": 0.35,
+        "gridX": 538,
+        "top": 33,
+        "bottom": 125,
+        "thicknessGrid": 93,
+        "thicknessLogical": 279
+      },
+      {
+        "fraction": 0.4,
+        "gridX": 614,
+        "top": 32,
+        "bottom": 127,
+        "thicknessGrid": 96,
+        "thicknessLogical": 288
+      },
+      {
+        "fraction": 0.45,
+        "gridX": 691,
+        "top": 32,
+        "bottom": 124,
+        "thicknessGrid": 93,
+        "thicknessLogical": 279
+      }
+    ]
+  },
+  "limits": [
+    "No web replica rules used.",
+    "The source DLL build is not proved identical to the screenshot executable build.",
+    "No game mechanism, source images, version, replay or production cache was modified."
+  ],
+  "userCorrectedBaseline": "老土普通武器垂直正中两次，打不穿独木桥中段。覆盖此前两发正中能穿的说法。"
+}

@@ -7,6 +7,11 @@ export function aimGeometry(relative:number,slope:number,direction:number){
  const a=relative*Math.PI/180,d=direction<0?-1:1,c=Math.cos(slope),s=Math.sin(slope);
  return {absolute:relative-d*slope*180/Math.PI,x:d*Math.cos(a)*c+Math.sin(a)*s,y:d*Math.cos(a)*s-Math.sin(a)*c};
 }
+/** Same foot-anchored transform used to enlarge the battlefield artwork. */
+export function muzzleGeometry(t:{x:number;y:number},relative:number,slope:number,direction:number,scale=1){
+ const v=aimGeometry(relative,slope,direction),mount=18-31*scale;
+ return {x:t.x-Math.sin(slope)*mount+v.x*31*scale,y:t.y+Math.cos(slope)*mount+v.y*31*scale};
+}
 // Invert the same body rotation for touch aiming. Facing is chosen in BODY space,
 // not screen x: a right-facing vehicle may legitimately fire above 90° uphill.
 export function relativeAimForVector(dx:number,dy:number,slope:number,currentDirection=1){
