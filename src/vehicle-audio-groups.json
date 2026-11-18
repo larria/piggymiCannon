@@ -1,0 +1,15 @@
+{
+  "bowl": 1,
+  "crossbow": 2,
+  "cannon": 3,
+  "beetle": 4,
+  "duke": 5,
+  "mine": 9,
+  "missile": 6,
+  "multi": 7,
+  "laser": 8,
+  "water": 11,
+  "ion": 10,
+  "sea": 12,
+  "dragon": 13
+}

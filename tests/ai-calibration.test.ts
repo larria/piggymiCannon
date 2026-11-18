@@ -32,3 +32,5 @@ test('legacy bonus airstrike still prepares and fires once with the new calibrat
 test('teammate excavation can disturb aim even with friendly damage off; the next attack still recalibrates',()=>{
  const g=game();g.tanks[1].team=g.active.team;g.active.aiCalibration={stableShots:3,disturbed:false};g.crater(260,455,35,25,{owner:1,weapon:'cannon-normal'});assert.ok(g.active.aiCalibration.terrainPending);while(g.active.fallVelocity>0)(g as any).updateTanks(.02);(g as any).refreshAICalibration(g.active);assert.equal(g.active.aiCalibration.disturbed,true);assert.equal(g.active.aiCalibration.stableShots,0);
 });
+
+test('new normal-error calibration preserves old recordings, first-shot penalties and all difficulty ceilings',()=>{const state={stableShots:3,disturbed:false};assert.equal(calibrationProfile('normal',state,'5.0.3').error,75);assert.equal(calibrationProfile('normal',state,'5.0.4').error,70);assert.equal(calibrationProfile('normal',{stableShots:0,disturbed:false},'5.0.4').missChance,.62);assert.equal(calibrationProfile('expert',state,'5.0.4').ceiling,.77);});

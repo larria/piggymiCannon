@@ -1,12 +1,14 @@
+import {sourceRangeModel} from './source-range';
 import { clamp } from './engine';
 import {MIN_POWER,LEGACY_MIN_POWER} from './ballistics';
 
 export const chargePower=(seconds:number)=>clamp(10+Math.max(0,seconds)*36,10,100);
-export const CHARGE_DELAY_SECONDS=.2;
+export const CHARGE_DELAY_SECONDS=.03;
 /** Saved 3.2.8 clips retain their original 100ms preparation timing. */
 export function chargePreparationSeconds(version:string){
+ if(sourceRangeModel(version))return CHARGE_DELAY_SECONDS;
  const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);
- if(!v||Number(v[1])>3||Number(v[1])===3&&(Number(v[2])>2||Number(v[2])===2&&Number(v[3])>=9))return CHARGE_DELAY_SECONDS;
+ if(!v||Number(v[1])>3||Number(v[1])===3&&(Number(v[2])>2||Number(v[2])===2&&Number(v[3])>=9))return .2;
  return Number(v[1])===3&&Number(v[2])===2&&Number(v[3])===8 ? .1 : 0;
 }
 export const chargeDelayProgress=(seconds:number,duration=CHARGE_DELAY_SECONDS)=>duration>0?clamp(seconds/duration,0,1):1;

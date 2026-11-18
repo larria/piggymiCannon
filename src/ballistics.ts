@@ -1,4 +1,6 @@
+import {sourceLaunchSpeed} from './source-range';
 export const MIN_POWER=1,LEGACY_MIN_POWER=10,LOW_POWER_END=22;
+export function launchSpeed(weapon:string,power:number,multiplier:number,gravity:number,version:string){return sourceLaunchSpeed(weapon,power,version,gravity)??projectileSpeed(power,launchSpeedMultiplier(weapon,multiplier,version),gravity);}
 /** Source character 5 has Range49; Cannon has43. Preserve the current short-shot
  * curve, but restore Duke's relative range instead of the old arbitrary +2%. */
 export function launchSpeedMultiplier(weapon:string,multiplier:number,version:string){const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);return weapon.startsWith('duke-')&&v&&(+v[1]>5||+v[1]===5&&(+v[2]>0||+v[2]===0&&+v[3]>=3))?49/43:multiplier;}

@@ -31,7 +31,7 @@ function evaluate(g:Game,t:Tank,target:Tank,angle:number,power:number,direction:
 export function planAIRestoration(g:Game,t:Tank):RestorePlan|null{
  if(t.fallVelocity>0)return null;
  const known=new Map(g.knownAITargets().map(b=>[b.id,b]));
- const bodies=g.tanks.filter(b=>b.hp>0).map(b=>{const tank=g.fog&&b.team!==t.team?known.get(b.id)??b:b;return {tank,slope:g.tankSlope(tank)};});
+ const bodies=g.tanks.filter(b=>g.bodyOccupies(b)).map(b=>{const tank=g.fog&&b.team!==t.team?known.get(b.id)??b:b;return {tank,slope:g.tankSlope(tank)};});
  const ownMissing=t.maxHP-t.hp,self=t.hp<=t.maxHP*.7&&ownMissing>=t.maxHP*.12?evaluate(g,t,t,(t.minAngle+t.maxAngle)/2,g.minimumShotPower,t.direction,bodies):null;
  if(self&&t.hp<=t.maxHP*.35)return self;
  let best=self&&self.score>0?self:null;

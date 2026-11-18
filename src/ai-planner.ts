@@ -1,3 +1,4 @@
+import {launchGravityMultiplier,sourceRangeModel,sourceRange} from './source-range';
 import {originalBallistics,originalWeapon,ORIGINAL_TANKS,sourceMaximum,sourceDistance,sourceDamage} from './original-ballistics';
 import {precisionPolish,impactPolish} from './match-polish';
 import {salvoProfile} from './salvo';
@@ -9,7 +10,7 @@ import {SHOT_WIND_GAIN,type Game,type Tank} from './engine';
 import {weaponById,weaponDamage,weaponBlastRadius,launchDamageScale,excavation,type WeaponId} from './catalog';
 import {aimGeometry,muzzleGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
-import {projectileSpeed,launchSpeedMultiplier} from './ballistics';
+import {launchSpeed} from './ballistics';
 import {sourceHoming,homingProbe,sourceHomingVelocity,SOURCE_HOMING_RADIUS} from './source-homing';
 
 export interface AIShot {angle:number;power:number;direction:number;weapon:WeaponId;target:number;utility:number;effective:boolean;x:number;y:number}
@@ -17,9 +18,9 @@ type Body={tank:Tank;slope:number;hostile:boolean;eligible:boolean};
 type World={game:Game;bodies:Body[];shooter:Tank;slope:number;missAim?:{x:number;y:number}};
 const clamp=(x:number,a:number,b:number)=>Math.max(a,Math.min(b,x));
 function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetId?:number):World{
- const bodies=game.tanks.filter(t=>t.hp>0).map(t=>{
+ const bodies=game.tanks.filter(t=>game.bodyOccupies(t)).map(t=>{
   const known=t.id===shooter.id?shooter:targets.find(e=>e.id===t.id),tank=known?{...known,x:known.x+(t.team!==shooter.team&&!miss?offset:0)}:t;
-  return {tank,slope:known?game.tankSlope({...known,x:known.x}):game.tankSlope(t),hostile:t.team!==shooter.team,eligible:game.canDamage(t,shooter.id)};
+  return {tank,slope:known?game.tankSlope({...known,x:known.x}):game.tankSlope(t),hostile:t.hp>0&&t.team!==shooter.team,eligible:t.hp>0&&game.canDamage(t,shooter.id)};
  });
  const target=targets.find(t=>t.id===targetId)??targets[0];
  return {game,bodies,shooter,slope:game.tankSlope(shooter),missAim:miss?{x:target.x+offset,y:target.y}:undefined};
@@ -29,7 +30,7 @@ function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetI
 // terrain, HP, ammo, weather, particles or the live volley-lock map.
 export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0,verticalScale=speedScale){
  const {game:g,shooter:t,slope}=w,modernGeometry=originalBallistics(g.gameVersion),spec=weaponById(weapon),v=aimGeometry(angle,slope,t.direction);
- const speed=projectileSpeed(Math.max(g.minimumShotPower,power),launchSpeedMultiplier(weapon,weapon==='sniper'?2:spec.speed??1,g.gameVersion),g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*speedScale;
+ const speed=launchSpeed(weapon,Math.max(g.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,g.gravity*launchGravityMultiplier(weapon,weapon==='sniper'?.27:spec.gravity??1,g.gameVersion),g.gameVersion)*speedScale;
  const muzzle=muzzleGeometry(t,angle,slope,t.direction,tankArtScale(g.gameVersion));
  let x=muzzle.x,y=muzzle.y,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
  let age=0,wx=0,wy=0,lock:Body|undefined,boost=t.boost?1.5:1,orbital=false;
@@ -52,7 +53,7 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
    }
    if(lock){const a=Math.atan2(lock.tank.y+aimOffsetY-y,lock.tank.x+aimOffsetX-x),s=Math.max(250,Math.hypot(vx,vy)),blend=Math.min(1,dt*5);vx+=(Math.cos(a)*s-vx)*blend;vy+=(Math.sin(a)*s-vy)*blend;}
   }
-  vy+=(orbital||sourceTracking&&lock?0:g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*dt;x+=vx*dt;y+=vy*dt;
+  vy+=(orbital||sourceTracking&&lock?0:g.gravity*launchGravityMultiplier(weapon,weapon==='sniper'?.27:spec.gravity??1,g.gameVersion))*dt;x+=vx*dt;y+=vy*dt;
   if(spec.effect==='pierce'){
    const contact=permanentPiercingContact(g.land,oldX,oldY,x,y);
    if(contact){x=contact.x;y=contact.y;vx=0;vy=0;}
@@ -129,6 +130,7 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
 }
 function grid(min:number,max:number,step:number){const values:number[]=[];for(let v=min;v<=max;v+=step)values.push(v);if(values.at(-1)!==max)values.push(max);return values;}
 function search(w:World,weapons:WeaponId[],fine:boolean):AIShot{
+ const minimum=(weapon:WeaponId)=>sourceRangeModel(w.game.gameVersion)&&sourceRange(weapon)!==undefined?w.game.minimumShotPower:10;
  // Even a lapse aims toward a known enemy side; model a wrong landing point,
  // rather than deliberately turning toward an empty side at close range.
  const directions=[...new Set(w.bodies.filter(b=>b.hostile).map(b=>b.tank.x>w.shooter.x?1:-1))];
@@ -137,13 +139,13 @@ function search(w:World,weapons:WeaponId[],fine:boolean):AIShot{
  const offer=(shot:AIShot)=>{if(best.length===4&&shot.utility<=best[3].utility)return;best.push(shot);best.sort((a,b)=>b.utility-a.utility);best.splice(4);};
  for(const direction of directions){face(direction);for(const weapon of weapons){
   if(weapon==='airstrike')continue;
-  for(const angle of grid(w.shooter.minAngle,w.shooter.maxAngle,4))for(const power of grid(10,100,4))offer(grade(w,angle,power,weapon,1/60));
+  for(const angle of grid(w.shooter.minAngle,w.shooter.maxAngle,4))for(const power of grid(minimum(weapon),100,4))offer(grade(w,angle,power,weapon,1/60));
  }}
  if(!best.length)throw new Error('AI has no projectile weapon');
  if(fine){
   const anchors=[...best];best.length=0;
-  for(const b of anchors){face(b.direction);for(const a of grid(Math.max(w.shooter.minAngle,b.angle-4),Math.min(w.shooter.maxAngle,b.angle+4),1))for(const p of grid(Math.max(10,b.power-4),Math.min(100,b.power+4),1))offer(grade(w,a,p,b.weapon,1/180));}
-  const local=[...best].slice(0,2);for(const b of local){face(b.direction);for(const a of grid(Math.max(w.shooter.minAngle,b.angle-.75),Math.min(w.shooter.maxAngle,b.angle+.75),.25))for(const p of grid(Math.max(10,b.power-.75),Math.min(100,b.power+.75),.25))offer(grade(w,a,p,b.weapon,1/180));}
+  for(const b of anchors){face(b.direction);for(const a of grid(Math.max(w.shooter.minAngle,b.angle-4),Math.min(w.shooter.maxAngle,b.angle+4),1))for(const p of grid(Math.max(minimum(b.weapon),b.power-4),Math.min(100,b.power+4),1))offer(grade(w,a,p,b.weapon,1/180));}
+  const local=[...best].slice(0,2);for(const b of local){face(b.direction);for(const a of grid(Math.max(w.shooter.minAngle,b.angle-.75),Math.min(w.shooter.maxAngle,b.angle+.75),.25))for(const p of grid(Math.max(minimum(b.weapon),b.power-.75),Math.min(100,b.power+.75),.25))offer(grade(w,a,p,b.weapon,1/180));}
  }
  return best[0];
 }
@@ -156,7 +158,7 @@ export function safeAIPositions(game:Game,tank:Tank,targets?:Tank[],travelLimit=
   if(distance<4)continue;const x=tank.x+direction*distance,foot=game.traversable(tank,x);
   if(foot===null||!Number.isFinite(foot))continue;
   const lo=Math.min(tank.x,x),hi=Math.max(tank.x,x);
-  if(game.tanks.some(actual=>{const t=targets?.find(t=>t.id===actual.id)??actual;return t.id!==tank.id&&t.hp>0&&Math.abs(t.y-tank.y)<42&&t.x>lo-56&&t.x<hi+56;}))continue;
+  if(game.tanks.some(actual=>{const t=targets?.find(t=>t.id===actual.id)??actual;return t.id!==tank.id&&game.bodyOccupies(t)&&Math.abs(t.y-tank.y)<42&&t.x>lo-56&&t.x<hi+56;}))continue;
   if(game.fires.some(f=>Math.abs(f.x-x)<f.radius&&game.canDamage(tank,f.owner))||game.gases.some(f=>Math.abs(f.x-x)<f.radius&&Math.abs(f.y-(foot-18))<50&&game.canDamage(tank,f.owner)))continue;
   if(game.fires.some(f=>game.canDamage(tank,f.owner)&&Math.abs(f.x-tank.x)>=f.radius&&f.x+f.radius>lo&&f.x-f.radius<hi&&Math.abs((f.y??game.ground(f.x))-foot)<40))continue;
   if(game.gases.some(f=>game.canDamage(tank,f.owner)&&Math.abs(f.x-tank.x)>=f.radius&&f.x+f.radius>lo&&f.x-f.radius<hi&&Math.abs(f.y-(foot-18))<50))continue;

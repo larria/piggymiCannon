@@ -69,6 +69,8 @@ let recorder:ReplayRecorder|null=null,playback:ReplayPlayer|null=null;
 let impactProfiler:ImpactProfiler|null=null;
 let replayReturn:{game:Game;config:Config;recorder:ReplayRecorder|null;statsRecorded:boolean;immersive:boolean}|null=null;
 const canControlBattle=()=>game.humanTurn&&!playback;
+let angleKeyOwner:number|null=null;const blockedAngleKeys=new Set<string>();
+const canAdjustAngle=()=>!playback&&!$<HTMLDialogElement>('#dialog').open&&(canControlBattle()||!charge&&game.canPrepareAim);
 const canMarkPower=()=>game.canMarkPower&&!playback&&!charge&&!$<HTMLDialogElement>('#dialog').open;
 const audio=new AudioManager();
 audio.setSoundEnabled(saved?.soundEnabled??saved?.sound??true);audio.setMusicEnabled(saved?.musicEnabled??saved?.sound??true);audio.setVolume(saved?.audioVersion===2?clamp(Number(saved.volume)||0,0,1):Math.max(0.65,clamp(Number(saved?.volume)||0.65,0,1)));
@@ -141,7 +143,7 @@ $('.dash-actions').prepend($('.move-buttons'));
 $('.dash-actions').insertAdjacentHTML('beforeend',`<div class="angle-nudges" role="group" aria-label="射击角度微调"><button type="button" id="angle-up" class="angle-nudge" aria-label="抬高炮口 1 度，长按连续调整" title="抬高 · 1°">${icon('aim-up')}<small aria-hidden="true">1°</small></button><button type="button" id="angle-down" class="angle-nudge" aria-label="压低炮口 1 度，长按连续调整" title="压低 · 1°">${icon('aim-down')}<small aria-hidden="true">1°</small></button></div>`);
 const updateProgress=new UpdateProgress($('#update-download'),$('#update-download-meter'),()=>swRegistration,new URL(import.meta.env.BASE_URL,location.href).href);
 $('#update-download-close').addEventListener('click',()=>updateProgress.dismiss());
-const angleNudges=installAngleNudges($('#angle-up'),$('#angle-down'),{enabled:()=>canControlBattle()&&!$<HTMLDialogElement>('#dialog').open,actor:()=>game.active,step:(direction,steps)=>{const t=game.active,target=clamp(t.angle+direction*steps,t.minAngle,t.maxAngle);if(target!==t.angle){game.setAim(target,t.power);updateUI();}}});
+const angleNudges=installAngleNudges($('#angle-up'),$('#angle-down'),{enabled:canAdjustAngle,actor:()=>displayTank(),step:(direction,steps)=>{const t=displayTank(),target=clamp(t.angle+direction*steps,t.minAngle,t.maxAngle);if(target!==t.angle){adjustDisplayedAim(target);updateUI();}}});
 $('#pause-button').insertAdjacentHTML('beforebegin',`<button class="stage-button" data-dialog="settings" aria-label="游戏设置" data-help-name="游戏设置" data-help-description="音效、音乐、自伤、友伤与直接选择暴龙">${icon('settings')}</button>`);
 $('.dashboard').classList.add('compact-dashboard');
 const logButton=$('#log-button');logButton.classList.add('stage-button');logButton.innerHTML=icon('book');logButton.title='战斗记录';$('#pause-button').before(logButton);
@@ -195,6 +197,11 @@ async function copyBattleSnapshot(){
   catch {snapshotFeedback('剪贴板不可用或未获授权，请允许剪贴板访问后重试。');}
 }
 function toast(message:string) {const el=$('#toast');el.innerHTML=colorNames(message);el.classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>el.classList.remove('visible'),2700);}
+function adjustDisplayedAim(angle:number,direction?:number){
+ const t=displayTank();if(!canAdjustAngle()||!Number.isFinite(angle))return;angle=clamp(angle,t.minAngle,t.maxAngle);if(angle===t.angle&&(direction===undefined||direction===t.direction))return;
+ if(canControlBattle()){if(direction!==undefined)game.face(direction);game.setAim(angle,t.power);}
+ else if(direction===undefined)game.prepareAim(angle,t.id);else game.prepareAim(angle,t.id,direction);
+}
 function displayTank(){return game.dashboardTank;}
 function renderInventory() {
   const tank=displayTank(),vehicle=tank.vehicleId?vehicleById(tank.vehicleId):null;
@@ -274,7 +281,7 @@ function updateUI() {
   $('#map-label').textContent=MAPS.find(m=>m.id===game.config.map)!.name+(game.fog?` · 浓雾 ${game.fogTurnsRemaining} ${modernWeather(game.gameVersion)?'轮':'行动'}`:'')+(game.snow?' · 飘雪':'')+(game.fireLine?` · 火线 +50% ·${game.fireLineTurnsRemaining} ${modernWeather(game.gameVersion)?'轮':'行动'}`:'');
   $('#map-code').textContent=String(MAPS.findIndex(m=>m.id===game.config.map)+1).padStart(2,'0');
   updateWindGauge($('#wind-gauge'),game.wind);
-  $('#gravity-note').textContent=game.config.map==='moon'?'重力 0.63 g':'重力 1.0 g';
+  $('#gravity-note').textContent=`重力 ${game.gravity===230?'1.0':(game.gravity/230).toFixed(2)} g`;
   $('#field-note').textContent=game.phase==='supply'?'空投受风影响 · 计时暂停':game.restoring?'恢复弹 · 轻点原地治疗，也可投向队友':game.teleporting?'转移弹按弹道落点传送':game.selected==='airstrike'?'点击战场指定空袭落点':MAPS.find(m=>m.id===game.config.map)!.sub;
   if(game.fireLine) $('#field-note').textContent+=` · 火线 +50% · 剩 ${game.fireLineTurnsRemaining} ${modernWeather(game.gameVersion)?'完整轮次':'行动回合'}`;
   $('#minimap-toggle').dataset.helpDescription=`${MAPS.find(m=>m.id===game.config.map)!.sub} ${$('#field-note').textContent} · ${$('#gravity-note').textContent}。轻点折叠或展开，点击地图定位视野。`;
@@ -294,11 +301,11 @@ function updateUI() {
   const angle=$<HTMLInputElement>('#angle'),power=$<HTMLInputElement>('#power');
   angle.min=String(t.minAngle);angle.max=String(t.maxAngle);angle.value=String(t.angle);power.value=String(t.power);
   angle.style.setProperty('--range-fill',`${(t.angle-t.minAngle)/(t.maxAngle-t.minAngle)*100}%`);power.style.setProperty('--range-fill',`${(t.power-MIN_POWER)/(100-MIN_POWER)*100}%`);
-  angle.disabled=!human;power.disabled=!human;
-  $('.control-deck').classList.toggle('inactive',!human);$<HTMLButtonElement>('#power-meter').disabled=!game.canMarkPower||!!playback||$<HTMLDialogElement>('#dialog').open;
-  $('#power-meter .meter-help').textContent=human?'轻点记号 · 按住蓄力':'轻点记号 · 等待行动';$<HTMLButtonElement>('#skip-button').disabled=!human&&!renderer.touring;
+  angle.disabled=!canAdjustAngle();power.disabled=!human;
+  $('.control-deck').classList.toggle('inactive',!human);$('.control-deck').classList.toggle('can-prepare-aim',!human&&canAdjustAngle());$<HTMLButtonElement>('#power-meter').disabled=!game.canMarkPower||!!playback||$<HTMLDialogElement>('#dialog').open;
+  $('#power-meter .meter-help').textContent=human?'轻点记号 · 按住蓄力':canAdjustAngle()?'可记力度 · 预设角度':'轻点记号 · 等待行动';$<HTMLButtonElement>('#skip-button').disabled=!human&&!renderer.touring;
   $('#skip-button').setAttribute('aria-label',renderer.touring?'跳过开场巡游':'跳过回合');
-  document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, .angle-nudge, #face-button, #aim-pad').forEach(b=>b.disabled=!human);if(!human)angleNudges.cancel();
+  document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, .angle-nudge, #face-button, #aim-pad').forEach(b=>b.disabled=b.matches('.angle-nudge,#face-button,#aim-pad')||b.dataset.adjust?.startsWith('angle:')?!canAdjustAngle():!human);if(!canAdjustAngle())angleNudges.cancel();
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
   updateChargeVisual(powerDisplay(t.power,t.lastPower,game.minimumShotPower,!!charge||!!playback?.waiting||!!playback?.charging,matchPolish(game.gameVersion)));
   updateChargePreparation(performance.now());
@@ -399,7 +406,7 @@ function showDialog(type:string) {
   if(renderer.touring)renderer.finishTour();
   const dialog=$<HTMLDialogElement>('#dialog');
   if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;moveHeld=0;keys.clear();}
-  dialogKeepsMusic=(type==='settings'||type==='update')&&!(playback?.paused??dialogPaused);audio.pause(true,dialogKeepsMusic);
+  dialogKeepsMusic=!(playback?.paused??dialogPaused);audio.pause(true,dialogKeepsMusic);
   dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');content.removeEventListener('click',profileClick);
   dialog.classList.toggle('settings-dialog',type==='settings');
   if(type.startsWith('portrait:')) {
@@ -530,7 +537,7 @@ document.addEventListener('click',e=>{
   if(action==='handoff') {game.acceptHandoff();audio.unlock();lastPhase='';updateUI();}
   if(action==='rematch') newMatch(config);
   const adjust=target.closest<HTMLElement>('[data-adjust]')?.dataset.adjust;
-  if(adjust&&canControlBattle()) {const [key,step]=adjust.split(':');game.setAim(game.active.angle+(key==='angle'?Number(step):0),game.active.power+(key==='power'?Number(step):0));updateUI();}
+  if(adjust) {const [key,step]=adjust.split(':');if(key==='angle')adjustDisplayedAim(displayTank().angle+Number(step));else if(canControlBattle())game.setAim(game.active.angle,game.active.power+Number(step));updateUI();}
   const weapon=target.closest<HTMLElement>('[data-weapon]')?.dataset.weapon as WeaponId|undefined;
   if(weapon) {
     if(game.phase==='lobby') {game.selected=weapon;lastInventory='';updateUI();return;}
@@ -566,9 +573,9 @@ $('#dialog').addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
 $('#dialog').addEventListener('click',e=>{if(e.target===$('#dialog')) closeDialog();});
 $('#weapons-tab').addEventListener('click',()=>{activeTab='weapons';lastInventory='';updateUI();});
 $('#items-tab').addEventListener('click',()=>{activeTab='items';lastInventory='';updateUI();});
-$('#angle').addEventListener('input',e=>{game.setAim(Number((e.target as HTMLInputElement).value),game.active.power);updateUI();});
+$('#angle').addEventListener('input',e=>{adjustDisplayedAim(Number((e.target as HTMLInputElement).value));updateUI();});
 $('#power').addEventListener('input',e=>{game.setAim(game.active.angle,Number((e.target as HTMLInputElement).value));updateUI();});
-$('#face-button').addEventListener('click',()=>{game.face(-game.active.direction);updateUI();});
+$('#face-button').addEventListener('click',()=>{const t=displayTank();adjustDisplayedAim(t.angle,-t.direction);updateUI();});
 function startCharge(pointer:number|null,event?:PointerEvent,startedAt=performance.now()) {
   if(!canControlBattle()||game.active.fallVelocity>0||charge) return false;
   setDrawer(false);charge={pointer,startedAt,previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',audible:false,pointerStartedAt:event?.timeStamp};
@@ -592,8 +599,8 @@ function finishCharge(maximum=false,event?:PointerEvent) {
 const fireButton=$<HTMLButtonElement>('#fire-button');
 const forceBar=$<HTMLButtonElement>('#power-meter');
 const ownsChargePointer=(e:PointerEvent)=>charge?.pointer===e.pointerId&&(charge.pointerStartedAt===undefined||e.timeStamp>=charge.pointerStartedAt);
-const releaseChargePointer=(e:PointerEvent)=>{if(ownsChargePointer(e)){e.preventDefault();finishCharge(false,e);}};
-const cancelChargePointer=(e:PointerEvent)=>{if(ownsChargePointer(e)){cancelCharge();updateUI();}};
+const releaseChargePointer=(e:PointerEvent)=>{if(powerMarkGesture?.owns(e.pointerId))return;if(ownsChargePointer(e)){e.preventDefault();finishCharge(false,e);}};
+const cancelChargePointer=(e:PointerEvent)=>{if(powerMarkGesture?.owns(e.pointerId))return;if(ownsChargePointer(e)){cancelCharge();updateUI();}};
 for(const control of [fireButton]){
   control.addEventListener('pointerdown',e=>{if(startCharge(e.pointerId,e)){e.preventDefault();try{control.setPointerCapture(e.pointerId);}catch{/* Document release also handles unavailable/lost capture. */}}});
   control.addEventListener('pointerup',releaseChargePointer);
@@ -608,12 +615,12 @@ forceBar.addEventListener('contextmenu',e=>e.preventDefault());
 fireButton.addEventListener('contextmenu',e=>e.preventDefault());
 fireButton.addEventListener('click',e=>{if(e.detail===0&&(e as PointerEvent).pointerType!=='touch'&&!charge&&canControlBattle()){audio.unlock();game.fire();updateUI();}});
 
-let padDrag:number|null=null;
+let padDrag:number|null=null,padOwner:number|null=null,padGame:Game|null=null;
 const aimPad=$<HTMLButtonElement>('#aim-pad');
-function instrumentAim(e:PointerEvent){const r=aimPad.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2;if(Math.hypot(dx,dy)<12)return;const aim=relativeAimForVector(dx,dy,game.tankSlope(game.active),game.active.direction);game.face(aim.direction);game.setAim(aim.relative,game.active.power);updateUI();}
-aimPad.addEventListener('pointerdown',e=>{if(!canControlBattle()) return;e.preventDefault();padDrag=e.pointerId;aimPad.setPointerCapture(e.pointerId);aimPad.classList.add('dragging');instrumentAim(e);});
+function instrumentAim(e:PointerEvent){const r=aimPad.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2;if(Math.hypot(dx,dy)<12)return;const t=displayTank();if(!canAdjustAngle()||padGame!==game||padOwner!==t.id){endPad();return;}const aim=relativeAimForVector(dx,dy,game.tankSlope(t),t.direction);adjustDisplayedAim(aim.relative,aim.direction);updateUI();}
+aimPad.addEventListener('pointerdown',e=>{if(!canAdjustAngle()) return;e.preventDefault();padDrag=e.pointerId;padOwner=displayTank().id;padGame=game;aimPad.setPointerCapture(e.pointerId);aimPad.classList.add('dragging');instrumentAim(e);});
 aimPad.addEventListener('pointermove',e=>{if(padDrag===e.pointerId) instrumentAim(e);});
-const endPad=()=>{padDrag=null;aimPad.classList.remove('dragging');};
+const endPad=()=>{padDrag=null;padOwner=null;padGame=null;aimPad.classList.remove('dragging');};
 aimPad.addEventListener('pointerup',endPad);aimPad.addEventListener('pointercancel',endPad);aimPad.addEventListener('lostpointercapture',endPad);
 aimPad.addEventListener('contextmenu',e=>e.preventDefault());
 
@@ -662,12 +669,13 @@ document.addEventListener('keydown',e=>{
   if($<HTMLDialogElement>('#dialog').open) return;
   const target=e.target as HTMLElement;
   if(target.matches('input,select,textarea')) return;
-  const key=e.key.toLowerCase();
+  const key=e.key.toLowerCase();if(blockedAngleKeys.has(key)){if(e.repeat){e.preventDefault();return;}blockedAngleKeys.delete(key);}
   if(key==='escape') {togglePause();return;}
   if(key==='tab'&&game.phase!=='lobby'){e.preventDefault();toggleMinimap();audio.play('click');return;}
   if(key==='c'&&e.ctrlKey){e.preventDefault();renderer.follow();return;}
   if(key==='f5'&&renderer.touring){e.preventDefault();renderer.finishTour();updateUI();return;}
-  if(!canControlBattle()) return;
+  if(!canControlBattle()){if(canAdjustAngle()&&['w','s','arrowup','arrowdown'].includes(key)){e.preventDefault();angleKeyOwner=displayTank().id;keys.add(key);}return;}
+  if(['w','s','arrowup','arrowdown'].includes(key))angleKeyOwner=displayTank().id;
   if((key==='f3'||key==='f4')&&game.active.vehicleId){e.preventDefault();const v=vehicleById(game.active.vehicleId);if(game.selectWeapon(key==='f3'?v.normal:v.special)) {audio.play('click');updateUI();}return;}
   if(key==='f5'){e.preventDefault();cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();return;}
   if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const slot=Number(key.slice(1))-9,id=game.backpack()[slot];if(id&&game.useItem(id,false,slot))updateUI();else toast(id?game.itemUnavailable(id,false,slot)??'当前不能使用':'这个道具槽是空的');return;}
@@ -675,7 +683,7 @@ document.addEventListener('keydown',e=>{
   if(['a','d','w','s','q','e',' '].includes(key)) {e.preventDefault();keys.add(key);}
   if(key===' '&&!e.repeat) startCharge(null);
 });
-document.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());if(e.key===' '&&charge?.pointer===null){e.preventDefault();finishCharge();}});
+document.addEventListener('keyup',e=>{blockedAngleKeys.delete(e.key.toLowerCase());keys.delete(e.key.toLowerCase());if(e.key===' '&&charge?.pointer===null){e.preventDefault();finishCharge();}});
 window.addEventListener('blur',()=>{keys.clear();moveHeld=0;cancelCharge();});
 let backgroundGame:Game|null=null,backgroundWasPaused=false;
 document.addEventListener('visibilitychange',()=>{
@@ -713,12 +721,13 @@ function frame(now:number) {
   const dt=Math.max(0,Math.min((now-previous)/1000,0.05));previous=now;
   if(document.hidden||document.getElementById('opening-loading')){requestAnimationFrame(frame);return;}
   impactProfiler?.beginFrame(now);angleNudges.update(now);
+  if(angleKeyOwner!==null&&angleKeyOwner!==displayTank().id){for(const key of ['w','s','arrowup','arrowdown'])if(keys.has(key))blockedAngleKeys.add(key);keys.clear();moveHeld=0;angleKeyOwner=null;}if(padDrag!==null&&(padGame!==game||padOwner!==displayTank().id))endPad();
   if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open) {
     if(charge&&charge.tank===game.current) {const seconds=(now-charge.startedAt)/1000;if(seconds>=CHARGE_DELAY_SECONDS&&!charge.audible){charge.audible=true;audio.startCharge();recorder?.cue('charge-start');}game.setAim(game.active.angle,heldChargePower(seconds));if(charge.audible)audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
     const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
-  }
+  }else if(canAdjustAngle()&&angleKeyOwner===displayTank().id){const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0);if(angle)adjustDisplayedAim(displayTank().angle+angle*35*dt);}
   if(!renderer.touring){if(playback){if(!$<HTMLDialogElement>('#dialog').open){try{playback.advance(dt);}catch(error){playback.paused=true;toast(`录像播放失败：${(error as Error).message}`);}}}else if(impactProfiler)impactProfiler.measure('simulation',()=>game.update(dt));else game.update(dt);}
   const edge=edgePan.tick(dt);if(edge.x||edge.y)renderer.panBy(edge.x*game.motionScale,edge.y*game.motionScale);
   if(impactProfiler)impactProfiler.measure('scene',()=>renderer.draw(playback?.paused?0:dt*(playback?.speed??1)));else renderer.draw(playback?.paused?0:dt*(playback?.speed??1));dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight,renderer.offsetX,renderer.viewWidth);
@@ -737,7 +746,7 @@ function frame(now:number) {
     if(event.type==='wind')audio.play('wind');
     if(event.type==='timeout')audio.play('warning');
     if(event.type==='win') audio.play('win');
-    if(event.type==='defeat')audio.play('death',event.x,game.tanks[game.viewer].x);
+    if(event.type==='defeat'){const defeated=event.value===undefined?game.tanks.find(t=>event.message===`${t.name}出局了。`):game.tanks[event.value],observer=displayTank().controller==='human'?displayTank():game.tanks[game.viewer];audio.play('death',event.x,observer.x,undefined,defeated?.team===observer.team);}
     if(event.type==='crate') audio.play(event.message.includes('空降')?'supply':'crate-land',event.x,game.tanks[game.viewer].x);
     if(event.type==='lock') audio.play('lock',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='crate-land') audio.play('crate-land',event.x,game.tanks[game.viewer].x);

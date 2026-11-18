@@ -3,6 +3,7 @@ export type Era='古代系'|'近代系'|'现代系'|'未来系'|'超代系';
 export type VehicleId='bowl'|'crossbow'|'cannon'|'beetle'|'duke'|'mine'|'missile'|'multi'|'laser'|'water'|'ion'|'sea'|'dragon';
 export type VehicleChoice=VehicleId|'random';
 export type WeaponEffect='shell'|'fire'|'poison'|'gas'|'mine'|'pierce'|'homing'|'orbital'|'freeze'|'beam'|'helix';
+/** range retains the pre5.0.4 speed multiplier for recordings; current launch uses SOURCE_RANGES. */
 export interface Vehicle {
   id:VehicleId;name:string;era:Era;hp:number;minAngle:number;maxAngle:number;movement:number;waiting:number;range:number;
   color:string;body:string;trait:string;hidden:boolean;normal:WeaponId;special:WeaponId;

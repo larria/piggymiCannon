@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {placeTankPortrait,type PortraitRect} from '../src/portrait-layout';
+import {placeTankPortrait as place,type PortraitRect} from '../src/portrait-layout';
+const placeTankPortrait=(...args:Parameters<typeof place>)=>place(args[0],args[1],args[2],args[3],args[4],args[5],args[6],'5.0.3');
 const collision=(a:PortraitRect,b:PortraitRect)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
 test('the supplied temple spawn needs only horizontal clearance, never two raised portrait rows',()=>{
  const fox=placeTankPortrait(2,1292,242,1.4,false,[]),fish=placeTankPortrait(3,1196,242,1.4,false,[fox.rect]);
@@ -18,4 +19,10 @@ test('edge portraits and medals stay within view, without raising or affecting i
  for(const p of [first,next]){assert.equal(p.y,300);assert.ok(p.rect.left>=0);assert.ok(p.rect.right<=700);}
  assert.equal(collision(first.rect,next.rect),false);
  const alone=placeTankPortrait(2,500,300,1.4,false,[first.rect,next.rect],viewport);assert.equal(alone.x,500);
+});
+
+test('current portraits overlap without clearance shifts, including four coincident heads; only viewport edges clamp',()=>{
+ const fox=place(2,1292,242,1.4,false,[]),fish=place(3,1196,242,1.4,false,[fox.rect]);assert.equal(fish.x,1196);assert.equal(fish.y,242);
+ const heads:PortraitRect[]=[];for(let i=0;i<4;i++){const p=place(i,800,300,1.4,i%2===0,heads);assert.equal(p.x,800);assert.equal(p.y,300);if(i)assert.equal(collision(p.rect,heads[0]),true);heads.push(p.rect);}
+ const edge=place(0,5,300,1.4,true,[],{left:0,right:700});assert.equal(edge.y,300);assert.ok(edge.rect.left>=0);assert.ok(edge.rect.right<=700);
 });

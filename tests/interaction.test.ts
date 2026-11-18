@@ -15,10 +15,10 @@ test('dragging upward raises aim and horizontal travel changes direction after t
   assert.equal(dragAim(48,1,0,1000).angle,5);
 });
 
-test('all input devices use 200ms preparation before charging, and the button progress has its own timing',async()=>{
- const {heldChargePower,chargeDelayProgress,chargePreparationSeconds,CHARGE_DELAY_SECONDS}=await import('../src/interaction');assert.equal(CHARGE_DELAY_SECONDS,.2);
- for(const seconds of [0,.05,.1,.199,.2])assert.equal(heldChargePower(seconds),1);
- assert.ok(Math.abs(heldChargePower(.25)-2.8)<1e-9);assert.equal(heldChargePower(1.2),37);assert.equal(heldChargePower(2.95),100);assert.equal(heldChargePower(99),100);
- assert.equal(chargeDelayProgress(0),0);assert.equal(chargeDelayProgress(.1),.5);assert.equal(chargeDelayProgress(.2),1);assert.equal(chargeDelayProgress(1),1);
- assert.equal(chargePreparationSeconds('3.2.8'),.1);assert.equal(chargePreparationSeconds('v3.2.9'),.2);assert.equal(chargePreparationSeconds('3.2.7'),0);assert.equal(chargeDelayProgress(.05,.1),.5);
+test('current input waits30ms, then fills the bar; old replay preparations remain200/100ms',async()=>{
+ const {heldChargePower,chargeDelayProgress,chargePreparationSeconds,CHARGE_DELAY_SECONDS}=await import('../src/interaction');assert.equal(CHARGE_DELAY_SECONDS,.03);
+ for(const seconds of [0,.01,.029,.03])assert.equal(heldChargePower(seconds),1);
+ assert.ok(Math.abs(heldChargePower(.08)-2.8)<1e-9);assert.equal(heldChargePower(1.03),37);assert.equal(heldChargePower(2.78),100);
+ assert.equal(chargeDelayProgress(.015),.5);assert.equal(chargeDelayProgress(.03),1);
+ assert.equal(chargePreparationSeconds('5.0.4'),.03);assert.equal(chargePreparationSeconds('5.0.3'),.2);assert.equal(chargePreparationSeconds('v3.2.9'),.2);assert.equal(chargePreparationSeconds('3.2.8'),.1);assert.equal(chargePreparationSeconds('3.2.7'),0);
 });

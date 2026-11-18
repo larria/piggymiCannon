@@ -29,7 +29,7 @@ export class AudioManager {
   setPageHidden(hidden:boolean){this.pageHidden=hidden;if(hidden){this.pause(true);this.selectionMusic.pause();}else if(this.selectionActive&&this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}
   setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.selectionMusic.volume=this.volume*0.55;for(const clip of this.playingEffects)clip.volume=this.volume*.75;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
   setSelectionMusic(active:boolean){if(active===this.selectionActive)return;this.selectionActive=active;if(active){this.music.pause();this.selectionMusic.currentTime=0;if(this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}else this.selectionMusic.pause();}
-  /** Modal settings stop battle effects while keeping the current BGM timeline. */
+  /** Modals stop battle effects while keeping the current BGM timeline. */
   pause(paused:boolean,keepMusic=false) {
     this.paused=paused;this.musicPaused=paused&&!keepMusic;
     if(this.musicPaused)this.music.pause();
@@ -138,14 +138,14 @@ export class AudioManager {
     }catch{this.stopTracking();}
   }
   stopTracking(){if(!this.tracking||!this.context)return;const t=this.tracking;this.tracking=null;t.gain.gain.setTargetAtTime(.0001,this.context.currentTime,.02);t.oscillator.stop(this.context.currentTime+.07);t.oscillator.onended=()=>{t.oscillator.disconnect();t.gain.disconnect();t.pan.disconnect();};}
-  play(type:'denied'|'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer'|'turn'|'wind'|'firewall'|'supply'|'warning'|'death',sourceX?:number,viewerX=0,weapon?:WeaponId) {
+  play(type:'denied'|'click'|'shot'|'explosion'|'item'|'win'|'crate-land'|'lock'|'aim'|'transfer'|'turn'|'wind'|'firewall'|'supply'|'warning'|'death',sourceX?:number,viewerX=0,weapon?:WeaponId,friendlyDeath=false) {
     if(type==='item')return; // Item feedback is animation only, including preload/fallback paths.
     if(!this.soundEnabled||!this.unlocked||(this.paused&&type!=='click'&&type!=='aim'&&type!=='denied')) return;
     if(type==='denied'||type==='click'||type==='win'||(type==='aim'&&this.paused)) {
       const audio=new Audio(asset(`sfx-${type==='aim'?'select':type}.mp3`));audio.volume=this.volume*.75;this.playingEffects.add(audio);audio.onended=()=>{this.playingEffects.delete(audio);this.pausedEffects.delete(audio);};void audio.play().catch(()=>this.playingEffects.delete(audio));return;
     }
     try {
-      const name=type==='shot'||type==='explosion'?weaponSoundClip(type,weapon):`sfx-${type==='aim'?'select':type}.mp3`;
+      const name=type==='shot'||type==='explosion'?weaponSoundClip(type,weapon):type==='death'&&friendlyDeath?'sfx-death-friendly.mp3':`sfx-${type==='aim'?'select':type}.mp3`;
       const loaded=this.buffers.has(name),sample=this.sample(name,sourceX,viewerX);
       // Keep the established lock chirp alongside Homming; fallback synthesis covers first-use loading.
       if(type!=='lock'&&(sample||loaded))return;

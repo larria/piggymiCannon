@@ -1,3 +1,4 @@
+import {sourceRangeModel} from './source-range';
 import {vectorProjectiles} from './weapon-presentation';
 import {battleViewWidth} from './world-layout';
 import {precisionPolish} from './match-polish';
@@ -84,7 +85,7 @@ export class Renderer {
   get tourPlayer(){return this.camera.tourPlayer;}
   startTour(done:()=>void){const points=this.game.tanks.map(t=>({x:t.x,y:t.y,id:t.id}));points.push({...points[this.game.current]});this.camera.startTour(points,done,matchMedia('(prefers-reduced-motion: reduce)').matches);this.invalidate();}
   finishTour(recenter=true){if(!this.touring)return;this.camera.finishTour();if(recenter){this.camera.center(this.game.active.x,this.game.active.y,false);this.camera.follow();}this.invalidate();}
-  portraitAt(x:number,y:number){return this.portraitHits.find(p=>Math.hypot(x-p.x,y-p.y)<=Math.max(23*this.game.layoutScale,22*this.viewWidth/Math.max(1,this.canvas.clientWidth)))?.id??null;}
+  portraitAt(x:number,y:number){for(let i=this.portraitHits.length-1;i>=0;i--){const p=this.portraitHits[i];if(Math.hypot(x-p.x,y-p.y)<=Math.max(23*this.game.layoutScale,22*this.viewWidth/Math.max(1,this.canvas.clientWidth)))return p.id;}return null;}
   constructor(canvas:HTMLCanvasElement,game:Game) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d')!;this.background=document.createElement('canvas');
     this.game=game;this.background.width=this.worldWidth;this.background.height=this.worldHeight;this.palette=PALETTES[game.config.map];
@@ -322,7 +323,7 @@ export class Renderer {
     for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132)*g.motionScale;const x=clamp(t.x,this.offsetX+48*g.motionScale,this.offsetX+this.viewWidth-48*g.motionScale),y=Math.max(this.offsetY+38*g.motionScale,top);ctx.save();ctx.translate(x,y);ctx.scale(g.motionScale,g.motionScale);paintItemCue(ctx,cue,0,0,teamFlag(t.team).color,this.reducedMotion);ctx.restore();}
     // The portrait stays upright; its frame carries the team colour.
     const celebrateOffset=(celebrating?-26:0)-badgeLift;
-    const label=placeTankPortrait(t.id,t.x,t.y-85+celebrateOffset,labelScale,!!t.poisoned,this.labelRects,{left:this.offsetX+6,right:this.offsetX+this.viewWidth-6});
+    const label=placeTankPortrait(t.id,t.x,t.y-85+celebrateOffset,labelScale,!!t.poisoned,this.labelRects,{left:this.offsetX+6,right:this.offsetX+this.viewWidth-6},g.gameVersion);
     const labelShift=label.x-t.x;this.labelRects.push(label.rect);
     this.portraitHits.push({x:label.x,y:label.y,id:t.id});
     ctx.save();ctx.translate(t.x,t.y);
@@ -395,7 +396,7 @@ export class Renderer {
     }
     const shotArtScale=tankArtScale(g.gameVersion);
     for(const mine of g.mines) if((precisionPolish(g.gameVersion)?g.tanks[mine.owner]?.team===g.tanks[g.viewer].team:mine.owner===g.viewer||g.snow)&&this.visibleAt(mine.x)) {ctx.fillStyle=weaponById(mine.weapon).color;ctx.beginPath();ctx.ellipse(mine.x,mine.y,9*shotArtScale,4*shotArtScale,0,0,7);ctx.fill();ctx.fillStyle='#eeb58a';ctx.fillRect(mine.x-2*shotArtScale,mine.y-5*shotArtScale,4*shotArtScale,2*shotArtScale);}
-    this.labelRects=[];this.portraitHits=[];g.tanks.filter(t=>g.visible(t)).forEach(t=>this.tank(t));
+    this.labelRects=[];this.portraitHits=[];const visibleTanks=g.tanks.filter(t=>g.visible(t)),portraitTop=g.introLocked?this.tourPlayer:g.current;if(sourceRangeModel(g.gameVersion))visibleTanks.sort((a,b)=>Number(a.id===portraitTop)-Number(b.id===portraitTop));visibleTanks.forEach(t=>this.tank(t));
     // Visible pickups sit in front of the chassis, including drops at a player’s feet.
     for(const crate of g.crates) {
       if(!this.visibleAt(crate.x)&&!crate.falling&&!(g.phase==='supply'&&this.supplyCrates.includes(crate))) continue;

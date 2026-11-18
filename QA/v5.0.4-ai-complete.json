@@ -1,0 +1,45 @@
+{
+  "games": 36,
+  "shots": 669,
+  "hits": 443,
+  "direct": 396,
+  "intentional": 205,
+  "intentionalHits": 21,
+  "moves": 139,
+  "unfinished": 0,
+  "rate": 0.6621823617339312,
+  "maps": {
+    "valley": {
+      "games": 6,
+      "shots": 121,
+      "hits": 78
+    },
+    "coast": {
+      "games": 6,
+      "shots": 136,
+      "hits": 92
+    },
+    "moon": {
+      "games": 6,
+      "shots": 59,
+      "hits": 41
+    },
+    "factory": {
+      "games": 6,
+      "shots": 145,
+      "hits": 99
+    },
+    "temple": {
+      "games": 6,
+      "shots": 123,
+      "hits": 68
+    },
+    "egypt": {
+      "games": 6,
+      "shots": 85,
+      "hits": 65
+    }
+  },
+  "gameVersion": "5.0.4",
+  "scope": "Actual package-version regression. Fixed scenarios; observed rates are not a population or per-match hit guarantee."
+}

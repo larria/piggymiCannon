@@ -1,3 +1,4 @@
+import {sourceRangeModel} from './source-range';
 import {DIFFICULTIES,type Difficulty} from './catalog';
 export interface AICalibration {
  stableShots:number;disturbed:boolean;
@@ -6,14 +7,14 @@ export interface AICalibration {
 export const AI_STABLE_SHOTS=3;
 export const AI_EFFECTIVE_CEILINGS=[.42,.55,.66,.77] as const;
 /** Accuracy is an aim lapse/error model, never a hit roll or a damage override. */
-export function calibrationProfile(difficulty:Difficulty,state:AICalibration){
+export function calibrationProfile(difficulty:Difficulty,state:AICalibration,version='development'){
  const level=DIFFICULTIES.findIndex(d=>d.id===difficulty),d=DIFFICULTIES[level];
  const warmup=(AI_STABLE_SHOTS-Math.min(AI_STABLE_SHOTS,state.stableShots))/AI_STABLE_SHOTS;
  const stableMiss=[.65,.50,.39,.30][level],penalty=level===3?(state.disturbed?.08:.04):(state.disturbed?.16:.12);
- return {missChance:Math.min(.9,stableMiss+warmup*penalty),error:d.error*(1+warmup*(state.disturbed?.7:.4)),ceiling:AI_EFFECTIVE_CEILINGS[level],warmup};
+ return {missChance:Math.min(.9,stableMiss+warmup*penalty),error:(difficulty==='normal'&&sourceRangeModel(version)?70:d.error)*(1+warmup*(state.disturbed?.7:.4)),ceiling:AI_EFFECTIVE_CEILINGS[level],warmup};
 }
 export function calibrationDisturbed(state:AICalibration,x:number,y:number,slope:number){
  const old=state.terrainPending;if(!old)return false;
  return Math.abs(slope-old.slope)>=3*Math.PI/180||Math.abs(y-old.y)>=12||Math.abs(x-old.x)>=16;
 }
-export function advanceCalibration(state:AICalibration){state.stableShots=Math.min(AI_STABLE_SHOTS,state.stableShots+1);state.disturbed=false;delete state.terrainPending;}
+export function advanceCalibration(state:AICalibration,version='development'){state.stableShots=Math.min(AI_STABLE_SHOTS,state.stableShots+1);state.disturbed=false;delete state.terrainPending;}

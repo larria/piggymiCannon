@@ -16,7 +16,7 @@ export function coveredShooter(difficulty:'easy'|'expert'='expert'){
 }
 test('2v2 close shots search 10-22 power at several distances and both facings with damage switches off',()=>{
  for(const direction of [-1,1])for(const distance of [75,90,110,130,170]){
-  const g=aiScenario('expert',52,'valley',distance,'cannon');g.active.x=direction===1?220:950;g.active.direction=direction;
+  const g=aiScenario('expert',52,'valley',distance,'cannon','5.0.3');g.active.x=direction===1?220:950;g.active.direction=direction;
   g.tanks[1].x=g.active.x+direction*distance;g.tanks[1].direction=-direction;
   g.tanks[2].x=direction===1?70:1130;g.tanks[3].x=direction===1?1180:70;g.tanks[3].crew='dad';g.tanks[3].hp=g.tanks[3].maxHP=g.tanks[1].hp;
   const shot=solveAIShot(g,g.active,['cannon-normal'],g.opponents(g.active));assert.equal(shot.target,1);assert.ok(shot.effective);

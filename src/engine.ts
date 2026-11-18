@@ -1,3 +1,4 @@
+import {sourceRangeModel,sourceRange,launchGravityMultiplier} from './source-range';
 import {groundOrbital,vectorProjectiles} from './weapon-presentation';
 import {backgroundMarkers} from './background-markers';
 import {chooseMapBgm,restoreMapBgm,randomMapMusic,type MatchBgm} from './map-music';
@@ -36,7 +37,7 @@ import {BattleTrace,packTerrain,unpackTerrain,snapshotText,traceClone,type Battl
 import {MAPS,mapsForVersion,type MapChoice} from './catalog';
 import {nextNaturalWind,nextWindRound,MAX_WIND_CHANGE,NATURAL_WIND_LIMIT} from './wind-cycle';
 import {ITEM_CUE_SECONDS,type ItemCue} from './item-feedback';
-import {projectileSpeed,launchSpeedMultiplier,minimumPower,MIN_POWER} from './ballistics';
+import {launchSpeed,minimumPower,MIN_POWER} from './ballistics';
 import {modernSupplyTiming,SUPPLY_APPROACH_SECONDS,SUPPLY_LANDING_SECONDS,type SupplyObservation} from './supply-camera';
 export {WORLD_W,WORLD_H,BOTTOM_Y};
 export {WATER_Y} from './terrain';
@@ -154,7 +155,7 @@ export class Game {
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
-  private traceRules(){return {...(sourceHoming(this.gameVersion)?{homingModel:'source-lookahead-v1',homingProbeRadius:SOURCE_HOMING_RADIUS,restoreMaximumFraction:restoreFraction(this.gameVersion),dukeSpeedMultiplier:49/43}:{}),...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
+  private traceRules(){return {...(sourceRangeModel(this.gameVersion)?{launchModel:'source-range-linear-v1',launchReference:{range:43,fullSpeed:730,gravity:230},carrierGravity:'uniform-per-map',fallSpeedFactor:1.15,supplyFallLimit:300,aiNormalErrorBase:70,idleAimPreparation:true,corpseBodyModel:'source-aabb-until-out-v1'}:{}),...(sourceHoming(this.gameVersion)?{homingModel:'source-lookahead-v1',homingProbeRadius:SOURCE_HOMING_RADIUS,restoreMaximumFraction:restoreFraction(this.gameVersion),dukeSpeedMultiplier:49/43}:{}),...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=this.worldHeight||t.x<0||t.x>this.worldWidth)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
@@ -172,7 +173,7 @@ export class Game {
     if(!pose)t.outOfBounds=true;
     this.movingUntil[t.id]=0;
     this.recordBattle('defeat-state',`${t.name}${pose?(modernBackpack(this.gameVersion)?'立即进入陆地趴地哭泣，随地形下落':'立即进入陆地趴地哭泣，位置固定'):'不留残骸：掉穿底边／出界或无陆地落点'}`,{target:t.id,pose:t.defeat,outOfBounds:t.outOfBounds});
-    this.emit('defeat',`${t.name}出局了。`,undefined,t.x);
+    this.emit('defeat',`${t.name}出局了。`,sourceRangeModel(this.gameVersion)?t.id:undefined,t.x);
   }
   private traceTanks(){return this.tanks.map(t=>({...t,flag:teamFlag(t.team),red:t.hp>0&&t.hp<=redHealthLimit(t),raging:isRaging(t),slope:this.tankSlope(t),absoluteAngle:this.aim(t).absolute}));}
   private traceTurn(type:'turn-start'|'turn-end'){
@@ -218,12 +219,17 @@ export class Game {
   opponents(t:Tank){return this.tanks.filter(e=>e.team!==t.team&&e.hp>0);}
   canDamage(t:Tank,owner:number){const source=this.tanks[owner];return !source|| (t.id===owner?!!this.config.selfDamage||this.minimumShotPower===MIN_POWER&&!!this.config.friendlyFire:t.team===source.team?!!this.config.friendlyFire:true);}
   projectileCollisionAllowed(t:Tank,owner:number){return t.id!==owner||this.minimumShotPower!==MIN_POWER;}
+  bodyOccupies(t:Tank){return t.hp>0||sourceRangeModel(this.gameVersion)&&!t.outOfBounds&&t.x>=0&&t.x<=this.worldWidth&&t.y+18<this.worldHeight;}
+  projectileBodyAllowed(t:Tank,p:Pick<Projectile,'owner'|'healing'>){return t.hp<=0?this.bodyOccupies(t):this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner));}
   visible(t:Tank){return this.introLocked||!this.fog||t.team===this.tanks[this.viewer].team;}
   get motionScale(){return screenMotionScale(this.gameVersion,this.worldWidth);}
+  get fallMotionScale(){return this.motionScale*(sourceRangeModel(this.gameVersion)?1.15:1);}
+  get supplyFallLimit(){return sourceRangeModel(this.gameVersion)?300:250;}
   get gravity() { return this.config.map==='moon'||this.config.map==='sky'?145:230; }
   get snow(){return modernWeather(this.gameVersion)?this.config.snow??this.weatherSnow:this.config.snow===true;}
   private rememberHumanDashboard(){if(backgroundMarkers(this.gameVersion)&&this.humanTurn)this.dashboardHuman=this.current;}
   get dashboardTank(){return backgroundMarkers(this.gameVersion)&&!this.humanTurn&&this.dashboardHuman!==null?(this.tanks[this.dashboardHuman]??this.active):this.active;}
+  get canPrepareAim(){return sourceRangeModel(this.gameVersion)&&this.canMarkPower&&this.dashboardTank.hp>0;}
   get canMarkPower(){return backgroundMarkers(this.gameVersion)?!this.paused&&!this.introLocked&&!['lobby','ended'].includes(this.phase)&&this.dashboardTank.controller==='human'&&(this.humanTurn||this.dashboardHuman!==null):this.humanTurn;}
   get humanTurn() { return this.phase==='aiming' && !this.paused && !this.introLocked && !this.weatherObservation && this.active.hp>0 && this.active.controller==='human'; }
   get round() { return this.roundNumber; }
@@ -350,7 +356,7 @@ export class Game {
     if(buildClassicMap(this.land,this.config.map,this.gameVersion))return;
     if(this.config.map==='coast'&&this.layoutScale>1){buildCoastMap(this.land);return;}
     if(this.config.map==='sky'){buildSkyCity(this.land);return;}
-    if(this.config.map==='moon'&&this.layoutScale>1){buildIceValley(this.land);return;}
+    if(this.config.map==='moon'&&this.layoutScale>1){buildIceValley(this.land,this.gameVersion);return;}
     for(let x=0;x<=this.worldWidth;x++) {
       const scale=this.layoutScale,u=x/(1.5*scale);
       if(this.config.map==='coast') {
@@ -408,6 +414,15 @@ export class Game {
     const to={relative:this.active.angle,absolute:this.aim(this.active).absolute,power:this.active.power};
     if(from.relative!==to.relative||from.power!==to.power)this.recordBattle('aim',`${this.active.name}瞄准：相对${to.relative.toFixed(2)}°／绝对${to.absolute.toFixed(2)}°，力度${to.power.toFixed(2)}，${weaponById(this.selected).name}`,{from,to,weapon:this.selected},false,true);
   }
+  prepareAim(angle:number,owner?:number,direction?:number){
+    if(!this.canPrepareAim||!Number.isFinite(angle)||direction!==undefined&&direction!==1&&direction!==-1)return false;
+    this.rememberHumanDashboard();const t=this.dashboardTank;if(owner!==undefined&&owner!==t.id)return false;
+    const from={relative:t.angle,absolute:this.aim(t).absolute,direction:t.direction,power:t.power};
+    t.angle=clamp(angle,t.minAngle,t.maxAngle);if(direction!==undefined)t.direction=direction;
+    const to={relative:t.angle,absolute:this.aim(t).absolute,direction:t.direction,power:t.power};
+    if(from.relative!==to.relative||from.direction!==to.direction)this.recordBattle('aim-preparation',`${t.name}提前调整炮口：相对${to.relative.toFixed(2)}°／绝对${to.absolute.toFixed(2)}°`,{tank:t.id,phase:this.phase,from,to},false,true);
+    return true;
+  }
   setPowerMarker(power:number,owner?:number){if(!this.canMarkPower||!matchPolish(this.gameVersion)||!Number.isFinite(power))return false;this.rememberHumanDashboard();const t=this.dashboardTank;if(owner!==undefined&&owner!==t.id)return false;t.powerMarker=Math.round(clamp(power,1,100));this.recordBattle('power-marker',`${t.name}标记力度${t.powerMarker}%`,{tank:t.id,power:t.powerMarker});return true;}
   selectWeapon(id:WeaponId) {
     if(!this.humanTurn||!weaponById(id)||(this.active.ammo[id]??0)<=0) return false;
@@ -422,7 +437,7 @@ export class Game {
     const distance=Math.sign(direction)*t.moveSpeed*Math.min(dt,0.25)*this.motionScale;
     const x=clamp(t.x+distance,32,this.worldWidth-32);
     const cost=Math.abs(x-t.x)*(100/t.moveDistance)*(t.frozen>0?2:1);
-    if(t.fuel<cost||this.tanks.some(e=>e.id!==t.id&&e.hp>0&&Math.abs(e.y-t.y)<42&&Math.abs(x-e.x)<56)||x===t.x) return false;
+    if(t.fuel<cost||this.tanks.some(e=>e.id!==t.id&&this.bodyOccupies(e)&&Math.abs(e.y-t.y)<42&&Math.abs(x-e.x)<56)||x===t.x) return false;
     // Check every part of the path, plus tread-scale slope, independent of frame rate.
     const previous=this.traversable(t,x,!ai);if(previous===null) return false;
     t.fuel-=cost;t.movedThisTurn+=Math.abs(x-t.x);t.x=x;
@@ -527,7 +542,7 @@ export class Game {
   }
   launch(t:Tank,weapon:WeaponId,angle=t.angle,power=t.power):Projectile {
     const vector=this.aim(t,angle),muzzle=this.muzzle(t,angle);
-    const spec=weaponById(weapon),speed=projectileSpeed(Math.max(this.minimumShotPower,power),launchSpeedMultiplier(weapon,weapon==='sniper'?2:spec.speed??1,this.gameVersion),this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
+    const spec=weaponById(weapon),speed=launchSpeed(weapon,Math.max(this.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,this.gravity*launchGravityMultiplier(weapon,weapon==='sniper'?.27:spec.gravity??1,this.gameVersion),this.gameVersion);
     const rage=isRaging(t)?1.5:1;
     const weather=t.vehicleId==='water'&&this.snow?1.25:1;
     return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:launchDamageScale(!!t.vehicleId,weapon),phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:originalBallistics(this.gameVersion)?1:rage>1?1.15:1,rage:rage>1};
@@ -588,11 +603,11 @@ export class Game {
   private traceProjectile(p:Projectile,parent?:number){
     p.traceId=++this.projectileSequence;p.traceParent=parent;
     const owner=this.tanks[p.owner];p.traceLaunch??={action:this.turn+1,time:this.elapsed,owner:p.owner,name:owner?.name,vehicle:owner?.vehicleId,hp:owner?.hp,maxHP:owner?.maxHP,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:owner?.angle,absolute:owner?this.aim(owner).absolute:null,power:owner?.power,wind:this.wind,rngIndex:this.trace.rngIndex};
-    this.recordBattle('projectile-start',`${this.tanks[p.owner]?.name??p.owner}的${p.healing?'恢复弹':p.transfer?'转移弹':weaponById(p.weapon).name}第${p.traceId}弹${p.delay?'（延迟追加）':''}`,{projectile:p.traceId,parent,owner:p.owner,weapon:p.weapon,...(modernWeather(this.gameVersion)?{healing:!!p.healing,transfer:!!p.transfer}:{}),volley:p.volley,x:p.x,y:p.y,vx:p.vx,vy:p.vy,delay:p.delay,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,boostSources:p.boostSources,digBoost:p.digBoost,aimOffsetX:p.aimOffsetX,aimOffsetY:p.aimOffsetY,penetrations:p.penetrations,hitCooldown:p.hitCooldown});return p;
+    this.recordBattle('projectile-start',`${this.tanks[p.owner]?.name??p.owner}的${p.healing?'恢复弹':p.transfer?'转移弹':weaponById(p.weapon).name}第${p.traceId}弹${p.delay?'（延迟追加）':''}`,{projectile:p.traceId,parent,owner:p.owner,weapon:p.weapon,...(sourceRangeModel(this.gameVersion)?{range:sourceRange(p.weapon)??null,launchModel:sourceRange(p.weapon)===undefined?'bonus-legacy-v1':'source-range-linear-v1'}:{}),...(modernWeather(this.gameVersion)?{healing:!!p.healing,transfer:!!p.transfer}:{}),volley:p.volley,x:p.x,y:p.y,vx:p.vx,vy:p.vy,delay:p.delay,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,boostSources:p.boostSources,digBoost:p.digBoost,aimOffsetX:p.aimOffsetX,aimOffsetY:p.aimOffsetY,penetrations:p.penetrations,hitCooldown:p.hitCooldown});return p;
   }
   firstImpact(p:Projectile,x:number,y:number,toX:number,toY:number,bodies?:readonly {tank:Tank;slope:number}[]){
     let best:{x:number;y:number;fraction:number;tank?:Tank}|null=null;
-    if(p.age>=.09&&!groundOrbital(p.weapon,p.sub,this.gameVersion))for(const entry of bodies??this.tanks){const t=bodies?(entry as {tank:Tank;slope:number}).tank:entry as Tank;if(t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))){if(Math.max(x,toX)<t.x-70||Math.min(x,toX)>t.x+70||Math.max(y,toY)<t.y-70||Math.min(y,toY)>t.y+70)continue;const slope=referenceCalibration(this.gameVersion)?0:bodies?(entry as {tank:Tank;slope:number}).slope:this.tankSlope(t),point=tankSegmentContact(t,x,y,toX,toY,slope,this.gameVersion);if(point&&(!best||point.fraction<best.fraction))best={...point,tank:t};}}
+    if(p.age>=.09&&!groundOrbital(p.weapon,p.sub,this.gameVersion))for(const entry of bodies??this.tanks){const t=bodies?(entry as {tank:Tank;slope:number}).tank:entry as Tank;if(this.projectileBodyAllowed(t,p)){if(Math.max(x,toX)<t.x-70||Math.min(x,toX)>t.x+70||Math.max(y,toY)<t.y-70||Math.min(y,toY)>t.y+70)continue;const slope=referenceCalibration(this.gameVersion)?0:bodies?(entry as {tank:Tank;slope:number}).slope:this.tankSlope(t),point=tankSegmentContact(t,x,y,toX,toY,slope,this.gameVersion);if(point&&(!best||point.fraction<best.fraction))best={...point,tank:t};}}
     if(Math.max(y,toY)<this.land.ceiling)return best;
     const steps=Math.max(1,Math.ceil(Math.max(Math.abs(toX-x),Math.abs(toY-y))));
     for(let i=0;i<=steps;i++){const f=i/steps;if(best&&f>best.fraction)break;const px=x+(toX-x)*f,py=y+(toY-y)*f;if(this.land.solid(px,py)){best={x:px,y:py,fraction:f};break;}}
@@ -600,7 +615,7 @@ export class Game {
   }
   private projectileHit(p:Projectile) {
     if(p.age<0.09||groundOrbital(p.weapon,p.sub,this.gameVersion)) return undefined;
-    return this.tanks.find(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion));
+    return this.tanks.find(t=>this.projectileBodyAllowed(t,p)&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion));
   }
   private invalidVolleyTarget(p:Projectile) {
     if(p.volley===0||weaponById(p.weapon).homingMode!=='volley')return false;
@@ -640,7 +655,7 @@ export class Game {
     const spec=weaponById(p.weapon),effect=spec.effect;
     const orbital=effect==='orbital'&&p.sub;
     const sourceTracking=sourceHoming(this.gameVersion)&&(p.weapon==='homing'||effect==='homing');
-    const g=orbital?0:this.gravity*(p.weapon==='sniper'?0.27:spec.gravity??1);
+    const g=orbital?0:this.gravity*launchGravityMultiplier(p.weapon,p.weapon==='sniper'?0.27:spec.gravity??1,this.gameVersion);
     if(!sourceTracking||!p.homing)p.vx+=orbital?0:this.wind*SHOT_WIND_GAIN*(p.weapon==='sniper'?0.25:1)*dt;
     if(effect==='helix') {p.x-=p.weaveX;p.y-=p.weaveY;}
     const oldX=p.x,oldY=p.y;
@@ -831,7 +846,7 @@ export class Game {
     const w=weaponById(p.weapon),native=originalBallistics(this.gameVersion)?originalWeapon(p.weapon,p.penetrations):null,radius=weaponBlastRadius(p.weapon,this.gameVersion,p.penetrations),nativeDamage=!!native&&p.weapon!=='missile-normal';
     this.observe('ground',null,{x:p.x,y:p.y});
     const section=w.effect==='pierce'?p.penetrations+1:undefined;
-    const impact=this.recordBattle('impact',`第${p.traceId}弹 ${this.tanks[p.owner]?.name??p.owner}的${w.name}${section?`第${section}/${PIERCING_SECTIONS}段`:''}${direct?`正中${this.tanks[directTarget??p.pierceContact!.target]?.name}`:bodyContact?`擦中${this.tanks[directTarget!]?.name}`:'命中地形／爆炸波及'}；(${p.x.toFixed(2)},${p.y.toFixed(2)})`,{projectile:p.traceId,parent:p.traceParent,owner:p.owner,weapon:p.weapon,directTarget,x:p.x,y:p.y,age:p.age,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,sources:p.boostSources,section,...(precisionPolish(this.gameVersion)?{bullseye:direct,bodyContact}:{}),...(p.pierceContact?{contact:p.pierceContact}:{})});
+    const impact=this.recordBattle('impact',`第${p.traceId}弹 ${this.tanks[p.owner]?.name??p.owner}的${w.name}${section?`第${section}/${PIERCING_SECTIONS}段`:''}${direct?`正中${this.tanks[directTarget??p.pierceContact!.target]?.name}`:bodyContact?`擦中${this.tanks[directTarget!]?.name}`:'命中地形／爆炸波及'}；(${p.x.toFixed(2)},${p.y.toFixed(2)})`,{projectile:p.traceId,parent:p.traceParent,owner:p.owner,weapon:p.weapon,directTarget,x:p.x,y:p.y,age:p.age,boost:p.boost,scale:p.scale,fireBoosted:p.fireBoosted,sources:p.boostSources,section,...(precisionPolish(this.gameVersion)?{bullseye:direct,bodyContact}:{}),...(sourceRangeModel(this.gameVersion)?{corpseContact:directTarget!==undefined&&this.tanks[directTarget].hp<=0}:{}),...(p.pierceContact?{contact:p.pierceContact}:{})});
     const damageGeometry=this.tanks.map(t=>({tank:t,distance:Math.hypot(t.x-p.x,t.y-p.y),nativeDistance:native?sourceDistance(t,p.x,p.y,this.tankSlope(t),p.weapon,this.gameVersion):0,scale:impactDamageScale(t,p.x,p.y,this.tankSlope(t),radius,directTarget===t.id,this.gameVersion,incoming,p.weapon,p.penetrations)}));
     const color=w.color;
     this.blasts.push({x:p.x,y:p.y,radius:w.radius,...(native?{damageRadius:radius}:{}),life:0.65,maxLife:0.65,color,weapon:p.weapon});
@@ -935,7 +950,7 @@ export class Game {
       if(t.parachute){
         // Transfer uses its landing column, not a flat five-point placement test.
         const ground=this.support(t.x,t.y+18)-18;
-        this.observe('fall',t);t.fallVelocity=Math.min(150,t.fallVelocity+120*dt);t.y+=t.fallVelocity*dt*this.motionScale;
+        this.observe('fall',t);t.fallVelocity=Math.min(150,t.fallVelocity+120*dt);t.y+=t.fallVelocity*dt*this.fallMotionScale;
         if(ground<this.worldHeight-18&&t.y>=ground){
           t.y=ground;t.fallVelocity=0;const source=t.parachute;t.parachute=null;
           this.recordBattle('landing',`${t.name}降落伞落位，免坠落伤害`,{target:t.id,projectile:source.projectile,position:{x:t.x,y:t.y},distance:t.y-t.fallStart,parachute:true,fallDamage:false});
@@ -950,7 +965,7 @@ export class Game {
       const ground=this.support(t.x,t.y+18)-18;
       if(t.y<ground-0.5 || t.fallVelocity>0) {
         if(!t.fallVelocity) {t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{cause:'失去地形支撑',action:this.turn+1});}
-        this.observe('fall',t);t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt*this.motionScale;
+        this.observe('fall',t);t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt*this.fallMotionScale;
         if(ground<this.worldHeight-18&&t.y>=ground) {
           t.y=ground; const fall=t.y-t.fallStart;t.fallVelocity=0;
           this.observe('fall',t);this.recordBattle('landing',`${t.name}落地，落差${fall.toFixed(2)}，坠落伤害${this.config.fallDamage?'开启':'关闭'}`,{target:t.id,distance:fall,fallDamage:!!this.config.fallDamage,position:{x:t.x,y:t.y}});
@@ -966,7 +981,7 @@ export class Game {
     const ground=this.support(t.x,t.y+18)-18;
     if(t.y<ground-.5||t.fallVelocity>0){
       if(!t.fallVelocity){t.fallVelocity=1;t.fallStart=t.y;this.recordBattle('corpse-fall',`${t.name}的哭泣尸体失去支撑，开始下落`,{target:t.id,from:{x:t.x,y:t.y}});}
-      t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt*this.motionScale;t.defeat.y=t.y;t.defeat.slope=0;
+      t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt*this.fallMotionScale;t.defeat.y=t.y;t.defeat.slope=0;
       if(ground<this.worldHeight-18&&t.y>=ground){t.y=ground;t.defeat.y=ground;t.fallVelocity=0;t.defeat.slope=this.tankSlope(t);this.recordBattle('corpse-landing',`${t.name}的哭泣尸体落到下层`,{target:t.id,position:{x:t.x,y:t.y}});}
     }
     if(t.y+18>=this.worldHeight){t.outOfBounds=true;t.defeat=null;t.fallVelocity=0;this.recordBattle('corpse-out',`${t.name}的哭泣尸体掉出了地图`,{target:t.id,position:{x:t.x,y:t.y}});}
@@ -1070,8 +1085,8 @@ export class Game {
         const desired=human.x+(this.rng()<0.5?-1:1)*(45+this.rng()*Math.max(0,maxDistance-45));
         if(!this.stablePlatform(desired)||this.traversable(human,desired)===null) continue;
         const distance=this.ground(desired)+50;
-        const capTime=(250-80)/220,capDistance=80*capTime+110*capTime*capTime;
-        const time=distance>capDistance?capTime+(distance-capDistance)/250:(-80+Math.sqrt(6400+440*distance))/220;
+        const capTime=(this.supplyFallLimit-80)/220,capDistance=80*capTime+110*capTime*capTime;
+        const time=distance>capDistance?capTime+(distance-capDistance)/this.supplyFallLimit:(-80+Math.sqrt(6400+440*distance))/220;
         const drift=this.wind*2.5*(time/0.35-(1-Math.exp(-0.35*time))/0.35**2);
         const start=desired-drift,landing=this.predictSupply(start);
         const reachable=landing?this.traversable(human,landing.x):null;
@@ -1104,8 +1119,8 @@ export class Game {
       const maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
       const desired=human.x+(this.rng()<.5?-1:1)*(45+this.rng()*Math.max(0,maxDistance-45));
       if(!this.stablePlatform(desired)||this.traversable(human,desired)===null)continue;
-      const distance=this.ground(desired)+50,capTime=(250-80)/220,capDistance=80*capTime+110*capTime*capTime;
-      const time=distance>capDistance?capTime+(distance-capDistance)/250:(-80+Math.sqrt(6400+440*distance))/220;
+      const distance=this.ground(desired)+50,capTime=(this.supplyFallLimit-80)/220,capDistance=80*capTime+110*capTime*capTime;
+      const time=distance>capDistance?capTime+(distance-capDistance)/this.supplyFallLimit:(-80+Math.sqrt(6400+440*distance))/220;
       const drift=this.wind*2.5*(time/.35-(1-Math.exp(-.35*time))/.35**2),start=desired-drift,landing=this.predictSupply(start);
       const reachable=landing?this.traversable(human,landing.x):null;
       if(start<32||start>this.worldWidth-32||!landing||landing.x<40||landing.x>this.worldWidth-40||!this.stablePlatform(landing.x)||reachable===null||Math.abs(landing.y+14-reachable)>MAX_STEP_HEIGHT||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45))continue;
@@ -1151,7 +1166,7 @@ export class Game {
     let x=startX,y=-50,vx=0,vy=80;const dt=1/120;
     for(let i=0;i<1000;i++) {
       const target=this.ground(x,y-8)-14;
-      vx=(vx+this.wind*2.5*dt)*Math.exp(-0.35*dt);x+=vx*dt*this.motionScale;vy=Math.min(250,vy+220*dt);y+=vy*dt*this.motionScale;
+      vx=(vx+this.wind*2.5*dt)*Math.exp(-0.35*dt);x+=vx*dt*this.motionScale;vy=Math.min(this.supplyFallLimit,vy+220*dt);y+=vy*dt*this.motionScale;
       if(x<32||x>this.worldWidth-32||y>=this.worldHeight-14) return null;
       if(y>=target) return {x,y:target};
     }
@@ -1165,14 +1180,14 @@ export class Game {
     for(let i=0;i<maxTime/dt;i++) {
       const oldX=p.x,oldY=p.y;
       p.vx+=this.wind*SHOT_WIND_GAIN*(weapon==='sniper'?0.25:1)*dt;
-      p.vy+=this.gravity*(weapon==='sniper'?0.27:weaponById(weapon).gravity??1)*dt;
+      p.vy+=this.gravity*launchGravityMultiplier(weapon,weapon==='sniper'?0.27:weaponById(weapon).gravity??1,this.gameVersion)*dt;
       p.x+=p.vx*dt;p.y+=p.vy*dt;
       if(weaponById(weapon).effect==='pierce'){
         const contact=permanentPiercingContact(this.land,oldX,oldY,p.x,p.y);
         if(contact){p.x=contact.x;p.y=contact.y;}
       }
       if(i%6===0) points.push({x:p.x,y:p.y});
-      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion));
+      direct=!this.fog&&i*dt>=0.09&&this.tanks.some(t=>this.projectileBodyAllowed(t,p)&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion));
       if(p.x<0||p.x>this.worldWidth||p.y>this.worldHeight||this.land.solid(p.x,p.y)||direct) break;
     }
     return {x:p.x,y:p.y,points,direct};
@@ -1219,7 +1234,7 @@ export class Game {
     const targets=this.knownAITargets();
     if(weapon==='airstrike') {
       let profile:ReturnType<typeof calibrationProfile>|undefined;
-      if(modernWeather(this.gameVersion)){this.refreshAICalibration(t);profile=calibrationProfile(difficulty,t.aiCalibration!);}
+      if(modernWeather(this.gameVersion)){this.refreshAICalibration(t);profile=calibrationProfile(difficulty,t.aiCalibration!,this.gameVersion);}
       const intent=aiAimOffset(difficulty,weapon,this.rng,profile,this.gameVersion);this.selected=weapon;this.targetX=clamp(enemyX+intent.offset,20,this.worldWidth-20);
       if(profile){this.aiDecision={target:e.id,fromX:t.x,goalX:t.x,weapon,intentionalMiss:intent.miss};this.recordBattle('ai-calibration',`${t.name}空袭瞄准校准`,{target:t.id,state:t.aiCalibration,profile,decision:this.aiDecision});}
       return;
@@ -1230,7 +1245,7 @@ export class Game {
     const planned=level===3||recover||level===2&&this.fires.some(f=>Math.abs(f.x-t.x)<f.radius&&this.canDamage(t,f.owner))?chooseAIPosition(this,t,weapons,targets,stay):{stay,best:undefined};
     const best=planned.best??planned.stay;
     this.selected=best.weapon;
-    const profile=modernWeather(this.gameVersion)?calibrationProfile(difficulty,t.aiCalibration!):undefined;
+    const profile=modernWeather(this.gameVersion)?calibrationProfile(difficulty,t.aiCalibration!,this.gameVersion):undefined;
     const intent=aiAimOffset(difficulty,best.weapon,this.rng,profile,this.gameVersion),offset=intent.offset+(this.fog?(this.rng()-.5)*120:0);
     this.aiDecision={target:best.target,fromX:t.x,goalX:best.x,weapon:best.weapon,intentionalMiss:intent.miss};
     if(profile)this.recordBattle('ai-calibration',`${t.name}校准：${t.aiCalibration!.disturbed?'地形扰动后的下一炮':t.aiCalibration!.stableShots===0?'开局首炮':'稳定射击逐步校准'}；误瞄概率${(profile.missChance*100).toFixed(1)}%，${recover?'先恢复射角':'评估当前射位'}`,{target:t.id,state:t.aiCalibration,profile,decision:this.aiDecision});
@@ -1266,7 +1281,7 @@ export class Game {
     if(modernWeather(this.gameVersion)&&this.active.aiCalibration?.terrainPending){
       const shifted=calibrationDisturbed(this.active.aiCalibration,this.active.x,this.active.y,this.tankSlope(this.active));this.refreshAICalibration(this.active);
       if(shifted){
-        const intent=aiAimOffset(this.active.difficulty,pending.weapons[0],this.rng,calibrationProfile(this.active.difficulty,this.active.aiCalibration),this.gameVersion);pending.offset=intent.offset+(this.fog?(this.rng()-.5)*120:0);pending.miss=intent.miss;
+        const intent=aiAimOffset(this.active.difficulty,pending.weapons[0],this.rng,calibrationProfile(this.active.difficulty,this.active.aiCalibration,this.gameVersion),this.gameVersion);pending.offset=intent.offset+(this.fog?(this.rng()-.5)*120:0);pending.miss=intent.miss;
         const recovery=chooseAIPosition(this,this.active,pending.weapons,this.knownAITargets());
         if(this.aiDecision){this.aiDecision.goalX=recovery.best.x;this.aiDecision.intentionalMiss=intent.miss;}
         this.recordBattle('ai-adjusted-plan','移动中地形改变，落地后重新校准并恢复射角',{target:this.active.id,decision:this.aiDecision,state:this.active.aiCalibration});
@@ -1321,7 +1336,7 @@ export class Game {
         for(let i=0;i<steps&&c.falling;i++) {
           const target=this.ground(c.x,c.y-8)-14;
           c.vx=((c.vx??0)+this.wind*2.5*step)*Math.exp(-0.35*step);
-          c.x+=(c.vx??0)*step*this.motionScale;c.vy=Math.min(250,(c.vy??80)+220*step);c.y+=(c.vy??80)*step*this.motionScale;
+          c.x+=(c.vx??0)*step*this.motionScale;c.vy=Math.min(this.supplyFallLimit,(c.vy??80)+220*step);c.y+=(c.vy??80)*step*this.motionScale;
           if(c.y>=target) {c.y=target;c.falling=false;this.burst(c.x,c.y+13,15,'#d9c29a');this.emit('crate-land','补给箱已落地。',undefined,c.x);}
         }
       }

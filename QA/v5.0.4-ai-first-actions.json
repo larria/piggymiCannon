@@ -1,0 +1,210 @@
+{
+  "protocol": "v1",
+  "shotsPerLevel": 240,
+  "uniqueSeeds": 240,
+  "criterion": "direct or >=max(30,5% victim maxHP) enemy HP/shield loss in one completed action; all cases retained; no fog; 2v2; self/friendly off",
+  "levels": {
+    "easy": {
+      "effective": 61,
+      "direct": 27,
+      "moved": 0,
+      "nearest": 31,
+      "intentional": 182,
+      "rate": 0.25416666666666665,
+      "breakdown": {
+        "valley": {
+          "n": 24,
+          "hits": 11
+        },
+        "coast": {
+          "n": 24,
+          "hits": 5
+        },
+        "moon": {
+          "n": 24,
+          "hits": 5
+        },
+        "factory": {
+          "n": 24,
+          "hits": 4
+        },
+        "temple": {
+          "n": 24,
+          "hits": 7
+        },
+        "egypt": {
+          "n": 24,
+          "hits": 4
+        },
+        "flat-90": {
+          "n": 24,
+          "hits": 7
+        },
+        "flat-130": {
+          "n": 24,
+          "hits": 5
+        },
+        "flat-220": {
+          "n": 24,
+          "hits": 7
+        },
+        "flat-600": {
+          "n": 24,
+          "hits": 6
+        }
+      }
+    },
+    "normal": {
+      "effective": 79,
+      "direct": 57,
+      "moved": 0,
+      "nearest": 42,
+      "intentional": 160,
+      "rate": 0.32916666666666666,
+      "breakdown": {
+        "valley": {
+          "n": 24,
+          "hits": 8
+        },
+        "coast": {
+          "n": 24,
+          "hits": 6
+        },
+        "moon": {
+          "n": 24,
+          "hits": 10
+        },
+        "factory": {
+          "n": 24,
+          "hits": 9
+        },
+        "temple": {
+          "n": 24,
+          "hits": 4
+        },
+        "egypt": {
+          "n": 24,
+          "hits": 10
+        },
+        "flat-90": {
+          "n": 24,
+          "hits": 9
+        },
+        "flat-130": {
+          "n": 24,
+          "hits": 10
+        },
+        "flat-220": {
+          "n": 24,
+          "hits": 7
+        },
+        "flat-600": {
+          "n": 24,
+          "hits": 6
+        }
+      }
+    },
+    "hard": {
+      "effective": 124,
+      "direct": 109,
+      "moved": 0,
+      "nearest": 87,
+      "intentional": 119,
+      "rate": 0.5166666666666667,
+      "breakdown": {
+        "valley": {
+          "n": 24,
+          "hits": 11
+        },
+        "coast": {
+          "n": 24,
+          "hits": 14
+        },
+        "moon": {
+          "n": 24,
+          "hits": 13
+        },
+        "factory": {
+          "n": 24,
+          "hits": 13
+        },
+        "temple": {
+          "n": 24,
+          "hits": 10
+        },
+        "egypt": {
+          "n": 24,
+          "hits": 14
+        },
+        "flat-90": {
+          "n": 24,
+          "hits": 13
+        },
+        "flat-130": {
+          "n": 24,
+          "hits": 14
+        },
+        "flat-220": {
+          "n": 24,
+          "hits": 9
+        },
+        "flat-600": {
+          "n": 24,
+          "hits": 13
+        }
+      }
+    },
+    "expert": {
+      "effective": 173,
+      "direct": 160,
+      "moved": 15,
+      "nearest": 109,
+      "intentional": 71,
+      "rate": 0.7208333333333333,
+      "breakdown": {
+        "valley": {
+          "n": 24,
+          "hits": 16
+        },
+        "coast": {
+          "n": 24,
+          "hits": 19
+        },
+        "moon": {
+          "n": 24,
+          "hits": 17
+        },
+        "factory": {
+          "n": 24,
+          "hits": 18
+        },
+        "temple": {
+          "n": 24,
+          "hits": 10
+        },
+        "egypt": {
+          "n": 24,
+          "hits": 18
+        },
+        "flat-90": {
+          "n": 24,
+          "hits": 19
+        },
+        "flat-130": {
+          "n": 24,
+          "hits": 19
+        },
+        "flat-220": {
+          "n": 24,
+          "hits": 19
+        },
+        "flat-600": {
+          "n": 24,
+          "hits": 18
+        }
+      }
+    }
+  },
+  "gameVersion": "5.0.4",
+  "scope": "Actual package-version regression. Fixed scenarios; observed rates are not a population or per-match hit guarantee."
+}

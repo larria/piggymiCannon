@@ -6,6 +6,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'assets/ft2-audio'
 OUTPUT = ROOT / 'public/audio'
 VEHICLES = ['bowl', 'crossbow', 'cannon', 'beetle', 'duke', 'mine', 'missile', 'multi', 'laser', 'water', 'ion', 'sea', 'dragon']
+SFX_GROUPS = json.loads((ROOT / 'src/vehicle-audio-groups.json').read_text())
+assert set(SFX_GROUPS) == set(VEHICLES) and set(SFX_GROUPS.values()) == set(range(1,14))
 SELECTION = json.loads((ROOT / 'research/FT2_MAP_BGM_SELECTION.json').read_text())
 EVIDENCE = json.loads((ROOT / 'research/FT2_MAP_BGM_EVIDENCE.json').read_text())
 # Validate against original MapUtil / FieldRVA evidence, not web remake rules.
@@ -19,7 +21,7 @@ BGM = {'lobby': 'GM01.mp3', 'setup': 'GM02.mp3', 'result': 'GM04.mp3',
 COMMON = {'denied': 'Push2.wav', 'click': 'Push1.wav', 'select': 'Select1.wav',
           'win': 'logo.wav', 'turn': 'Turn.wav', 'wind': 'Wind.wav',
           'firewall': 'Firewall.wav', 'lock': 'Homming.wav', 'crate-land': 'BoxLanding.wav',
-          'supply': 'heli.wav', 'warning': 'Warring.wav', 'transfer': 'Push3.wav', 'quake': 'quake.wav', 'death': 'Enemy.wav'}
+          'supply': 'heli.wav', 'warning': 'Warring.wav', 'transfer': 'Push3.wav', 'quake': 'quake.wav', 'death': 'Enemy.wav', 'death-friendly': 'Friend.wav'}
 
 def build(only=None):
     OUTPUT.mkdir(exist_ok=True)
@@ -62,7 +64,8 @@ def build(only=None):
             choice = SELECTION['tracks'][str(int(scene[6:]))]
             assert choice['durationMode'] == 'full'
             assert abs(choice['seconds'] - entries[-1]['sourceSeconds']) < .001
-    for group, vehicle in enumerate(VEHICLES, 1):
+    for vehicle in VEHICLES:
+        group = SFX_GROUPS[vehicle]
         for variant, weapon in [(1, 'normal'), (2, 'special')]:
             for kind in ['Fire', 'Bomb']:
                 convert('sfx', f'{kind}{group}-{variant}.wav', f'sfx-{kind.lower()}-{vehicle}-{weapon}.mp3', 4)
@@ -81,7 +84,8 @@ def build(only=None):
         if target.name not in valid_runtime:
             target.unlink()
     manifest = {'formatVersion': 3, 'source': '本机 ft2 目录/原版分析；来源素材仅用于本项目，未宣称官方授权',
-                'mapping': '本作13载具分配Fire/Bomb组；1/2分配普通/特殊。经典地图选曲来自原客户端MapUtil有效列表，本作择一；原创峡谷自行选曲，不使用复刻web规则。',
+                'mapping': '依据已核实原角色号分配Fire/Bomb/move/Unmove组；1/2分配普通/特殊，非本作载具列表顺序。经典地图选曲来自原客户端MapUtil有效列表，本作择一；原创峡谷自行选曲，不使用复刻web规则。',
+                'vehicleAudioGroups': SFX_GROUPS, 'soundEvidence': 'FT2_SFX_EVIDENCE.json',
                 'mapBgmSelection': SELECTION['maps'], 'mapBgmTracks': SELECTION['tracks'],
                 'mapBgmEvidence': 'FT2_MAP_BGM_EVIDENCE.json',
                 'ffmpegVersion': subprocess.check_output(['ffmpeg', '-version'], text=True).splitlines()[0],

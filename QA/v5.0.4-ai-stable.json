@@ -1,0 +1,8 @@
+{
+  "shots": 240,
+  "hits": 181,
+  "direct": 168,
+  "rate": 0.7541666666666667,
+  "gameVersion": "5.0.4",
+  "scope": "Actual package-version regression. Fixed scenarios; observed rates are not a population or per-match hit guarantee."
+}

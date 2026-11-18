@@ -1,0 +1,231 @@
+{
+  "version": "5.0.4",
+  "changed": [
+    {
+      "runtime": "sfx-fire-mine-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Fire6-1.wav",
+      "after": "assets/ft2-audio/sfx/Fire9-1.wav",
+      "bytes": 2759
+    },
+    {
+      "runtime": "sfx-bomb-mine-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb6-1.wav",
+      "after": "assets/ft2-audio/sfx/Bomb9-1.wav",
+      "bytes": 11327
+    },
+    {
+      "runtime": "sfx-fire-mine-special.mp3",
+      "before": "assets/ft2-audio/sfx/Fire6-2.wav",
+      "after": "assets/ft2-audio/sfx/Fire9-2.wav",
+      "bytes": 2550
+    },
+    {
+      "runtime": "sfx-bomb-mine-special.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb6-2.wav",
+      "after": "assets/ft2-audio/sfx/Bomb9-2.wav",
+      "bytes": 17806
+    },
+    {
+      "runtime": "sfx-move-mine.mp3",
+      "before": "assets/ft2-audio/sfx/move6.wav",
+      "after": "assets/ft2-audio/sfx/move9.wav",
+      "bytes": 10074
+    },
+    {
+      "runtime": "sfx-stop-mine.mp3",
+      "before": "assets/ft2-audio/sfx/Unmove6.wav",
+      "after": "assets/ft2-audio/sfx/Unmove9.wav",
+      "bytes": 7984
+    },
+    {
+      "runtime": "sfx-fire-missile-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Fire7-1.wav",
+      "after": "assets/ft2-audio/sfx/Fire6-1.wav",
+      "bytes": 9447
+    },
+    {
+      "runtime": "sfx-bomb-missile-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb7-1.wav",
+      "after": "assets/ft2-audio/sfx/Bomb6-1.wav",
+      "bytes": 9029
+    },
+    {
+      "runtime": "sfx-fire-missile-special.mp3",
+      "before": "assets/ft2-audio/sfx/Fire7-2.wav",
+      "after": "assets/ft2-audio/sfx/Fire6-2.wav",
+      "bytes": 7148
+    },
+    {
+      "runtime": "sfx-bomb-missile-special.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb7-2.wav",
+      "after": "assets/ft2-audio/sfx/Bomb6-2.wav",
+      "bytes": 8611
+    },
+    {
+      "runtime": "sfx-move-missile.mp3",
+      "before": "assets/ft2-audio/sfx/move7.wav",
+      "after": "assets/ft2-audio/sfx/move6.wav",
+      "bytes": 7148
+    },
+    {
+      "runtime": "sfx-stop-missile.mp3",
+      "before": "assets/ft2-audio/sfx/Unmove7.wav",
+      "after": "assets/ft2-audio/sfx/Unmove6.wav",
+      "bytes": 2341
+    },
+    {
+      "runtime": "sfx-fire-multi-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Fire8-1.wav",
+      "after": "assets/ft2-audio/sfx/Fire7-1.wav",
+      "bytes": 7148
+    },
+    {
+      "runtime": "sfx-bomb-multi-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb8-1.wav",
+      "after": "assets/ft2-audio/sfx/Bomb7-1.wav",
+      "bytes": 10074
+    },
+    {
+      "runtime": "sfx-fire-multi-special.mp3",
+      "before": "assets/ft2-audio/sfx/Fire8-2.wav",
+      "after": "assets/ft2-audio/sfx/Fire7-2.wav",
+      "bytes": 6103
+    },
+    {
+      "runtime": "sfx-bomb-multi-special.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb8-2.wav",
+      "after": "assets/ft2-audio/sfx/Bomb7-2.wav",
+      "bytes": 7357
+    },
+    {
+      "runtime": "sfx-move-multi.mp3",
+      "before": "assets/ft2-audio/sfx/move8.wav",
+      "after": "assets/ft2-audio/sfx/move7.wav",
+      "bytes": 8402
+    },
+    {
+      "runtime": "sfx-stop-multi.mp3",
+      "before": "assets/ft2-audio/sfx/Unmove8.wav",
+      "after": "assets/ft2-audio/sfx/Unmove7.wav",
+      "bytes": 2132
+    },
+    {
+      "runtime": "sfx-fire-laser-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Fire9-1.wav",
+      "after": "assets/ft2-audio/sfx/Fire8-1.wav",
+      "bytes": 8193
+    },
+    {
+      "runtime": "sfx-bomb-laser-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb9-1.wav",
+      "after": "assets/ft2-audio/sfx/Bomb8-1.wav",
+      "bytes": 16134
+    },
+    {
+      "runtime": "sfx-fire-laser-special.mp3",
+      "before": "assets/ft2-audio/sfx/Fire9-2.wav",
+      "after": "assets/ft2-audio/sfx/Fire8-2.wav",
+      "bytes": 11745
+    },
+    {
+      "runtime": "sfx-bomb-laser-special.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb9-2.wav",
+      "after": "assets/ft2-audio/sfx/Bomb8-2.wav",
+      "bytes": 21358
+    },
+    {
+      "runtime": "sfx-move-laser.mp3",
+      "before": "assets/ft2-audio/sfx/move9.wav",
+      "after": "assets/ft2-audio/sfx/move8.wav",
+      "bytes": 9238
+    },
+    {
+      "runtime": "sfx-stop-laser.mp3",
+      "before": "assets/ft2-audio/sfx/Unmove9.wav",
+      "after": "assets/ft2-audio/sfx/Unmove8.wav",
+      "bytes": 24075
+    },
+    {
+      "runtime": "sfx-fire-water-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Fire10-1.wav",
+      "after": "assets/ft2-audio/sfx/Fire11-1.wav",
+      "bytes": 6312
+    },
+    {
+      "runtime": "sfx-bomb-water-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb10-1.wav",
+      "after": "assets/ft2-audio/sfx/Bomb11-1.wav",
+      "bytes": 23239
+    },
+    {
+      "runtime": "sfx-fire-water-special.mp3",
+      "before": "assets/ft2-audio/sfx/Fire10-2.wav",
+      "after": "assets/ft2-audio/sfx/Fire11-2.wav",
+      "bytes": 7357
+    },
+    {
+      "runtime": "sfx-bomb-water-special.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb10-2.wav",
+      "after": "assets/ft2-audio/sfx/Bomb11-2.wav",
+      "bytes": 15716
+    },
+    {
+      "runtime": "sfx-move-water.mp3",
+      "before": "assets/ft2-audio/sfx/move10.wav",
+      "after": "assets/ft2-audio/sfx/move11.wav",
+      "bytes": 10492
+    },
+    {
+      "runtime": "sfx-stop-water.mp3",
+      "before": "assets/ft2-audio/sfx/Unmove10.wav",
+      "after": "assets/ft2-audio/sfx/Unmove11.wav",
+      "bytes": 2968
+    },
+    {
+      "runtime": "sfx-fire-ion-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Fire11-1.wav",
+      "after": "assets/ft2-audio/sfx/Fire10-1.wav",
+      "bytes": 6312
+    },
+    {
+      "runtime": "sfx-bomb-ion-normal.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb11-1.wav",
+      "after": "assets/ft2-audio/sfx/Bomb10-1.wav",
+      "bytes": 8611
+    },
+    {
+      "runtime": "sfx-fire-ion-special.mp3",
+      "before": "assets/ft2-audio/sfx/Fire11-2.wav",
+      "after": "assets/ft2-audio/sfx/Fire10-2.wav",
+      "bytes": 6939
+    },
+    {
+      "runtime": "sfx-bomb-ion-special.mp3",
+      "before": "assets/ft2-audio/sfx/Bomb11-2.wav",
+      "after": "assets/ft2-audio/sfx/Bomb10-2.wav",
+      "bytes": 11536
+    },
+    {
+      "runtime": "sfx-move-ion.mp3",
+      "before": "assets/ft2-audio/sfx/move11.wav",
+      "after": "assets/ft2-audio/sfx/move10.wav",
+      "bytes": 5894
+    },
+    {
+      "runtime": "sfx-stop-ion.mp3",
+      "before": "assets/ft2-audio/sfx/Unmove11.wav",
+      "after": "assets/ft2-audio/sfx/Unmove10.wav",
+      "bytes": 5267
+    },
+    {
+      "runtime": "sfx-death-friendly.mp3",
+      "before": null,
+      "after": "assets/ft2-audio/sfx/Friend.wav",
+      "bytes": 8820
+    }
+  ],
+  "all16FullBgmHashesUnchanged": true,
+  "runtimeFiles": 109,
+  "runtimeAudioBytes": 58151429,
+  "unusedSourcesPublished": false
+}
