@@ -5,17 +5,17 @@
     "height": 834
   },
   "samples": [
-    0,
     1,
     1,
+    1,
     2,
     2,
     2,
-    2
+    3
   ],
   "partialBigFile": {
     "url": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00012.mp3",
-    "received": 1080000
+    "received": 1200000
   },
   "avatarsLoadGated": true,
   "interaction": true,

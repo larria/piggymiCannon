@@ -1,0 +1,31 @@
+{
+  "version": "5.0.7",
+  "sourceCommit": "6da20bc62f850c98174b52e108319f9bd51c47e0",
+  "ci": {
+    "id": 44368845282,
+    "conclusion": "success",
+    "tests": 522,
+    "passed": 522,
+    "failed": 0,
+    "build": "passed",
+    "sizeCheck": "passed"
+  },
+  "pages": {
+    "id": 44373379510,
+    "commit": "2678d6ae020d100d1f44308e991a9a200be2a016",
+    "conclusion": "success",
+    "url": "https://larria.github.io/piggymiCannon/"
+  },
+  "live": {
+    "version": "v5.0.7",
+    "url": "https://larria.github.io/piggymiCannon/",
+    "verifiedAt": "2026-11-18T18:50:36.252Z",
+    "bundleMatchesLocal": true,
+    "offlineReload": true,
+    "allMaterialHashesVerifiedOffline": true,
+    "audioFiles": 109,
+    "originalPortraitsDecoded": true,
+    "errors": []
+  },
+  "tag": "v5.0.7"
+}

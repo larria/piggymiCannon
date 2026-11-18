@@ -1,0 +1,20 @@
+{
+  "samples": [
+    0,
+    0,
+    24,
+    68
+  ],
+  "actual": {
+    "done": 59336350,
+    "total": 64990647,
+    "downloaded": 59336350,
+    "percent": 91
+  },
+  "shown": 91,
+  "offlineLoadMs": 966,
+  "repairing": 1,
+  "repairCompleted": 100,
+  "offlineRepairedAsset": true,
+  "errors": []
+}
