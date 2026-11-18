@@ -1,3 +1,4 @@
+import {modernAssistance} from './combat-preferences';
 import {sourceRangeModel} from './source-range';
 import {backgroundMarkers} from './background-markers';
 import {CREW} from './crew';
@@ -88,7 +89,7 @@ export function validateReplay(value:any):asserts value is BattleReplay{
   else if(c[0]===-2){if(c.length!==2||!['charge-wait','charge-start','charge-stop'].includes(c[1]))throw Error('录像音效提示数据损坏。');}
   else if(c[0]===12&&(![2,...(backgroundMarkers(value.gameVersion)?[3]:[])].includes(c.length)||!finite(c[1])||c[1]<1||c[1]>100||c.length===3&&(!Number.isInteger(c[2])||c[2]<0||c[2]>3)))throw Error('录像力度记号损坏。');
   else if(c[0]===14&&(!sourceRangeModel(value.gameVersion)||![2,3,4].includes(c.length)||!finite(c[1])||c.length>=3&&(!Number.isInteger(c[2])||c[2]<0||c[2]>3)||c.length===4&&c[3]!==1&&c[3]!==-1))throw Error('录像预设角度损坏。');
-  else if(c[0]<0||c[0]>=METHODS.length||c.length>5||c.slice(1).some((a:any)=>!['number','string','boolean'].includes(typeof a)||typeof a==='number'&&!finite(a))||c[0]===0&&(c.length!==2||c[1]<0||c[1]>.1)||c[0]===10&&(!['selfDamage','friendlyFire','allowDragon','fallDamage'].includes(c[1])||typeof c[2]!=='boolean'))throw Error('录像操作不支持。');
+  else if(c[0]<0||c[0]>=METHODS.length||c.length>5||c.slice(1).some((a:any)=>!['number','string','boolean'].includes(typeof a)||typeof a==='number'&&!finite(a))||c[0]===0&&(c.length!==2||c[1]<0||c[1]>.1)||c[0]===10&&(!['selfDamage','friendlyFire','allowDragon','fallDamage',...(modernAssistance(value.gameVersion)?['powerAssist','tankBlocking']:[])].includes(c[1])||typeof c[2]!=='boolean'))throw Error('录像操作不支持。');
  }
 }
 export class ReplayPlayer {

@@ -1,3 +1,4 @@
+import {modernAssistance} from './combat-preferences';
 import {sourceRangeModel,sourceRange,launchGravityMultiplier} from './source-range';
 import {groundOrbital,vectorProjectiles} from './weapon-presentation';
 import {backgroundMarkers} from './background-markers';
@@ -46,7 +47,7 @@ export const MAX_CLIMB_ANGLE=60,MAX_STEP_HEIGHT=12;
 export const SHOT_WIND_GAIN=3;
 export const BRIDGE_THICKNESS=180;
 export type Phase = 'lobby' | 'aiming' | 'flying' | 'resolving' | 'supply' | 'handoff' | 'ended';
-export interface Config {competition?:Competition;slots:Slot[];map:MapId;mapChoice?:MapChoice;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean;fallDamage?:boolean }
+export interface Config {competition?:Competition;slots:Slot[];map:MapId;mapChoice?:MapChoice;timer:number;seed:number;fog?:boolean;fireLine?:boolean;snow?:boolean;selfDamage?:boolean;friendlyFire?:boolean;allowDragon?:boolean;fallDamage?:boolean;powerAssist?:boolean;tankBlocking?:boolean }
 export interface Tank {
   id:number; name:string;crew:CrewId;slot:number;team:number;controller:'human'|'ai';difficulty:Difficulty; x:number; y:number; hp:number; shield:number; fuel:number;
   angle:number; power:number; direction:number; ammo:Record<WeaponId,number>;
@@ -71,7 +72,7 @@ export interface Gas {x:number;y:number;owner:number;radius:number;turns:number;
 interface BoostSources {fire:'item'|'line'|null;rage:number;snow:number;inherited?:number}
 export interface Projectile {pierceContact?:{x:number;y:number;target:number;incoming?:{vx:number;vy:number}};healing?:boolean;awaitTransfer?:boolean;traceId?:number;traceParent?:number;boostSources?:BoostSources;traceCrossed?:boolean;traceLaunch?:Record<string,any>;traceFireLine?:unknown}
 export interface Mine {boostSources?:BoostSources;traceOrigin?:number;traceLaunch?:Record<string,any>}
-export interface GameEvent {sequence?:number;time?:number;action?:number}
+export interface GameEvent {observerTeam?:number;sequence?:number;time?:number;action?:number}
 interface DamageContext {cause:string;weapon?:WeaponId;projectile?:number;impact?:number;base?:number;factors?:{source:string;value:number}[];formula?:string;dig?:unknown;origin?:unknown}
 const DAMAGE_CAUSES:Record<string,string>={direct:'直接命中',graze:'爆炸擦中／波及',mine:'地雷',fall:'坠落',out:'掉出战场',poison:'毒箭持续伤害',fire:'火烧',gas:'毒气',sudden:'决胜时刻扣血',unknown:'未标注来源'};
 const RESTORE_KEYS=['config','introLocked','observation','tanks','phase','current','turn','roundNumber','roundPending','windChangeRound','wind','itemCues','clock','selected','projectiles','blasts','fires','gases','mines','crates','texts','paused','winner','elapsed','resultAge','resolveTime','resolveHazardTime','targetX','teleporting','aiTime','fog','fogTurnsRemaining','fireLine','fireLineTurnsRemaining','movingUntil','volleySequence','volleyTargets','heardX','afterSupply','supplySettling','firedBy','aiMoveGoal','aiPending','aiDecision','fallOrigins','projectileSequence','log'] as const;
@@ -127,6 +128,7 @@ export class Game {
     this.minimumShotPower=minimumPower(gameVersion);
     this.config={slots:defaultSlots(),map:'valley',timer:0,fallDamage:false,seed:Date.now(),...config};
     this.config.fallDamage=!!this.config.fallDamage;
+    if(modernAssistance(gameVersion)){this.config.powerAssist=!!this.config.powerAssist;this.config.tankBlocking=!!this.config.tankBlocking;}
     if(this.config.slots.length!==4||slotProblem(this.config.slots))throw new Error(slotProblem(this.config.slots)??'需要四个固定槽位');
     this.trace=new BattleTrace(this.config.seed);this.rng=this.diagnosticRng(makeRng(this.config.seed));
     if(this.config.mapChoice==='random'){
@@ -155,7 +157,7 @@ export class Game {
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
-  private traceRules(){return {...(sourceRangeModel(this.gameVersion)?{launchModel:'source-range-linear-v1',launchReference:{range:43,fullSpeed:730,gravity:230},carrierGravity:'uniform-per-map',fallSpeedFactor:1.15,supplyFallLimit:300,aiNormalErrorBase:70,idleAimPreparation:true,corpseBodyModel:'source-aabb-until-out-v1'}:{}),...(sourceHoming(this.gameVersion)?{homingModel:'source-lookahead-v1',homingProbeRadius:SOURCE_HOMING_RADIUS,restoreMaximumFraction:restoreFraction(this.gameVersion),dukeSpeedMultiplier:49/43}:{}),...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
+  private traceRules(){return {...(modernAssistance(this.gameVersion)?{powerAssist:!!this.config.powerAssist,tankBlocking:!!this.config.tankBlocking}:{}),...(sourceRangeModel(this.gameVersion)?{launchModel:'source-range-linear-v1',launchReference:{range:43,fullSpeed:730,gravity:230},carrierGravity:'uniform-per-map',fallSpeedFactor:1.15,supplyFallLimit:300,aiNormalErrorBase:70,idleAimPreparation:true,corpseBodyModel:'source-aabb-until-out-v1'}:{}),...(sourceHoming(this.gameVersion)?{homingModel:'source-lookahead-v1',homingProbeRadius:SOURCE_HOMING_RADIUS,restoreMaximumFraction:restoreFraction(this.gameVersion),dukeSpeedMultiplier:49/43}:{}),...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=this.worldHeight||t.x<0||t.x>this.worldWidth)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
@@ -193,7 +195,7 @@ export class Game {
     return this.trace.snapshot(this.gameVersion,current);
   }
   battleSnapshotText(){return snapshotText(this.battleSnapshot());}
-  setBattleRule(key:'selfDamage'|'friendlyFire'|'allowDragon'|'fallDamage',value:boolean){this.config[key]=value;this.recordBattle('rule-change',`规则切换：${key==='selfDamage'?'自伤':key==='friendlyFire'?'友伤':key==='fallDamage'?'坠落伤害':'直接选择暴龙'}${value?'开启':'关闭'}`,{key,value,rules:this.traceRules()});}
+  setBattleRule(key:'selfDamage'|'friendlyFire'|'allowDragon'|'fallDamage'|'powerAssist'|'tankBlocking',value:boolean){this.config[key]=value;this.recordBattle('rule-change',`规则切换：${key==='selfDamage'?'自伤':key==='friendlyFire'?'友伤':key==='fallDamage'?'坠落伤害':key==='powerAssist'?'显示蓄力辅助':key==='tankBlocking'?'坦克相互阻挡':'直接选择暴龙'}${value?'开启':'关闭'}`,{key,value,rules:this.traceRules()});}
   static fromBattleSnapshot(snapshot:BattleSnapshot){
     if(snapshot.format!=='piggy-battle-snapshot'||snapshot.formatVersion!==1)throw new Error('不支持的快照格式');
     const g=new Game(snapshot.initial.config,snapshot.gameVersion,recordedWorld(snapshot.initial.world,snapshot.gameVersion)),state=JSON.parse(JSON.stringify(snapshot.current),(_key,v)=>v==='Infinity'?Infinity:v==='-Infinity'?-Infinity:v==='NaN'?NaN:v);
@@ -219,6 +221,15 @@ export class Game {
   opponents(t:Tank){return this.tanks.filter(e=>e.team!==t.team&&e.hp>0);}
   canDamage(t:Tank,owner:number){const source=this.tanks[owner];return !source|| (t.id===owner?!!this.config.selfDamage||this.minimumShotPower===MIN_POWER&&!!this.config.friendlyFire:t.team===source.team?!!this.config.friendlyFire:true);}
   projectileCollisionAllowed(t:Tank,owner:number){return t.id!==owner||this.minimumShotPower!==MIN_POWER;}
+  get tanksBlockMovement(){return !modernAssistance(this.gameVersion)||!!this.config.tankBlocking;}
+  movementBodyBlocked(t:Tank,x:number,bodies:Tank[]=this.tanks,path=false){
+    if(!this.tanksBlockMovement)return false;
+    return bodies.some(e=>{
+      if(e.id===t.id||!this.bodyOccupies(e)||Math.abs(e.y-t.y)>=42)return false;
+      if(modernAssistance(this.gameVersion)&&Math.abs(t.x-e.x)<56&&Math.abs(x-e.x)>Math.abs(t.x-e.x)&&(t.x-e.x)*(x-e.x)>=0)return false;
+      return path||modernAssistance(this.gameVersion)?e.x>Math.min(t.x,x)-56&&e.x<Math.max(t.x,x)+56:Math.abs(x-e.x)<56;
+    });
+  }
   bodyOccupies(t:Tank){return t.hp>0||sourceRangeModel(this.gameVersion)&&!t.outOfBounds&&t.x>=0&&t.x<=this.worldWidth&&t.y+18<this.worldHeight;}
   projectileBodyAllowed(t:Tank,p:Pick<Projectile,'owner'|'healing'>){return t.hp<=0?this.bodyOccupies(t):this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner));}
   visible(t:Tank){return this.introLocked||!this.fog||t.team===this.tanks[this.viewer].team;}
@@ -402,8 +413,9 @@ export class Game {
     this.traceTurn('turn-start');
   }
   private emit(type:GameEvent['type'],message:string,value?:number,x?:number,weapon?:WeaponId,transfer=false) {
-    const sequence=this.recordBattle(type,message,{value,x,weapon,transfer});
-    this.events.push({type,message,value,x,weapon,transfer,sequence,time:this.elapsed,action:this.turn+1});
+    const perspective=modernAssistance(this.gameVersion)&&type==='defeat'?{observerTeam:this.dashboardTank.controller==='human'?this.dashboardTank.team:this.tanks[this.viewer].team}:{};
+    const sequence=this.recordBattle(type,message,{value,x,weapon,transfer,...perspective});
+    this.events.push({type,message,value,x,weapon,transfer,...perspective,sequence,time:this.elapsed,action:this.turn+1});
     this.log.unshift(message); this.log=this.log.slice(0,24);
   }
   drainEvents() { return this.events.splice(0); }
@@ -437,7 +449,7 @@ export class Game {
     const distance=Math.sign(direction)*t.moveSpeed*Math.min(dt,0.25)*this.motionScale;
     const x=clamp(t.x+distance,32,this.worldWidth-32);
     const cost=Math.abs(x-t.x)*(100/t.moveDistance)*(t.frozen>0?2:1);
-    if(t.fuel<cost||this.tanks.some(e=>e.id!==t.id&&this.bodyOccupies(e)&&Math.abs(e.y-t.y)<42&&Math.abs(x-e.x)<56)||x===t.x) return false;
+    if(t.fuel<cost||this.movementBodyBlocked(t,x)||x===t.x) return false;
     // Check every part of the path, plus tread-scale slope, independent of frame rate.
     const previous=this.traversable(t,x,!ai);if(previous===null) return false;
     t.fuel-=cost;t.movedThisTurn+=Math.abs(x-t.x);t.x=x;

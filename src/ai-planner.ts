@@ -82,7 +82,7 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
 
   return {body:b,damage,direct:hit};
  });
- return {x,y,hits,age};
+ return {x,y,hits,age,boost};
 }
 function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AIShot{
  const spec=weaponById(weapon),impact=traceAIShot(w,angle,power,weapon,dt);
@@ -158,7 +158,7 @@ export function safeAIPositions(game:Game,tank:Tank,targets?:Tank[],travelLimit=
   if(distance<4)continue;const x=tank.x+direction*distance,foot=game.traversable(tank,x);
   if(foot===null||!Number.isFinite(foot))continue;
   const lo=Math.min(tank.x,x),hi=Math.max(tank.x,x);
-  if(game.tanks.some(actual=>{const t=targets?.find(t=>t.id===actual.id)??actual;return t.id!==tank.id&&game.bodyOccupies(t)&&Math.abs(t.y-tank.y)<42&&t.x>lo-56&&t.x<hi+56;}))continue;
+  if(game.movementBodyBlocked(tank,x,game.tanks.map(actual=>targets?.find(t=>t.id===actual.id)??actual),true))continue;
   if(game.fires.some(f=>Math.abs(f.x-x)<f.radius&&game.canDamage(tank,f.owner))||game.gases.some(f=>Math.abs(f.x-x)<f.radius&&Math.abs(f.y-(foot-18))<50&&game.canDamage(tank,f.owner)))continue;
   if(game.fires.some(f=>game.canDamage(tank,f.owner)&&Math.abs(f.x-tank.x)>=f.radius&&f.x+f.radius>lo&&f.x-f.radius<hi&&Math.abs((f.y??game.ground(f.x))-foot)<40))continue;
   if(game.gases.some(f=>game.canDamage(tank,f.owner)&&Math.abs(f.x-tank.x)>=f.radius&&f.x+f.radius>lo&&f.x-f.radius<hi&&Math.abs(f.y-(foot-18))<50))continue;
@@ -198,4 +198,11 @@ export function chooseAIPosition(game:Game,tank:Tank,weapons:WeaponId[],targets:
  }
  if(best.x!==stay.x)best=solveAIShot(game,{...tank,x:best.x,y:best.y},weapons,targets);
  return {stay,best};
+}
+
+/** Reuse body/slope probes for the fixed-angle assistance sweep. All rays share
+ * the live weapon dispersion, homing and collision model without consuming RNG. */
+export function fixedAnglePredictor(game:Game,tank:Tank,weapon:WeaponId){
+ const w=world(game,{...tank},game.opponents(tank)),count=weaponById(weapon).shots??(weapon==='triple'?3:1);
+ return function*(power:number){for(let i=0;i<count;i++){const p=salvoProfile(tank.vehicleId,weapon,i,count,game.gameVersion);yield traceAIShot(w,tank.angle+p.angle,power,weapon,1/180,i*Math.PI*2/count,p.vx,p.aimX,p.aimY,p.vy);}};
 }

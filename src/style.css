@@ -283,3 +283,6 @@ dialog,.arsenal{scrollbar-gutter:stable}
 .scoreboard .hud-vehicle{width:48px;display:flex;align-items:center;justify-content:center}.scoreboard .hud-vehicle svg{width:48px;height:42px;transform:scale(1.12);transform-origin:center}@media(max-width:1050px) and (min-width:701px){.scoreboard .hud-vehicle{width:36px}.scoreboard .hud-vehicle svg{width:36px;height:38px}}@media(max-width:700px){.scoreboard .hud-vehicle{display:none}#owner-tabs>button{padding:4px 3px;gap:3px}#owner-tabs .owner-avatar{width:24px;height:24px}}
 
 .control-deck.can-prepare-aim #angle,.control-deck.can-prepare-aim .angle-nudge:enabled,.control-deck.can-prepare-aim #aim-pad:enabled,.control-deck.can-prepare-aim #face-button:enabled{opacity:1}.control-deck.can-prepare-aim .angle-nudges{border-radius:12px;background:#e9eedc}
+/* Aim estimates occupy only the bottom edge; memory fill and upper marker stay legible. */
+#power-assistance{position:absolute;display:block;left:2px;right:2px;bottom:2px;width:calc(100% - 4px);height:8px;border-radius:0 0 3px 3px;z-index:2;pointer-events:none;opacity:.92}
+#power-assistance[hidden]{display:none}

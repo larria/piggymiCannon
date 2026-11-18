@@ -26,5 +26,5 @@ export function installAngleNudges(up:HTMLButtonElement,down:HTMLButtonElement,o
   button.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();}});
  }
  document.addEventListener('pointerup',release,true);document.addEventListener('pointercancel',release,true);window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancel();});
- return {cancel,update(now:number){const enabled=options.enabled();if(up.disabled===enabled)up.disabled=!enabled;if(down.disabled===enabled)down.disabled=!enabled;if(!held)return;if(!enabled||options.actor()!==held.owner){cancel();return;}const steps=held.repeat.take(now);if(steps)options.step(held.direction,steps);}};
+ return {cancel,get holding(){return held!==null;},update(now:number){const enabled=options.enabled();if(up.disabled===enabled)up.disabled=!enabled;if(down.disabled===enabled)down.disabled=!enabled;if(!held)return;if(!enabled||options.actor()!==held.owner){cancel();return;}const steps=held.repeat.take(now);if(steps)options.step(held.direction,steps);}};
 }
