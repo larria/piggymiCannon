@@ -52,7 +52,7 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
   }
   if(spec.effect==='helix'){const s=Math.max(1,Math.hypot(vx,vy)),o=Math.sin(age*17+phase)*18*Math.min(1,age*5);wx=-vy/s*o;wy=vx/s*o;x+=wx;y+=wy;}
   if(g.fireLine&&boost===1&&(oldX-g.fireLine.x)*(x-g.fireLine.x)<=0&&y>=g.fireLine.top&&y<=g.fireLine.bottom)boost=1.5;
-  if(modernGeometry){const p={owner:t.id,age,healing:false} as any,contact=g.firstImpact(p,oldX,oldY,x,y,w.bodies);if(contact){x=contact.x;y=contact.y;direct=contact.tank?w.bodies.find(b=>b.tank.id===contact.tank!.id):undefined;if(spec.effect==='orbital'&&!orbital){y=-50;vx=0;vy=680;orbital=true;age=0;direct=undefined;continue;}landed=true;break;}}
+  if(modernGeometry){const p={owner:t.id,age,healing:false,weapon,sub:orbital} as any,contact=g.firstImpact(p,oldX,oldY,x,y,w.bodies);if(contact){x=contact.x;y=contact.y;direct=contact.tank?w.bodies.find(b=>b.tank.id===contact.tank!.id):undefined;if(spec.effect==='orbital'&&!orbital){y=-50;vx=0;vy=680;orbital=true;age=0;direct=undefined;continue;}landed=true;break;}}
   else if(age>=.09)direct=w.bodies.find(b=>b.eligible&&g.projectileCollisionAllowed(b.tank,t.id)&&Math.abs(b.tank.x-x)<50&&Math.abs(b.tank.y-y)<62&&pointHitsTank(b.tank,x,y,b.slope,g.gameVersion));
   if(g.land.solid(x,y)||direct){
    if(spec.effect==='orbital'&&!orbital){y=-50;vx=0;vy=680;orbital=true;age=0;direct=undefined;continue;}

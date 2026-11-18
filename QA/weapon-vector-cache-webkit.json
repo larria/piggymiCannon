@@ -1,0 +1,253 @@
+{
+  "bodies": [
+    {
+      "id": "bowl-normal",
+      "section": 1,
+      "left": 133,
+      "right": 184,
+      "top": 57,
+      "bottom": 102
+    },
+    {
+      "id": "bowl-special",
+      "section": 1,
+      "left": 130,
+      "right": 189,
+      "top": 53,
+      "bottom": 107
+    },
+    {
+      "id": "crossbow-normal",
+      "section": 1,
+      "left": 114,
+      "right": 203,
+      "top": 63,
+      "bottom": 96
+    },
+    {
+      "id": "crossbow-special",
+      "section": 1,
+      "left": 114,
+      "right": 203,
+      "top": 63,
+      "bottom": 96
+    },
+    {
+      "id": "cannon-normal",
+      "section": 1,
+      "left": 139,
+      "right": 180,
+      "top": 59,
+      "bottom": 100
+    },
+    {
+      "id": "cannon-special",
+      "section": 1,
+      "left": 142,
+      "right": 177,
+      "top": 62,
+      "bottom": 97
+    },
+    {
+      "id": "beetle-normal",
+      "section": 1,
+      "left": 105,
+      "right": 194,
+      "top": 59,
+      "bottom": 100
+    },
+    {
+      "id": "beetle-special",
+      "section": 1,
+      "left": 109,
+      "right": 184,
+      "top": 65,
+      "bottom": 94
+    },
+    {
+      "id": "duke-normal",
+      "section": 1,
+      "left": 97,
+      "right": 196,
+      "top": 63,
+      "bottom": 96
+    },
+    {
+      "id": "duke-special",
+      "section": 1,
+      "left": 102,
+      "right": 190,
+      "top": 63,
+      "bottom": 96
+    },
+    {
+      "id": "mine-normal",
+      "section": 1,
+      "left": 141,
+      "right": 178,
+      "top": 53,
+      "bottom": 98
+    },
+    {
+      "id": "mine-special",
+      "section": 1,
+      "left": 145,
+      "right": 174,
+      "top": 61,
+      "bottom": 88
+    },
+    {
+      "id": "missile-normal",
+      "section": 1,
+      "left": 119,
+      "right": 192,
+      "top": 61,
+      "bottom": 98
+    },
+    {
+      "id": "missile-normal",
+      "section": 2,
+      "left": 112,
+      "right": 192,
+      "top": 61,
+      "bottom": 98
+    },
+    {
+      "id": "missile-normal",
+      "section": 3,
+      "left": 105,
+      "right": 192,
+      "top": 61,
+      "bottom": 98
+    },
+    {
+      "id": "missile-normal",
+      "section": 4,
+      "left": 98,
+      "right": 192,
+      "top": 61,
+      "bottom": 98
+    },
+    {
+      "id": "missile-special",
+      "section": 1,
+      "left": 102,
+      "right": 198,
+      "top": 61,
+      "bottom": 98
+    },
+    {
+      "id": "multi-normal",
+      "section": 1,
+      "left": 102,
+      "right": 200,
+      "top": 63,
+      "bottom": 96
+    },
+    {
+      "id": "multi-special",
+      "section": 1,
+      "left": 107,
+      "right": 186,
+      "top": 63,
+      "bottom": 96
+    },
+    {
+      "id": "laser-normal",
+      "section": 1,
+      "left": 136,
+      "right": 184,
+      "top": 66,
+      "bottom": 93
+    },
+    {
+      "id": "laser-special",
+      "section": 1,
+      "left": 135,
+      "right": 184,
+      "top": 65,
+      "bottom": 94
+    },
+    {
+      "id": "water-normal",
+      "section": 1,
+      "left": 128,
+      "right": 193,
+      "top": 57,
+      "bottom": 101
+    },
+    {
+      "id": "water-special",
+      "section": 1,
+      "left": 137,
+      "right": 185,
+      "top": 62,
+      "bottom": 96
+    },
+    {
+      "id": "ion-normal",
+      "section": 1,
+      "left": 108,
+      "right": 181,
+      "top": 58,
+      "bottom": 101
+    },
+    {
+      "id": "ion-special",
+      "section": 1,
+      "left": 109,
+      "right": 182,
+      "top": 57,
+      "bottom": 102
+    },
+    {
+      "id": "sea-normal",
+      "section": 1,
+      "left": 137,
+      "right": 182,
+      "top": 57,
+      "bottom": 102
+    },
+    {
+      "id": "sea-special",
+      "section": 1,
+      "left": 132,
+      "right": 187,
+      "top": 54,
+      "bottom": 107
+    },
+    {
+      "id": "dragon-normal",
+      "section": 1,
+      "left": 100,
+      "right": 193,
+      "top": 63,
+      "bottom": 96
+    },
+    {
+      "id": "dragon-special",
+      "section": 1,
+      "left": 105,
+      "right": 188,
+      "top": 61,
+      "bottom": 98
+    }
+  ],
+  "initial": {
+    "atlases": 29,
+    "frames": 116,
+    "bytes": 14699520
+  },
+  "before": {
+    "atlases": 29,
+    "frames": 116,
+    "bytes": 14699520
+  },
+  "after": {
+    "atlases": 29,
+    "frames": 116,
+    "bytes": 14699520
+  },
+  "elapsed": 2,
+  "draws": 2600
+}

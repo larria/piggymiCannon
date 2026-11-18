@@ -5,8 +5,6 @@ export const BATTLE_SPRITES={
  water:{file:'effects/ft2-water.png',width:128,height:64,frames:9},
  flame:{file:'effects/ft2-flame.png',width:32,height:64,frames:18},
  gas:{file:'effects/ft2-gas.png',width:128,height:72,frames:6},
- 'missile-grain':{file:'effects/ft2-missile-grain.png',width:64,height:16,frames:4},
- 'multi-grain':{file:'effects/ft2-multi-grain.png',width:32,height:16,frames:4},
 } as const;
 export type BattleSprite=keyof typeof BATTLE_SPRITES;
 const images=new Map<BattleSprite,HTMLImageElement>();
@@ -36,12 +34,4 @@ export function paintBattleSprite(c:CanvasRenderingContext2D,id:BattleSprite,pro
  const image=images.get(id);if(!image)return false;
  const spec=BATTLE_SPRITES[id],frame=spriteFrame(id,progress,loop);c.save();c.globalAlpha*=opacity;
  c.drawImage(image,frame*spec.width,0,spec.width,spec.height,x,y,width,height);c.restore();return true;
-}
-/** Interior grain only: no baked exhaust, no change to shell colors/outline/hitboxes. */
-export function paintProjectileGrain(c:CanvasRenderingContext2D,shape:string,time:number,sections:number){
- if(!['missile-normal','missile-special','multi-normal'].includes(shape))return;
- c.save();c.beginPath();
- const points=shape==='missile-normal'?[[11,0],[5,-4],[-sections*5+2,-4],[-sections*5+4,0],[-sections*5+2,4],[5,4]]:shape==='missile-special'?[[13,0],[3,-4],[-4,-4],[-10,0],[-4,4],[3,4]]:[[13,0],[6,-2],[-11,-2],[-11,2],[6,2]];
- points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.clip();
- paintBattleSprite(c,shape==='multi-normal'?'multi-grain':'missile-grain',time*3,-28,-5,42,10,.26,true);c.restore();
 }

@@ -1,3 +1,4 @@
+import {vectorProjectiles} from './weapon-presentation';
 import {battleViewWidth} from './world-layout';
 import {precisionPolish} from './match-polish';
 import {tankArtScale,tankBadgeLift} from './reference-calibration';
@@ -13,6 +14,7 @@ import {supplyCameraTarget} from './supply-camera';
 import { Game, WORLD_W, WORLD_H, clamp, makeRng, type Tank,type Crate } from './engine';
 import { weaponById,weaponHasTrail,MODERN_TRAIL_ALPHA,MODERN_TRAIL_WIDTH } from './catalog';
 import {projectileBattleScale,projectileRearExtent} from './projectile-art';
+import {warmProjectileVectors,paintBoostStars} from './projectile-vector';
 import { breathingPose } from './feedback';
 import {isRaging} from './health';
 import {defeatedPig,victoryConfetti} from './result-art';
@@ -85,7 +87,7 @@ export class Renderer {
   constructor(canvas:HTMLCanvasElement,game:Game) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d')!;this.background=document.createElement('canvas');
     this.game=game;this.background.width=this.worldWidth;this.background.height=this.worldHeight;this.palette=PALETTES[game.config.map];
-    this.resize();void loadBattleSprites();
+    warmProjectileVectors();this.resize();void loadBattleSprites();
     void document.fonts.ready.then(()=>{this.staticRevision=-1;this.invalidate();});
     this.ready=new URLSearchParams(location.search).has('canvas')?Promise.resolve():this.initializePixi();
   }
@@ -406,10 +408,10 @@ export class Renderer {
     }
     for(const p of g.projectiles) {
       if(p.delay>0||!this.visibleAt(p.x)) continue;
-      if(!p.fireBoosted&&!p.transfer&&weaponHasTrail(p.weapon)&&p.trail.length>1){ctx.save();const first=p.trail[0],last=p.trail[p.trail.length-1],weapon=weaponById(p.weapon),color=weapon.color,rear=projectileRearExtent(weapon.shape??p.weapon,4-p.penetrations)*shotArtScale,angle=Math.atan2(p.vy,p.vx);ctx.translate(-Math.cos(angle)*rear,-Math.sin(angle)*rear);const fade=ctx.createLinearGradient(first.x,first.y,last.x,last.y);fade.addColorStop(0,color+'00');fade.addColorStop(1,color);ctx.strokeStyle=fade;ctx.globalAlpha=MODERN_TRAIL_ALPHA;ctx.lineWidth=MODERN_TRAIL_WIDTH*shotArtScale;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();p.trail.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.stroke();ctx.restore();}
+      if(!vectorProjectiles(g.gameVersion)&&!p.fireBoosted&&!p.transfer&&weaponHasTrail(p.weapon,g.gameVersion)&&p.trail.length>1){ctx.save();const first=p.trail[0],last=p.trail[p.trail.length-1],weapon=weaponById(p.weapon),color=weapon.color,rear=projectileRearExtent(weapon.shape??p.weapon,4-p.penetrations)*shotArtScale,angle=Math.atan2(p.vy,p.vx);ctx.translate(-Math.cos(angle)*rear,-Math.sin(angle)*rear);const fade=ctx.createLinearGradient(first.x,first.y,last.x,last.y);fade.addColorStop(0,color+'00');fade.addColorStop(1,color);ctx.strokeStyle=fade;ctx.globalAlpha=MODERN_TRAIL_ALPHA;ctx.lineWidth=MODERN_TRAIL_WIDTH*shotArtScale;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();p.trail.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.stroke();ctx.restore();}
       if(p.fireBoosted){ctx.save();p.trail.filter((_,i)=>i%6===0).forEach((q,i)=>{ctx.globalAlpha=.3+i/10;ctx.translate(q.x,q.y);ctx.fillStyle=i%2?'#e8a958':'#fae5a1';ctx.strokeStyle='#b27939';ctx.lineWidth=.6*shotArtScale;ctx.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,r=(j%2?2.6:6)*shotArtScale;const x=Math.cos(a)*r,y=Math.sin(a)*r;j?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.stroke();ctx.translate(-q.x,-q.y);});ctx.restore();}
       ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(p.vy,p.vx));
-      const weapon=weaponById(p.weapon),shape=p.healing?'cannon-normal':p.transfer?'transfer':weapon.shape??p.weapon;ctx.save();const size=projectileBattleScale(shape,g.gameVersion);ctx.scale(size,size);projectileArt(ctx,shape,p.healing?'#8bb977':p.transfer?'#63adbd':weapon.color,this.time+p.phase,4-p.penetrations);ctx.restore();
+      const weapon=weaponById(p.weapon),shape=p.healing?'medical':p.transfer?'transfer':weapon.shape??p.weapon;ctx.save();const size=projectileBattleScale(p.healing?'cannon-normal':shape,g.gameVersion);ctx.scale(size,size);projectileArt(ctx,shape,p.healing?'#8bb977':p.transfer?'#63adbd':weapon.color,this.time+p.phase,4-p.penetrations);if(p.fireBoosted)paintBoostStars(ctx,shape,this.time+p.phase,4-p.penetrations);ctx.restore();
       if(p.healing){ctx.save();ctx.scale(shotArtScale,shotArtScale);ctx.fillStyle='#fff8e8';ctx.fillRect(-1.5,-5,3,10);ctx.fillRect(-5,-1.5,10,3);ctx.restore();}
       if(p.homing) {ctx.strokeStyle='#bddce3';ctx.lineWidth=2*shotArtScale;ctx.beginPath();ctx.arc(0,0,11*shotArtScale,0,Math.PI*2);ctx.stroke();}ctx.restore();
       if(p.homing&&this.visibleAt(p.lockX)) {ctx.save();ctx.strokeStyle='#d6efdfb0';ctx.lineWidth=1.5;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.lockX,p.lockY);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(p.lockX,p.lockY,15+Math.sin(p.lockAge*12)*4,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(p.lockX-23,p.lockY);ctx.lineTo(p.lockX-13,p.lockY);ctx.moveTo(p.lockX+13,p.lockY);ctx.lineTo(p.lockX+23,p.lockY);ctx.stroke();ctx.restore();}

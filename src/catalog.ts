@@ -1,4 +1,5 @@
 import {referenceCalibration} from './reference-calibration';
+import {vectorProjectiles} from './weapon-presentation';
 import {originalBallistics,originalWeapon,originalCraterAxes,sourceRadius,sourceMaximum} from './original-ballistics';
 import {ellipseExcavation,precisionPolish,impactPolish} from './match-polish';
 import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
@@ -55,8 +56,9 @@ const weaponTable=Object.fromEntries(ALL_WEAPONS.map(w=>[w.id,w])) as Record<Wea
 export const weaponById = (id:WeaponId) => weaponTable[id];
 /** Existing native-carrier amplification of legacy bonus shells; shared with AI. */
 export const launchDamageScale=(hasVehicle:boolean,id:WeaponId)=>hasVehicle&&!weaponById(id).effect?6:1;
-/** Only native rounds of the catalog's modern era have a faint ordinary trail. */
-export const weaponHasTrail=(id:WeaponId)=>VEHICLES.some(v=>v.era==='现代系'&&(v.normal===id||v.special===id));
+/** Pictured exhaust is now part of each animated body, without a history line.
+ * Explicit old versions retain the previous modern-era history policy. */
+export const weaponHasTrail=(id:WeaponId,version='development')=>vectorProjectiles(version)?['beetle-normal','beetle-special','duke-normal','duke-special','missile-normal','missile-special','multi-normal','multi-special','ion-normal','ion-special','dragon-normal','dragon-special'].includes(id):VEHICLES.some(v=>v.era==='现代系'&&(v.normal===id||v.special===id));
 export const MODERN_TRAIL_POINTS=6,MODERN_TRAIL_LENGTH=24,MODERN_TRAIL_ALPHA=.16,MODERN_TRAIL_WIDTH=1;
 export const itemById = (id:ItemId) => ITEMS.find(i=>i.id===id)!;
 /** Flat depth absorbed by a direct body contact, shared by every weapon. */

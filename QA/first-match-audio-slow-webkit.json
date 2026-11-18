@@ -1,0 +1,78 @@
+{
+  "fault": "slow",
+  "browserName": "webkit",
+  "report": [
+    {
+      "weapon": "multi-normal",
+      "first": {
+        "fired": true,
+        "peak": 0.06780130645339232,
+        "state": "running",
+        "events": [
+          "multi-normal"
+        ]
+      },
+      "retry": {
+        "decoded": true,
+        "peak": 0.03494570184665786
+      }
+    },
+    {
+      "weapon": "multi-special",
+      "first": {
+        "fired": true,
+        "peak": 0.036075640027504165,
+        "state": "running",
+        "events": [
+          "multi-normal",
+          "multi-normal",
+          "multi-special"
+        ]
+      },
+      "retry": {
+        "decoded": true,
+        "peak": 0.036268740884370654
+      }
+    },
+    {
+      "weapon": "ion-normal",
+      "first": {
+        "fired": true,
+        "peak": 0.04603620568221108,
+        "state": "running",
+        "events": [
+          "multi-normal",
+          "multi-normal",
+          "multi-special",
+          "multi-special",
+          "ion-normal"
+        ]
+      },
+      "retry": {
+        "decoded": true,
+        "peak": 0.028477180935276417
+      }
+    },
+    {
+      "weapon": "ion-special",
+      "first": {
+        "fired": true,
+        "peak": 0.03584181459996796,
+        "state": "running",
+        "events": [
+          "multi-normal",
+          "multi-normal",
+          "multi-special",
+          "multi-special",
+          "ion-normal",
+          "ion-normal",
+          "ion-special"
+        ]
+      },
+      "retry": {
+        "decoded": true,
+        "peak": 0.033991173202621135
+      }
+    }
+  ]
+}

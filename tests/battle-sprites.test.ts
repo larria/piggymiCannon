@@ -4,7 +4,7 @@ import {BATTLE_SPRITES,spriteFrame,loadBattleSprites} from '../src/battle-sprite
 import {Game} from '../src/engine';import {defaultSlots} from '../src/crew';
 const manifest=JSON.parse(readFileSync('research/FT2_VISUAL_SOURCES.json','utf8'));
 test('selected visual assets are bounded, reproducible and contain whole decoded frames',()=>{
- assert.equal(manifest.assets.length,7);assert.ok(manifest.runtimeBytes<300*1024);assert.ok(manifest.runtimeBytes<manifest.totalSourceBytes*.006);
+ assert.equal(manifest.assets.length,5);assert.ok(manifest.runtimeBytes<300*1024);assert.ok(manifest.runtimeBytes<manifest.totalSourceBytes*.006);
  let bytes=0;for(const a of manifest.assets){const s=BATTLE_SPRITES[a.id as keyof typeof BATTLE_SPRITES],buf=readFileSync('public/'+s.file);assert.equal(buf.readUInt32BE(16),s.width*s.frames);assert.equal(buf.readUInt32BE(20),s.height);assert.equal(createHash('sha256').update(buf).digest('hex'),a.sha256);bytes+=statSync('public/'+s.file).size;assert.equal(a.selected.length,s.frames);for(const f of a.selected)assert.ok(f.rect[2]>f.rect[0]&&f.rect[3]>f.rect[1]);}assert.equal(bytes,manifest.runtimeBytes);
 });
 test('animation uses simulation progress, saturates bursts and wraps persistent fields',async()=>{

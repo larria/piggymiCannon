@@ -1,0 +1,163 @@
+{
+  "source": "本机 ft2 目录/原版分析",
+  "referenceDirectory": "/Users/larkin_1/Downloads/tmp/bullet-sprites/by-tank",
+  "frames": [
+    {
+      "tank": "公爵",
+      "frame": "普通_bullet05_000.png",
+      "sha256": "564ac91a6d9c8bee8ff27de1a04af8587a6ac9a0fc23a732bcc2a7b6e4421783",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "公爵",
+      "frame": "特殊_bullet05_032.png",
+      "sha256": "c9438a6f2bf5413ee91d41eaba88cf6c0fd3055659cd8767c0126e5eedb26ff1",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "叉叉",
+      "frame": "普通_bullet02_000.png",
+      "sha256": "37a6a77836902ec9fc86294a596b52ebba88833372c88d5b8c54f22005b4b32d",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "叉叉",
+      "frame": "特殊_bullet02_032.png",
+      "sha256": "5005f6f902d4eac461f8335ac58f4d6e629b27c1528a8ea397022315f44a89b9",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "大腕",
+      "frame": "普通_bullet01_000.png",
+      "sha256": "15d071cf12f426631b8efb3654f708cda8a9df1c92c6ec53115e69bbfc484421",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "大腕",
+      "frame": "特殊_bullet01_032.png",
+      "sha256": "43f7eb1e4ace204852fbb1c51ec0daf5a5435b0e2ba9dbc7a68368ae9b903805",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "小妖",
+      "frame": "普通_bullet08_000.png",
+      "sha256": "800e8e2992ca033f1dec51ca0118eb77bce2156a1abc791c01bcba1eabbf613c",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "小妖",
+      "frame": "特殊_bullet08_032.png",
+      "sha256": "6bcaf31889ded436da7378d6085f9f3c52568b01411d6cfd9eff31509069e82c",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "暴龙",
+      "frame": "普通_bullet13_000.png",
+      "sha256": "28d958113feb2e27c1395f54ec5570b05f0c12ba570cc42d64d3556f72360963",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "暴龙",
+      "frame": "特殊_bullet13_032.png",
+      "sha256": "a6f73ca1ea8843c94b19453d34c33cd1cc5ff9fee85bb711a111ed93c9e78b99",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "水鬼",
+      "frame": "普通_bullet11_000.png",
+      "sha256": "66c17094a3202176e18e13be4faba5b079a60ca6f5d04595de021535bd8ae31e",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "水鬼",
+      "frame": "特殊_bullet11_032.png",
+      "sha256": "9e8ecdd5e29fb03240eca6166946ce7810b7244107ba487da730c2f56d019a4c",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "流星",
+      "frame": "普通_bullet07_000.png",
+      "sha256": "4e3652a3dbe4ddba61aeec115cc01cbf878fb6d5ad9598b1024392eafa9a99e6",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "流星",
+      "frame": "特殊_bullet07_032.png",
+      "sha256": "a8e18907131889d5600810aa7e5bae72c3d9b34ef90bac650698758234eae17b",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "海怪",
+      "frame": "普通_bullet12_000.png",
+      "sha256": "364bdcf1dfc5197702a50f1e75e104a929855b2df9cf9eaed32421acc514f8cc",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "海怪",
+      "frame": "特殊_bullet12_032.png",
+      "sha256": "febe2d458e55f3ca2977f7f234343122559566f9aae650507249efd5fb8b6b00",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "甲壳虫",
+      "frame": "普通_bullet04_000.png",
+      "sha256": "47171fd6f68746c79b3ad15062630226b7dc7cabfdf738b11c010c716d809d80",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "甲壳虫",
+      "frame": "特殊_bullet04_032.png",
+      "sha256": "414d56eef938597da007e6c34c477fd5b4640227f1e84c5a191978d507f7f94b",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "老土",
+      "frame": "普通_bullet03_000.png",
+      "sha256": "ea7730feeb9fdd1820078a0664fd1e87bfccdfebb70034002a4d114b061b6864",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "老土",
+      "frame": "特殊_bullet03_032.png",
+      "sha256": "540542369ae1b08cf8cd70f4d92cf252cd663764e73ce5fea04d3f6dd1676aec",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "闪灵",
+      "frame": "普通_bullet10_000.png",
+      "sha256": "81be572886d08c348c923513ab4b5329b03b2d1e70b13742cf1ab427493aa92f",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "闪灵",
+      "frame": "特殊_bullet10_032.png",
+      "sha256": "79a4b5ea9142353036a9f716173805c820235b63ef22f5454788e2b413fff8a5",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "雷霆",
+      "frame": "普通_bullet09_000.png",
+      "sha256": "3156dd456c261d9d4796819a15bd8246c8473d5d969a885b40bdd82cd64361f9",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "雷霆",
+      "frame": "特殊_bullet09_032.png",
+      "sha256": "197d8b2fb6f964a1f45d0a194145b96690b4c83406473561118e8977721629de",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "飞火",
+      "frame": "普通_bullet06_000.png",
+      "sha256": "3e5734f8865edde4b8ddf01d168c7f00b45b9362194215e1f7363f3974ff7fe3",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    },
+    {
+      "tank": "飞火",
+      "frame": "特殊_bullet06_032.png",
+      "sha256": "4d164073b43b029def388ff753e4dc75b09b5d007654c35fcdf30793ac58cebe",
+      "use": "reference only; runtime vector drawn in src/projectile-vector.ts"
+    }
+  ],
+  "boundary": "Horizontal frame shapes/colors are visual evidence; salvo counts and damage logic remain independently implemented."
+}

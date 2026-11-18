@@ -17,6 +17,7 @@ for(const spec of Object.values(portraits) as {file:string;bytes:number;width:nu
 export default defineConfig(({mode}) => ({
   base: mode === 'pages' ? '/piggymiCannon/' : '/',
   define:{__APP_VERSION__:JSON.stringify(version)},
+  build:{rollupOptions:{input:{main:'index.html',weapons:'weapon-lab.html'}}},
   plugins: [assetIntegrityPlugin(version),{
     name:'game-version',
     configureServer(server){server.middlewares.use((req,res,next)=>{

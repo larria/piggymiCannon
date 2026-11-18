@@ -1,9 +1,9 @@
 {
   "formatVersion": 1,
-  "source": "用户本机 ft2逆向/resources/ 逆向提取，仅本项目使用，未宣称官方授权",
-  "processing": "Pillow LANCZOS; atlas rect crop; shared frame scale; monochrome warm palette; lossless PNG optimize/compress_level=9; bullet rear 60% discarded; interior clipping at runtime",
+  "source": "本机 ft2 目录/原版分析，仅本项目使用，未宣称官方授权",
+  "processing": "Pillow LANCZOS; atlas rect crop; shared frame scale; monochrome warm palette; lossless PNG optimize/compress_level=9. Projectile grain removed in vector revision.",
   "totalSourceBytes": 52878173,
-  "runtimeBytes": 291620,
+  "runtimeBytes": 284043,
   "assets": [
     {
       "id": "blast",
@@ -635,112 +635,6 @@
             286,
             445,
             388
-          ]
-        }
-      ]
-    },
-    {
-      "id": "missile-grain",
-      "file": "effects/ft2-missile-grain.png",
-      "cell": [
-        64,
-        16
-      ],
-      "frames": 4,
-      "source": "assets/ft2-bullets/bullet/bullet07.png",
-      "sourceBytes": 962500,
-      "bytes": 4573,
-      "sourceSha256": "6bbea2d66e58a907a74dcbc9ad1d652c25bad2eda9ee2f3403e5f306ca326e7e",
-      "sha256": "54cd167cabf160483fb5c08c109bb7fd1b5d20e55e29b9ba6b5b061b97aa1939",
-      "metadataSha256": "4c642ba2a52e1b9bcab10a9841322480c04ee1a92cae154197b7a3c090e4763e",
-      "selected": [
-        {
-          "name": "bullet07_064",
-          "rect": [
-            617,
-            718,
-            800,
-            757
-          ]
-        },
-        {
-          "name": "bullet07_065",
-          "rect": [
-            334,
-            302,
-            481,
-            341
-          ]
-        },
-        {
-          "name": "bullet07_066",
-          "rect": [
-            447,
-            846,
-            636,
-            891
-          ]
-        },
-        {
-          "name": "bullet07_067",
-          "rect": [
-            334,
-            576,
-            496,
-            615
-          ]
-        }
-      ]
-    },
-    {
-      "id": "multi-grain",
-      "file": "effects/ft2-multi-grain.png",
-      "cell": [
-        32,
-        16
-      ],
-      "frames": 4,
-      "source": "assets/ft2-bullets/bullet/bullet08.png",
-      "sourceBytes": 344237,
-      "bytes": 3004,
-      "sourceSha256": "2b0baa9875da4f20d4c3078b743d5b3327c16b181fe28affc32ee138be416aa7",
-      "sha256": "376ee523ce7c8e41bebd1dd67112eb16d726f542483a98d878a9f64ab9fb0d91",
-      "metadataSha256": "4c642ba2a52e1b9bcab10a9841322480c04ee1a92cae154197b7a3c090e4763e",
-      "selected": [
-        {
-          "name": "bullet08_064",
-          "rect": [
-            183,
-            299,
-            252,
-            344
-          ]
-        },
-        {
-          "name": "bullet08_065",
-          "rect": [
-            425,
-            394,
-            506,
-            442
-          ]
-        },
-        {
-          "name": "bullet08_066",
-          "rect": [
-            374,
-            464,
-            464,
-            512
-          ]
-        },
-        {
-          "name": "bullet08_067",
-          "rect": [
-            330,
-            160,
-            384,
-            187
           ]
         }
       ]

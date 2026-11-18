@@ -1,6 +1,6 @@
 import {tankArtScale} from './reference-calibration';
-import {paintProjectileGrain} from './battle-sprites';
 import {weaponById,type WeaponId} from './catalog';
+import {paintVectorProjectile} from './projectile-vector';
 
 /** Render-only visibility adjustment. Never use projectile.scale (a damage factor). */
 export const projectileDrawScale=(shape:string)=>shape==='cannon-special'?1.35:shape==='shell'?1.2:['crossbow-normal','crossbow-special','sniper','ion-normal'].includes(shape)?1.12:1;
@@ -18,6 +18,7 @@ export function projectileRearExtent(shape:string,sections=4){
 
 /** Every available and legacy shell has its own silhouette. The catalog owns its body color. */
 export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:string,time:number,sections=4){
+  if(paintVectorProjectile(c,shape,time,sections))return;
   const edge='#53624f';c.fillStyle=color;c.strokeStyle=edge;c.lineWidth=1.2;c.lineJoin='round';c.lineCap='round';
   const poly=(p:number[][])=>{c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();};
   const oval=(x:number,y:number,rx:number,ry:number)=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill();c.stroke();};
@@ -30,6 +31,7 @@ export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:stri
     case 'crossbow-normal':line([[-19,0],[9,0]],color,3);poly([[15,0],[6,-5],[7,0],[6,5]]);line([[-13,0],[-18,-5]],color);break;
     case 'crossbow-special':line([[-17,0],[8,0]],color,3);poly([[14,0],[3,-6],[5,0],[3,6]]);poly([[-11,0],[-19,-5],[-15,0],[-19,5]]);oval(-8,5,2,3);break;
     case 'cannon-normal':oval(0,0,10,10);shine(-4,-4);break;
+    case 'medical':oval(0,0,10,10);shine(-4,-4);break;
     case 'cannon-special':oval(0,0,6,6);shine(-2,-2);break;
     case 'beetle-normal':poly([[-7,-5],[-3,-9],[5,-8],[8,-3],[6,4],[4,4],[4,8],[-4,8],[-4,4],[-7,3]]);c.fillStyle='#373a38';c.fillRect(-4,-2,3,3);c.fillRect(2,-2,3,3);c.fillRect(-2,4,4,2);break;
     case 'beetle-special':poly([[12,0],[4,-5],[-8,-5],[-4,-9],[-12,-6],[-9,0],[-12,6],[-4,9],[-8,5],[4,5]]);line([[-5,-3],[-5,3]],'#fff1d9');break;
@@ -72,7 +74,6 @@ export function projectileArt(c:CanvasRenderingContext2D,shape:string,color:stri
     case 'sniper':poly([[23,0],[-15,-3],[-11,0],[-15,3]]);break;
     case 'homing':poly([[16,0],[4,-4],[-5,-10],[-4,-3],[-13,0],[-4,3],[-5,10],[4,4]]);ring(2,0,4,color,1.5);break;
   }
-  paintProjectileGrain(c,shape,time,sections);
 }
 
 export function paintProjectilePreviews(root:ParentNode=document){

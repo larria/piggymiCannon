@@ -1,3 +1,4 @@
+import {groundOrbital,vectorProjectiles} from './weapon-presentation';
 import {backgroundMarkers} from './background-markers';
 import {chooseMapBgm,restoreMapBgm,randomMapMusic,type MatchBgm} from './map-music';
 import {originalBallistics,originalWeapon,originalCrater,originalCraterAxes,ORIGINAL_TANKS,sourceMaximum,sourceDistance,sourceDamage} from './original-ballistics';
@@ -590,14 +591,14 @@ export class Game {
   }
   firstImpact(p:Projectile,x:number,y:number,toX:number,toY:number,bodies?:readonly {tank:Tank;slope:number}[]){
     let best:{x:number;y:number;fraction:number;tank?:Tank}|null=null;
-    if(p.age>=.09)for(const entry of bodies??this.tanks){const t=bodies?(entry as {tank:Tank;slope:number}).tank:entry as Tank;if(t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))){if(Math.max(x,toX)<t.x-70||Math.min(x,toX)>t.x+70||Math.max(y,toY)<t.y-70||Math.min(y,toY)>t.y+70)continue;const slope=referenceCalibration(this.gameVersion)?0:bodies?(entry as {tank:Tank;slope:number}).slope:this.tankSlope(t),point=tankSegmentContact(t,x,y,toX,toY,slope,this.gameVersion);if(point&&(!best||point.fraction<best.fraction))best={...point,tank:t};}}
+    if(p.age>=.09&&!groundOrbital(p.weapon,p.sub,this.gameVersion))for(const entry of bodies??this.tanks){const t=bodies?(entry as {tank:Tank;slope:number}).tank:entry as Tank;if(t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))){if(Math.max(x,toX)<t.x-70||Math.min(x,toX)>t.x+70||Math.max(y,toY)<t.y-70||Math.min(y,toY)>t.y+70)continue;const slope=referenceCalibration(this.gameVersion)?0:bodies?(entry as {tank:Tank;slope:number}).slope:this.tankSlope(t),point=tankSegmentContact(t,x,y,toX,toY,slope,this.gameVersion);if(point&&(!best||point.fraction<best.fraction))best={...point,tank:t};}}
     if(Math.max(y,toY)<this.land.ceiling)return best;
     const steps=Math.max(1,Math.ceil(Math.max(Math.abs(toX-x),Math.abs(toY-y))));
     for(let i=0;i<=steps;i++){const f=i/steps;if(best&&f>best.fraction)break;const px=x+(toX-x)*f,py=y+(toY-y)*f;if(this.land.solid(px,py)){best={x:px,y:py,fraction:f};break;}}
     return best;
   }
   private projectileHit(p:Projectile) {
-    if(p.age<0.09) return undefined;
+    if(p.age<0.09||groundOrbital(p.weapon,p.sub,this.gameVersion)) return undefined;
     return this.tanks.find(t=>t.hp>0&&this.projectileCollisionAllowed(t,p.owner)&&(p.healing?this.canRestore(t,p.owner):this.canDamage(t,p.owner))&&Math.abs(t.x-p.x)<50&&Math.abs(t.y-p.y)<62&&pointHitsTank(t,p.x,p.y,this.tankSlope(t),this.gameVersion));
   }
   private invalidVolleyTarget(p:Projectile) {
@@ -679,7 +680,7 @@ export class Game {
     }
     if(!p.transfer&&!p.traceCrossed&&this.fireLine&&(oldX-this.fireLine.x)*(p.x-this.fireLine.x)<=0&&p.y>=this.fireLine.top&&p.y<=this.fireLine.bottom){p.traceCrossed=true;p.traceFireLine={...this.fireLine,time:this.elapsed,xImpact:p.x,yImpact:p.y};this.recordBattle('fire-line',`第${p.traceId??'?'}弹穿越火线；${p.boostSources?.fire==='item'?'道具已强化，不重复乘1.5':'火线强化×1.5'}，总boost=${p.boost}`,{projectile:p.traceId,fireBoosted:p.fireBoosted,boost:p.boost,sources:p.boostSources,line:this.fireLine});}
     if(p.fireBoosted){p.trail.push({x:p.x,y:p.y});if(p.trail.length>40)p.trail.shift();}
-    else if(!p.transfer&&weaponHasTrail(p.weapon)){
+    else if(!p.transfer&&!vectorProjectiles(this.gameVersion)&&weaponHasTrail(p.weapon,this.gameVersion)){
       p.trail.push({x:p.x,y:p.y});while(p.trail.length>MODERN_TRAIL_POINTS)p.trail.shift();
       let length=0;for(let i=p.trail.length-1;i>0;i--){const newer=p.trail[i],older=p.trail[i-1],segment=Math.hypot(newer.x-older.x,newer.y-older.y);if(length+segment>MODERN_TRAIL_LENGTH){const fraction=(MODERN_TRAIL_LENGTH-length)/segment;p.trail[i-1]={x:newer.x+(older.x-newer.x)*fraction,y:newer.y+(older.y-newer.y)*fraction};p.trail.splice(0,i-1);break;}length+=segment;}
     }
