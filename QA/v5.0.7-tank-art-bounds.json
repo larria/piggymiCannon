@@ -1,0 +1,70 @@
+{
+  "protocol": "Raster alpha>20 bounds of existing 13 tank+crew vectors, all4 crews,0/25/45/60/90 aim,-60/0/60 slope,artScale1.4; excludes separate portrait, marker and transient effects.",
+  "rows": [
+    {
+      "vehicle": "bowl",
+      "width": 123,
+      "height": 117
+    },
+    {
+      "vehicle": "crossbow",
+      "width": 124,
+      "height": 118
+    },
+    {
+      "vehicle": "cannon",
+      "width": 124,
+      "height": 118
+    },
+    {
+      "vehicle": "beetle",
+      "width": 129,
+      "height": 124
+    },
+    {
+      "vehicle": "duke",
+      "width": 127,
+      "height": 123
+    },
+    {
+      "vehicle": "mine",
+      "width": 129,
+      "height": 124
+    },
+    {
+      "vehicle": "missile",
+      "width": 129,
+      "height": 124
+    },
+    {
+      "vehicle": "multi",
+      "width": 126,
+      "height": 122
+    },
+    {
+      "vehicle": "laser",
+      "width": 134,
+      "height": 129
+    },
+    {
+      "vehicle": "water",
+      "width": 125,
+      "height": 119
+    },
+    {
+      "vehicle": "ion",
+      "width": 115,
+      "height": 113
+    },
+    {
+      "vehicle": "sea",
+      "width": 129,
+      "height": 122
+    },
+    {
+      "vehicle": "dragon",
+      "width": 129,
+      "height": 125
+    }
+  ]
+}

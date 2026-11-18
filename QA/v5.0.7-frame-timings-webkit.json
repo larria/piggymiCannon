@@ -1,0 +1,22 @@
+{
+  "environment": "1194x834 touch simulation, desktop host; not physical iPad",
+  "baseline": {
+    "frames": 43,
+    "medianMs": 17,
+    "p95Ms": 28,
+    "maxMs": 29
+  },
+  "sweep": {
+    "frames": 103,
+    "medianMs": 17,
+    "p95Ms": 28,
+    "maxMs": 35
+  },
+  "idle": {
+    "frames": 73,
+    "medianMs": 17,
+    "p95Ms": 27,
+    "maxMs": 29
+  },
+  "idlePixelsUnchanged": true
+}

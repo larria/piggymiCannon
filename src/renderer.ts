@@ -107,8 +107,17 @@ export class Renderer {
   setGame(game:Game) {this.flightFloor=null;this.flightActive=false;this.camera.reset();this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.resize();this.invalidate();}
   resize() {
     this.viewWidth=battleViewWidth(this.worldWidth);
-    this.ratio=Math.min(window.devicePixelRatio||1,2)*BATTLE_VIEW_WIDTH/this.viewWidth;
-    this.viewHeight=Math.max(370/this.zoom,this.canvas.clientHeight/Math.max(1,this.canvas.clientWidth)*this.viewWidth);
+    const phone=window.matchMedia('(any-pointer: coarse) and (max-width: 700px), (any-pointer: coarse) and (max-width: 950px) and (max-height: 500px)').matches;
+    if(phone&&window.matchMedia('(orientation: landscape)').matches){
+      // Keep a broad panorama on phones. On a short landscape strip, zoom out
+      // toward a 10% body-height envelope, bounded by the actual map width.
+      this.viewWidth=Math.min(this.worldWidth,Math.max(this.viewWidth,1300*this.canvas.clientWidth/Math.max(1,this.canvas.clientHeight)));
+    }
+    // Preserve shared tank/projectile geometry; raster size follows device
+    // pixels independently of how much logical terrain the camera displays.
+    this.ratio=Math.min(window.devicePixelRatio||1,2)*(phone?this.canvas.clientWidth:BATTLE_VIEW_WIDTH)/this.viewWidth;
+    const aspectHeight=this.canvas.clientHeight/Math.max(1,this.canvas.clientWidth)*this.viewWidth;
+    this.viewHeight=phone?Math.max(1,aspectHeight):Math.max(370/this.zoom,aspectHeight);
     this.camera.configure(this.viewWidth,this.viewHeight,this.worldWidth,this.worldHeight);
     this.canvas.width=this.viewWidth*this.ratio;this.canvas.height=this.viewHeight*this.ratio;
     this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);

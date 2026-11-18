@@ -1,0 +1,24 @@
+{
+  "version": "5.0.7",
+  "viewport": {
+    "width": 1194,
+    "height": 834
+  },
+  "samples": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2
+  ],
+  "partialBigFile": {
+    "url": "http://localhost:4177/piggymiCannon/audio/bgm-stage-00012.mp3",
+    "received": 1080000
+  },
+  "avatarsLoadGated": true,
+  "interaction": true,
+  "offlineReload": true,
+  "errors": []
+}

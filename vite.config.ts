@@ -24,7 +24,7 @@ export default defineConfig(({mode}) => ({
       if(req.url?.split('?')[0].endsWith('/version.json')) {res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({version,notes:RELEASE_NOTES}));}
       else next();
     });},
-    generateBundle(){const source=JSON.stringify({version,notes:RELEASE_NOTES});this.emitFile({type:'asset',fileName:'version.json',source});this.emitFile({type:'asset',fileName:'release-notes.json',source});},
+    generateBundle(){const source=JSON.stringify({version,notes:RELEASE_NOTES});this.emitFile({type:'asset',fileName:'version.json',source});this.emitFile({type:'asset',fileName:'release-notes.json',source});this.emitFile({type:'asset',fileName:`install-progress-${version}.js`,source:readFileSync(new URL('./src/service-worker/install-progress.js',import.meta.url),'utf8')});},
   },VitePWA({
     registerType: 'prompt',
     injectRegister: false,
@@ -47,9 +47,13 @@ export default defineConfig(({mode}) => ({
       ],
     },
     workbox: {
-      importScripts: ['audio-range.js'],
-      manifestTransforms:[async entries=>({manifest:entries.map(entry=>({...entry,integrity:'sha256-'+createHash('sha256').update(readFileSync(new URL('./dist/'+entry.url,import.meta.url))).digest('base64')})),warnings:[]})],
-      globPatterns: ['**/*.{js,css,html,png,svg,mp3,ttf,webmanifest}','asset-integrity.json','release-notes.json'],
+      importScripts: ['audio-range.js',`install-progress-${version}.js`],
+      manifestTransforms:[async entries=>{
+        const sizes=new Map<string,number>();
+        const manifest=entries.map(entry=>{const bytes=readFileSync(new URL('./dist/'+entry.url,import.meta.url));sizes.set(entry.url,bytes.length);return {...entry,integrity:'sha256-'+createHash('sha256').update(bytes).digest('base64')};});
+        return {manifest:manifest.sort((a,b)=>sizes.get(b.url)!-sizes.get(a.url)!),warnings:[]};
+      }],
+      globPatterns: ['**/*.{js,css,html,png,webp,svg,mp3,ttf,webmanifest}','asset-integrity.json','release-notes.json'],
       // Include the longest complete BGM; the separate total-size gate remains 90 MB.
       maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       cleanupOutdatedCaches: true,

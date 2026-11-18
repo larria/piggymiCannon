@@ -5,6 +5,7 @@ import {weaponById,excavation,type WeaponId} from './catalog';
 import {adaptiveAI} from './ai-distance';
 type Hole={x:number;y:number;rx:number;ry:number;rows?:Map<number,{left:number;width:number}>};
 export type ShotSafety={unsafe:boolean;out:boolean;fall:number;selfDamage:number;ground:number;holes:number;friendlyCost?:number;enemyBenefit?:number;allies?:{target:number;out:boolean;fall:number;damage:number;lethal:boolean}[]};
+export const blockedAIShot=(risk:ShotSafety)=>risk.unsafe||(risk.friendlyCost??0)>(risk.enemyBenefit??0)*1.1;
 /** Read-only local virtual excavation: use exact native integer scanlines and
  * permanent cells, not just distance to a crater. Mirrors five-column support.
  * Later salvo impacts are conservative at their initial predicted locations. */
@@ -63,4 +64,28 @@ export function chooseSafeAIShot(g:Game,t:Tank,weapons:WeaponId[],targets:Tank[]
  if(offers.some(s=>s.effective||Math.abs(s.x-t.x)>2))return offers.filter(s=>s.effective||Math.abs(s.x-t.x)>2).sort((a,b)=>b.utility-a.utility)[0];
  for(const position of safeAIPositions(g,t).sort((a,b)=>Math.abs(a.x-t.x)-Math.abs(b.x-t.x))){const shot=solveAIShot(g,position,weapons,targets,0,false);if(shot.effective&&safe(shot))return shot;}
  return null;
+}
+
+/** Correct an already calibrated shot at the ACTUAL firing position. A harmless
+ * miss is a valid difficulty outcome: it needs no enemy-damage benefit. Probe
+ * deterministic alternatives without rerolling calibration or granting fuel.
+ * Prefer a nearby safe miss for a lapse, then the least damaging safe option.
+ * Fatal excavation and self/ally damage tradeoffs use the same final guard. */
+export function recoverFinalAIShot(g:Game,t:Tank,weapon:WeaponId,intentionalMiss:boolean):{shot:AIShot;risk:ShotSafety}|null{
+ const target=g.aiDecision?.target??g.enemy.id,seen=new Set<string>();
+ let fallback:{shot:AIShot;risk:ShotSafety;change:number}|null=null;
+ const probe=(angle:number,power:number)=>{
+  angle=Math.max(t.minAngle,Math.min(t.maxAngle,angle));power=Math.max(g.minimumShotPower,Math.min(100,power));
+  const key=`${angle}:${power}`;if(seen.has(key))return null;seen.add(key);
+  const risk=shotSafety(g,t,weapon,angle,power,t.direction);if(blockedAIShot(risk))return null;
+  const shot:AIShot={x:t.x,y:t.y,angle,power,direction:t.direction,weapon,target,utility:(risk.enemyBenefit??0)-(risk.friendlyCost??0),effective:(risk.enemyBenefit??0)>0};
+  const candidate={shot,risk,change:Math.abs(angle-t.angle)+Math.abs(power-t.power)*.25};
+  if(!intentionalMiss||((risk.enemyBenefit??0)===0&&(risk.friendlyCost??0)===0))return candidate;
+  if(!fallback||(risk.enemyBenefit??0)<(fallback.risk.enemyBenefit??0)||risk.enemyBenefit===fallback.risk.enemyBenefit&&candidate.change<fallback.change)fallback=candidate;
+  return null;
+ };
+ for(const da of [0,-2,2,-4,4,-8,8])for(const dp of [0,-2,2,-6,6,-12,12,-24,24]){const found=probe(t.angle+da,t.power+dp);if(found)return found;}
+ const angles=[t.minAngle,t.maxAngle,(t.minAngle+t.maxAngle)/2];for(let a=t.minAngle;a<=t.maxAngle;a+=6)angles.push(a);
+ for(const angle of angles)for(const power of [1,5,15,30,50,70,90,100]){const found=probe(angle,power);if(found)return found;}
+ return fallback;
 }

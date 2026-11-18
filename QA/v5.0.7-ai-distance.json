@@ -1,0 +1,70 @@
+{
+  "version": "5.0.7",
+  "protocol": "320 complete first/stable expert shots; 40 unique seeds per distance/state on permanent flat support; wind0; all samples counted incl skips; regression sample, not population guarantee",
+  "rows": [
+    {
+      "distance": 100,
+      "stable": false,
+      "shots": 40,
+      "hits": 33,
+      "rate": 0.825,
+      "skips": 0
+    },
+    {
+      "distance": 100,
+      "stable": true,
+      "shots": 40,
+      "hits": 36,
+      "rate": 0.9,
+      "skips": 0
+    },
+    {
+      "distance": 300,
+      "stable": false,
+      "shots": 40,
+      "hits": 33,
+      "rate": 0.825,
+      "skips": 0
+    },
+    {
+      "distance": 300,
+      "stable": true,
+      "shots": 40,
+      "hits": 36,
+      "rate": 0.9,
+      "skips": 0
+    },
+    {
+      "distance": 800,
+      "stable": false,
+      "shots": 40,
+      "hits": 30,
+      "rate": 0.75,
+      "skips": 0
+    },
+    {
+      "distance": 800,
+      "stable": true,
+      "shots": 40,
+      "hits": 33,
+      "rate": 0.825,
+      "skips": 0
+    },
+    {
+      "distance": 1200,
+      "stable": false,
+      "shots": 40,
+      "hits": 24,
+      "rate": 0.6,
+      "skips": 0
+    },
+    {
+      "distance": 1200,
+      "stable": true,
+      "shots": 40,
+      "hits": 30,
+      "rate": 0.75,
+      "skips": 0
+    }
+  ]
+}

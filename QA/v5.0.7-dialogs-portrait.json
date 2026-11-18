@@ -1,0 +1,96 @@
+[
+  {
+    "kind": "setup",
+    "x": 8,
+    "y": 8,
+    "right": 382,
+    "bottom": 836,
+    "w": 374,
+    "h": 828,
+    "overflow": false,
+    "scroll": 1235,
+    "client": 826
+  },
+  {
+    "kind": "settings",
+    "x": 8,
+    "y": 8,
+    "right": 382,
+    "bottom": 836,
+    "w": 374,
+    "h": 828,
+    "overflow": false,
+    "scroll": 1012,
+    "client": 826
+  },
+  {
+    "kind": "guide",
+    "x": 8,
+    "y": 8,
+    "right": 382,
+    "bottom": 836,
+    "w": 374,
+    "h": 828,
+    "overflow": false,
+    "scroll": 1486,
+    "client": 826
+  },
+  {
+    "kind": "stats",
+    "x": 8,
+    "y": 8,
+    "right": 382,
+    "bottom": 836,
+    "w": 374,
+    "h": 828,
+    "overflow": false,
+    "scroll": 1851,
+    "client": 826
+  },
+  {
+    "kind": "projectiles",
+    "x": 8,
+    "y": 8,
+    "right": 382,
+    "bottom": 836,
+    "w": 374,
+    "h": 828,
+    "overflow": false,
+    "scroll": 1006,
+    "client": 826
+  },
+  {
+    "kind": "replays",
+    "x": 8,
+    "y": 223.8125,
+    "right": 382,
+    "bottom": 620.1875,
+    "w": 374,
+    "h": 396.375,
+    "overflow": false,
+    "scroll": 394,
+    "client": 394
+  },
+  {
+    "kind": "log",
+    "x": 8,
+    "y": 291.703125,
+    "right": 382,
+    "bottom": 552.296875,
+    "w": 374,
+    "h": 260.59375,
+    "overflow": false,
+    "scroll": 259,
+    "client": 259
+  },
+  {
+    "kind": "result",
+    "x": 8,
+    "y": 8,
+    "right": 382,
+    "bottom": 674.171875,
+    "w": 374,
+    "h": 666.171875,
+    "overflow": false
+  }
+]

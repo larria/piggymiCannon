@@ -12,6 +12,8 @@ import {aimGeometry,muzzleGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
 import {launchSpeed} from './ballistics';
 import {sourceHoming,homingProbe,sourceHomingVelocity,SOURCE_HOMING_RADIUS} from './source-homing';
+import {finalAIRecovery} from './ai-distance';
+import {battleViewWidth} from './world-layout';
 
 export interface AIShot {angle:number;power:number;direction:number;weapon:WeaponId;target:number;utility:number;effective:boolean;x:number;y:number}
 type Body={tank:Tank;slope:number;hostile:boolean;eligible:boolean};
@@ -100,7 +102,10 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
  for(const h of hits){
   const t=h.body.tank;
   if(h.body.hostile){
-   const damage=Math.min(t.hp+t.shield,h.damage),value=damage+(h.damage>=t.hp+t.shield?100:0);
+   const nearby=finalAIRecovery(w.game.gameVersion)&&Math.hypot(t.x-w.shooter.x,t.y-w.shooter.y)<=battleViewWidth(w.game.worldWidth)*.2;
+   // Removing an immediate nearby threat is worth more than farming damage on
+   // a distant full-health tank. Lapse grading below still suppresses hits.
+   const damage=Math.min(t.hp+t.shield,h.damage),value=damage+(h.damage>=t.hp+t.shield?(nearby?400:100):0);
    utility+=value;
    if(value>largest){largest=value;target=t.id;}
    if(h.damage>0&&(h.direct||h.damage>=Math.max(30,t.maxHP*.05)))effective=true;

@@ -1,5 +1,5 @@
-import {adaptiveAI,aiTargetDistance} from './ai-distance';
-import {shotSafety,chooseSafeAIShot} from './ai-safety';
+import {adaptiveAI,aiTargetDistance,finalAIRecovery} from './ai-distance';
+import {shotSafety,chooseSafeAIShot,blockedAIShot,recoverFinalAIShot} from './ai-safety';
 import {modernAssistance} from './combat-preferences';
 import {sourceRangeModel,sourceRange,launchGravityMultiplier} from './source-range';
 import {groundOrbital,vectorProjectiles} from './weapon-presentation';
@@ -159,7 +159,7 @@ export class Game {
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
-  private traceRules(){return {...(adaptiveAI(this.gameVersion)?{aiDistanceModel:'viewport-distance-v1',aiTeamSafety:'virtual-native-excavation-v1',aiSkipWaitSeconds:3,aiNearDistanceFraction:.2}:{}),...(modernAssistance(this.gameVersion)?{powerAssist:!!this.config.powerAssist,tankBlocking:!!this.config.tankBlocking}:{}),...(sourceRangeModel(this.gameVersion)?{launchModel:'source-range-linear-v1',launchReference:{range:43,fullSpeed:730,gravity:230},carrierGravity:'uniform-per-map',fallSpeedFactor:1.15,supplyFallLimit:300,aiNormalErrorBase:70,idleAimPreparation:true,corpseBodyModel:'source-aabb-until-out-v1'}:{}),...(sourceHoming(this.gameVersion)?{homingModel:'source-lookahead-v1',homingProbeRadius:SOURCE_HOMING_RADIUS,restoreMaximumFraction:restoreFraction(this.gameVersion),dukeSpeedMultiplier:49/43}:{}),...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
+  private traceRules(){return {...(adaptiveAI(this.gameVersion)?{aiDistanceModel:'viewport-distance-v1',aiTeamSafety:'virtual-native-excavation-v1',aiSkipWaitSeconds:3,aiNearDistanceFraction:.2}:{}),...(finalAIRecovery(this.gameVersion)?{aiFinalSafety:'deterministic-safe-miss-recovery-v1'}:{}),...(modernAssistance(this.gameVersion)?{powerAssist:!!this.config.powerAssist,tankBlocking:!!this.config.tankBlocking}:{}),...(sourceRangeModel(this.gameVersion)?{launchModel:'source-range-linear-v1',launchReference:{range:43,fullSpeed:730,gravity:230},carrierGravity:'uniform-per-map',fallSpeedFactor:1.15,supplyFallLimit:300,aiNormalErrorBase:70,idleAimPreparation:true,corpseBodyModel:'source-aabb-until-out-v1'}:{}),...(sourceHoming(this.gameVersion)?{homingModel:'source-lookahead-v1',homingProbeRadius:SOURCE_HOMING_RADIUS,restoreMaximumFraction:restoreFraction(this.gameVersion),dukeSpeedMultiplier:49/43}:{}),...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=this.worldHeight||t.x<0||t.x>this.worldWidth)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
@@ -571,7 +571,19 @@ export class Game {
   fire(ai=false) {
     if(this.paused||this.introLocked||this.weatherObservation||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||((this.active.ammo[this.selected]??0)<=0&&(!modernWeather(this.gameVersion)||!this.teleporting&&!this.restoring))||this.active.fallVelocity>0) return false;
     const t=this.active,id=this.selected,transfer=this.teleporting,healing=this.restoring;
-    if(ai&&adaptiveAI(this.gameVersion)&&!transfer&&!healing){const risk=shotSafety(this,t,id);if(risk.unsafe||(risk.friendlyCost??0)>(risk.enemyBenefit??0)*1.1){this.aiDecision={target:this.aiDecision?.target??this.enemy.id,fromX:t.x,goalX:t.x,weapon:id,intentionalMiss:this.aiDecision?.intentionalMiss??false,skip:true,skipAt:this.elapsed+3};this.aiMoveGoal=null;this.aiPending=null;this.recordBattle('ai-safety-plan','实际发射姿态有致命风险，等待3秒后跳过',{target:t.id,weapon:id,angle:t.angle,power:t.power,risk,skipAt:this.aiDecision.skipAt});return false;}}
+    if(ai&&adaptiveAI(this.gameVersion)&&!transfer&&!healing){
+      const risk=shotSafety(this,t,id);
+      if(blockedAIShot(risk)){
+        const recovery=finalAIRecovery(this.gameVersion)&&this.aiDecision&&!this.aiDecision.skip?recoverFinalAIShot(this,t,id,this.aiDecision.intentionalMiss):null;
+        if(recovery){
+          const before={angle:t.angle,power:t.power,risk};t.angle=recovery.shot.angle;t.power=recovery.shot.power;
+          this.recordBattle('ai-safe-adjustment','误瞄／微调后的落点风险偏高，改用安全落点继续发射',{target:t.id,weapon:id,intentionalMiss:this.aiDecision!.intentionalMiss,before,after:{angle:t.angle,power:t.power,risk:recovery.risk}});
+        }else{
+          this.aiDecision={target:this.aiDecision?.target??this.enemy.id,fromX:t.x,goalX:t.x,weapon:id,intentionalMiss:this.aiDecision?.intentionalMiss??false,skip:true,skipAt:this.elapsed+3};this.aiMoveGoal=null;this.aiPending=null;
+          this.recordBattle('ai-safety-plan',finalAIRecovery(this.gameVersion)?`${risk.unsafe?'实际发射姿态有致命风险':'实际发射姿态的自伤／友伤或落位代价偏高'}，没有找到安全替代落点，等待3秒后跳过`:'实际发射姿态有致命风险，等待3秒后跳过',{target:t.id,weapon:id,angle:t.angle,power:t.power,risk,skipAt:this.aiDecision.skipAt});return false;
+        }
+      }
+    }
     if(ai&&healing&&precisionPolish(this.gameVersion)&&this.aiDecision&&this.aiDecision.target!==t.id&&(!this.tanks[this.aiDecision.target]||this.tanks[this.aiDecision.target].hp<=0)){this.planAI();return false;}
     if(transfer&&this.itemUnavailable('teleport',ai))return false;
     const armedSlot=modernBackpack(this.gameVersion)?this.armedItemSlot??undefined:undefined;
@@ -1260,7 +1272,8 @@ export class Game {
     const planned=level===3||recover||level===2&&this.fires.some(f=>Math.abs(f.x-t.x)<f.radius&&this.canDamage(t,f.owner))?chooseAIPosition(this,t,weapons,targets,stay):{stay,best:undefined};
     let best=planned.best??planned.stay;
     if(adaptiveAI(this.gameVersion)){
-      const safe=chooseSafeAIShot(this,t,weapons,targets,best);
+      const safetyWeapons=finalAIRecovery(this.gameVersion)&&t.vehicleId&&aiTargetDistance(this,t)<=.2?[...new Set([...weapons,vehicleById(t.vehicleId).normal,vehicleById(t.vehicleId).special])].filter(id=>t.ammo[id]>0):weapons;
+      const safe=chooseSafeAIShot(this,t,safetyWeapons,targets,best);
       if(!safe){this.aiDecision={target:e.id,fromX:t.x,goalX:t.x,weapon:best.weapon,intentionalMiss:false,skip:true,skipAt:this.elapsed+3};this.recordBattle('ai-safety-plan','当前射位与可达射位均没有安全有效落点，准备跳过',{target:t.id,risk:shotSafety(this,t,best.weapon,best.angle,best.power,best.direction)});return;}
       best=safe;
     }
