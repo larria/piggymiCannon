@@ -1,5 +1,5 @@
 import {originalBallistics} from './original-ballistics';
-import {restoreRadius} from './item-combos';
+import {restoreRadius,restoreFraction} from './item-combos';
 import type {Game,Tank} from './engine';import {SHOT_WIND_GAIN} from './engine';import {pointHitsTank} from './tank-hitbox';import {impactDamageScale} from './impact-damage';
 export interface RestorePlan {target:number;angle:number;power:number;direction:number;x:number;y:number;gain:number;score:number;self:boolean}
 /** Read-only healing flight: same launch, wind, collision grace, fire line and falloff. */
@@ -22,7 +22,7 @@ function evaluate(g:Game,t:Tank,target:Tank,angle:number,power:number,direction:
   if(!g.canRestore(b,t.id)||hit!==b.id&&Math.hypot(b.x-p.x,b.y-p.y)>restoreRadius(g.gameVersion)+26)continue;
   const selfCentred=b.id===t.id&&power<=g.minimumShotPower&&Math.abs(p.x-t.x)<=3&&Math.abs(p.y-(t.y+18))<=4;
   const factor=selfCentred?1:impactDamageScale(b,p.x,p.y,slope,restoreRadius(g.gameVersion),hit===b.id,g.gameVersion,{vx:p.vx,vy:p.vy},'cannon-normal');
-  const gain=Math.min(b.maxHP-b.hp,Math.round(b.maxHP*.4*(boosted?1.5:1)*factor));
+  const gain=Math.min(b.maxHP-b.hp,Math.round(b.maxHP*restoreFraction(g.gameVersion)*(boosted?1.5:1)*factor));
   score+=gain*(b.team===t.team?1+(1-b.hp/b.maxHP)*.5:-1.25);if(b.id===target.id)targetGain=gain;
  }
  if(targetGain<target.maxHP*.12)return null;

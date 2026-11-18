@@ -1,5 +1,6 @@
 import {referenceCalibration} from './reference-calibration';
 import {vectorProjectiles} from './weapon-presentation';
+import {sourceHoming,SOURCE_HOMING_RADIUS} from './source-homing';
 import {originalBallistics,originalWeapon,originalCraterAxes,sourceRadius,sourceMaximum} from './original-ballistics';
 import {ellipseExcavation,precisionPolish,impactPolish} from './match-polish';
 import {VEHICLE_WEAPONS,VEHICLES,type VehicleId,type WeaponEffect} from './vehicles';
@@ -22,12 +23,12 @@ export const WEAPONS: Weapon[] = [
   { id:'airstrike', name:'空中支援', english:'Air strike', description:'点击战场选择落点，三枚炸弹从上方垂直落下。', damage:25, radius:34, digRadius:29, digDepth:26, ammo:1, color:'#7597a7', icon:'plane', tag:'指定落点' },
   { id:'quake', name:'大地震', english:'Earth shaker', description:'最强的地形破坏；落地时可挖开宽约 238 米、深约 135 米的区域。', damage:32, radius:90, digRadius:88, digDepth:90, ammo:1, color:'#a7906f', icon:'quake', tag:'地形破坏' },
   { id:'sniper', name:'穿甲飞镖', english:'Armor dart', description:'两倍初速、低重力的直射弹。高直接伤害，几乎不挖地。', damage:72, radius:16, digRadius:8, digDepth:8, ammo:2, color:'#bc7a73', icon:'dart', tag:'高速直射' },
-  { id:'homing', name:'猎星追踪弹', english:'Homing shell', description:'仅从空投获得。下降到地面附近后，会追踪 140 米内的敌人；地形仍可阻挡它。', damage:62,radius:29,digRadius:20,digDepth:20,ammo:0,color:'#be9159',icon:'target',tag:'稀有空投' },
+  { id:'homing', name:'猎星追踪弹', english:'Homing shell', description:'仅从空投获得。下降后探测前方，锁定附近敌人并直接追踪；地形仍可阻挡它。', damage:62,radius:29,digRadius:20,digDepth:20,ammo:0,color:'#be9159',icon:'target',tag:'稀有空投' },
 ];
 WEAPONS.forEach((w,i)=>{w.shape=w.id;w.sound=27+i;});
 export const TURN_ITEMS:ItemId[]=['double','teleport','boost','repair'];
 export const ITEMS: { id:ItemId; name:string; description:string; count:number; icon:string;cost:number;cooldown:number;unlock:number }[] = [
-  { id:'repair', name:'恢复弹', description:'装填后蓄力发射，不挖土；轻点原地治疗。正中最高恢复目标最大生命40%，偏离时按距离衰减，受威力加强与火线影响。友伤关闭时只治疗自己与队友，开启时也会治疗敌人；不复活，也不解除中毒。可与双发、强化联动。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
+  { id:'repair', name:'恢复弹', description:'装填后蓄力发射，不挖土；轻点原地治疗。正中最高恢复目标最大生命60%，偏离时按距离衰减，受威力加强与火线影响。友伤关闭时只治疗自己与队友，开启时也会治疗敌人；不复活，也不解除中毒。可与双发、强化联动。', count:1, icon:'plus',cost:0,cooldown:0,unlock:1 },
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
   { id:'boost', name:'威力加强', description:'本次攻击伤害 +50%，跳过后失效。每局开局携带一件，用掉不会自动恢复；任意空槽可拾取重复道具；可与双发、恢复弹联动，不能与转移弹同时使用。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
@@ -82,7 +83,7 @@ export const excavation = (id:WeaponId,direct:boolean,version='development',digB
 export function aiAimOffset(difficulty:Difficulty,weapon:WeaponId,rng:()=>number,profile?:{missChance:number;error:number},version='development') {
   const d=DIFFICULTIES.find(d=>d.id===difficulty)!,w=weaponById(weapon);
   const miss=rng()<(profile?.missChance??d.missChance);
-  const offset=miss?(rng()<0.5?-1:1)*(Math.max(weaponBlastRadius(weapon,version)+45,excavation(weapon,false,version).radius+40,w.effect==='homing'||weapon==='homing'?(w.homingRadius??140)+45:0)+rng()*65):(rng()-0.5)*(profile?.error??d.error)*2;
+  const offset=miss?(rng()<0.5?-1:1)*(Math.max(weaponBlastRadius(weapon,version)+45,excavation(weapon,false,version).radius+40,w.effect==='homing'||weapon==='homing'?(sourceHoming(version)?SOURCE_HOMING_RADIUS:w.homingRadius??140)+45:0)+rng()*65):(rng()-0.5)*(profile?.error??d.error)*2;
   return {miss,offset};
 }
 

@@ -9,7 +9,8 @@ import {SHOT_WIND_GAIN,type Game,type Tank} from './engine';
 import {weaponById,weaponDamage,weaponBlastRadius,launchDamageScale,excavation,type WeaponId} from './catalog';
 import {aimGeometry,muzzleGeometry} from './aim';
 import {pointHitsTank} from './tank-hitbox';
-import {projectileSpeed} from './ballistics';
+import {projectileSpeed,launchSpeedMultiplier} from './ballistics';
+import {sourceHoming,homingProbe,sourceHomingVelocity,SOURCE_HOMING_RADIUS} from './source-homing';
 
 export interface AIShot {angle:number;power:number;direction:number;weapon:WeaponId;target:number;utility:number;effective:boolean;x:number;y:number}
 type Body={tank:Tank;slope:number;hostile:boolean;eligible:boolean};
@@ -28,24 +29,30 @@ function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetI
 // terrain, HP, ammo, weather, particles or the live volley-lock map.
 export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0,verticalScale=speedScale){
  const {game:g,shooter:t,slope}=w,modernGeometry=originalBallistics(g.gameVersion),spec=weaponById(weapon),v=aimGeometry(angle,slope,t.direction);
- const speed=projectileSpeed(Math.max(g.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*speedScale;
+ const speed=projectileSpeed(Math.max(g.minimumShotPower,power),launchSpeedMultiplier(weapon,weapon==='sniper'?2:spec.speed??1,g.gameVersion),g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*speedScale;
  const muzzle=muzzleGeometry(t,angle,slope,t.direction,tankArtScale(g.gameVersion));
  let x=muzzle.x,y=muzzle.y,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
  let age=0,wx=0,wy=0,lock:Body|undefined,boost=t.boost?1.5:1,orbital=false;
+ const sourceTracking=sourceHoming(g.gameVersion)&&(spec.effect==='homing'||weapon==='homing');
  let direct:Body|undefined,landed=false;
  for(let i=0;i<12/dt;i++){
   age+=dt;
   if(spec.effect==='helix'){x-=wx;y-=wy;}
   const oldX=x,oldY=y;
-  vx+=orbital?0:g.wind*SHOT_WIND_GAIN*(weapon==='sniper'?.25:1)*dt;
-  if((spec.effect==='homing'||weapon==='homing')&&(vy>0||lock)){
+  if(!sourceTracking||!lock)vx+=orbital?0:g.wind*SHOT_WIND_GAIN*(weapon==='sniper'?.25:1)*dt;
+  if(sourceTracking&&!lock&&vy>0&&age>=.09){
+   const probe=homingProbe({x,y,vx,vy},g.gravity);
+   const target=w.bodies.filter(b=>b.eligible&&(weapon!=='homing'||b.hostile)).map(b=>({b,x:Math.trunc(b.tank.x/3)*3,y:Math.trunc((b.tank.y+18)/3)*3})).filter(b=>Math.hypot(b.x-probe.x,b.y-probe.y)<SOURCE_HOMING_RADIUS).sort((a,b)=>Math.hypot(a.x-probe.x,a.y-probe.y)-Math.hypot(b.x-probe.x,b.y-probe.y)||a.b.tank.id-b.b.tank.id)[0];
+   if(target){lock=target.b;const velocity=sourceHomingVelocity({x,y},{x:target.x+aimOffsetX,y:target.y+aimOffsetY},g.gravity);vx=velocity.vx;vy=velocity.vy;}
+  }
+  if(!sourceTracking&&(spec.effect==='homing'||weapon==='homing')&&(vy>0||lock)){
    if(!lock&&age>.18&&y>g.ground(x)-130){
     let closest=Infinity;for(const b of w.bodies)if(b.eligible){const d=Math.hypot(b.tank.x-x,b.tank.y-y);if(d<closest){closest=d;lock=b;}}
     if(closest>=(spec.homingRadius??140))lock=undefined;
    }
    if(lock){const a=Math.atan2(lock.tank.y+aimOffsetY-y,lock.tank.x+aimOffsetX-x),s=Math.max(250,Math.hypot(vx,vy)),blend=Math.min(1,dt*5);vx+=(Math.cos(a)*s-vx)*blend;vy+=(Math.sin(a)*s-vy)*blend;}
   }
-  vy+=(orbital?0:g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*dt;x+=vx*dt;y+=vy*dt;
+  vy+=(orbital||sourceTracking&&lock?0:g.gravity*(weapon==='sniper'?.27:spec.gravity??1))*dt;x+=vx*dt;y+=vy*dt;
   if(spec.effect==='pierce'){
    const contact=permanentPiercingContact(g.land,oldX,oldY,x,y);
    if(contact){x=contact.x;y=contact.y;vx=0;vy=0;}

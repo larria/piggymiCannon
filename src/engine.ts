@@ -6,7 +6,8 @@ import {planAIRestoration} from './ai-restoration';
 import {abandonmentWinner} from './exit-rules';
 import {ellipseExcavation,precisionPolish,impactPolish,matchPolish,startingAngle} from './match-polish';
 import {playerSupplyTiming,rankIndex,aiRank,emptyCombat,type Competition,type MatchProgress,type CombatMetrics} from './progression';
-import {RESTORE_FRACTION,restoreRadius,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
+import {restoreFraction,restoreRadius,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
+import {sourceHoming,homingProbe,sourceHomingVelocity,SOURCE_HOMING_RADIUS} from './source-homing';
 import {modernBackpack,backpackSlots,takeBackpackItem,putBackpackItem,SUPPLY_INTERVAL_ACTIONS} from './backpack';
 import {calibrationProfile,calibrationDisturbed,advanceCalibration,type AICalibration} from './ai-calibration';
 import {buildCoastMap} from './coast-map';
@@ -35,7 +36,7 @@ import {BattleTrace,packTerrain,unpackTerrain,snapshotText,traceClone,type Battl
 import {MAPS,mapsForVersion,type MapChoice} from './catalog';
 import {nextNaturalWind,nextWindRound,MAX_WIND_CHANGE,NATURAL_WIND_LIMIT} from './wind-cycle';
 import {ITEM_CUE_SECONDS,type ItemCue} from './item-feedback';
-import {projectileSpeed,minimumPower,MIN_POWER} from './ballistics';
+import {projectileSpeed,launchSpeedMultiplier,minimumPower,MIN_POWER} from './ballistics';
 import {modernSupplyTiming,SUPPLY_APPROACH_SECONDS,SUPPLY_LANDING_SECONDS,type SupplyObservation} from './supply-camera';
 export {WORLD_W,WORLD_H,BOTTOM_Y};
 export {WATER_Y} from './terrain';
@@ -153,7 +154,7 @@ export class Game {
   }
   private diagnosticRng(raw:()=>number){return ()=>{const value=raw();this.trace.rngIndex++;if(!this.visualRandom)this.recordBattle('rng',`随机抽取 #${this.trace.rngIndex} = ${value}`,{value,state:this.trace.rngState});return value;};}
   private recordBattle(type:string,summary:string,data:Record<string,any>={},pin=false,merge=false){return this.trace.record({time:this.elapsed,action:this.turn+1,round:this.roundNumber,actor:this.tanks[this.current]?.id??null,type,summary,data},pin,merge);}
-  private traceRules(){return {...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
+  private traceRules(){return {...(sourceHoming(this.gameVersion)?{homingModel:'source-lookahead-v1',homingProbeRadius:SOURCE_HOMING_RADIUS,restoreMaximumFraction:restoreFraction(this.gameVersion),dukeSpeedMultiplier:49/43}:{}),...(this.minimumShotPower===MIN_POWER?{minimumPower:MIN_POWER,projectileOwnCollision:false,friendlyFireAllowsSelfSplash:true,restoreFalloff:'impact-distance-v1'}:{}),...(modernWeather(this.gameVersion)?{weatherCycle:'full-rounds-v1',weatherCombinedChance:1/40,weatherClearRounds:WEATHER_CLEAR_ROUNDS}:{}),...(this.motionScale!==1?{motionVersion:'screen-tempo-v1',motionScale:this.motionScale}:{}),eraDamageVersion:referenceCalibration(this.gameVersion)?SOURCE_ATTRIBUTE_VERSION:ERA_DAMAGE_VERSION,...(referenceCalibration(this.gameVersion)?{bodyModel:'source-aabb-v1',damageReference:'fixed-foot-v1',battleArtScale:tankArtScale(this.gameVersion),bridgeThickness:REFERENCE_BRIDGE_THICKNESS,...(this.layoutScale>1?{mapLayout:'expanded-platform-spacing-v1'}:{})}:{}),雾:this.fog,火线:!!this.fireLine,雪:this.snow,自伤:!!this.config.selfDamage,友伤:!!this.config.friendlyFire,坠落伤害:!!this.config.fallDamage,直接选择暴龙:!!this.config.allowDragon};}
   private landPose(t:Tank,groundedOnly=false):DefeatPose|null {
     if(t.outOfBounds||t.y+18>=this.worldHeight||t.x<0||t.x>this.worldWidth)return null;
     const foot=this.support(t.x,t.y+18),near=Math.abs(foot-(t.y+18))<=28;
@@ -526,7 +527,7 @@ export class Game {
   }
   launch(t:Tank,weapon:WeaponId,angle=t.angle,power=t.power):Projectile {
     const vector=this.aim(t,angle),muzzle=this.muzzle(t,angle);
-    const spec=weaponById(weapon),speed=projectileSpeed(Math.max(this.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
+    const spec=weaponById(weapon),speed=projectileSpeed(Math.max(this.minimumShotPower,power),launchSpeedMultiplier(weapon,weapon==='sniper'?2:spec.speed??1,this.gameVersion),this.gravity*(weapon==='sniper'?.27:spec.gravity??1));
     const rage=isRaging(t)?1.5:1;
     const weather=t.vehicleId==='water'&&this.snow?1.25:1;
     return {x:muzzle.x,y:muzzle.y,vx:vector.x*speed,vy:vector.y*speed,weapon,owner:t.id,age:0,bounces:0,drillY:null,sub:false,boost:(t.boost?1.5:1)*rage*weather,boostSources:{fire:t.boost?'item':null,rage,snow:weather},trail:[],delay:0,echo:false,fireBoosted:t.boost,homing:false,penetrations:0,scale:launchDamageScale(!!t.vehicleId,weapon),phase:0,lockAge:0,lockX:0,lockY:0,lockTarget:null,volley:0,weaveX:0,weaveY:0,hitCooldown:0,mineArmed:false,digBoost:originalBallistics(this.gameVersion)?1:rage>1?1.15:1,rage:rage>1};
@@ -638,11 +639,24 @@ export class Game {
     }
     const spec=weaponById(p.weapon),effect=spec.effect;
     const orbital=effect==='orbital'&&p.sub;
+    const sourceTracking=sourceHoming(this.gameVersion)&&(p.weapon==='homing'||effect==='homing');
     const g=orbital?0:this.gravity*(p.weapon==='sniper'?0.27:spec.gravity??1);
-    p.vx+=orbital?0:this.wind*SHOT_WIND_GAIN*(p.weapon==='sniper'?0.25:1)*dt;
+    if(!sourceTracking||!p.homing)p.vx+=orbital?0:this.wind*SHOT_WIND_GAIN*(p.weapon==='sniper'?0.25:1)*dt;
     if(effect==='helix') {p.x-=p.weaveX;p.y-=p.weaveY;}
     const oldX=p.x,oldY=p.y;
-    if((p.weapon==='homing'||effect==='homing')&&(p.vy>0||p.homing)) {
+    if(sourceTracking&&!p.homing&&p.vy>0&&p.age>=.09){
+      const probe=homingProbe(p,this.gravity),shared=this.volleyTargets.get(p.volley)?.target;
+      const candidates=this.tanks.filter(t=>t.hp>0&&this.canDamage(t,p.owner)&&(p.weapon!=='homing'||t.team!==this.tanks[p.owner].team)&&(shared===null||shared===undefined||t.id===shared));
+      const target=candidates.map(t=>({t,x:Math.trunc(t.x/3)*3,y:Math.trunc((t.y+18)/3)*3})).filter(t=>Math.hypot(t.x-probe.x,t.y-probe.y)<SOURCE_HOMING_RADIUS).sort((a,b)=>Math.hypot(a.x-probe.x,a.y-probe.y)-Math.hypot(b.x-probe.x,b.y-probe.y)||a.t.id-b.t.id)[0];
+      if(target){
+        p.lockTarget=target.t.id;p.lockX=target.x+(p.aimOffsetX??0);p.lockY=target.y+(p.aimOffsetY??0);p.homing=true;
+        Object.assign(p,sourceHomingVelocity(p,{x:p.lockX,y:p.lockY},this.gravity));
+        const volley=this.volleyTargets.get(p.volley);if(volley&&volley.target===null)volley.target=target.t.id;
+        this.emit('lock',`${spec.name}锁定目标，开始追踪。`,undefined,p.x,p.weapon);
+        this.recordBattle('projectile-lock',`第${p.traceId??'?'}弹 ${spec.name}按原版前瞻索敌锁定${target.t.name}`,{projectile:p.traceId,volley:p.volley,target:target.t.id,owner:p.owner,weapon:p.weapon,model:'source-lookahead-v1',probe,radius:SOURCE_HOMING_RADIUS,aimX:p.lockX,aimY:p.lockY,x:p.x,y:p.y,vx:p.vx,vy:p.vy,eligible:this.canDamage(target.t,p.owner)});
+      }
+    }
+    if(!sourceTracking&&(p.weapon==='homing'||effect==='homing')&&(p.vy>0||p.homing)) {
       const radius=spec.homingRadius??140,volleyTarget=this.volleyTargets.get(p.volley);
       if(p.lockTarget===null&&p.age>.18&&p.y>this.ground(p.x)-130) {
         // Classic guided missiles have no IFF. The bonus supply weapon keeps enemy-only targeting.
@@ -663,7 +677,8 @@ export class Game {
         p.homing=true;p.lockX=aimX;p.lockY=aimY;p.lockAge+=dt;
       }
     }
-    p.vy+=g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(sourceTracking&&p.homing)p.lockAge+=dt;
+    p.vy+=(sourceTracking&&p.homing?0:g)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
     if(effect==='pierce'&&!p.transfer){
       const contact=permanentPiercingContact(this.land,oldX,oldY,p.x,p.y);
       if(contact){
@@ -798,9 +813,9 @@ export class Game {
       if(!this.canRestore(target,p.owner)){this.recordBattle('heal-blocked',`${target.name}不受敌方恢复弹影响：友伤关闭`,{owner:p.owner,target:target.id,friendlyFire:!!this.config.friendlyFire});continue;}
       const selfCentred=precisionPolish(this.gameVersion)&&target.id===p.owner&&p.traceLaunch?.power===this.minimumShotPower&&Math.abs(p.x-target.x)<=3&&Math.abs(p.y-(target.y+18))<=4;
       const falloff=selfCentred?1:this.minimumShotPower===MIN_POWER?impactDamageScale(target,p.x,p.y,this.tankSlope(target),radius,directTarget===target.id,this.gameVersion,{vx:p.vx,vy:p.vy},p.weapon):1;
-      const before=target.hp,base=target.maxHP*RESTORE_FRACTION,requested=Math.round(base*p.boost*falloff);target.hp=Math.min(target.maxHP,target.hp+requested);const actual=target.hp-before;
+      const fraction=restoreFraction(this.gameVersion),before=target.hp,base=target.maxHP*fraction,requested=Math.round(base*p.boost*falloff);target.hp=Math.min(target.maxHP,target.hp+requested);const actual=target.hp-before;
       if(target.team===this.tanks[p.owner]?.team)this.credit(this.tanks[p.owner],'healed',actual);
-      const factors=[{source:'基础恢复比例',value:RESTORE_FRACTION},{source:`fireBoosted（${p.boostSources?.fire??'无强化'}）`,value:p.fireBoosted?1.5:1},{source:selfCentred?'原地恢复弹正中自身':this.minimumShotPower===MIN_POWER?'命中／距离衰减':'恢复弹范围内',value:falloff}];
+      const factors=[{source:'基础恢复比例',value:fraction},{source:`fireBoosted（${p.boostSources?.fire??'无强化'}）`,value:p.fireBoosted?1.5:1},{source:selfCentred?'原地恢复弹正中自身':this.minimumShotPower===MIN_POWER?'命中／距离衰减':'恢复弹范围内',value:falloff}];
       this.recordBattle('heal',`${this.tanks[p.owner].name}→${target.name}恢复弹：最大HP${target.maxHP}${factors.map(f=>` ×${f.value}[${f.source}]`).join('')}，恢复${actual}，HP ${before}→${target.hp}`,{owner:p.owner,target:target.id,weapon:'cannon-normal',projectile:p.traceId,base:target.maxHP,factors,requested,actual,hpBefore:before,hpAfter:target.hp,boostSources:p.boostSources,friendlyFire:!!this.config.friendlyFire,poisoned:target.poisoned,...(this.minimumShotPower===MIN_POWER?{falloff,distance:Math.hypot(target.x-p.x,target.y-p.y),directHit:directTarget===target.id}:{} )});
       if(actual){this.float(target.x,target.y-40,`+${actual}`,'#568949',target.id);this.itemCues.push({tank:target.id,item:'repair',age:0});this.observe('hit',target);this.emit('heal',`${target.name}恢复了${actual}点生命。`,actual,target.x);}
     }

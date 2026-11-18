@@ -2,6 +2,7 @@ import {vectorProjectiles} from './weapon-presentation';
 import {battleViewWidth} from './world-layout';
 import {precisionPolish} from './match-polish';
 import {tankArtScale,tankBadgeLift} from './reference-calibration';
+import {placeTankPortrait,type PortraitRect} from './portrait-layout';
 import {paintMedal} from './medal-art';
 import type {RankIndex} from './progression';
 import {fireLineVisual,weatherCameraPoint,modernWeather} from './weather';
@@ -65,7 +66,7 @@ export class Renderer {
   private windMotes:{x:number;y:number;vx:number;fall:number;alpha:number;size:number;phase:number}[]=[];
   private get manualFocus(){return this.camera.manual?.y??null;}
   private set manualFocus(v:number|null){this.camera.manual=v===null?null:{x:this.offsetX,y:v};}
-  private labelRects:{left:number;right:number;top:number;bottom:number;tank:number}[]=[];
+  private labelRects:PortraitRect[]=[];
   private portraitHits:{x:number;y:number;id:number}[]=[];
   private staticTerrain=document.createElement('canvas');private staticRevision=-1;private staticRatio=0;
   private terrainChange:TerrainChange|null=null;private terrainDirtyRegion:TerrainChange|null=null;
@@ -320,13 +321,13 @@ export class Renderer {
     if(celebrating)victoryConfetti(ctx,t,this.time);
     for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132)*g.motionScale;const x=clamp(t.x,this.offsetX+48*g.motionScale,this.offsetX+this.viewWidth-48*g.motionScale),y=Math.max(this.offsetY+38*g.motionScale,top);ctx.save();ctx.translate(x,y);ctx.scale(g.motionScale,g.motionScale);paintItemCue(ctx,cue,0,0,teamFlag(t.team).color,this.reducedMotion);ctx.restore();}
     // The portrait stays upright; its frame carries the team colour.
-    const celebrateOffset=(celebrating?-26:0)-badgeLift;let labelOffset=0;
-    const box=()=>({left:t.x-25*labelScale,right:t.x+(t.poisoned?82:43)*labelScale,top:t.y-85+celebrateOffset+labelOffset-23*labelScale,bottom:t.y-85+celebrateOffset+labelOffset+32*labelScale});
-    for(let attempt=0;attempt<4;attempt++){const b=box();if(!this.labelRects.some(a=>b.left<a.right+4&&b.right>a.left-4&&b.top<a.bottom+4&&b.bottom>a.top-4))break;labelOffset-=55*labelScale;}
-    this.labelRects.push({...box(),tank:t.id});
-    this.portraitHits.push({x:t.x,y:t.y-85+celebrateOffset+labelOffset,id:t.id});
+    const celebrateOffset=(celebrating?-26:0)-badgeLift;
+    const label=placeTankPortrait(t.id,t.x,t.y-85+celebrateOffset,labelScale,!!t.poisoned,this.labelRects,{left:this.offsetX+6,right:this.offsetX+this.viewWidth-6});
+    const labelShift=label.x-t.x;this.labelRects.push(label.rect);
+    this.portraitHits.push({x:label.x,y:label.y,id:t.id});
     ctx.save();ctx.translate(t.x,t.y);
-    ctx.save();ctx.translate(0,celebrateOffset+labelOffset);ctx.translate(0,-85);ctx.scale(labelScale,labelScale);ctx.translate(0,85);
+    if(Math.abs(labelShift)>8*labelScale){ctx.strokeStyle=teamFlag(t.team).color+'70';ctx.lineWidth=labelScale;ctx.beginPath();ctx.moveTo(0,-48*artScale);ctx.lineTo(labelShift,label.y-t.y+31*labelScale);ctx.stroke();}
+    ctx.save();ctx.translate(labelShift,celebrateOffset);ctx.translate(0,-85);ctx.scale(labelScale,labelScale);ctx.translate(0,85);
     const active=(g.introLocked?this.tourPlayer===t.id:g.current===t.id)&&!['lobby','ended','resolving'].includes(g.phase);
     if(active)paintTurnMarker(ctx,0,-126,teamFlag(t.team).color,this.time,this.reducedMotion);
     ctx.fillStyle='#fff8e8';ctx.beginPath();ctx.arc(0,-85,21,0,Math.PI*2);ctx.fill();

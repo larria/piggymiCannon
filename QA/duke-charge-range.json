@@ -1,0 +1,401 @@
+{
+  "version": "5.0.2",
+  "worldWidth": 2688,
+  "rows": [
+    {
+      "angle": 20,
+      "absolute": 43.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-normal",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2407.80317513889,
+      "impact": {
+        "boundary": true,
+        "x": 2688.205988923958,
+        "y": 746.8569849775374,
+        "distance": 2428.205988923958
+      },
+      "flightTime": 4.464999999999826,
+      "launch": {
+        "x": 260,
+        "y": 747.1344243792479,
+        "vx": 538.9550108916195,
+        "vy": -513.7671225709313
+      }
+    },
+    {
+      "angle": 20,
+      "absolute": 43.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-special",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2407.80317513889,
+      "impact": {
+        "boundary": true,
+        "x": 2688.205988923958,
+        "y": 746.8569849775374,
+        "distance": 2428.205988923958
+      },
+      "flightTime": 4.464999999999826,
+      "launch": {
+        "x": 260,
+        "y": 747.1344243792479,
+        "vx": 538.9550108916195,
+        "vy": -513.7671225709313
+      }
+    },
+    {
+      "angle": 25,
+      "absolute": 48.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-normal",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2391.242489399595,
+      "impact": {
+        "boundary": true,
+        "x": 2688.4462706400864,
+        "y": 766.4730082170316,
+        "distance": 2428.4462706400864
+      },
+      "flightTime": 4.89599999999997,
+      "launch": {
+        "x": 260,
+        "y": 744.5104913135559,
+        "vx": 492.12636919321363,
+        "vy": -558.7851078408451
+      }
+    },
+    {
+      "angle": 25,
+      "absolute": 48.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-special",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2391.242489399595,
+      "impact": {
+        "boundary": true,
+        "x": 2688.4462706400864,
+        "y": 766.4730082170316,
+        "distance": 2428.4462706400864
+      },
+      "flightTime": 4.89599999999997,
+      "launch": {
+        "x": 260,
+        "y": 744.5104913135559,
+        "vx": 492.12636919321363,
+        "vy": -558.7851078408451
+      }
+    },
+    {
+      "angle": 30,
+      "absolute": 53.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-normal",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2302.025110646978,
+      "impact": {
+        "x": 2640.510046224346,
+        "y": 830.5330641030437,
+        "distance": 2380.510046224346
+      },
+      "flightTime": 5.355000000000123,
+      "launch": {
+        "x": 260,
+        "y": 742.1344320539698,
+        "vx": 441.5523486712213,
+        "vy": -599.5504010364168
+      }
+    },
+    {
+      "angle": 30,
+      "absolute": 53.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-special",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2302.025110646978,
+      "impact": {
+        "x": 2640.510046224346,
+        "y": 830.5330641030437,
+        "distance": 2380.510046224346
+      },
+      "flightTime": 5.355000000000123,
+      "launch": {
+        "x": 260,
+        "y": 742.1344320539698,
+        "vx": 441.5523486712213,
+        "vy": -599.5504010364168
+      }
+    },
+    {
+      "angle": 35,
+      "absolute": 58.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-normal",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2142.8618637882646,
+      "impact": {
+        "x": 2467.8795147151445,
+        "y": 829.0751331065977,
+        "distance": 2207.8795147151445
+      },
+      "flightTime": 5.663000000000226,
+      "launch": {
+        "x": 260,
+        "y": 740.0243298461588,
+        "vx": 387.6178481592431,
+        "vy": -635.7527536616714
+      }
+    },
+    {
+      "angle": 35,
+      "absolute": 58.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-special",
+      "speed": 744.6,
+      "flatEqualHeightRange": 2142.8618637882646,
+      "impact": {
+        "x": 2467.8795147151445,
+        "y": 829.0751331065977,
+        "distance": 2207.8795147151445
+      },
+      "flightTime": 5.663000000000226,
+      "launch": {
+        "x": 260,
+        "y": 740.0243298461588,
+        "vx": 387.6178481592431,
+        "vy": -635.7527536616714
+      }
+    },
+    {
+      "angle": 40,
+      "absolute": 63.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-normal",
+      "speed": 744.6,
+      "flatEqualHeightRange": 1918.5888435387687,
+      "impact": {
+        "x": 2235.3061505698342,
+        "y": 837.3193455383379,
+        "distance": 1975.3061505698342
+      },
+      "flightTime": 5.94400000000032,
+      "launch": {
+        "x": 260,
+        "y": 738.1962438420389,
+        "vx": 330.7333417727173,
+        "vy": -667.1166439535524
+      }
+    },
+    {
+      "angle": 40,
+      "absolute": 63.62937773065682,
+      "slope": -0.4124104415973873,
+      "weapon": "duke-special",
+      "speed": 744.6,
+      "flatEqualHeightRange": 1918.5888435387687,
+      "impact": {
+        "x": 2235.3061505698342,
+        "y": 837.3193455383379,
+        "distance": 1975.3061505698342
+      },
+      "flightTime": 5.94400000000032,
+      "launch": {
+        "x": 260,
+        "y": 738.1962438420389,
+        "vx": 330.7333417727173,
+        "vy": -667.1166439535524
+      }
+    }
+  ],
+  "flatRows": [
+    {
+      "angle": 20,
+      "power": 100,
+      "speed": 744.6,
+      "range": 1549.4791065083298
+    },
+    {
+      "angle": 25,
+      "power": 100,
+      "speed": 744.6,
+      "range": 1846.5972918309687
+    },
+    {
+      "angle": 30,
+      "power": 100,
+      "speed": 744.6,
+      "range": 2087.6075528646397
+    },
+    {
+      "angle": 35,
+      "power": 100,
+      "speed": 744.6,
+      "range": 2265.1869147849116
+    },
+    {
+      "angle": 40,
+      "power": 100,
+      "speed": 744.6,
+      "range": 2373.9397185393304
+    }
+  ],
+  "sourceRows": [
+    {
+      "angle": 20,
+      "power": 49,
+      "vx": 4600,
+      "vy": -1600,
+      "ticks": 33,
+      "gridRange": 1518,
+      "logicRange": 4554,
+      "gridRangeRatioTo1536": 0.98828125
+    },
+    {
+      "angle": 25,
+      "power": 49,
+      "vx": 4400,
+      "vy": -2000,
+      "ticks": 41,
+      "gridRange": 1804,
+      "logicRange": 5412,
+      "gridRangeRatioTo1536": 1.1744791666666667
+    },
+    {
+      "angle": 30,
+      "power": 49,
+      "vx": 4200,
+      "vy": -2400,
+      "ticks": 49,
+      "gridRange": 2058,
+      "logicRange": 6174,
+      "gridRangeRatioTo1536": 1.33984375
+    },
+    {
+      "angle": 35,
+      "power": 49,
+      "vx": 4000,
+      "vy": -2800,
+      "ticks": 57,
+      "gridRange": 2280,
+      "logicRange": 6840,
+      "gridRangeRatioTo1536": 1.484375
+    },
+    {
+      "angle": 40,
+      "power": 49,
+      "vx": 3700,
+      "vy": -3100,
+      "ticks": 63,
+      "gridRange": 2331,
+      "logicRange": 6993,
+      "gridRangeRatioTo1536": 1.517578125
+    }
+  ],
+  "seedCases": [
+    {
+      "seed": 1,
+      "start": 684,
+      "target": 2524,
+      "gap": 1840,
+      "angle": 20,
+      "wind": 2.4824549332261086
+    },
+    {
+      "seed": 2,
+      "start": 1276,
+      "target": 2284,
+      "gap": 1008,
+      "angle": 20,
+      "wind": -0.0175653793849051
+    },
+    {
+      "seed": 3,
+      "start": 1884,
+      "target": 2004,
+      "gap": 120,
+      "angle": 20,
+      "wind": -0.29194935830309987
+    },
+    {
+      "seed": 4,
+      "start": 676,
+      "target": 796,
+      "gap": 120,
+      "angle": 20,
+      "wind": -9.29738725349307
+    },
+    {
+      "seed": 5,
+      "start": 300,
+      "target": 1788,
+      "gap": 1488,
+      "angle": 20,
+      "wind": 4.842249405104667
+    },
+    {
+      "seed": 6,
+      "start": 1188,
+      "target": 1452,
+      "gap": 264,
+      "angle": 20,
+      "wind": -10.900167486164719
+    },
+    {
+      "seed": 7,
+      "start": 852,
+      "target": 1396,
+      "gap": 544,
+      "angle": 20,
+      "wind": -0.7428820845670998
+    },
+    {
+      "seed": 8,
+      "start": 932,
+      "target": 1556,
+      "gap": 624,
+      "angle": 20,
+      "wind": 7.012710163835436
+    }
+  ],
+  "source": "本机 ft2 目录/原版分析",
+  "scope": "Same-height, zero-wind, unobstructed range comparison. Source rows use integer launch components and move-before-acceleration order; actual map slopes, muzzle height and wind change landing distance.",
+  "calibration": {
+    "version": "5.0.3",
+    "sourceRange": 49,
+    "cannonRange": 43,
+    "speedMultiplier": 1.1395348837209303,
+    "scope": "Duke relative range only; existing Cannon force curve and1% contact branch retained, no universal source tick conversion."
+  },
+  "calibratedFlatRows": [
+    {
+      "angle": 20,
+      "power": 100,
+      "speed": 831.8604651162791,
+      "range": 1933.9294631690414
+    },
+    {
+      "angle": 25,
+      "power": 100,
+      "speed": 831.8604651162791,
+      "range": 2304.7673855554976
+    },
+    {
+      "angle": 30,
+      "power": 100,
+      "speed": 831.8604651162791,
+      "range": 2605.5761172004195
+    },
+    {
+      "angle": 35,
+      "power": 100,
+      "speed": 831.8604651162791,
+      "range": 2827.2157370093405
+    },
+    {
+      "angle": 40,
+      "power": 100,
+      "speed": 831.8604651162791,
+      "range": 2962.9518372894254
+    }
+  ]
+}
