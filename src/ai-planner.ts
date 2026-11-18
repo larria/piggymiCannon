@@ -82,7 +82,7 @@ export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt
 
   return {body:b,damage,direct:hit};
  });
- return {x,y,hits,age,boost};
+ return {x,y,hits,age,boost,vx,vy};
 }
 function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AIShot{
  const spec=weaponById(weapon),impact=traceAIShot(w,angle,power,weapon,dt);

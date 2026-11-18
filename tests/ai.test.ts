@@ -66,7 +66,7 @@ test('fixed 960-action FIRST-shot corpus: reduced opening accuracy, observable f
  const report:any={protocol:'v1',shotsPerLevel:240,uniqueSeeds:240,criterion:'direct or >=max(30,5% victim maxHP) enemy HP/shield loss in one completed action; all cases retained; no fog; 2v2; self/friendly off',levels:{}};
  for(const d of DIFFICULTIES){let effective=0,direct=0,moved=0,nearest=0,intentional=0;const breakdown:any={};
   for(const c of cases){
-   const shot=measureAIShot(aiScenario(d.id,c.seed,c.map,c.distance,c.vehicle));effective+=+shot.effective;direct+=+shot.direct;moved+=+(shot.moved>2);nearest+=+shot.nearestHit;intentional+=+(shot.decision?.intentionalMiss??false);
+   const shot=measureAIShot(aiScenario(d.id,c.seed,c.map,c.distance,c.vehicle,'5.0.5'));effective+=+shot.effective;direct+=+shot.direct;moved+=+(shot.moved>2);nearest+=+shot.nearestHit;intentional+=+(shot.decision?.intentionalMiss??false);
    const key=c.distance?'flat-'+c.distance:c.map,b=breakdown[key]??={n:0,hits:0};b.n++;b.hits+=+shot.effective;
   }
   report.levels[d.id]={effective,direct,moved,nearest,intentional,rate:effective/240,breakdown};
@@ -106,7 +106,7 @@ test('an AI route interrupted by a collapsing floor waits for landing and recomp
 });
 
 test('36 complete all-AI matches include weaker openings and disturbed poses while all games finish',()=>{
- const report=benchmarkAIBattles();console.log('AI complete battle report',JSON.stringify(report));
+ const report=benchmarkAIBattles('expert',6,'5.0.5');console.log('AI complete battle report',JSON.stringify(report));
  assert.equal(report.unfinished,0);assert.equal(report.games,36);assert.ok(report.shots>=350);assert.ok(report.rate>=.60&&report.rate<=.79,JSON.stringify(report));assert.ok(report.shots-report.hits>=70);assert.ok(report.moves>=20);
 });
 test('mid and long range solutions still hit through headwind and tailwind',()=>{
@@ -122,6 +122,6 @@ test('a close-range deliberate lapse still faces a known enemy rather than an em
 });
 
 test('240 seeded stable expert shots approach the 77 percent ceiling and outperform opening shots',()=>{
- const cases=aiSampleCases();let hits=0,direct=0;for(const c of cases){const g=aiScenario('expert',c.seed,c.map,c.distance,c.vehicle);g.active.aiCalibration={stableShots:3,disturbed:false};const shot=measureAIShot(g);hits+=+shot.effective;direct+=+shot.direct;}
+ const cases=aiSampleCases();let hits=0,direct=0;for(const c of cases){const g=aiScenario('expert',c.seed,c.map,c.distance,c.vehicle,'5.0.5');g.active.aiCalibration={stableShots:3,disturbed:false};const shot=measureAIShot(g);hits+=+shot.effective;direct+=+shot.direct;}
  const rate=hits/cases.length;console.log('AI stable calibration report',JSON.stringify({shots:cases.length,hits,direct,rate}));assert.ok(rate>=.73&&rate<=.80);assert.ok(cases.length-hits>=45);
 });

@@ -5,7 +5,7 @@ import {originalWeapon,sourceDamage,ORIGINAL_TANKS} from './original-ballistics'
 import {PIERCING_DAMAGE} from './piercing';
 import {damageAffinity,applyDamageAffinity} from './source-attributes';
 import {isRaging} from './health';
-export const ASSIST_SETTLE_MS=200,ASSIST_POWER_STEP=.5,ASSIST_SLICE_MS=4;
+export const ASSIST_SETTLE_MS=30,ASSIST_POWER_STEP=.5,ASSIST_SLICE_MS=4;
 export type AssistBand={target:number;samples:Float32Array};
 export function assistanceSignature(g:Game,t:Tank){
  const weapon=t.id===g.current?g.selected:t.selectedWeapon;
@@ -50,7 +50,7 @@ export class PowerAssistance {
  private cancel(){this.generation++;if(this.timer!==null)clearTimeout(this.timer);this.timer=null;this.job=null;}
  update(g:Game,t:Tank,allowed:boolean,inputActive:boolean,now:number,charging=false){
   this.suspended=charging;
-  if(!g.config.powerAssist||!allowed||t.controller!=='human'||t.hp<=0||t.fallVelocity>0||g.phase!=='aiming'||g.restoring||g.teleporting||(t.id===g.current?g.selected:t.selectedWeapon)==='airstrike'){this.clear();return;}
+  if(!g.config.powerAssist||!allowed||!g.humanTurn||t.id!==g.current||t.controller!=='human'||t.hp<=0||t.fallVelocity>0||g.phase!=='aiming'||g.restoring||g.teleporting||(t.id===g.current?g.selected:t.selectedWeapon)==='airstrike'){this.clear();return;}
   const key=assistanceSignature(g,t);
   if(this.game!==g||key!==this.key||inputActive){this.cancel();this.game=g;this.owner=t.id;this.key=key;this.stableAt=now;this.complete=false;this.bands=[];this.canvas.hidden=true;}
   if(!inputActive&&!charging&&!this.complete&&!this.job&&now-this.stableAt>=ASSIST_SETTLE_MS){this.job=assistanceSweep(g,{...t});this.schedule();}
