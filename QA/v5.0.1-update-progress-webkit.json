@@ -1,0 +1,14 @@
+{
+  "future": "5.0.2",
+  "percent": 94,
+  "completed": 100,
+  "actualPayloadBytes": 4000004,
+  "floatingRect": {
+    "x": 850,
+    "y": 743,
+    "width": 324,
+    "height": 71
+  },
+  "footerSingleInk": true,
+  "noAutomaticReload": true
+}

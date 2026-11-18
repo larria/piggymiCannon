@@ -1,0 +1,15 @@
+{
+  "version": "5.0.1",
+  "manifestVersion": "5.0.1",
+  "files": 151,
+  "bytes": 64889875,
+  "audioFiles": 108,
+  "portraits": 4,
+  "productionWithoutQA": true,
+  "failures": [],
+  "errors": [],
+  "offlineReload": true,
+  "offlineMatchStarts": true,
+  "midpoint": 32.5,
+  "onlineChecked": false
+}

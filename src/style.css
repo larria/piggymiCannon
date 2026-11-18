@@ -269,3 +269,11 @@ dialog,.arsenal{scrollbar-gutter:stable}
 @media(max-width:600px){.replay-entry>div{flex-basis:100%}.replay-tools{flex-wrap:wrap}}
 
 .toast .crew-name{color:var(--crew-on-dark,#fff5dc)!important;-webkit-text-stroke:.15px rgba(20,35,23,.65);text-shadow:0 1px 1px rgba(0,0,0,.5);font-weight:700}
+
+/* A byte-weighted material meter shared with the opening screen. */
+#repair-progress{margin:18px 0 6px;padding:16px 18px;border:1px solid #dce2cf;border-radius:13px;background:#f4f5ec}#repair-progress .material-progress-heading{font-size:12px}#repair-progress .material-progress-track{height:9px}#repair-progress .material-progress-status{font-size:11px;min-height:0}#repair-progress .material-progress-status:empty{display:none}
+
+.footer-pig{width:19px;height:19px;display:inline-block;vertical-align:middle;margin:0 6px;color:#849374;flex:none}.page-footer>span:last-child{display:flex;align-items:center}
+.update-download{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));z-index:104;width:min(324px,calc(100vw - 32px));padding:20px 19px 14px;border:1px solid #d5ddc8;border-radius:15px;background:#fbfaf3;box-shadow:0 6px 30px #30423118;box-sizing:border-box}.update-download[hidden]{display:none}.update-download>.icon-button{position:absolute;right:2px;top:0;width:44px;height:44px;min-width:44px}.update-download .material-progress-heading{padding-right:24px}.update-download .material-progress-status:empty{display:none}.update-download .material-progress-track{height:8px}.update-download .material-progress-value{font-size:11px}.combat-mode .update-download{display:none}body:has(#pwa-update:not(.hidden)) .update-download{bottom:86px}@media(max-width:600px){.update-download{right:16px;bottom:16px;width:calc(100vw - 32px)}body:has(#pwa-update:not(.hidden)) .update-download{bottom:88px}}
+
+.wind-center{width:2px;transform:translateX(-1px);background:#637455;box-shadow:0 0 0 1px #fffef988;z-index:2}.wind-area{background:var(--wind-color,#f2d58c);transition:background-color .25s ease}.control-deck.inactive .power-meter-button:not(:disabled){cursor:crosshair;opacity:1}@media(prefers-reduced-motion:reduce){.wind-area{transition:none}}

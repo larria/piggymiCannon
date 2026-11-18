@@ -1,0 +1,32 @@
+[
+  {
+    "version": "4.0.5",
+    "scale": 1,
+    "shotPixels": 0.0028125000000000177,
+    "fallPixels": 0.000008398437500001243,
+    "width": 1280,
+    "clock": 45,
+    "gravity": 230,
+    "shotAge": 0.009000000000000001
+  },
+  {
+    "version": "5.0.0",
+    "scale": 1,
+    "shotPixels": 0.0020089285714285842,
+    "fallPixels": 0.000005998883928572317,
+    "width": 1792,
+    "clock": 45,
+    "gravity": 230,
+    "shotAge": 0.009000000000000001
+  },
+  {
+    "version": "5.0.1",
+    "scale": 1.4,
+    "shotPixels": 0.0028125000000000116,
+    "fallPixels": 0.000008398437500001243,
+    "width": 1792,
+    "clock": 45,
+    "gravity": 230,
+    "shotAge": 0.0126
+  }
+]

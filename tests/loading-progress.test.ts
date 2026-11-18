@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {cachedLoadingProgress} from '../src/loading-progress';import {assetCacheKey,repairAssetCache,type AssetManifest} from '../src/asset-repair';import {createHash} from 'node:crypto';
+const scope='https://example.test/piggymiCannon/',texts=['a','longer audio content'],manifest:AssetManifest={formatVersion:1,gameVersion:'5.0.1',files:texts.map((s,i)=>({url:i?'audio/bgm.mp3':'assets/main-Ab123.js',bytes:s.length,revision:i?'b'.repeat(32):null,sha256:createHash('sha256').update(s).digest('hex')}))};
+test('opening progress uses completed byte weights, rejects old revisions and ignores other apps/duplicate keys',()=>{
+ const tiny=assetCacheKey(manifest.files[0],scope),big=assetCacheKey(manifest.files[1],scope);
+ assert.equal(cachedLoadingProgress(manifest,scope,[]).fraction,0);const p=cachedLoadingProgress(manifest,scope,[tiny,tiny,big.replace('b'.repeat(32),'a'.repeat(32))]);assert.equal(p.completed,1);assert.equal(p.fraction,1/(1+texts[1].length));assert.notEqual(p.fraction,.5);assert.equal(cachedLoadingProgress(manifest,scope,[tiny,big,big]).fraction,1);assert.equal(cachedLoadingProgress(manifest,scope,[big.replace(scope,'https://other.test/')]).fraction,0);
+});
+test('repair reports byte-weighted actual checked work, including explicit failure, with two bounded workers',async()=>{
+ const progress:any[]=[],cache={match:async()=>undefined,put:async()=>{}},storage={keys:async()=>['workbox-precache-v2-'+scope],open:async()=>cache};
+ const report=await repairAssetCache(manifest,scope,storage as any,(async(url:string)=>{if(url.includes('bgm'))throw Error('offline');return new Response(texts[0]);}) as typeof fetch,(_n,_t,p)=>progress.push(p));assert.equal(report.failed.length,1);assert.equal(progress.length,2);assert.equal(progress.at(-1).completedBytes,manifest.files.reduce((n,f)=>n+f.bytes,0));assert.equal(progress.at(-1).checked,2);assert.equal(progress.at(-1).failed,1);assert.ok(progress[1].completedBytes>progress[0].completedBytes);
+});

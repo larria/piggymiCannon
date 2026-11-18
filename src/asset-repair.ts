@@ -1,3 +1,4 @@
+import type {RepairProgress} from './loading-progress';
 export interface AssetSpec {url:string;bytes:number;sha256:string;revision:string|null}
 export interface AssetManifest {formatVersion:1;gameVersion:string;files:AssetSpec[]}
 export interface AssetRepairReport {formatVersion:1;gameVersion:string;total:number;checked:number;healthy:number;repaired:number;restored:string[];failed:{url:string;error:string}[]}
@@ -16,10 +17,10 @@ async function checked(response:Response|undefined,spec:AssetSpec){
 export function assetCacheKey(spec:AssetSpec,scope:string){const url=new URL(spec.url,scope);if(spec.revision)url.searchParams.set('__WB_REVISION__',spec.revision);return url.href;}
 /** Explicit repair only. Two concurrent bounded downloads; healthy keys, settings,
  * recordings and other projects are untouched. Preserve native Response metadata. */
-export async function repairAssetCache(manifest:AssetManifest,scope:string,storage:CacheStorage,fetcher:typeof fetch,onProgress?:(checked:number,total:number)=>void){
+export async function repairAssetCache(manifest:AssetManifest,scope:string,storage:CacheStorage,fetcher:typeof fetch,onProgress?:(checked:number,total:number,progress?:RepairProgress)=>void){
  const names=(await storage.keys()).filter(n=>n.startsWith('workbox-precache')&&n.endsWith(scope));if(!names.length)throw Error('离线缓存尚未准备好，请联网打开游戏后再试。');
  const caches=await Promise.all(names.map(n=>storage.open(n))),cache=caches[0];
- const report:AssetRepairReport={formatVersion:1,gameVersion:manifest.gameVersion,total:manifest.files.length,checked:0,healthy:0,repaired:0,restored:[],failed:[]};let at=0;
+ const report:AssetRepairReport={formatVersion:1,gameVersion:manifest.gameVersion,total:manifest.files.length,checked:0,healthy:0,repaired:0,restored:[],failed:[]};let at=0,completedBytes=0;const totalBytes=manifest.files.reduce((n,f)=>n+f.bytes,0);
  const worker=async()=>{while(at<manifest.files.length){const spec=manifest.files[at++],key=assetCacheKey(spec,scope);try{
    let healthy=false;for(const c of caches){try{await checked(await c.match(key),spec);healthy=true;break;}catch{/* Try the next same-project cache. */}}
    if(healthy)report.healthy++;
@@ -27,10 +28,10 @@ export async function repairAssetCache(manifest:AssetManifest,scope:string,stora
     try{const response=await fetcher(url.href,{cache:'no-store',signal:controller.signal}),copy=response.clone();await checked(response,spec);await cache.put(key,copy);report.repaired++;report.restored.push(spec.url);}finally{clearTimeout(timer);}
    }
   }catch(error){report.failed.push({url:spec.url,error:error instanceof Error?error.message:'素材不可用'});}
-  report.checked++;onProgress?.(report.checked,report.total);await new Promise<void>(r=>setTimeout(r,0));
+  report.checked++;completedBytes+=spec.bytes;onProgress?.(report.checked,report.total,{checked:report.checked,total:report.total,completedBytes,totalBytes,failed:report.failed.length});await new Promise<void>(r=>setTimeout(r,0));
  }};await Promise.all([worker(),worker()]);report.restored.sort();report.failed.sort((a,b)=>a.url.localeCompare(b.url));return report;
 }
-export function repairGameAssets(version:string,onProgress?:(checked:number,total:number)=>void){
+export function repairGameAssets(version:string,onProgress?:(checked:number,total:number,progress?:RepairProgress)=>void){
  if(pending)return pending;
  return pending=(async()=>{
   if(!globalThis.caches||!globalThis.crypto?.subtle)throw Error('此浏览器无法修复离线素材，请使用 HTTPS 打开游戏。');

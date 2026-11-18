@@ -1,3 +1,4 @@
+import {backgroundMarkers} from './background-markers';
 import {CREW} from './crew';
 import {recordedWorld} from './world-layout';
 import {ALL_WEAPONS,ITEMS,MAPS,DIFFICULTIES} from './catalog';
@@ -83,7 +84,7 @@ export function validateReplay(value:any):asserts value is BattleReplay{
   if(!Array.isArray(c)||!Number.isInteger(c[0]))throw Error('录像操作数据损坏。');
   if(c[0]===-1){const p=c[1];if(c.length!==2||typeof p?.paused!=='boolean'||!finite(p.targetX)||!Array.isArray(p.aims)||p.aims.length>4||p.aims.some((a:any)=>!Array.isArray(a)||a.length!==4||a.some((n:any)=>!finite(n))||!Number.isInteger(a[0])||a[0]<0||a[0]>3))throw Error('录像状态数据损坏。');}
   else if(c[0]===-2){if(c.length!==2||!['charge-wait','charge-start','charge-stop'].includes(c[1]))throw Error('录像音效提示数据损坏。');}
-  else if(c[0]===12&&(c.length!==2||!finite(c[1])||c[1]<1||c[1]>100))throw Error('录像力度记号损坏。');
+  else if(c[0]===12&&(![2,...(backgroundMarkers(value.gameVersion)?[3]:[])].includes(c.length)||!finite(c[1])||c[1]<1||c[1]>100||c.length===3&&(!Number.isInteger(c[2])||c[2]<0||c[2]>3)))throw Error('录像力度记号损坏。');
   else if(c[0]<0||c[0]>=METHODS.length||c.length>5||c.slice(1).some((a:any)=>!['number','string','boolean'].includes(typeof a)||typeof a==='number'&&!finite(a))||c[0]===0&&(c.length!==2||c[1]<0||c[1]>.1)||c[0]===10&&(!['selfDamage','friendlyFire','allowDragon','fallDamage'].includes(c[1])||typeof c[2]!=='boolean'))throw Error('录像操作不支持。');
  }
 }
@@ -155,7 +156,7 @@ export function parseReplayFile(text:string,currentVersion:string):BattleReplay{
  for(const [i,t] of state.tanks.entries()){if(t.id!==i||!(t.crew in CREW)||!DIFFICULTIES.some(d=>d.id===t.difficulty)||!VEHICLES.some(v=>v.id===t.vehicleId)||typeof t.name!=='string'||t.name.length>80||/[<>&]/.test(t.name)||![t.x,t.y,t.hp,t.maxHP,t.angle,t.power].every(finite)||t.maxHP<=0||t.maxHP>10000||Math.abs(t.x)>10000||Math.abs(t.y)>10000||!['human','ai'].includes(t.controller)||![0,1,2,3].includes(t.team)||!weapons.has(t.selectedWeapon))throw Error('录像炮手状态损坏。');}
  for(const [key,max] of [['projectiles',128],['blasts',512],['mines',32],['crates',32],['fires',64],['gases',64],['texts',512],['itemCues',64]] as const)if(!Array.isArray(state[key])||state[key].length>max)throw Error('录像实体数量异常。');
  for(const p of state.projectiles)if(!weapons.has(p.weapon)||!integer(p.owner)||p.owner>=state.tanks.length||![p.x,p.y,p.vx,p.vy,p.delay,p.age].every(finite)||Math.max(Math.abs(p.vx),Math.abs(p.vy))>10000||!integer(p.penetrations)||p.penetrations>3)throw Error('录像弹体损坏。');
- for(const c of value.commands){const [m,...a]=c;const valid=m<0||m===0||m===1&&a.length===2&&a.every(finite)&&a[1]>=1&&a[1]<=100||m===2&&a.length===1&&[-1,1].includes(a[0])||m===3&&a.length===1&&weapons.has(a[0])||m===4&&a.length>=2&&a.length<=3&&[-1,1].includes(a[0])&&finite(a[1])&&a[1]>=0&&a[1]<=.1&&(a.length===2||typeof a[2]==='boolean')||m===5&&a.length>=1&&a.length<=3&&items.has(a[0])&&(a.length<2||typeof a[1]==='boolean')&&(a.length<3||integer(a[2])&&a[2]<4)||[6,7,8,11,13].includes(m)&&a.length===0||m===9&&a.length===1&&typeof a[0]==='boolean'||m===10&&a.length===2||m===12&&a.length===1;if(!valid)throw Error('录像操作参数损坏。');if(m===-1&&(new Set(a[0].aims.map((r:number[])=>r[0])).size!==a[0].aims.length||a[0].aims.some((r:number[])=>r[0]>=state.tanks.length||r[2]<1||r[2]>100||![-1,1].includes(r[3]))))throw Error('录像炮手输入损坏。');}
+ for(const c of value.commands){const [m,...a]=c;const valid=m<0||m===0||m===1&&a.length===2&&a.every(finite)&&a[1]>=1&&a[1]<=100||m===2&&a.length===1&&[-1,1].includes(a[0])||m===3&&a.length===1&&weapons.has(a[0])||m===4&&a.length>=2&&a.length<=3&&[-1,1].includes(a[0])&&finite(a[1])&&a[1]>=0&&a[1]<=.1&&(a.length===2||typeof a[2]==='boolean')||m===5&&a.length>=1&&a.length<=3&&items.has(a[0])&&(a.length<2||typeof a[1]==='boolean')&&(a.length<3||integer(a[2])&&a[2]<4)||[6,7,8,11,13].includes(m)&&a.length===0||m===9&&a.length===1&&typeof a[0]==='boolean'||m===10&&a.length===2||m===12&&(a.length===1||backgroundMarkers(value.gameVersion)&&a.length===2&&integer(a[1])&&a[1]<state.tanks.length&&state.tanks[a[1]].controller==='human');if(!valid)throw Error('录像操作参数损坏。');if(m===-1&&(new Set(a[0].aims.map((r:number[])=>r[0])).size!==a[0].aims.length||a[0].aims.some((r:number[])=>r[0]>=state.tanks.length||r[2]<1||r[2]>100||![-1,1].includes(r[3]))))throw Error('录像炮手输入损坏。');}
  const duration=value.commands.reduce((n:number,c:Command)=>n+(c[0]===0?c[1]:0),0);
  if(Math.abs(duration-value.duration)>.000001)throw Error('录像时长与操作不一致。');
  try{Game.fromBattleSnapshot(snap);}catch{throw Error('录像初始状态无法恢复。');}

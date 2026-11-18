@@ -8,9 +8,9 @@ export function modernSupplyTiming(version:string){
   const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);
   return !v||Number(v[1])>3||Number(v[1])===3&&(Number(v[2])>2||Number(v[2])===2&&Number(v[3])>=4);
 }
-export function supplyCameraTarget(boxes:Box[],actor:Point,width:number,height:number,time=0):Point {
+export function supplyCameraTarget(boxes:Box[],actor:Point,width:number,height:number,time=0,artScale=1):Point {
   if(!boxes.length)return {x:actor.x-width/2,y:actor.y-height/2};
-  const bounds=(list:Box[])=>({left:Math.min(...list.map(c=>c.x-44)),right:Math.max(...list.map(c=>c.x+44)),top:Math.min(...list.map(c=>c.y-(c.falling?76:24))),bottom:Math.max(...list.map(c=>c.y+25))});
+  const bounds=(list:Box[])=>({left:Math.min(...list.map(c=>c.x-44*artScale)),right:Math.max(...list.map(c=>c.x+44*artScale)),top:Math.min(...list.map(c=>c.y-(c.falling?76:24)*artScale)),bottom:Math.max(...list.map(c=>c.y+25*artScale))});
   let shown=boxes,b=bounds(shown);
   // A fixed viewport cannot contain arbitrarily distant simultaneous drops.
   // Visit fitting groups instead of centering on empty space between them.

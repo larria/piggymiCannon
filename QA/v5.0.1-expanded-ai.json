@@ -1,0 +1,103 @@
+{
+  "protocol": "seven current maps, seed52, two expert cannon AI, full match at1/30s; no fog/fireline, default health/rules",
+  "rows": [
+    {
+      "map": "valley",
+      "world": [
+        2688,
+        1344
+      ],
+      "ended": true,
+      "seconds": 37.03333333333379,
+      "turn": 8,
+      "shots": 9,
+      "damage": 2175,
+      "finite": true,
+      "steps": 1111
+    },
+    {
+      "map": "coast",
+      "world": [
+        2688,
+        1344
+      ],
+      "ended": true,
+      "seconds": 36.03333333333385,
+      "turn": 8,
+      "shots": 9,
+      "damage": 2192,
+      "finite": true,
+      "steps": 1081
+    },
+    {
+      "map": "moon",
+      "world": [
+        2688,
+        1344
+      ],
+      "ended": true,
+      "seconds": 37.43333333333377,
+      "turn": 8,
+      "shots": 9,
+      "damage": 2171,
+      "finite": true,
+      "steps": 1123
+    },
+    {
+      "map": "sky",
+      "world": [
+        2688,
+        1344
+      ],
+      "ended": true,
+      "seconds": 38.7333333333337,
+      "turn": 8,
+      "shots": 9,
+      "damage": 2159,
+      "finite": true,
+      "steps": 1162
+    },
+    {
+      "map": "factory",
+      "world": [
+        2688,
+        1344
+      ],
+      "ended": true,
+      "seconds": 36.133333333333844,
+      "turn": 8,
+      "shots": 9,
+      "damage": 2175,
+      "finite": true,
+      "steps": 1084
+    },
+    {
+      "map": "temple",
+      "world": [
+        2688,
+        1344
+      ],
+      "ended": true,
+      "seconds": 35.900000000000524,
+      "turn": 8,
+      "shots": 9,
+      "damage": 2186,
+      "finite": true,
+      "steps": 1077
+    },
+    {
+      "map": "egypt",
+      "world": [
+        2688,
+        1344
+      ],
+      "ended": true,
+      "seconds": 33.833333333333975,
+      "turn": 8,
+      "shots": 9,
+      "damage": 1670,
+      "finite": true,
+      "steps": 1015
+    }
+  ]
+}

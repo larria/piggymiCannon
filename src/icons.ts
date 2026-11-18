@@ -56,3 +56,6 @@ const paths: Record<string,string> = {
   heart:'<path d="M20 4c-3-2-6 0-8 3-2-3-5-5-8-3-5 4-1 9 8 16 9-7 13-12 8-16Z"/>',
 };
 export const icon = (name:string, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.shell}</svg>`;
+
+/** A single-ink pig mark with cut-out eyes and muzzle. */
+export const pigHeadSvg=()=>`<svg class="footer-pig" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.5 7.1C5.8 4.6 3.7 3.8 2.5 4.2c-.5 2.7.5 5.1 2.3 6.4C3.2 12.2 2.5 14.6 2.5 17.1c0 7 5.8 11 13.5 11s13.5-4 13.5-11c0-2.5-.7-4.9-2.3-6.5 1.8-1.3 2.8-3.7 2.3-6.4-1.2-.4-3.3.4-5 2.9-5-1.9-12-1.9-17 0Zm2 6.4a1.4 1.4 0 1 0 2.8 0 1.4 1.4 0 1 0-2.8 0Zm10.2 0a1.4 1.4 0 1 0 2.8 0 1.4 1.4 0 1 0-2.8 0ZM9 20a7 4.6 0 1 0 14 0 7 4.6 0 1 0-14 0Z"/><ellipse cx="13" cy="20" rx="1" ry="1.5"/><ellipse cx="19" cy="20" rx="1" ry="1.5"/></svg>`;

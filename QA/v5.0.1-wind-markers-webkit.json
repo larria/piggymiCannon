@@ -1,0 +1,44 @@
+[
+  {
+    "wind": 0,
+    "centerWidth": 2,
+    "width": 0,
+    "color": "rgb(248, 229, 175)"
+  },
+  {
+    "wind": 1,
+    "centerWidth": 2,
+    "width": 7.359375,
+    "color": "rgb(245, 223, 165)"
+  },
+  {
+    "wind": 5,
+    "centerWidth": 2,
+    "width": 36.8125,
+    "color": "rgb(231, 199, 123)"
+  },
+  {
+    "wind": 11,
+    "centerWidth": 2,
+    "width": 81,
+    "color": "rgb(211, 164, 61)"
+  },
+  {
+    "wind": -1,
+    "centerWidth": 2,
+    "width": 7.359375,
+    "color": "rgb(245, 223, 165)"
+  },
+  {
+    "wind": -5,
+    "centerWidth": 2,
+    "width": 36.8125,
+    "color": "rgb(231, 199, 123)"
+  },
+  {
+    "wind": -11,
+    "centerWidth": 2,
+    "width": 81,
+    "color": "rgb(211, 164, 61)"
+  }
+]

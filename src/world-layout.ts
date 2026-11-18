@@ -14,3 +14,10 @@ export function recordedWorld(value:unknown,version:string):WorldSize{
 export const layoutScale=(width:number)=>width/LEGACY_WORLD.width;
 /** Enlarge the view along with the calibrated art, without reducing screen pixel density. */
 export const battleViewWidth=(width:number)=>1280*(width>LEGACY_WORLD.width?REFERENCE_ART_SCALE:1);
+
+/** v5.0.1 restores pre-expansion screen motion; a replay retains its own release. */
+export function screenMotionScale(version:string,width:number){
+ const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+ const enabled=!!v&&(+v[1]>5||+v[1]===5&&(+v[2]>0||+v[2]===0&&+v[3]>=1));
+ return enabled?battleViewWidth(width)/1280:1;
+}

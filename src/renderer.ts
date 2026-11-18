@@ -55,7 +55,7 @@ export class Renderer {
     if(g.supplyObservation)this.supplyCrates=g.supplyObservation.crates.map(i=>g.crates[i]).filter((c):c is Crate=>!!c);
     // A legacy snapshot saved during settling has no presentation indices.
     if(!this.supplyCrates.length)this.supplyCrates=[...g.crates];
-    return supplyCameraTarget(this.supplyCrates,g.active,this.viewWidth,this.viewHeight,g.elapsed-this.supplyStarted);
+    return supplyCameraTarget(this.supplyCrates,g.active,this.viewWidth,this.viewHeight,g.elapsed-this.supplyStarted,g.motionScale);
   }
   private reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
   get offsetX(){return this.camera.x;}set offsetX(v:number){this.camera.x=v;}
@@ -71,6 +71,7 @@ export class Renderer {
   rasterPixelsLastUpdate=0;staticPixelsLastUpdate=0;
   private stage:PixiStage|null=null;private backgroundDirty=true;private terrainDirty=true;
   private invalidated=true;private pausedStamp='';private destroyed=false;
+  ready:Promise<void>;
   backend:'canvas'|'pixi'='canvas';frames=0;
   invalidate(){this.invalidated=true;}
   focusAt(x:number,y?:number){this.camera.center(y===undefined?this.offsetX+this.viewWidth/2:x,y??x);this.invalidate();}
@@ -86,7 +87,7 @@ export class Renderer {
     this.game=game;this.background.width=this.worldWidth;this.background.height=this.worldHeight;this.palette=PALETTES[game.config.map];
     this.resize();void loadBattleSprites();
     void document.fonts.ready.then(()=>{this.staticRevision=-1;this.invalidate();});
-    if(!new URLSearchParams(location.search).has('canvas'))void this.initializePixi();
+    this.ready=new URLSearchParams(location.search).has('canvas')?Promise.resolve():this.initializePixi();
   }
   private async initializePixi(){
     const layer=document.createElement('canvas');layer.className='pixi-battle-layer';layer.hidden=true;layer.setAttribute('aria-hidden','true');this.canvas.before(layer);
@@ -272,7 +273,7 @@ export class Renderer {
     const ctx=this.ctx,g=this.game;
     for(let i=0;i<this.windMotes.length;i++) {
       const mote=this.windMotes[i];
-      ctx.save();ctx.translate(mote.x,mote.y);ctx.globalAlpha=mote.alpha;
+      ctx.save();ctx.translate(mote.x,mote.y);ctx.scale(g.motionScale,g.motionScale);ctx.globalAlpha=mote.alpha;
       if(g.snow||!modernWeather(g.gameVersion)&&g.config.map==='moon') {ctx.fillStyle='#fffcf0';ctx.strokeStyle='#8aa6a34d';ctx.lineWidth=.7;ctx.beginPath();ctx.arc(0,0,mote.size,0,Math.PI*2);ctx.fill();ctx.stroke();}
       else {ctx.rotate(Math.sin(this.time+mote.phase)*0.9+Math.sign(g.wind)*0.5);ctx.fillStyle=i%3===0?'#bd915e':'#8da46c';ctx.beginPath();ctx.ellipse(0,0,4.6,2.0,0,0,Math.PI*2);ctx.fill();}
       ctx.restore();
@@ -299,7 +300,7 @@ export class Renderer {
     }
     const vehicle=t.vehicleId?vehicleById(t.vehicleId):null;
     const slope=g.tankSlope(t);
-    if(t.parachute)paintTransferParachute(ctx,t.x,t.y,this.time,teamFlag(t.team).color);
+    if(t.parachute){ctx.save();ctx.translate(t.x,t.y+18);ctx.scale(g.motionScale,g.motionScale);ctx.translate(-t.x,-t.y-18);paintTransferParachute(ctx,t.x,t.y,this.time,teamFlag(t.team).color);ctx.restore();}
     ctx.save();ctx.translate(t.x,t.y);ctx.rotate(slope);ctx.scale(t.direction,1);
     if(artScale!==1){ctx.translate(0,18);ctx.scale(artScale,artScale);ctx.translate(0,-18);}
     ctx.fillStyle='#34413028';ctx.beginPath();ctx.ellipse(0,17,33,7,0,0,Math.PI*2);ctx.fill();
@@ -307,15 +308,15 @@ export class Renderer {
     if(t.poisoned){ctx.fillStyle='#91af6c24';ctx.beginPath();ctx.ellipse(0,-17,36,34,0,0,7);ctx.fill();ctx.strokeStyle='#9bbd7980';ctx.lineWidth=1.5;for(let i=0;i<6;i++){const p=(this.time*.8+i/6)%1;ctx.beginPath();ctx.arc(Math.sin(i*5.1)*28,-3-p*43,2+p*2,0,7);ctx.stroke();}}
     const celebrating=g.phase==='ended'&&g.winner===t.team;
     const moving=g.movingUntil[t.id]>g.elapsed;
-    const fired=g.projectiles.some(p=>p.owner===t.id&&p.age<.5);
-    const firing=fired?Math.max(0,1-(g.projectiles.find(p=>p.owner===t.id)?.age??0)*2):0;
+    const fired=g.projectiles.some(p=>p.owner===t.id&&p.age/g.motionScale<.5);
+    const firing=fired?Math.max(0,1-(g.projectiles.find(p=>p.owner===t.id)?.age??0)/g.motionScale*2):0;
     if(vehicle)paintVehicle(ctx,vehicle,t.angle,this.time,firing,moving);
     const breathing=breathingPose(t.hp,this.time+t.id*.5,t.maxHP,t.vehicleId);
     paintCrew(ctx,t,this.time,celebrating?'win':t.reaction?'hurt':fired?'fire':moving?'move':'idle',breathing.active);
     if(isRaging(t)&&!celebrating){ctx.strokeStyle='#d88b50';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-31,-39);ctx.lineTo(-27,-33);ctx.lineTo(-30,-27);ctx.stroke();}
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
-    for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132);paintItemCue(ctx,cue,clamp(t.x,this.offsetX+48,this.offsetX+this.viewWidth-48),Math.max(this.offsetY+38,top),teamFlag(t.team).color,this.reducedMotion);}
+    for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132)*g.motionScale;const x=clamp(t.x,this.offsetX+48*g.motionScale,this.offsetX+this.viewWidth-48*g.motionScale),y=Math.max(this.offsetY+38*g.motionScale,top);ctx.save();ctx.translate(x,y);ctx.scale(g.motionScale,g.motionScale);paintItemCue(ctx,cue,0,0,teamFlag(t.team).color,this.reducedMotion);ctx.restore();}
     // The portrait stays upright; its frame carries the team colour.
     const celebrateOffset=(celebrating?-26:0)-badgeLift;let labelOffset=0;
     const box=()=>({left:t.x-25*labelScale,right:t.x+(t.poisoned?82:43)*labelScale,top:t.y-85+celebrateOffset+labelOffset-23*labelScale,bottom:t.y-85+celebrateOffset+labelOffset+32*labelScale});
@@ -350,7 +351,7 @@ export class Renderer {
     if(dt!==0&&g.paused&&!cameraMoving&&!this.invalidated&&this.pausedStamp===stamp)return;
     this.invalidated=false;this.pausedStamp=g.paused?stamp:'';this.frames++;this.time+=g.paused&&!this.touring?0:dt;
     if(!this.windMotes.length) {const rng=makeRng(609);this.windMotes=Array.from({length:40},()=>({x:rng()*this.worldWidth,y:rng()*this.worldHeight,vx:g.wind*13,fall:8+rng()*11,alpha:0.52+rng()*0.24,size:1.4+rng()*1.6,phase:rng()*10}));}
-    if(!g.paused) for(const mote of this.windMotes) {mote.vx+=(g.wind*13-mote.vx)*Math.min(1,dt*2);mote.x=((mote.x+mote.vx*dt)%this.worldWidth+this.worldWidth)%this.worldWidth;mote.y=(mote.y+mote.fall*dt)%this.worldHeight;}
+    if(!g.paused) for(const mote of this.windMotes) {mote.vx+=(g.wind*13-mote.vx)*Math.min(1,dt*2);mote.x=((mote.x+mote.vx*dt*g.motionScale)%this.worldWidth+this.worldWidth)%this.worldWidth;mote.y=(mote.y+mote.fall*dt*g.motionScale)%this.worldHeight;}
     const actor=g.active;let camera=actor.y-this.viewHeight*.5,targetX=actor.x-this.viewWidth*.5;
     const enteringSupply=g.phase==='supply'&&!this.supplyPhase,supply=this.supplyView();
     if(enteringSupply&&!this.camera.manual&&!this.touring)this.follow();
@@ -363,7 +364,7 @@ export class Renderer {
     if(lowest){targetX=lowest.x-this.viewWidth*.5;camera=lowest.y-this.viewHeight*.5;}
     if(supply){camera=supply.y;targetX=supply.x;}
     if(g.phase==='resolving'&&g.observation){const falling=g.tanks.find(t=>t.hp>0&&t.fallVelocity>0),t=falling??(g.observation.target===null?null:g.tanks[g.observation.target]),point=t?(t.defeat??t):g.observation.point;if(point){targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}}
-    if(actor.parachute&&(g.phase==='flying'||g.phase==='resolving')){targetX=actor.x-this.viewWidth*.5;camera=actor.y-70-this.viewHeight*.5;}
+    if(actor.parachute&&(g.phase==='flying'||g.phase==='resolving')){targetX=actor.x-this.viewWidth*.5;camera=actor.y-70*g.motionScale-this.viewHeight*.5;}
     if(g.weatherObservation){const point=weatherCameraPoint(g.weatherObservation,actor);targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}
     this.camera.update(g.paused&&!this.touring&&!this.camera.manual?0:dt,{x:targetX,y:camera});
     ctx.save();ctx.clearRect(0,0,this.viewWidth,this.viewHeight);
@@ -395,11 +396,13 @@ export class Renderer {
     // Visible pickups sit in front of the chassis, including drops at a player’s feet.
     for(const crate of g.crates) {
       if(!this.visibleAt(crate.x)&&!crate.falling&&!(g.phase==='supply'&&this.supplyCrates.includes(crate))) continue;
+      ctx.save();ctx.translate(crate.x,crate.y+14);ctx.scale(g.motionScale,g.motionScale);ctx.translate(-crate.x,-crate.y-14);
       if(crate.falling) {ctx.strokeStyle='#f6f1dfaa';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(crate.x-14,crate.y-10);ctx.lineTo(crate.x-27,crate.y-48);ctx.moveTo(crate.x+14,crate.y-10);ctx.lineTo(crate.x+27,crate.y-48);ctx.stroke();ctx.fillStyle='#ead9b8cc';ctx.beginPath();ctx.ellipse(crate.x,crate.y-48,36,20,0,Math.PI,Math.PI*2);ctx.fill();}
       ctx.fillStyle='#b29469';rr(ctx,crate.x-14,crate.y-10,28,25,3);ctx.fill();ctx.strokeStyle='#ead7aa';ctx.lineWidth=2;ctx.stroke();
       ctx.fillStyle='#e9d9b5';ctx.fillRect(crate.x-2,crate.y-10,4,25);
       if(['double','homing','transfer','boost'].includes(crate.type)) {ctx.fillStyle=crate.type==='double'?'#e7c081':'#acc4d0';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(crate.type==='double'?'×2':crate.type==='transfer'?'⇄':crate.type==='boost'?'↑':'◎',crate.x,crate.y+9);}
       if(crate.type==='medical') {ctx.fillStyle='#a47158';ctx.fillRect(crate.x-7,crate.y-2,14,4);ctx.fillRect(crate.x-2,crate.y-7,4,14);}
+      ctx.restore();
     }
     for(const p of g.projectiles) {
       if(p.delay>0||!this.visibleAt(p.x)) continue;
@@ -422,7 +425,7 @@ export class Renderer {
       ctx.beginPath();ctx.arc(b.x,b.y,b.radius*(0.4+progress*0.8),0,Math.PI*2);ctx.fill();
       ctx.globalAlpha=(1-progress)*0.9;ctx.strokeStyle='#fff0c9';ctx.lineWidth=3;ctx.beginPath();ctx.arc(b.x,b.y,b.radius*(0.2+progress*1.25),0,Math.PI*2);ctx.stroke();if(b.healing){ctx.fillStyle='#5b9150';ctx.globalAlpha=1-progress;ctx.fillRect(b.x-2,b.y-9,4,18);ctx.fillRect(b.x-9,b.y-2,18,4);}ctx.globalAlpha=1;
     }
-    for(const p of g.particles) {if(!this.visibleAt(p.x)) continue;ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*(0.4+p.life/p.maxLife*0.6),0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+    for(const p of g.particles) {if(!this.visibleAt(p.x)) continue;ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*g.motionScale*(0.4+p.life/p.maxLife*0.6),0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
     for(const t of g.texts) {if(!this.visibleAt(t.x)) continue;ctx.globalAlpha=clamp(t.life,0,1);ctx.font=`bold ${18*g.layoutScale}px "PingFang SC",sans-serif`;ctx.textAlign='center';ctx.strokeStyle='#fff8e8';ctx.lineWidth=3*g.layoutScale;ctx.strokeText(t.text,t.x,t.y);ctx.fillStyle=t.color;ctx.fillText(t.text,t.x,t.y);}ctx.globalAlpha=1;
     ctx.restore();
   }

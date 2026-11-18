@@ -1,0 +1,548 @@
+[
+  {
+    "weapon": "bowl-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 40,
+        "height": 36,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 40,
+        "height": 36,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "bowl-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 64,
+        "height": 39,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 64,
+        "height": 39,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "crossbow-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 81,
+        "height": 26,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 81,
+        "height": 26,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "crossbow-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 77,
+        "height": 35,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 77,
+        "height": 35,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "cannon-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 42,
+        "height": 43,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 42,
+        "height": 43,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "cannon-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 36,
+        "height": 36,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 36,
+        "height": 36,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "beetle-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 32,
+        "height": 37,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 32,
+        "height": 37,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "beetle-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 50,
+        "height": 38,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 50,
+        "height": 38,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "duke-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 71,
+        "height": 26,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 71,
+        "height": 26,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "duke-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 42,
+        "height": 31,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 42,
+        "height": 31,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "mine-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 30,
+        "height": 47,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 30,
+        "height": 47,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "mine-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 56,
+        "height": 24,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 56,
+        "height": 24,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "missile-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 78,
+        "height": 23,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 78,
+        "height": 23,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "missile-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 62,
+        "height": 42,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 62,
+        "height": 42,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "multi-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 56,
+        "height": 31,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 56,
+        "height": 31,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "multi-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 38,
+        "height": 38,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 38,
+        "height": 38,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "laser-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 58,
+        "height": 26,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 58,
+        "height": 26,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "laser-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 84,
+        "height": 23,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 84,
+        "height": 23,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "water-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 69,
+        "height": 44,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 69,
+        "height": 44,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "water-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 42,
+        "height": 39,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 42,
+        "height": 39,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "ion-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 56,
+        "height": 44,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 56,
+        "height": 44,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "ion-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 70,
+        "height": 27,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 70,
+        "height": 27,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "sea-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 60,
+        "height": 60,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 60,
+        "height": 60,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "sea-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 58,
+        "height": 34,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 58,
+        "height": 34,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "dragon-normal",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 82,
+        "height": 43,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 82,
+        "height": 43,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  },
+  {
+    "weapon": "dragon-special",
+    "versions": [
+      {
+        "version": "4.0.5",
+        "width": 58,
+        "height": 35,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1280
+      },
+      {
+        "version": "5.0.1",
+        "width": 58,
+        "height": 35,
+        "physicsScale": 1,
+        "afterScale": 1,
+        "view": 1792
+      }
+    ]
+  }
+]

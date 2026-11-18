@@ -27,7 +27,7 @@ try{
    const g=(window as any).__qa.game;
    if(g.config.seed!==seed)throw new Error('Fixture seed was not honored');
    if(scenario==='multi-double'){g.selected='multi-special';g.active.ammo['multi-special']=Infinity;g.active.doubleShot=true;g.active.angle=75;g.active.power=75;g.fire();}
-   if(scenario==='paused'||scenario==='settings'){g.paused=true;(window as any).__qa.audio.pause(true);(window as any).__qa.updateUI();}
+   if(scenario==='paused'){g.paused=true;(window as any).__qa.audio.pause(true);(window as any).__qa.updateUI();}
   },{scenario,seed:310030+results.length});
   if(scenario==='settings')await page.locator('[data-dialog="settings"]:visible').first().click();
   await page.waitForTimeout(1200);
