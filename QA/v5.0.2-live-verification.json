@@ -1,0 +1,60 @@
+{
+  "formatVersion": 1,
+  "version": "v5.0.2",
+  "base": "https://larria.github.io/piggymiCannon/",
+  "verifiedAt": "2026-11-18T09:52:40.166Z",
+  "liveBundleMatchesLocal": true,
+  "offlineReload": true,
+  "offlinePixi": true,
+  "allOfflineAudioHashesMatch": true,
+  "audioFiles": 108,
+  "precacheURLs": 155,
+  "range": {
+    "status": 206,
+    "bytes": 4096,
+    "range": "bytes 3049556-3053651/3053652"
+  },
+  "actualMap": "temple",
+  "mapName": "神圣殿堂",
+  "seed": 3994192601,
+  "world": {
+    "width": 2688,
+    "height": 1344,
+    "bottomY": 1344
+  },
+  "snapshotFormatVersion": 1,
+  "allMaterialHashesVerifiedOffline": true,
+  "actualMapMusicPlayedOffline": true,
+  "allFourPortraitsDecodedOffline": true,
+  "allOfflinePortraitHashesMatch": true,
+  "portraitBackup": {
+    "files": 4,
+    "bytes": 49453
+  },
+  "angleNudgesVerified": true,
+  "independentSwitchesEnabled": true,
+  "offlineReplayVerified": true,
+  "offlineReplayExchangeVerified": true,
+  "healingComboVerified": true,
+  "offlineMedalUI": true,
+  "humanCounterSnapshot": true,
+  "unfinishedReplayNoScore": true,
+  "emptyMeterVerified": true,
+  "powerMarkerVerified": true,
+  "midpointAimVerified": true,
+  "localReplayBytes": 29946,
+  "backend": "pixi",
+  "map": "神圣殿堂",
+  "productionWithoutQA": true,
+  "timerHidden": true,
+  "errors": [],
+  "sourceCommit": "52a73c733f97a74b4537a4a04a342bead5a47cca",
+  "pagesCommit": "91c00d5c9032e977423ad3330d7e4ebf7de85e6f",
+  "weaponLabHtmlMatchesLocal": true,
+  "mechanismTests": {
+    "total": 458,
+    "passed": 458,
+    "failed": 0,
+    "skipped": 0
+  }
+}
