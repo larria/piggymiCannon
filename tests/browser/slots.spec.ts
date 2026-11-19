@@ -30,7 +30,11 @@ test('13 reference-colored vehicles share their updated shape across selection a
 });
 test('production slots persist flags/controllers without resurrecting an empty Mimi or changing Dad identity',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- await page.setViewportSize({width:1210,height:834});await page.goto('./');await page.evaluate(()=>localStorage.removeItem('piggy-settings'));await page.reload();
+ await page.setViewportSize({width:1210,height:834});await page.goto('./');
+ // This persistence test starts after the first complete PWA installation.
+ // Reloading during the initial install cancels WebKit's pending Worker/image fetches.
+ await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
+ await page.evaluate(()=>localStorage.removeItem('piggy-settings'));await page.reload();
  await page.getByRole('button',{name:'进入战场',exact:true}).click();await activate(page,4);await page.locator('[data-enable="0"]').click();
  for(const [i,team] of [[1,3],[2,2],[3,1]])await page.locator(`[data-team="${i}"]`).selectOption(String(team));
  await page.locator('[data-controller="1"]').selectOption('human');await page.locator('[data-difficulty="2"]').selectOption('hard');await page.locator('[data-controller="3"]').selectOption('human');await page.locator('#turn-timer').selectOption('0');

@@ -2,9 +2,10 @@ import type {Game,Tank} from './engine';
 import {fixedAnglePredictor,safeAIPositions,solveAIShot,type AIShot} from './ai-planner';
 import {originalWeapon,originalCrater,originalCraterAxes} from './original-ballistics';
 import {weaponById,excavation,type WeaponId} from './catalog';
-import {adaptiveAI} from './ai-distance';
+import {adaptiveAI,causalAIShotSafety} from './ai-distance';
 type Hole={x:number;y:number;rx:number;ry:number;rows?:Map<number,{left:number;width:number}>};
-export type ShotSafety={unsafe:boolean;out:boolean;fall:number;selfDamage:number;ground:number;holes:number;friendlyCost?:number;enemyBenefit?:number;allies?:{target:number;out:boolean;fall:number;damage:number;lethal:boolean}[]};
+type SupportChange={baselineGround:number;predictedGround:number;baselineOut:boolean;predictedOut:boolean;baselineFall:number;predictedFall:number};
+export type ShotSafety={unsafe:boolean;out:boolean;fall:number;selfDamage:number;ground:number;holes:number;friendlyCost?:number;enemyBenefit?:number;supportChange?:SupportChange;allies?:{target:number;out:boolean;fall:number;damage:number;lethal:boolean;supportChange?:SupportChange}[]};
 export const blockedAIShot=(risk:ShotSafety)=>risk.unsafe||(risk.friendlyCost??0)>(risk.enemyBenefit??0)*1.1;
 /** Read-only local virtual excavation: use exact native integer scanlines and
  * permanent cells, not just distance to a crater. Mirrors five-column support.
@@ -39,11 +40,24 @@ export function shotSafety(g:Game,t:Tank,weapon:WeaponId,angle=t.angle,power=t.p
  const surface=(x:number,foot:number)=>{x=Math.round(x);let y=Math.max(0,Math.floor(foot-14));while(y<g.worldHeight&&!solid(x,y))y++;while(y>0&&solid(x,y-1))y--;return y;};
  const risks=protectedTanks.map(b=>{
   const center=surface(b.x,b.y+18),left=surface(b.x-8,center),right=surface(b.x+8,center),ground=[surface(b.x-16,left),left,center,right,surface(b.x+16,right)].sort((a,b)=>a-b)[2];
-  const fall=Math.max(0,ground-(b.y+18)),out=ground>=g.worldHeight-18,fallDamage=g.config.fallDamage&&fall>48?Math.round((fall-35)*.3):0,hpLoss=Math.max(0,(damage.get(b.id)??0)*(t.doubleShot?2:1)-b.shield)+fallDamage;
-  return {target:b.id,out,fall,damage:hpLoss,shieldLoss:Math.min(b.shield,(damage.get(b.id)??0)*(t.doubleShot?2:1)),lethal:out||hpLoss>=b.hp,ground,weight:b.hp<b.maxHP*.5?4.5:3};
+  const predictedFall=Math.max(0,ground-(b.y+18)),directLoss=Math.max(0,(damage.get(b.id)??0)*(t.doubleShot?2:1)-b.shield),shieldLoss=Math.min(b.shield,(damage.get(b.id)??0)*(t.doubleShot?2:1));
+  if(causalAIShotSafety(g.gameVersion)){
+   // ground is a FOOT/support coordinate, not the body's center. The live
+   // engine accepts every support below height; subtracting 18 rejected valid
+   // bottom platforms. Compare with untouched terrain so an existing fall or
+   // missing support cannot veto an unrelated shot elsewhere on the map.
+   const baselineGround=g.support(b.x,b.y+18),baselineOut=baselineGround>=g.worldHeight,predictedOut=ground>=g.worldHeight,baselineFall=Math.max(0,baselineGround-(b.y+18));
+   const start=b.fallVelocity>0?b.fallStart:b.y;
+   const landingDamage=(floor:number,out:boolean)=>{const distance=Math.max(0,floor-18-start);return g.config.fallDamage&&!out&&distance>48?Math.round((distance-35)*.3):0;};
+   const baselineDamage=landingDamage(baselineGround,baselineOut),predictedDamage=landingDamage(ground,predictedOut),baselineLethal=baselineOut||baselineDamage>=b.hp;
+   const out=predictedOut&&!baselineOut,fall=Math.max(0,predictedFall-baselineFall),hpLoss=directLoss+Math.max(0,predictedDamage-baselineDamage);
+   return {target:b.id,out,fall,damage:hpLoss,shieldLoss,lethal:!baselineLethal&&(predictedOut||directLoss+predictedDamage>=b.hp),ground,weight:b.hp<b.maxHP*.5?4.5:3,supportChange:{baselineGround,predictedGround:ground,baselineOut,predictedOut,baselineFall,predictedFall}};
+  }
+  const fall=predictedFall,out=ground>=g.worldHeight-18,fallDamage=g.config.fallDamage&&fall>48?Math.round((fall-35)*.3):0,hpLoss=directLoss+fallDamage;
+  return {target:b.id,out,fall,damage:hpLoss,shieldLoss,lethal:out||hpLoss>=b.hp,ground,weight:b.hp<b.maxHP*.5?4.5:3};
  });
  const own=risks.find(b=>b.target===t.id)!,friendlyCost=risks.reduce((n,b)=>n+b.damage*b.weight+b.shieldLoss*.7+Math.max(0,b.fall-12)*.15,0);
- return {unsafe:risks.some(b=>b.lethal),out:own.out,fall:own.fall,selfDamage,ground:own.ground,holes:holes.length,friendlyCost,enemyBenefit,allies:risks.filter(b=>b.target!==t.id).map(({weight,ground,...r})=>r)};
+ return {unsafe:risks.some(b=>b.lethal),out:own.out,fall:own.fall,selfDamage,ground:own.ground,holes:holes.length,friendlyCost,enemyBenefit,allies:risks.filter(b=>b.target!==t.id).map(({weight,ground,...r})=>r),...(own.supportChange?{supportChange:own.supportChange}:{})};
 }
 /** Prefer the original attack, then small legal variations and reachable firing
  * positions. Never grant fuel or alter a hit/damage/RNG result to make it safe. */

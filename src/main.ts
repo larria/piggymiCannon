@@ -16,6 +16,7 @@ import {modernWeather} from './weather';
 import {repairGameAssets,assetRepairDiagnostics,retryBrokenMaterialImages,retryMaterialFonts} from './asset-repair';
 import {retryBattleSprites} from './battle-sprites';
 import './style.css';
+import './web-select.css';
 import {ImpactProfiler} from './impact-profiler';
 import {snapshotText} from './battle-trace';
 import {legacyMapBgmFile} from './map-music';

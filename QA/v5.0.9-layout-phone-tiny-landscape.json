@@ -1,0 +1,189 @@
+{
+  "viewport": {
+    "w": 568,
+    "h": 320
+  },
+  "column": {
+    "x": 0,
+    "y": 0,
+    "w": 568,
+    "h": 320,
+    "right": 568,
+    "bottom": 320
+  },
+  "stage": {
+    "x": 0,
+    "y": 38,
+    "w": 568,
+    "h": 192,
+    "right": 568,
+    "bottom": 230
+  },
+  "deck": {
+    "x": 0,
+    "y": 230,
+    "w": 568,
+    "h": 90,
+    "right": 568,
+    "bottom": 320
+  },
+  "header": {
+    "x": 0,
+    "y": 0,
+    "w": 568,
+    "h": 38,
+    "right": 568,
+    "bottom": 38
+  },
+  "radius": "0px",
+  "border": "0px",
+  "overflow": false,
+  "viewWidth": 1863.75,
+  "viewHeight": 630,
+  "buttons": {
+    "move-left": {
+      "x": 334,
+      "y": 234,
+      "w": 28,
+      "h": 36,
+      "right": 362,
+      "bottom": 270
+    },
+    "move-right": {
+      "x": 364,
+      "y": 234,
+      "w": 28,
+      "h": 36,
+      "right": 392,
+      "bottom": 270
+    },
+    "skip-button": {
+      "x": 454,
+      "y": 234,
+      "w": 28,
+      "h": 36,
+      "right": 482,
+      "bottom": 270
+    },
+    "exit-match": {
+      "x": 484,
+      "y": 234,
+      "w": 28,
+      "h": 36,
+      "right": 512,
+      "bottom": 270
+    },
+    "fire-button": {
+      "x": 514,
+      "y": 234,
+      "w": 48,
+      "h": 36,
+      "right": 562,
+      "bottom": 270
+    },
+    "face-button": {
+      "x": 80,
+      "y": 290,
+      "w": 26,
+      "h": 26,
+      "right": 106,
+      "bottom": 316
+    },
+    "aim-pad": {
+      "x": 6,
+      "y": 238,
+      "w": 74,
+      "h": 74,
+      "right": 80,
+      "bottom": 312
+    },
+    "power-meter": {
+      "x": 132,
+      "y": 284,
+      "w": 369,
+      "h": 20,
+      "right": 501,
+      "bottom": 304
+    },
+    "angle-up": {
+      "x": 394,
+      "y": 234,
+      "w": 28,
+      "h": 36,
+      "right": 422,
+      "bottom": 270
+    },
+    "angle-down": {
+      "x": 424,
+      "y": 234,
+      "w": 28,
+      "h": 36,
+      "right": 452,
+      "bottom": 270
+    }
+  },
+  "weaponIcons": [
+    28,
+    28
+  ],
+  "quickItems": [
+    {
+      "x": 210,
+      "right": 238,
+      "y": 234,
+      "w": 28,
+      "h": 36
+    },
+    {
+      "x": 240,
+      "right": 268,
+      "y": 234,
+      "w": 28,
+      "h": 36
+    },
+    {
+      "x": 270,
+      "right": 298,
+      "y": 234,
+      "w": 28,
+      "h": 36
+    },
+    {
+      "x": 300,
+      "right": 328,
+      "y": 234,
+      "w": 28,
+      "h": 36
+    }
+  ],
+  "portraits": [
+    {
+      "x": 6,
+      "y": 2,
+      "w": 62,
+      "h": 34,
+      "overflow": false
+    },
+    {
+      "x": 74,
+      "y": 2,
+      "w": 62,
+      "h": 34,
+      "overflow": false
+    },
+    {
+      "x": 142,
+      "y": 2,
+      "w": 62,
+      "h": 34,
+      "overflow": false
+    },
+    {
+      "x": 210,
+      "y": 2,
+      "w": 62,
+      "h": 34,
+      "overflow": false
+    }
+  ]
+}

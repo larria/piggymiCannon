@@ -1,0 +1,78 @@
+{
+  "version": "5.0.9",
+  "protocol": "six complete2v2 expert matches; four native carriers, three maps, friendlyFire false/true, full health/items; capped800s; attributed deaths from pinned trace. Regression sample only.",
+  "rows": [
+    {
+      "map": "coast",
+      "friendlyFire": false,
+      "ended": true,
+      "finite": true,
+      "turns": 28,
+      "shots": 29,
+      "ownDig": 0,
+      "allyDig": 0,
+      "seconds": 138.3666666666614,
+      "winner": 0
+    },
+    {
+      "map": "coast",
+      "friendlyFire": true,
+      "ended": true,
+      "finite": true,
+      "turns": 27,
+      "shots": 28,
+      "ownDig": 0,
+      "allyDig": 0,
+      "seconds": 124.53333333332883,
+      "winner": 0
+    },
+    {
+      "map": "factory",
+      "friendlyFire": false,
+      "ended": true,
+      "finite": true,
+      "turns": 28,
+      "shots": 29,
+      "ownDig": 0,
+      "allyDig": 0,
+      "seconds": 131.13333333332847,
+      "winner": 1
+    },
+    {
+      "map": "factory",
+      "friendlyFire": true,
+      "ended": true,
+      "finite": true,
+      "turns": 25,
+      "shots": 26,
+      "ownDig": 0,
+      "allyDig": 0,
+      "seconds": 122.86666666666225,
+      "winner": 1
+    },
+    {
+      "map": "temple",
+      "friendlyFire": false,
+      "ended": true,
+      "finite": true,
+      "turns": 28,
+      "shots": 29,
+      "ownDig": 0,
+      "allyDig": 0,
+      "seconds": 136.8999999999948,
+      "winner": 1
+    },
+    {
+      "map": "temple",
+      "friendlyFire": true,
+      "ended": true,
+      "finite": true,
+      "turns": 27,
+      "shots": 27,
+      "ownDig": 0,
+      "allyDig": 0,
+      "seconds": 132.06666666666175,
+      "winner": 1
+    }
+  ]
+}

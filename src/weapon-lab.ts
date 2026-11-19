@@ -1,9 +1,11 @@
 import {VEHICLES} from './vehicles';
+import {installWebSelects} from './web-select';
 import {weaponById} from './catalog';
 import {projectileSvg,warmProjectileVectors} from './projectile-vector';
 import {projectileArt,projectileDrawScale} from './projectile-art';
 import {vehicleIcon} from './vehicle-art';
 import './weapon-lab.css';
+import './web-select.css';
 
 const root=document.querySelector<HTMLElement>('#weapon-lab')!;
 let boosted=false,salvo=false,paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -14,7 +16,7 @@ function render(){const filter=(document.querySelector('#lab-tank') as HTMLSelec
  if(paused)document.querySelectorAll<SVGSVGElement>('.lab-shell>svg').forEach(svg=>svg.pauseAnimations());
  paint();
 }
-document.querySelector('#lab-tank')!.addEventListener('change',render);document.querySelector('#lab-boost')!.addEventListener('click',()=>{boosted=!boosted;render();});document.querySelector('#lab-salvo')!.addEventListener('click',()=>{salvo=!salvo;render();});document.querySelector('#lab-pause')!.addEventListener('click',()=>{paused=!paused;render();});
+installWebSelects(root);document.querySelector('#lab-tank')!.addEventListener('change',render);document.querySelector('#lab-boost')!.addEventListener('click',()=>{boosted=!boosted;render();});document.querySelector('#lab-salvo')!.addEventListener('click',()=>{salvo=!salvo;render();});document.querySelector('#lab-pause')!.addEventListener('click',()=>{paused=!paused;render();});
 let time=0,last=0;
 // One loop, only visible cards. The exact battlefield function is shown alongside SVG.
 import {paintBoostStars} from './projectile-vector';

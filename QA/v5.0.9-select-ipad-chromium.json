@@ -1,0 +1,16 @@
+{
+  "version": "5.0.9",
+  "width": 1194,
+  "height": 834,
+  "bounds": {
+    "x": 412,
+    "y": 469.046875,
+    "width": 148,
+    "height": 190
+  },
+  "selects": 13,
+  "keyboard": true,
+  "focusAfterRosterRerender": true,
+  "formValue": "45",
+  "nativeCompatibility": true
+}

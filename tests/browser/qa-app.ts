@@ -12,6 +12,9 @@ const bundle=build({stdin:{contents:source('main.ts')+"\nimport {projectileArt,p
 export async function boot(page:any,combat=true,map="factory",vehicle0="cannon",vehicle1="sea"){
  await page.route(/\/assets\/(?:index|main)-[^/]+\.js$/,async(route:any)=>route.fulfill({contentType:'text/javascript',body:await bundle}));
  await page.goto('./');
+ // The QA JS replacement removes Vite's shared CSS preload. Keep this new
+ // component's real stylesheet present when instrumenting the current app.
+ if(!baselineRef||source('setup.ts').includes("from './web-select'"))await page.addStyleTag({content:source('web-select.css')});
  if(!combat)return;
  await page.getByRole('button',{name:'进入战场',exact:true}).click();await page.locator(`[data-choice="${vehicle0}"]`).click();
  await page.locator('[data-owner="1"]').click();await page.locator(`[data-choice="${vehicle1}"]`).click();
