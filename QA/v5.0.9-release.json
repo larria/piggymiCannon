@@ -1,0 +1,36 @@
+{
+  "version": "5.0.9",
+  "verifiedAt": "2026-11-19T09:23:37.197335+00:00",
+  "sourceCommit": "b135e406ddc360a6ff879efa7f6b73931ee99864",
+  "pagesCommit": "fc20a75b24eb4c07e96615eef687c3b8fad57c90",
+  "pagesRun": {
+    "id": 44494217960,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/larria/piggymiCannon/actions/runs/44494217960"
+  },
+  "sourceCIAtVerification": {
+    "id": 44494067847,
+    "conclusion": "",
+    "headSha": "b135e406ddc360a6ff879efa7f6b73931ee99864",
+    "status": "in_progress",
+    "url": "https://github.com/larria/piggymiCannon/actions/runs/44494067847"
+  },
+  "localTests": {
+    "aiFullSuite": 548,
+    "postUIWithoutPreviouslyPassedHeavyAICases": 537,
+    "uniqueTotal": 552,
+    "newAIScenarios": 23
+  },
+  "browserChecks": {
+    "chromiumRegression": 34,
+    "chromiumFinalMenuAndUpdate": 8,
+    "webkitRegression": 34,
+    "webkitPersistenceInitialInstallBarrierVerified": true
+  },
+  "liveVerification": "v5.0.9-live-verification.json",
+  "sizeReport": "v5.0.9-size.json",
+  "rollbackTag": "v5.0.9",
+  "sourceDirectoriesIncluded": false,
+  "postVerificationCommit": "QA only; source CI continues on the source commit; no redundant CI for report-only commit"
+}
