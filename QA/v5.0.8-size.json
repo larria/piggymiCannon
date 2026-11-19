@@ -1,0 +1,17 @@
+{
+  "formatVersion": 1,
+  "version": "5.0.8",
+  "limitBytes": 90000000,
+  "limitUnit": "MB (1,000,000 bytes)",
+  "distBytes": 65076743,
+  "allocatedDistBytes": 74416128,
+  "precacheBytes": 65027189,
+  "manifestBytesIncludingDuplicates": 65604711,
+  "distFiles": 167,
+  "precacheEntries": 164,
+  "uniquePrecacheEntries": 161,
+  "uniquePrecacheBytes": 65027189,
+  "duplicateExactEntries": 3,
+  "sourceDirectoriesIncluded": false,
+  "passed": true
+}

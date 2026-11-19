@@ -1,0 +1,24 @@
+{
+  "device": {
+    "name": "phone-portrait",
+    "width": 390,
+    "height": 844,
+    "dpr": 3,
+    "touch": true
+  },
+  "field": {
+    "w": 390,
+    "h": 475
+  },
+  "logical": {
+    "w": 1056.9103090241836,
+    "h": 1287.2625558627876
+  },
+  "raster": {
+    "w": 780,
+    "h": 950
+  },
+  "ratio": 0.7380001816049583,
+  "world": 2688,
+  "version": "5.0.8"
+}

@@ -1,6 +1,7 @@
 import {sourceRangeModel} from './source-range';
 import {vectorProjectiles} from './weapon-presentation';
 import {battleViewWidth} from './world-layout';
+import {portraitViewWidth} from './portrait-viewport';
 import {precisionPolish} from './match-polish';
 import {tankArtScale,tankBadgeLift} from './reference-calibration';
 import {placeTankPortrait,type PortraitRect} from './portrait-layout';
@@ -109,9 +110,11 @@ export class Renderer {
     this.viewWidth=battleViewWidth(this.worldWidth);
     const phone=window.matchMedia('(any-pointer: coarse) and (max-width: 700px), (any-pointer: coarse) and (max-width: 950px) and (max-height: 500px)').matches;
     if(phone&&window.matchMedia('(orientation: landscape)').matches){
-      // Keep a broad panorama on phones. On a short landscape strip, zoom out
-      // toward a 10% body-height envelope, bounded by the actual map width.
-      this.viewWidth=Math.min(this.worldWidth,Math.max(this.viewWidth,1300*this.canvas.clientWidth/Math.max(1,this.canvas.clientHeight)));
+      // Frame about 630 logical pixels vertically: typical tank art occupies
+      // roughly one seventh. All entities share this scale and keep their physics.
+      this.viewWidth=Math.min(this.worldWidth,630*this.canvas.clientWidth/Math.max(1,this.canvas.clientHeight));
+    }else if(phone){
+      this.viewWidth=Math.min(this.worldWidth,portraitViewWidth(this.game.gameVersion));
     }
     // Preserve shared tank/projectile geometry; raster size follows device
     // pixels independently of how much logical terrain the camera displays.

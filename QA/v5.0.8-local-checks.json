@@ -1,0 +1,21 @@
+{
+  "version": "5.0.8",
+  "node": {
+    "tests": 525,
+    "passed": 525,
+    "failed": 0,
+    "durationMs": 505185.930875
+  },
+  "browser": {
+    "chromium": {
+      "passed": 24,
+      "failed": 0
+    },
+    "webkit": {
+      "passed": 24,
+      "failed": 0
+    }
+  },
+  "productionOffline": "passed",
+  "jsErrors": 0
+}
