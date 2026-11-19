@@ -13,8 +13,8 @@ export class PixiStage {
   constructor(readonly canvas:HTMLCanvasElement,private invalidate:()=>void){}
   private onLost=(event:Event)=>{event.preventDefault();this.lost=true;this.canvas.hidden=true;this.invalidate();};
   private onRestored=()=>{this.lost=false;this.signature='';this.invalidate();};
-  async init(background:HTMLCanvasElement,terrain:HTMLCanvasElement,ratio:number,height:number,width=1280){
-    await this.app.init({canvas:this.canvas,width,height:Math.floor(height*ratio)/ratio,resolution:ratio,autoDensity:false,autoStart:false,sharedTicker:false,preference:['webgl'],antialias:false,backgroundAlpha:0});this.app.stop();
+  async init(background:HTMLCanvasElement,terrain:HTMLCanvasElement,ratio:number,height:number,width=1280,screenRatio=ratio){
+    await this.app.init({canvas:this.canvas,width,height:Math.floor(height*screenRatio)/screenRatio,resolution:screenRatio,autoDensity:false,autoStart:false,sharedTicker:false,preference:['webgl'],antialias:false,backgroundAlpha:0});this.app.stop();
     this.canvas.addEventListener('webglcontextlost',this.onLost);this.canvas.addEventListener('webglcontextrestored',this.onRestored);
     const texture=new Texture({source:new CanvasSource({resource:background,resolution:1,autoGenerateMipmaps:false})});this.textures.push(texture);this.uploads++;
     this.sky=new Sprite(texture);this.sky.width=width;this.sky.height=height;this.app.stage.addChild(this.sky,this.world);this.terrain=terrain;this.background=background;
@@ -40,20 +40,23 @@ export class PixiStage {
     const c=tile.canvas.getContext('2d')!;c.clearRect(0,0,w,h);
     const x=Math.max(0,px-gutter),y=Math.max(0,py-gutter),width=Math.min(this.terrain.width,px+pw+gutter)-x,height=Math.min(this.terrain.height,py+ph+gutter)-y;
     c.drawImage(this.terrain,x,y,width,height,x-px+gutter,y-py+gutter,width,height);
-    tile.texture.frame.set(gutter/ratio,gutter/ratio,pw/ratio,ph/ratio);source.update();tile.texture.update();
-    tile.sprite.position.set(px/this.terrain.width*totalWidth-32,py/this.terrain.height*this.worldHeight);tile.sprite.width=pw/this.terrain.width*totalWidth;tile.sprite.height=ph/this.terrain.height*this.worldHeight;
+    // Expose one copied gutter pixel on each side. Identical neighbouring
+    // pixels overlap, closing fractional-DPR/zoom rasterization cracks.
+    const overlap=1;
+    tile.texture.frame.set((gutter-overlap)/ratio,(gutter-overlap)/ratio,(pw+overlap*2)/ratio,(ph+overlap*2)/ratio);source.update();tile.texture.update();
+    tile.sprite.position.set((px-overlap)/this.terrain.width*totalWidth-32,(py-overlap)/this.terrain.height*this.worldHeight);tile.sprite.width=(pw+overlap*2)/this.terrain.width*totalWidth;tile.sprite.height=(ph+overlap*2)/this.terrain.height*this.worldHeight;
     this.uploads++;this.uploadedBytesLastSync+=tile.canvas.width*tile.canvas.height*4;
   }
   get available(){return !this.disposed&&!this.lost;}
-  sync(backgroundDirty:boolean,terrainDirty:boolean,ratio:number,height:number,width=1280,region:TerrainChange|null=null){
+  sync(backgroundDirty:boolean,terrainDirty:boolean,ratio:number,height:number,width=1280,region:TerrainChange|null=null,screenRatio=ratio){
     this.uploadedBytesLastSync=0;
     if(backgroundDirty){this.sky.texture.source.resize(this.background.width,this.background.height,1);this.sky.texture.source.update();this.uploads++;this.uploadedBytesLastSync+=this.sky.texture.source.pixelWidth*this.sky.texture.source.pixelHeight*4;}
     const layoutChanged=this.background.width!==this.worldWidth||this.background.height!==this.worldHeight;
     if(layoutChanged)this.resetTiles(ratio);
     const resized=this.terrainRatio!==ratio||layoutChanged,margin=Math.max(1,2/ratio);
     if(terrainDirty||resized){for(const tile of this.tiles){const x=tile.x-32;if(resized||!region||x-margin<=region.to&&x+tile.width+margin>=region.from&&tile.y-margin<=region.bottom&&tile.y+tile.height+margin>=region.top)this.copyTile(tile,ratio);}this.terrainRatio=ratio;}
-    const screenHeight=Math.floor(height*ratio)/ratio,screenWidth=Math.round(width*ratio)/ratio;
-    if(this.app.renderer.resolution!==ratio||this.app.screen.height!==screenHeight||this.app.screen.width!==screenWidth){this.app.renderer.resize(width,screenHeight,ratio);this.sky.width=width;this.sky.height=height;this.signature='';}
+    const screenHeight=Math.floor(height*screenRatio+1e-7)/screenRatio,screenWidth=Math.floor(width*screenRatio+1e-7)/screenRatio;
+    if(this.app.renderer.resolution!==screenRatio||this.app.screen.height!==screenHeight||this.app.screen.width!==screenWidth){this.app.renderer.resize(screenWidth,screenHeight,screenRatio);this.sky.width=width;this.sky.height=height;this.signature='';}
     if(backgroundDirty||terrainDirty||resized)this.signature='';
   }
   draw(x:number,y:number,shakeX:number,shakeY:number,height:number){

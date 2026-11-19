@@ -108,7 +108,7 @@ $('#app').innerHTML=`
         <div class="battle-card">
           <div class="scoreboard"></div>
           <div class="battle-stage">
-            <canvas id="battlefield" width="1280" height="600" aria-label="可破坏的炮术战场；使用下方面板或键盘调整角度、力度和移动。空袭与传送可点击战场选择位置。"></canvas>
+            <canvas id="battlefield" width="1280" height="600" aria-label="可破坏的炮术战场；使用下方面板或键盘调整角度、力度和移动；滚轮、触摸板或双指缩放，拖动转移视野。"></canvas>
             <div id="minimap-panel" class="minimap-panel"><div class="minimap-header"><button id="minimap-toggle" aria-label="折叠小地图" aria-expanded="true"><span>小地图</span>${icon('chevron')}</button><button id="minimap-follow" aria-label="恢复战场镜头跟随">跟随</button></div><canvas id="minimap" aria-label="小地图，点击定位视野"></canvas><div id="wind-gauge" class="wind-gauge" role="meter" aria-label="风向与风力" aria-valuemin="-11" aria-valuemax="11" aria-valuenow="0"><span class="wind-area" aria-hidden="true"></span><span class="wind-center" aria-hidden="true"></span><span class="wind-end" aria-hidden="true" hidden></span></div></div><div class="stage-top"><span class="map-chip">${icon('mountain')}<span id="map-label">青苔峡谷</span><span class="map-code" id="map-code">01</span></span><button id="inventory-toggle" class="stage-button stage-extra inventory-toggle" aria-label="展开军火库" aria-expanded="false">${icon('shell')}<span>军火库</span></button><button id="fullscreen-button" class="stage-button stage-extra" title="全屏作战" aria-label="全屏作战">${icon('fullscreen')}</button><button id="layout-button" class="stage-button stage-extra" title="切换标准布局" aria-label="切换标准布局">${icon('shrink')}</button><button id="pause-button" class="stage-button" title="暂停 · Esc" aria-label="暂停游戏">${icon('pause')}</button></div>
             <div id="turn-indicator" class="turn-indicator hidden"><span class="status-dot"></span><span id="turn-text">轮到你了</span><span class="turn-divider"></span><span id="round-text">第 01 回合</span></div>
             <div id="timer" class="timer hidden">${icon('clock')}<span>∞</span><small>s</small></div>
@@ -650,7 +650,14 @@ function aimOnField(e:Pick<PointerEvent,'clientX'|'clientY'>) {
 }
 installCrewPortraits();
 const battlefield=$<HTMLCanvasElement>('#battlefield');
-const edgePan=installEdgePanning(battlefield,()=>game.phase!=='lobby'&&!game.paused&&!playback?.paused&&!renderer.touring&&!game.weatherObservation&&game.phase!=='supply'&&!charge&&padDrag===null&&!$<HTMLDialogElement>('#dialog').open);
+let fieldMultiTouch=false;
+const edgePan=installEdgePanning(battlefield,()=>!fieldMultiTouch&&game.phase!=='lobby'&&!game.paused&&!playback?.paused&&!renderer.touring&&!game.weatherObservation&&game.phase!=='supply'&&!charge&&padDrag===null&&!$<HTMLDialogElement>('#dialog').open);
+const fieldTouchIds=new Set<number>();
+battlefield.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'){fieldTouchIds.add(e.pointerId);fieldMultiTouch=fieldTouchIds.size>=2;if(fieldMultiTouch)edgePan.reset();}},true);
+const endFieldTouch=(e:PointerEvent)=>{fieldTouchIds.delete(e.pointerId);fieldMultiTouch=fieldTouchIds.size>=2;};
+for(const name of ['pointerup','pointercancel'])document.addEventListener(name,endFieldTouch as EventListener,true);
+const resetFieldTouches=()=>{fieldTouchIds.clear();fieldMultiTouch=false;};
+window.addEventListener('blur',resetFieldTouches);document.addEventListener('visibilitychange',()=>{if(document.hidden)resetFieldTouches();});
 function focusPlayer(id:number){const t=game.tanks[id];if(!t)return;if(renderer.touring)renderer.finishTour(false);renderer.focusAt(t.defeat?.x??t.x,t.defeat?.y??t.y);updateUI();}
 function fieldPoint(p:{x:number;y:number}){const rect=battlefield.getBoundingClientRect();return {x:(p.x-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y:(p.y-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY};}
 let fieldPortrait:number|null=null;
@@ -660,7 +667,9 @@ installMapGestures(battlefield,{
   start:()=>{if(renderer.touring)renderer.finishTour(false);},
   pan:(dx,dy)=>{const rect=battlefield.getBoundingClientRect();renderer.panBy(dx/rect.width*renderer.viewWidth,dy/rect.height*renderer.viewHeight);},
   tap:p=>{if(fieldPortrait!==null)focusPlayer(fieldPortrait);else aimOnField({clientX:p.x,clientY:p.y});},
-  hold:()=>{if(fieldPortrait!==null&&game.tanks[fieldPortrait]){focusPlayer(fieldPortrait);showDialog(`portrait:${fieldPortrait}`);}}
+  hold:()=>{if(fieldPortrait!==null&&game.tanks[fieldPortrait]){focusPlayer(fieldPortrait);showDialog(`portrait:${fieldPortrait}`);}},
+  zoomAllowed:()=>game.phase!=='lobby'&&!charge&&padDrag===null&&!$<HTMLDialogElement>('#dialog').open,
+  zoom:(factor,p)=>{edgePan.reset();const rect=battlefield.getBoundingClientRect();renderer.zoomBy(factor,(p.x-rect.left)/rect.width,(p.y-rect.top)/rect.height);}
 });
 const mini=$<HTMLCanvasElement>('#minimap');
 const locateMini=(p:{x:number;y:number})=>{if(renderer.touring)renderer.finishTour(false);const rect=mini.getBoundingClientRect();renderer.focusAt((p.x-rect.left)/rect.width*game.worldWidth,(p.y-rect.top)/rect.height*game.worldHeight);};

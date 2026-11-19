@@ -14,6 +14,7 @@ import {loadBattleSprites,paintBattleSprite,battleSpriteRevision} from './battle
 import type {PixiStage} from './pixi-stage';
 import {BattleCamera,BATTLE_ZOOM,BATTLE_VIEW_WIDTH,lowestFlightFocus} from './camera';
 import {supplyCameraTarget} from './supply-camera';
+import {boundedBattleZoom} from './battle-zoom';
 import { Game, WORLD_W, WORLD_H, clamp, makeRng, type Tank,type Crate } from './engine';
 import { weaponById,weaponHasTrail,MODERN_TRAIL_ALPHA,MODERN_TRAIL_WIDTH } from './catalog';
 import {projectileBattleScale,projectileRearExtent} from './projectile-art';
@@ -48,7 +49,8 @@ export class Renderer {
   medalFor:((tank:Tank)=>RankIndex)|null=null;
   canvas:HTMLCanvasElement; ctx:CanvasRenderingContext2D; background:HTMLCanvasElement;terrainCanvas=document.createElement('canvas');terrainRevision=-1;
   game:Game; palette:Palette; ratio=1;time=0;viewHeight=WORLD_H;viewWidth=WORLD_W;
-  readonly zoom=BATTLE_ZOOM;
+  zoom=BATTLE_ZOOM;
+  private baseViewWidth=BATTLE_VIEW_WIDTH;private baseViewHeight=WORLD_H;private terrainRatio=1;
   get worldWidth(){return this.game.worldWidth;}
   get worldHeight(){return this.game.worldHeight;}
   private camera=new BattleCamera();
@@ -100,12 +102,30 @@ export class Renderer {
     try{
       const {PixiStage}=await import('./pixi-stage');if(this.destroyed){layer.remove();return;}
       this.rebuildStaticTerrain();stage=new PixiStage(layer,()=>{this.invalidate();if(this.stage&&!this.stage.available)this.draw(0);});
-      await stage.init(this.background,this.staticTerrain,this.ratio,this.viewHeight,this.viewWidth);
+      await stage.init(this.background,this.staticTerrain,this.terrainRatio,this.viewHeight,this.viewWidth,this.ratio);
       if(this.destroyed){stage.destroy();return;}this.stage=stage;this.backgroundDirty=true;this.terrainDirty=true;this.invalidate();
     }catch{stage?.destroy();layer.remove();this.backend='canvas';this.invalidate();}
   }
   destroy(){if(this.destroyed)return;this.destroyed=true;this.stage?.destroy();this.stage=null;}
-  setGame(game:Game) {this.flightFloor=null;this.flightActive=false;this.camera.reset();this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.resize();this.invalidate();}
+  setGame(game:Game) {this.flightFloor=null;this.flightActive=false;this.camera.reset();this.zoom=BATTLE_ZOOM;this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.resize();this.invalidate();}
+  zoomBy(factor:number,u=.5,v=.5){
+    if(!Number.isFinite(factor)||factor<=0)return;
+    const zoom=boundedBattleZoom(this.zoom*factor,this.baseViewWidth,this.worldWidth);
+    if(Math.abs(zoom-this.zoom)<1e-8)return;
+    this.zoom=zoom;this.applyViewport(u,v);
+    // Like dragging, the chosen point remains framed until Follow/next turn.
+    if(!this.touring)this.camera.pan(0,0);
+    this.invalidate();
+  }
+  private applyViewport(u=.5,v=.5){
+    this.viewWidth=this.baseViewWidth/this.zoom;this.viewHeight=this.baseViewHeight/this.zoom;
+    this.ratio=this.terrainRatio*this.zoom;
+    this.camera.reframe(this.viewWidth,this.viewHeight,u,v);
+    // Backing pixels and retained terrain stay constant throughout a pinch.
+    const width=Math.floor(this.baseViewWidth*this.terrainRatio+1e-7),height=Math.floor(this.baseViewHeight*this.terrainRatio+1e-7);
+    if(this.canvas.width!==width)this.canvas.width=width;if(this.canvas.height!==height)this.canvas.height=height;
+    this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);
+  }
   resize() {
     this.viewWidth=battleViewWidth(this.worldWidth);
     const phone=window.matchMedia('(any-pointer: coarse) and (max-width: 700px), (any-pointer: coarse) and (max-width: 950px) and (max-height: 500px)').matches;
@@ -118,12 +138,11 @@ export class Renderer {
     }
     // Preserve shared tank/projectile geometry; raster size follows device
     // pixels independently of how much logical terrain the camera displays.
-    this.ratio=Math.min(window.devicePixelRatio||1,2)*(phone?this.canvas.clientWidth:BATTLE_VIEW_WIDTH)/this.viewWidth;
+    this.terrainRatio=Math.min(window.devicePixelRatio||1,2)*(phone?this.canvas.clientWidth:BATTLE_VIEW_WIDTH)/this.viewWidth;
     const aspectHeight=this.canvas.clientHeight/Math.max(1,this.canvas.clientWidth)*this.viewWidth;
-    this.viewHeight=phone?Math.max(1,aspectHeight):Math.max(370/this.zoom,aspectHeight);
-    this.camera.configure(this.viewWidth,this.viewHeight,this.worldWidth,this.worldHeight);
-    this.canvas.width=this.viewWidth*this.ratio;this.canvas.height=this.viewHeight*this.ratio;
-    this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);
+    this.baseViewWidth=this.viewWidth;this.baseViewHeight=phone?Math.max(1,aspectHeight):Math.max(370,aspectHeight);
+    this.zoom=boundedBattleZoom(this.zoom,this.baseViewWidth,this.worldWidth);
+    this.camera.configure(this.camera.width,this.camera.height,this.worldWidth,this.worldHeight);this.applyViewport();
     this.paintBackground();
     this.invalidate();
   }
@@ -239,19 +258,19 @@ export class Renderer {
     this.terrainRevision=g.land.revision;this.terrainChange=region;this.rasterPixelsLastUpdate=width*height;
   }
   private rebuildStaticTerrain(){
-    if(this.staticRevision===this.game.land.revision&&this.staticRatio===this.ratio)return;
+    if(this.staticRevision===this.game.land.revision&&this.staticRatio===this.terrainRatio)return;
     if(this.terrainRevision!==this.game.land.revision)this.rebuildTerrain();
-    const full=this.staticRevision<0||this.staticRatio!==this.ratio;
+    const full=this.staticRevision<0||this.staticRatio!==this.terrainRatio;
     const dirty=this.terrainChange??{from:0,to:this.worldWidth,top:0,bottom:this.worldHeight-1};
     const region=full?{from:-32,to:this.worldWidth+31,top:0,bottom:this.worldHeight-1}:{from:Math.max(-32,dirty.from-32),to:Math.min(this.worldWidth+31,dirty.to+32),top:Math.max(0,dirty.top-22),bottom:Math.min(this.worldHeight-1,dirty.bottom+22)};
     // These decorations depend on one distant occupancy test.
     const layout=this.game.layoutScale;
     if(this.game.config.map==='egypt'&&dirty.from<=960*layout&&dirty.to>=960*layout&&dirty.top<=518*layout&&dirty.bottom>=518*layout)region.bottom=Math.max(region.bottom,620*layout);
     if(this.game.config.map==='temple'&&dirty.from<=960*layout&&dirty.to>=960*layout&&dirty.top<=(layout>1?this.worldHeight*.46:555)&&dirty.bottom>=(layout>1?this.worldHeight*.46:555)){region.from=Math.min(region.from,layout>1?this.worldWidth*.47:856);region.to=Math.max(region.to,layout>1?this.worldWidth*.53:1092);region.bottom=Math.max(region.bottom,layout>1?this.worldHeight*.46+36:580);}
-    const old=this.ctx,c=this.staticTerrain;if(full){c.width=(this.worldWidth+64)*this.ratio;c.height=this.worldHeight*this.ratio;}
-    this.ctx=c.getContext('2d')!;this.ctx.setTransform(1,0,0,1,0,0);this.ctx.save();const left=Math.floor((region.from+32)*this.ratio),top=Math.floor(region.top*this.ratio),right=Math.ceil((region.to+33)*this.ratio),bottom=Math.ceil((region.bottom+1)*this.ratio);this.ctx.beginPath();this.ctx.rect(left,top,right-left,bottom-top);this.ctx.clip();this.ctx.clearRect(left,top,right-left,bottom-top);this.ctx.setTransform(this.ratio,0,0,this.ratio,32*this.ratio,0);
+    const old=this.ctx,c=this.staticTerrain,r=this.terrainRatio;if(full){c.width=(this.worldWidth+64)*r;c.height=this.worldHeight*r;}
+    this.ctx=c.getContext('2d')!;this.ctx.setTransform(1,0,0,1,0,0);this.ctx.save();const left=Math.floor((region.from+32)*r),top=Math.floor(region.top*r),right=Math.ceil((region.to+33)*r),bottom=Math.ceil((region.bottom+1)*r);this.ctx.beginPath();this.ctx.rect(left,top,right-left,bottom-top);this.ctx.clip();this.ctx.clearRect(left,top,right-left,bottom-top);this.ctx.setTransform(r,0,0,r,32*r,0);
     try{this.paintTerrainDecoration(region);classicDetails(this.ctx,this.game);}finally{this.ctx.restore();this.ctx=old;}
-    this.staticRevision=this.game.land.revision;this.staticRatio=this.ratio;this.terrainDirty=true;
+    this.staticRevision=this.game.land.revision;this.staticRatio=this.terrainRatio;this.terrainDirty=true;
     const previous=this.terrainDirtyRegion;this.terrainDirtyRegion=previous?{from:Math.min(previous.from,region.from),to:Math.max(previous.to,region.to),top:Math.min(previous.top,region.top),bottom:Math.max(previous.bottom,region.bottom)}:region;
     this.terrainChange=null;this.staticPixelsLastUpdate=(region.to-region.from+1)*(region.bottom-region.top+1);
   }
@@ -387,7 +406,7 @@ export class Renderer {
     const shakeX=g.shake>0?Math.sin(this.time*88)*g.shake:0,shakeY=g.shake>0?Math.cos(this.time*69)*g.shake*.5:0;
     ctx.translate(shakeX,shakeY);this.rebuildStaticTerrain();
     let gpu=false;
-    try{if(this.stage?.available){this.stage.sync(this.backgroundDirty,this.terrainDirty,this.ratio,this.viewHeight,this.viewWidth,this.terrainDirtyRegion);gpu=this.stage.draw(this.offsetX,this.offsetY,shakeX,shakeY,this.viewHeight);this.backgroundDirty=false;this.terrainDirty=false;this.terrainDirtyRegion=null;}}
+    try{if(this.stage?.available){this.stage.sync(this.backgroundDirty,this.terrainDirty,this.terrainRatio,this.viewHeight,this.viewWidth,this.terrainDirtyRegion,this.ratio);gpu=this.stage.draw(this.offsetX,this.offsetY,shakeX,shakeY,this.viewHeight);this.backgroundDirty=false;this.terrainDirty=false;this.terrainDirtyRegion=null;}}
     catch{this.stage?.destroy();this.stage=null;}
     this.backend=gpu?'pixi':'canvas';this.canvas.dataset.renderBackend=this.backend;
     if(!gpu)ctx.drawImage(this.background,0,0,this.viewWidth,this.viewHeight);

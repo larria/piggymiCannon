@@ -1,0 +1,38 @@
+[
+  {
+    "seed": 52,
+    "phase": "ended",
+    "winner": 0,
+    "steps": 2425,
+    "shots": [
+      8,
+      8,
+      7,
+      4
+    ],
+    "outOfBounds": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "seed": 318,
+    "phase": "ended",
+    "winner": 0,
+    "steps": 1869,
+    "shots": [
+      6,
+      3,
+      5,
+      6
+    ],
+    "outOfBounds": [
+      false,
+      false,
+      false,
+      false
+    ]
+  }
+]

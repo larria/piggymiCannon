@@ -10,6 +10,17 @@ export class BattleCamera {
   private tour:{points:Point[];index:number;time:number;reduced:boolean;done:()=>void;from:Point}|null=null;
   private worldWidth=WORLD_W;private worldHeight=TERRAIN_H;
   configure(width:number,height:number,worldWidth=WORLD_W,worldHeight=TERRAIN_H){this.worldWidth=worldWidth;this.worldHeight=worldHeight;this.width=width;this.height=height;this.x=this.boundX(this.x);this.y=this.boundY(this.y);}
+  /** Keep the world point under the gesture fixed, including an active tween.
+   * Bounds may move that point only at the edge of the battlefield. */
+  reframe(width:number,height:number,u=.5,v=.5){
+    const dx=(this.width-width)*clamp(u,0,1),dy=(this.height-height)*clamp(v,0,1),x=this.x,y=this.y;
+    this.configure(width,height,this.worldWidth,this.worldHeight);
+    const shift=(p:Point)=>({...p,x:this.boundX(p.x+dx),y:this.boundY(p.y+dy)});
+    const next=shift({x,y});this.x=next.x;this.y=next.y;
+    if(this.manual)this.manual=shift(this.manual);
+    if(this.tween){this.tween.from=shift(this.tween.from);this.tween.to=shift(this.tween.to);}
+    if(this.tour)this.tour.from=shift(this.tour.from);
+  }
   private boundX(x:number){return clamp(x,0,Math.max(0,this.worldWidth-this.width));}
   private boundY(y:number){return clamp(y,-Math.max(this.worldHeight,this.height),Math.max(0,this.worldHeight-this.height));}
   target(x:number,y:number){return {x:this.boundX(x-this.width*.5),y:this.boundY(y-this.height*.5)};}

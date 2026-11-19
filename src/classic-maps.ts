@@ -2,6 +2,16 @@ import {originalBallistics} from './original-ballistics';
 import {layoutScale} from './world-layout';
 import {Terrain,TERRAIN_H} from './terrain';
 import type {MapId} from './catalog';
+import {compareVersions} from './version';
+
+export const FACTORY_PLATFORMS=[[.28,.72,.29],[0,.11,.46],[.89,1,.46],[.08,.33,.60],[.67,.92,.60],[.43,.57,.69]] as const;
+/** Self-drawn slanted end faces, based on the local factory thumbnails.
+ * Preserve the flat center, 90-unit steel thickness and permanent Z floor. */
+export function factoryPlatformColumn(x:number,from:number,to:number,top:number,thickness=90,worldWidth=2688){
+  const run=Math.min(48,(to-from)/4),edge=Math.min(from>0?x-from:Infinity,to<worldWidth?to-x:Infinity),u=Math.max(0,Math.min(1,edge/run));
+  return {top:top+28*(1-u),bottom:top+28+(thickness-28)*u};
+}
+export const slopedFactoryPlatforms=(version:string)=>/^v?\d+\.\d+\.\d+$/.test(version)&&compareVersions(version,'5.0.10')>=0;
 
 export const templeRail=(x:number,scale=1)=>(scale>1?960*scale*.86:780)+27*Math.sqrt(Math.max(0,1-((x-960*scale)/(900*scale))**2));
 export const TEMPLE_NODES=[143,525,960,1395,1778];
@@ -35,7 +45,10 @@ export function buildClassicMap(land:Terrain,map:MapId,version='4.0.4'){
     const platform=(a:number,b:number,y:number,thickness:number)=>{for(let x=Math.ceil(a*width);x<=Math.floor(b*width);x++)land.column(x,y*height,y*height+thickness);};
     if(map==='factory'){
       for(let x=0;x<=width;x++)land.column(x,factoryFloor(x,scale),height,true);
-      for(const [a,b,y] of [[.28,.72,.29],[0,.11,.46],[.89,1,.46],[.08,.33,.60],[.67,.92,.60],[.43,.57,.69]])platform(a,b,y,90);
+      for(const [a,b,y] of FACTORY_PLATFORMS){
+        if(slopedFactoryPlatforms(version))for(let x=Math.ceil(a*width);x<=Math.floor(b*width);x++){const c=factoryPlatformColumn(x,a*width,b*width,y*height,90,width);land.column(x,c.top,c.bottom);}
+        else platform(a,b,y,90);
+      }
     }else if(map==='temple'){
       for(const [a,b,y,d] of [[.24,.76,.28,13.5],[.01,.08,.52,13.5],[.92,.99,.52,13.5],[.47,.53,.46,66],[.32,.68,.64,12],[.22,.33,.75,12],[.69,.80,.75,12]])platform(a,b,y,d);
       for(let x=Math.ceil(60*scale);x<=Math.floor(1860*scale);x++)land.column(x,templeRail(x,scale),templeRail(x,scale)+4);
