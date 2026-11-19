@@ -1,0 +1,35 @@
+{
+  "offline": true,
+  "before": {
+    "ratio": 0.7142857142857143,
+    "pixels": [
+      1280,
+      685
+    ],
+    "angle": "35°",
+    "power": "0",
+    "version": "v5.0.10",
+    "production": true,
+    "viewport": [
+      1194,
+      834
+    ]
+  },
+  "after": {
+    "ratio": 0.9171610119198152,
+    "pixels": [
+      1280,
+      685
+    ],
+    "angle": "35°",
+    "power": "0",
+    "version": "v5.0.10",
+    "production": true,
+    "viewport": [
+      1194,
+      834
+    ]
+  },
+  "followPreservesZoom": true,
+  "errors": []
+}

@@ -1,0 +1,36 @@
+{
+  "version": "5.0.10",
+  "verifiedAt": "2026-11-19T13:23:41.328Z",
+  "sourceCommit": "42c640e751c6cdc10e4532424c9686519d3d0225",
+  "pagesCommit": "7081276181f1149d0f9f170fb28067b669b3f909",
+  "pagesRun": {
+    "id": 44530277336,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/larria/piggymiCannon/actions/runs/44530277336"
+  },
+  "sourceCIAtVerification": {
+    "id": 44530073787,
+    "conclusion": "",
+    "status": "in_progress",
+    "url": "https://github.com/larria/piggymiCannon/actions/runs/44530073787"
+  },
+  "localTests": {
+    "mechanismFullSuite": 557,
+    "chromiumRegression": 22,
+    "webkitRegression": 22,
+    "additionalProductionOfflineZoomPerBrowser": 1,
+    "factoryExpert2v2Games": 2,
+    "factoryAIShots": 47
+  },
+  "liveVerification": "v5.0.10-live-verification.json",
+  "productionOfflineZoom": [
+    "v5.0.10-production-zoom-chromium.json",
+    "v5.0.10-production-zoom-webkit.json"
+  ],
+  "sizeReport": "v5.0.10-size.json",
+  "tag": "v5.0.10",
+  "previousStableTag": "v5.0.9",
+  "sourceDirectoriesIncluded": false,
+  "postVerificationCommit": "QA and production-only regression tooling; deployed game code unchanged; source CI continues on the source commit."
+}
