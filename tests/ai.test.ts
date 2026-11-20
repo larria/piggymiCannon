@@ -48,9 +48,12 @@ test('AI candidate routes respect cliffs, overhead permanent layers, fuel, freez
  assert.ok(safeAIPositions(g,t).every(p=>p.x<310));g.mines.push({x:280,y:447,owner:1,weapon:'mine-special',boost:1});assert.ok(safeAIPositions(g,t).some(p=>p.x>t.x),'enemy mine is hidden from route planning');g.mines[0].owner=t.id;g.config.selfDamage=true;assert.ok(safeAIPositions(g,t).every(p=>p.x<t.x),'known harmful mine is avoided');
 });
 test('team target selection can choose a farther reachable enemy over a nearer protected enemy',()=>{
- const g=aiScenario('expert',52,'valley',200,'cannon');g.active.x=300;g.tanks[1].x=500;g.tanks[1].y=532;g.tanks[3].x=900;
- g.land=new Terrain();for(let x=0;x<=1280;x++){g.land.column(x,x>=420&&x<=600?550:450,640,true);if(x>=450&&x<=560)g.land.column(x,350,460,true);}g.land.rebuild();
- assert.equal(g.enemy.id,1);const shot=solveAIShot(g,g.active,['cannon-normal','cannon-special'],g.opponents(g.active));assert.equal(shot.target,3);assert.ok(shot.effective);const damage=fireSolution(g,shot);assert.ok(damage[3]>0);
+ for(const version of ['5.1.2','5.1.3']){
+  const g=aiScenario('expert',52,'valley',200,'cannon',version);g.active.x=300;g.tanks[1].x=500;g.tanks[1].y=532;g.tanks[3].x=900;
+  // The roof lip must block a low-power bank under the roof, even with finer effective power steps.
+  g.land=new Terrain();for(let x=0;x<=1280;x++){g.land.column(x,x>=420&&x<=600?550:450,640,true);if(x>=420&&x<=560)g.land.column(x,350,460,true);}g.land.rebuild();g.terrain=g.land.surface;
+  assert.equal(g.enemy.id,1);const shot=solveAIShot(g,g.active,['cannon-normal','cannon-special'],g.opponents(g.active));assert.equal(shot.target,3);assert.ok(shot.effective);const damage=fireSolution(g,shot);assert.equal(damage[1],0);assert.ok(damage[3]>0);
+ }
 });
 test('read-only prediction matches live first impact for ordinary, homing, helix and orbital shots',()=>{
  for(const weapon of ['cannon-normal','missile-special','laser-special','ion-special'] as const){
