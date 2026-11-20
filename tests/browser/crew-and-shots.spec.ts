@@ -1,5 +1,7 @@
 import {expect,test} from '@playwright/test';
 import {boot} from './qa-app';
+import {readFileSync} from 'node:fs';
+const version=JSON.parse(readFileSync('package.json','utf8')).version;
 
 test('water shell pixels are sized by the real carve and stay upright as trajectory changes',async({page})=>{
  await boot(page);
@@ -59,7 +61,7 @@ test('four portrait-matched crew are legible together on the iPad battlefield',a
    return g.tanks.every((t:any)=>t.x>r.offsetX+60&&t.x<r.offsetX+r.viewWidth-60);
  });
  expect(framed).toBe(true);
- await page.screenshot({path:`.workbuddy/v5.1.0-crew-ipad-${browserName}.png`,scale:'css',animations:'disabled'});
+ await page.screenshot({path:`.workbuddy/v${version}-crew-ipad-${browserName}.png`,scale:'css',animations:'disabled'});
 });
 
 test('every crew visibly changes pose when moving, firing, taking a hit, falling and celebrating',async({page})=>{

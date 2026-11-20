@@ -4,26 +4,38 @@ export function mimiPose(time:number,state:CrewAction){const p=Math.sin(time*(st
 export function dadPose(time:number,state:CrewAction){const p=Math.sin(time*(state==='win'?5:state==='move'?10:state==='hurt'?14:3.3));return {bob:state==='win'?-Math.max(0,p)*5:state==='hurt'?p*.8:state==='move'?Math.abs(p)*1.15:p*.42,lean:state==='win'?p*.05:state==='hurt'?-p*.075:state==='move'?.04:0,p};}
 export interface Expression {look:number;closed:boolean;upset:boolean;open:number;ear:number;serious:boolean;cry:boolean;pant:number|null;stunned:boolean;rage:boolean}
 const outline='#794f40';
-function cap(c:CanvasRenderingContext2D,dad:boolean){
- ink(c,'M-22 3Q-25-12-17-21Q-11-31 3-29Q21-29 24-12Q27 0 21 9L17 7 19-8Q7-18-16-7L-17 7Z',dad?'#62634a':'#6f744a','#534535');
- ink(c,'M-21-6Q-20-22-7-26Q9-31 19-19Q8-24-5-19Q-13-16-21-6Z',dad?'#858467':'#a09b66');
+function mimiCap(c:CanvasRenderingContext2D){
+ ink(c,'M-22 3Q-25-12-17-21Q-11-31 3-29Q21-29 24-12Q27 0 21 9L17 7 19-8Q7-18-16-7L-17 7Z','#6f744a','#534535');
+ ink(c,'M-21-6Q-20-22-7-26Q9-31 19-19Q8-24-5-19Q-13-16-21-6Z','#a09b66');
  ink(c,'M-22 0Q-20-15 0-17Q18-19 24-8L23-4Q14-13 0-12Q-15-10-22 3Z','#8c8053','#514a36');
  ink(c,'M-19-3Q-9-14 6-14Q16-14 22-7','none','#c2a87c',1.15);
  ink(c,'M-21-1l4 1-1 12-4 2-2-2ZM21-2l3 1-1 10-3 3-2-1Z','#786049','#503f34',1);
  ink(c,'M-23 4l5-1-1 4-4 1Z','#cfaa6c','#836044',.65);
- goggles(c,1,-21,dad?.04:.15,dad?.98:.93);
+ goggles(c,1,-21,.15,.93);
 }
 function pigFace(c:CanvasRenderingContext2D,e:Expression,dad:boolean){
  const peach=dad?'#bd7e66':'#f5b2a1',pale=dad?'#d99c7f':'#ffd0b6';
  // The far features tuck behind the head; the nose and gaze lead the turn.
  c.save();if(dad)c.scale(1.15,1.06);
- c.save();c.translate(-15,-12);c.rotate(e.ear);
- ink(c,dad?'M4-4Q-4-12-15-3Q-22 2-14 7Q-4 11 4 4Z':'M4 2Q3-13-9-16Q-19-14-14-7Q-13-2-5 4Z',peach,outline);
- ink(c,dad?'M1-3Q-6-7-14 1Q-10 7-2 4Z':'M0 1Q-4-11-10-12Q-14-11-11-6Q-7-2 0 1Z',dad?'#a95f58':'#e88783');c.restore();
- if(dad){c.save();c.translate(17,-12);c.scale(.79,.87);c.rotate(-e.ear*.65);ink(c,'M-3-2Q5-7 14 1Q21 9 13 10Q4 10-3 4Z',peach,outline);ink(c,'M1 0Q11 0 15 6Q8 9 1 0Z','#a95f58');c.restore();}
- ink(c,dad?'M-22-2Q-22-17-7-17Q12-22 22-9Q28-3 25 10Q22 21 3 22Q-21 22-24 9Q-25 3-22-2Z':'M-19-3Q-19-17-2-17Q14-20 21-7Q27-1 23 10Q20 20 3 20Q-17 20-21 9Q-24 2-19-3Z',pale,outline,1.65);
+ if(!dad){
+  c.save();c.translate(-15,-12);c.rotate(e.ear);
+  ink(c,'M4 2Q3-13-9-16Q-19-14-14-7Q-13-2-5 4Z',peach,outline);
+  ink(c,'M0 1Q-4-11-10-12Q-14-11-11-6Q-7-2 0 1Z','#e88783');c.restore();
+ }else{
+  c.save();c.translate(16,-15);c.rotate(-e.ear*.65);
+  ink(c,'M-5 1Q4-8 13-6Q18-4 17 1Q14 10 5 10Z',peach,outline);
+  ink(c,'M2 0Q9-4 14-3Q12 4 8 6Z','#a95f58');c.restore();
+ }
+ ink(c,dad?'M-23-3C-24-14-16-22-4-23C8-25 18-20 22-11Q29-4 25 10Q22 21 3 22Q-21 22-24 9Q-26 2-23-3Z':'M-19-3Q-19-17-2-17Q14-20 21-7Q27-1 23 10Q20 20 3 20Q-17 20-21 9Q-24 2-19-3Z',pale,outline,1.65);
  ink(c,dad?'M-24 4Q-19 15 0 17Q16 18 25 10Q22 22 1 22Q-22 22-24 4Z':'M-20 4Q-17 16 0 16Q17 16 23 8Q20 20 2 20Q-17 20-20 4Z',dad?'#be7b65':'#efac9a');
- cap(c,dad);
+ if(dad){
+  ink(c,'M-15-15Q-8-22 5-20Q-4-17-9-15Q-13-14-15-15Z','#eab093');
+  ink(c,'M-3-22Q-1-26 3-27M2-22Q6-26 9-25','none','#885b46',1.5);
+  c.save();c.translate(-16,-12);c.rotate(e.ear);
+  ink(c,'M5-3Q-1-9-10-6Q-19-2-16 7Q-14 12-8 9Q-2 5 5-3Z',peach,outline);
+  ink(c,'M0-3Q-8-6-12 0Q-15 5-11 6Q-6 3 0-3Z','#a95f58');
+  ink(c,'M-11-3Q-15 0-15 4','none','#dfa184',1.25);c.restore();
+ }else mimiCap(c);
  const iris=dad?'#4f392c':'#785138';
  profileEyes(c,-5,-2,dad?3.95:5.5,iris,e.look,e.closed,e.serious,false,false,e.stunned);
  profileEyes(c,16,-3,dad?3.55:4.75,iris,e.look,e.closed,e.serious,true,false,e.stunned);
