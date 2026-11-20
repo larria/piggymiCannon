@@ -7,9 +7,8 @@ import type {CrewId} from './crew';
 
 const wardrobe={mimi:{fabric:'#777b50',shade:'#555d42',light:'#a7a475',skin:'#f9bfaa',edge:'#805443'},dad:{fabric:'#6c7055',shade:'#505745',light:'#959370',skin:'#f9bfaa',edge:'#805443'},fox:{fabric:'#6f795e',shade:'#4e5849',light:'#a4a882',skin:'#e14838',edge:'#953027'},fish:{fabric:'#8b8356',shade:'#635e44',light:'#bdb17f',skin:'#ffd06a',edge:'#ab702d'}} as const;
 function foxFace(c:CanvasRenderingContext2D,e:Expression){
- // Broad, outward-flared ears: the outer edge rises to a softly rounded
- // point while the inner edge sweeps back into the forehead in one curve.
- for(const side of [-1,1]){c.save();c.translate(side*(side===1?12:13),-8);c.scale(side*(side===1?.94:1.03),side===1?.76:.86);c.rotate(e.ear);
+ // Keep the same ear shapes; draw them closer to the crown with a calmer tilt.
+ for(const side of [-1,1]){c.save();c.translate(side*(side===1?9:10),-8);c.scale(side*(side===1?.94:1.03),side===1?.76:.86);c.rotate(-.22+e.ear*.75);
   ink(c,'M-13 3C-11-10 1-25 20-29Q26-31 28-27C32-17 27-4 19 4Q13 11 4 10Z','#e83524','#862f28',1.65);
   ink(c,'M-6 0C-2-11 8-20 20-23Q23-24 23-20C24-11 19-2 13 3Q3 7-6 0Z','#ffcf99');
   ink(c,'M11-25Q20-29 25-28Q28-26 28-22Q26-26 22-26Z','#ff6747');

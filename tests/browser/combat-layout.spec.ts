@@ -21,6 +21,12 @@ async function inspect(page:any,label:string){
   else if(landscape){minimumWidth=tiny?28:34;minimumHeight=36;if(id==='aim-pad')minimumWidth=minimumHeight=tiny?74:80;if(id==='face-button'){minimumWidth=tiny?26:34;minimumHeight=26;}}
   expect(b.w,id).toBeGreaterThanOrEqual(minimumWidth);expect(b.h,id).toBeGreaterThanOrEqual(minimumHeight);expect(b.x,id).toBeGreaterThanOrEqual(0);expect(b.right,id).toBeLessThanOrEqual(data.viewport.w);expect(b.bottom,id).toBeLessThanOrEqual(data.viewport.h);
  }
+ const {buttons}=data;
+ expect(buttons['aim-pad'].w).toBe(buttons['aim-pad'].h);
+ expect(buttons['angle-up'].x).toBeGreaterThanOrEqual(buttons['aim-pad'].right);
+ expect(buttons['angle-down'].y).toBeGreaterThanOrEqual(buttons['angle-up'].bottom);
+ const overlaps=(a:any,b:any)=>a.x<b.right&&a.right>b.x&&a.y<b.bottom&&a.bottom>b.y;
+ for(const id of ['aim-pad','face-button','angle-up','angle-down'])for(const other of Object.keys(buttons))if(id!==other)expect(overlaps(buttons[id],buttons[other]),`${id} overlaps ${other}`).toBe(false);
  expect(data.weaponIcons.length).toBe(2);expect(data.weaponIcons.every((w:number)=>w>=20)).toBe(true);if(label.startsWith('phone'))expect(data.viewHeight/data.viewWidth).toBeCloseTo(data.stage.h/data.stage.w,5);
  if(label.startsWith('phone')){if(label.includes('portrait')){expect(data.viewWidth).toBeCloseTo(portraitViewWidth(version),5);expect(PORTRAIT_TANK_ENVELOPE_WIDTH/data.viewWidth).toBeCloseTo(1/PORTRAIT_VIEW_DIVISOR,5);}else {expect(data.viewHeight).toBeCloseTo(630,5);expect(90/data.viewHeight).toBeCloseTo(1/7,4);}}
  if(landscape){
@@ -31,7 +37,7 @@ async function inspect(page:any,label:string){
   });
   expect(instruments.dial.x).toBeLessThanOrEqual(6);expect(instruments.relative.h).toBeGreaterThan(20);expect(instruments.absolute.h).toBeGreaterThan(20);
   for(const value of instruments.values){expect(value.w).toBeGreaterThan(0);expect(value.h).toBeGreaterThan(0);}
-  for(const track of instruments.tracks){expect(track.w).toBeGreaterThan(350);expect(track.h).toBeGreaterThanOrEqual(8);expect(track.border).toBe('0px');}
+  for(const track of instruments.tracks){expect(track.w).toBeGreaterThan(tiny?data.viewport.w*.59:350);expect(track.h).toBeGreaterThanOrEqual(8);expect(track.border).toBe('0px');}
   expect(instruments.meters[0].bottom).toBeLessThanOrEqual(instruments.meters[1].y);expect(instruments.meters[1].bottom).toBeLessThanOrEqual(instruments.meters[2].y);
   expect(instruments.meters[2].bottom-instruments.meters[0].y).toBeLessThanOrEqual(44);
   await expect(page.locator('#relative-angle')).toBeVisible();await expect(page.locator('#absolute-angle')).toBeVisible();
@@ -39,12 +45,12 @@ async function inspect(page:any,label:string){
  expect(data.portraits.length).toBe(4);expect(data.portraits.every((p:any)=>!p.overflow)).toBe(true);
  expect(data.quickItems.length).toBe(4);for(const item of data.quickItems){expect(item.w).toBeGreaterThanOrEqual(landscape?tiny?28:34:44);expect(item.h).toBeGreaterThanOrEqual(landscape?36:44);expect(item.right).toBeLessThanOrEqual(data.viewport.w);}expect(new Set(data.quickItems.map((b:any)=>b.y)).size).toBe(1);
  for(const id of ['angle-up','angle-down','move-left','move-right','skip-button','exit-match','fire-button'])await expect(page.locator('#'+id)).toBeInViewport();
- await page.locator('#angle-up').click();await page.locator('#minimap-follow').click();await page.locator('#inventory-toggle').click();await expect(page.locator('.arsenal')).toBeVisible();expect((await page.locator('.arsenal').boundingBox())!.y).toBeGreaterThanOrEqual(0);await page.locator('#arsenal-close').click();
+ await page.locator('#angle-up').click();await page.locator('#angle-down').click();await page.locator('#face-button').click();await page.locator('#minimap-follow').click();await page.locator('#inventory-toggle').click();await expect(page.locator('.arsenal')).toBeVisible();expect((await page.locator('.arsenal').boundingBox())!.y).toBeGreaterThanOrEqual(0);await page.locator('#arsenal-close').click();
  await page.locator('.battle-stage [data-dialog="settings"]').click();await expect(page.locator('#dialog')).toBeVisible();await page.locator('#close-dialog').click();
  writeFileSync(`${reportPrefix}-${label}.json`,JSON.stringify(data,null,2)+'\n');
- if(process.env.PIGGY_LAYOUT_CAPTURE===label)await page.screenshot({path:`${reportPrefix}-${label}.png`,scale:'css'});
+ if(process.env.PIGGY_LAYOUT_CAPTURE===label||process.env.PIGGY_LAYOUT_CAPTURE==='all')await page.screenshot({path:`${reportPrefix}-${label}.png`,scale:'css'});
 }
-test.describe('desktop',()=>{test.use({viewport:{width:1440,height:900},isMobile:false,hasTouch:false});test('desktop fills window without changing controls',async({page})=>inspect(page,'desktop'));});
+test.describe('desktop',()=>{test.use({viewport:{width:1512,height:982},isMobile:false,hasTouch:false});test('desktop fills window without changing controls',async({page})=>inspect(page,'desktop'));});
 test.describe('ipad',()=>{test.use({viewport:{width:1194,height:834},isMobile:true,hasTouch:true});test('ipad fills window and preserves touch controls',async({page})=>inspect(page,'ipad'));});
 test.describe('phone portrait',()=>{test.use({viewport:{width:390,height:844},isMobile:true,hasTouch:true});test('phone-portrait reflows seats and keeps all actions accessible',async({page})=>inspect(page,'phone-portrait'));});
 test.describe('phone landscape',()=>{test.use({viewport:{width:844,height:390},isMobile:true,hasTouch:true});test('phone-landscape keeps controls above safe bottom edge',async({page})=>inspect(page,'phone-landscape'));});

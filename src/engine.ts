@@ -1,3 +1,5 @@
+import {isScaledSupplyCadence,supplyGapForHumans} from './supply-cadence';
+import {fastFallMotion,bodyFallSpeed,parachuteFallSpeed,supplyFallSpeed,supplyFlightTime,supplyGravity,supplySpeedLimit,SUPPLY_START_SPEED,SUPPLY_WIND_ACCEL,SUPPLY_WIND_DRAG} from './fall-motion';
 import {adaptiveAI,aiTargetDistance,finalAIRecovery,causalAIShotSafety} from './ai-distance';
 import {rememberAIWait,planAISelfRescue,blockedAIRescue,simulateAIRescue,type AIStuckState} from './ai-rescue';
 import {chooseSupportedAIPosition,planAIProtectiveTransfer,predictAITransfer} from './ai-support-strategy';
@@ -129,7 +131,7 @@ export class Game {
   dashboardHuman:number|null=null;
   introLocked=false;observation:ShotObservation|null=null;paused=false; winner:number|null=null; shake=0; elapsed=0;
   supplyObservation:SupplyObservation|null=null;
-  restoring=false;private firstSupplyChecked=false;private nextSupplyAction=8;
+  restoring=false;private firstSupplyChecked=false;private nextSupplyAction=8;private lastSupplyDelivery:number|null=null;
   private armedItemSlot:number|null=null;
   targetX=1000; teleporting=false; aiTime=0; resolveTime=0;resolveHazardTime=0;
   weatherObservation:WeatherObservation|null=null;private weatherNextRound=2;private weatherCooldownUntil=0;private weatherSnow=false;
@@ -152,7 +154,11 @@ export class Game {
   private aiPending:{weapons:WeaponId[];offset:number;level:number;miss:boolean;target:number}|null=null;
   aiDecision:{target:number;fromX:number;goalX:number;weapon:WeaponId;intentionalMiss:boolean;skip?:boolean;skipAt?:number;selfRescue?:boolean;protectiveTransfer?:boolean}|null=null;
 
+  private readonly fasterFalls:boolean;
+  private readonly scaledSupplyCadence:boolean;
   constructor(config:Partial<Config>={},readonly gameVersion='development',size:WorldSize=worldSize(gameVersion)) {
+    this.fasterFalls=fastFallMotion(gameVersion);
+    this.scaledSupplyCadence=isScaledSupplyCadence(gameVersion);
     this.land=new Terrain(size.width,size.height);this.terrain=this.land.surface;
     this.minimumShotPower=minimumPower(gameVersion);
     this.config={slots:defaultSlots(),map:'valley',timer:0,fallDamage:false,seed:Date.now(),...config};
@@ -217,6 +223,7 @@ export class Game {
     if(modernWeather(this.gameVersion))Object.assign(current,{restoring:this.restoring,firstSupplyChecked:this.firstSupplyChecked,nextSupplyAction:this.nextSupplyAction,weatherObservation:this.weatherObservation,weatherNextRound:this.weatherNextRound,weatherCooldownUntil:this.weatherCooldownUntil,weatherSnow:this.weatherSnow});
     if(modernBackpack(this.gameVersion))current.armedItemSlot=this.armedItemSlot;
     if(playerSupplyTiming(this.gameVersion))Object.assign(current,{progress:this.progress,pendingSupply:this.pendingSupply});
+    if(this.scaledSupplyCadence)current.lastSupplyDelivery=this.lastSupplyDelivery;
     if(this.matchBgm)current.bgm=this.matchBgm;
     if(backgroundMarkers(this.gameVersion))current.dashboardHuman=this.dashboardHuman;
     current.terrain={mask:packTerrain(this.land.mask),protectedMask:packTerrain(this.land.protectedMask),revision:this.land.revision};
@@ -234,6 +241,10 @@ export class Game {
     if(modernWeather(g.gameVersion))for(const key of ['restoring','firstSupplyChecked','nextSupplyAction','weatherObservation','weatherNextRound','weatherCooldownUntil','weatherSnow'] as const)if(key in state)(g as any)[key]=state[key];
     if(modernBackpack(g.gameVersion))g.armedItemSlot=state.armedItemSlot??null;
     if(playerSupplyTiming(g.gameVersion)){g.progress=state.progress??g.progress;g.pendingSupply=state.pendingSupply??null;}
+    if(g.scaledSupplyCadence&&state.lastSupplyDelivery!=null){
+      if(!Number.isSafeInteger(state.lastSupplyDelivery)||state.lastSupplyDelivery<0||state.lastSupplyDelivery>g.turn)throw Error('录像补给状态无效');
+      g.lastSupplyDelivery=state.lastSupplyDelivery;
+    }
     unpackTerrain(state.terrain.mask,g.land.mask);unpackTerrain(state.terrain.protectedMask,g.land.protectedMask);g.land.rebuild();g.land.revision=state.terrain.revision;
     g.matchBgm=restoreMapBgm(snapshot.initial.bgm,g.config.map);
     g.land.changes.length=0;
@@ -264,7 +275,13 @@ export class Game {
   visible(t:Tank){return this.introLocked||!this.fog||t.team===this.tanks[this.viewer].team;}
   get motionScale(){return screenMotionScale(this.gameVersion,this.worldWidth);}
   get fallMotionScale(){return this.motionScale*(sourceRangeModel(this.gameVersion)?1.15:1);}
-  get supplyFallLimit(){return sourceRangeModel(this.gameVersion)?300:250;}
+  get supplyFallLimit(){return supplySpeedLimit(this.fasterFalls,sourceRangeModel(this.gameVersion));}
+  get supplyFallAcceleration(){return supplyGravity(this.fasterFalls);}
+  private supplyLead(distance:number){
+    // New drops estimate physical travel to the bottom of the box in motion units.
+    const time=supplyFlightTime(this.fasterFalls?Math.max(0,distance-14)/this.motionScale:distance,this.supplyFallAcceleration,this.supplyFallLimit);
+    return this.wind*SUPPLY_WIND_ACCEL*(time/SUPPLY_WIND_DRAG-(1-Math.exp(-SUPPLY_WIND_DRAG*time))/SUPPLY_WIND_DRAG**2)*(this.fasterFalls?this.motionScale:1);
+  }
   get gravity() { return this.config.map==='moon'||this.config.map==='sky'?145:230; }
   get snow(){return modernWeather(this.gameVersion)?this.config.snow??this.weatherSnow:this.config.snow===true;}
   private rememberHumanDashboard(){if(backgroundMarkers(this.gameVersion)&&this.humanTurn)this.dashboardHuman=this.current;}
@@ -1028,7 +1045,7 @@ export class Game {
       if(t.parachute){
         // Transfer uses its landing column, not a flat five-point placement test.
         const ground=this.support(t.x,t.y+18)-18;
-        this.observe('fall',t);t.fallVelocity=Math.min(150,t.fallVelocity+120*dt);t.y+=t.fallVelocity*dt*this.fallMotionScale;
+        this.observe('fall',t);t.fallVelocity=parachuteFallSpeed(t.fallVelocity,dt,this.fasterFalls);t.y+=t.fallVelocity*dt*this.fallMotionScale;
         if(ground<this.worldHeight-18&&t.y>=ground){
           t.y=ground;t.fallVelocity=0;const source=t.parachute;t.parachute=null;
           this.recordBattle('landing',`${t.name}降落伞落位，免坠落伤害`,{target:t.id,projectile:source.projectile,position:{x:t.x,y:t.y},distance:t.y-t.fallStart,parachute:true,fallDamage:false});
@@ -1043,7 +1060,7 @@ export class Game {
       const ground=this.support(t.x,t.y+18)-18;
       if(t.y<ground-0.5 || t.fallVelocity>0) {
         if(!t.fallVelocity) {t.fallStart=t.y;t.fallVelocity=1;this.fallOrigins.set(t.id,{cause:'失去地形支撑',action:this.turn+1});}
-        this.observe('fall',t);t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt*this.fallMotionScale;
+        this.observe('fall',t);t.fallVelocity=bodyFallSpeed(t.fallVelocity,dt,this.gravity,this.fasterFalls);t.y+=t.fallVelocity*dt*this.fallMotionScale;
         if(ground<this.worldHeight-18&&t.y>=ground) {
           t.y=ground; const fall=t.y-t.fallStart;t.fallVelocity=0;
           this.observe('fall',t);this.recordBattle('landing',`${t.name}落地，落差${fall.toFixed(2)}，坠落伤害${this.config.fallDamage?'开启':'关闭'}`,{target:t.id,distance:fall,fallDamage:!!this.config.fallDamage,position:{x:t.x,y:t.y}});
@@ -1059,7 +1076,7 @@ export class Game {
     const ground=this.support(t.x,t.y+18)-18;
     if(t.y<ground-.5||t.fallVelocity>0){
       if(!t.fallVelocity){t.fallVelocity=1;t.fallStart=t.y;this.recordBattle('corpse-fall',`${t.name}的哭泣尸体失去支撑，开始下落`,{target:t.id,from:{x:t.x,y:t.y}});}
-      t.fallVelocity+=this.gravity*dt;t.y+=t.fallVelocity*dt*this.fallMotionScale;t.defeat.y=t.y;t.defeat.slope=0;
+      t.fallVelocity=bodyFallSpeed(t.fallVelocity,dt,this.gravity,this.fasterFalls);t.y+=t.fallVelocity*dt*this.fallMotionScale;t.defeat.y=t.y;t.defeat.slope=0;
       if(ground<this.worldHeight-18&&t.y>=ground){t.y=ground;t.defeat.y=ground;t.fallVelocity=0;t.defeat.slope=this.tankSlope(t);this.recordBattle('corpse-landing',`${t.name}的哭泣尸体落到下层`,{target:t.id,position:{x:t.x,y:t.y}});}
     }
     if(t.y+18>=this.worldHeight){t.outOfBounds=true;t.defeat=null;t.fallVelocity=0;this.recordBattle('corpse-out',`${t.name}的哭泣尸体掉出了地图`,{target:t.id,position:{x:t.x,y:t.y}});}
@@ -1164,16 +1181,12 @@ export class Game {
         const human=modernBackpack(this.gameVersion)?order[Math.floor(tries/50)]:modernWeather(this.gameVersion)?candidates[Math.floor(this.rng()*candidates.length)]:(humans[0]??this.tanks[0]),maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
         const desired=human.x+(this.rng()<0.5?-1:1)*(45+this.rng()*Math.max(0,maxDistance-45));
         if(!this.stablePlatform(desired)||this.traversable(human,desired)===null) continue;
-        const distance=this.ground(desired)+50;
-        const capTime=(this.supplyFallLimit-80)/220,capDistance=80*capTime+110*capTime*capTime;
-        const time=distance>capDistance?capTime+(distance-capDistance)/this.supplyFallLimit:(-80+Math.sqrt(6400+440*distance))/220;
-        const drift=this.wind*2.5*(time/0.35-(1-Math.exp(-0.35*time))/0.35**2);
-        const start=desired-drift,landing=this.predictSupply(start);
+        const start=desired-this.supplyLead(this.ground(desired)+50),landing=this.predictSupply(start);
         const reachable=landing?this.traversable(human,landing.x):null;
         // A lower-layer player cannot collect a box resting on the roof above.
         if(start<32||start>this.worldWidth-32||!landing||landing.x<40||landing.x>this.worldWidth-40||!this.stablePlatform(landing.x)||reachable===null||Math.abs(landing.y+14-reachable)>MAX_STEP_HEIGHT||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45)) continue;
         const roll=this.rng(),type=roll<.3?'medical':roll<.5?'double':roll<.65?'transfer':roll<.8?'boost':'homing';
-        this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0});if(modernWeather(this.gameVersion)){this.nextSupplyAction=this.turn+(modernBackpack(this.gameVersion)?SUPPLY_INTERVAL_ACTIONS:SUPPLY_ACTION_GAP);this.recordBattle('supply-selection','补给随机兼顾可安全投放的人类炮手',{candidates:candidates.map(t=>t.id),target:human.id,startX:start,landing,nextAction:this.nextSupplyAction});}
+        this.crates.push({x:start,y:-50,type,falling:true,vy:SUPPLY_START_SPEED,vx:0});if(modernWeather(this.gameVersion)){this.nextSupplyAction=this.turn+(modernBackpack(this.gameVersion)?SUPPLY_INTERVAL_ACTIONS:SUPPLY_ACTION_GAP);this.recordBattle('supply-selection','补给随机兼顾可安全投放的人类炮手',{candidates:candidates.map(t=>t.id),target:human.id,startX:start,landing,nextAction:this.nextSupplyAction});}
         this.emit('crate','补给空降中，回合计时暂停。');break;
       }
     }
@@ -1188,25 +1201,25 @@ export class Game {
     if(this.pendingSupply&&!candidates.some(t=>t.id===this.pendingSupply!.target)){
       this.recordBattle('supply-cancel','预定补给取消：对应人类炮手已出局或交给AI',{...this.pendingSupply});this.pendingSupply=null;
     }
-    if(!this.pendingSupply&&this.turn>=this.nextSupplyAction&&this.crates.length<3){
+    const cooldownUntil=()=>this.lastSupplyDelivery===null?0:this.lastSupplyDelivery+supplyGapForHumans(candidates.length);
+    if(!this.pendingSupply&&this.turn>=Math.max(this.nextSupplyAction,cooldownUntil())&&this.crates.length<3){
       this.nextSupplyAction=this.turn+SUPPLY_INTERVAL_ACTIONS;
       if(candidates.length){const target=candidates[Math.floor(this.rng()*candidates.length)].id;this.pendingSupply={target,candidates:candidates.map(t=>t.id),queuedAction:this.turn};this.recordBattle('supply-queued','补给已预定，在对应人类炮手行动前投放',{...this.pendingSupply,nextAction:this.nextSupplyAction});}
     }
-    if(!this.pendingSupply||this.pendingSupply.target!==this.active.id||this.crates.length>=3)return;
+    if(!this.pendingSupply||this.pendingSupply.target!==this.active.id||this.crates.length>=3||this.turn<cooldownUntil())return;
     const scheduled=this.pendingSupply,human=this.active;this.pendingSupply=null;
     // Wind, terrain and human position are evaluated NOW, not when this drop was queued.
     for(let tries=0;tries<50;tries++){
       const maxDistance=Math.min(205,(human.fuel+(human.vehicleId?200:36))/(100/human.moveDistance));
       const desired=human.x+(this.rng()<.5?-1:1)*(45+this.rng()*Math.max(0,maxDistance-45));
       if(!this.stablePlatform(desired)||this.traversable(human,desired)===null)continue;
-      const distance=this.ground(desired)+50,capTime=(this.supplyFallLimit-80)/220,capDistance=80*capTime+110*capTime*capTime;
-      const time=distance>capDistance?capTime+(distance-capDistance)/this.supplyFallLimit:(-80+Math.sqrt(6400+440*distance))/220;
-      const drift=this.wind*2.5*(time/.35-(1-Math.exp(-.35*time))/.35**2),start=desired-drift,landing=this.predictSupply(start);
+      const start=desired-this.supplyLead(this.ground(desired)+50),landing=this.predictSupply(start);
       const reachable=landing?this.traversable(human,landing.x):null;
       if(start<32||start>this.worldWidth-32||!landing||landing.x<40||landing.x>this.worldWidth-40||!this.stablePlatform(landing.x)||reachable===null||Math.abs(landing.y+14-reachable)>MAX_STEP_HEIGHT||Math.abs(landing.x-human.x)>maxDistance||this.crates.some(c=>Math.abs(c.x-landing.x)<45))continue;
       const roll=this.rng(),type=roll<.3?'medical':roll<.5?'double':roll<.65?'transfer':roll<.8?'boost':'homing';
-      this.crates.push({x:start,y:-50,type,falling:true,vy:80,vx:0,recipient:human.id});
-      this.recordBattle('supply-selection','补给在对应人类炮手行动前落下',{candidates:scheduled.candidates,target:human.id,startX:start,landing,queuedAction:scheduled.queuedAction,deliveryAction:this.turn,nextAction:this.nextSupplyAction});
+      this.crates.push({x:start,y:-50,type,falling:true,vy:SUPPLY_START_SPEED,vx:0,recipient:human.id});
+      if(this.scaledSupplyCadence)this.lastSupplyDelivery=this.turn;
+      this.recordBattle('supply-selection','补给在对应人类炮手行动前落下',{candidates:scheduled.candidates,target:human.id,startX:start,landing,queuedAction:scheduled.queuedAction,deliveryAction:this.turn,nextAction:Math.max(this.nextSupplyAction,cooldownUntil()),...(this.scaledSupplyCadence?{livingHumans:candidates.length,gapActions:supplyGapForHumans(candidates.length)}:{})});
       this.emit('crate','补给空降中，回合计时暂停。');return;
     }
     this.recordBattle('supply-cancel','本次补给取消：没有可安全拾取的落点',{target:human.id,queuedAction:scheduled.queuedAction});
@@ -1243,10 +1256,10 @@ export class Game {
     this.emit('weather',kind==='fog'?`雾气来了，持续${duration}完整轮。`:`火线升起，持续${duration}完整轮。`,undefined,placement?.x);
   }
   predictSupply(startX:number) {
-    let x=startX,y=-50,vx=0,vy=80;const dt=1/120;
+    let x=startX,y=-50,vx=0,vy=SUPPLY_START_SPEED;const dt=1/120,accel=this.supplyFallAcceleration,limit=this.supplyFallLimit;
     for(let i=0;i<1000;i++) {
       const target=this.ground(x,y-8)-14;
-      vx=(vx+this.wind*2.5*dt)*Math.exp(-0.35*dt);x+=vx*dt*this.motionScale;vy=Math.min(this.supplyFallLimit,vy+220*dt);y+=vy*dt*this.motionScale;
+      vx=(vx+this.wind*SUPPLY_WIND_ACCEL*dt)*Math.exp(-SUPPLY_WIND_DRAG*dt);x+=vx*dt*this.motionScale;vy=supplyFallSpeed(vy,dt,accel,limit);y+=vy*dt*this.motionScale;
       if(x<32||x>this.worldWidth-32||y>=this.worldHeight-14) return null;
       if(y>=target) return {x,y:target};
     }
@@ -1452,11 +1465,11 @@ export class Game {
       let dropDt=dt;
       if(this.supplyObservation?.approach){const wait=Math.min(dropDt,this.supplyObservation.approach);this.supplyObservation.approach-=wait;dropDt-=wait;if(dropDt<=0)return;}
       for(const c of this.crates) if(c.falling) {
-        const motionDt=dropDt*(modernWeather(this.gameVersion)?1.15:1),steps=Math.ceil(motionDt/(1/120)),step=motionDt/steps;
+        const motionDt=dropDt*(modernWeather(this.gameVersion)?1.15:1),steps=Math.ceil(motionDt/(1/120)),step=motionDt/steps,accel=this.supplyFallAcceleration,limit=this.supplyFallLimit;
         for(let i=0;i<steps&&c.falling;i++) {
           const target=this.ground(c.x,c.y-8)-14;
-          c.vx=((c.vx??0)+this.wind*2.5*step)*Math.exp(-0.35*step);
-          c.x+=(c.vx??0)*step*this.motionScale;c.vy=Math.min(this.supplyFallLimit,(c.vy??80)+220*step);c.y+=(c.vy??80)*step*this.motionScale;
+          c.vx=((c.vx??0)+this.wind*SUPPLY_WIND_ACCEL*step)*Math.exp(-SUPPLY_WIND_DRAG*step);
+          c.x+=(c.vx??0)*step*this.motionScale;c.vy=supplyFallSpeed(c.vy??SUPPLY_START_SPEED,step,accel,limit);c.y+=c.vy*step*this.motionScale;
           if(c.y>=target) {c.y=target;c.falling=false;this.burst(c.x,c.y+13,15,'#d9c29a');this.emit('crate-land','补给箱已落地。',undefined,c.x);}
         }
       }

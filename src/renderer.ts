@@ -1,3 +1,4 @@
+import {paintGroundFlame,paintGasCloud,paintPoisonStatus} from './hazard-art';
 import {thickIceEdges} from './sky-map';
 import {sourceRangeModel} from './source-range';
 import {enlargedBattleProjectiles,vectorProjectiles} from './weapon-presentation';
@@ -364,7 +365,7 @@ export class Renderer {
     if(artScale!==1){ctx.translate(0,18);ctx.scale(artScale,artScale);ctx.translate(0,-18);}
     ctx.fillStyle='#34413028';ctx.beginPath();ctx.ellipse(0,17,33,7,0,0,Math.PI*2);ctx.fill();
     if(t.shield>0) {ctx.fillStyle='#b4e4e515';ctx.strokeStyle='#c5eef0a0';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-9,40,42,0,0,Math.PI*2);ctx.fill();ctx.stroke();}
-    if(t.poisoned){ctx.fillStyle='#91af6c24';ctx.beginPath();ctx.ellipse(0,-17,36,34,0,0,7);ctx.fill();ctx.strokeStyle='#9bbd7980';ctx.lineWidth=1.5;for(let i=0;i<6;i++){const p=(this.time*.8+i/6)%1;ctx.beginPath();ctx.arc(Math.sin(i*5.1)*28,-3-p*43,2+p*2,0,7);ctx.stroke();}}
+    if(t.poisoned)paintPoisonStatus(ctx,this.time,this.reducedMotion);
     const falling=isCrewFalling(t),cryAge=this.crewAnimation.cryAge(t.id,g.elapsed);
     const celebrating=g.phase==='ended'&&g.winner===t.team&&!falling&&cryAge===null;
     const moving=g.movingUntil[t.id]>g.elapsed;
@@ -372,7 +373,7 @@ export class Renderer {
     const firing=fired?Math.max(0,1-(g.projectiles.find(p=>p.owner===t.id)?.age??0)/g.motionScale*2):0;
     const rage=isRaging(t)&&!celebrating;
     if(rage)paintRage(ctx,this.time,this.reducedMotion,false);
-    if(vehicle)paintVehicle(ctx,vehicle,t.angle,this.time,firing,moving);
+    if(vehicle)paintVehicle(ctx,vehicle,t.angle,this.time,firing,moving,rage,this.reducedMotion);
     const breathing=breathingPose(t.hp,this.time+t.id*.5,t.maxHP,t.vehicleId);
     const action=falling?'fall':t.reaction?'hurt':t.parachute?'parachute':celebrating?'win':fired?'fire':moving?'move':'idle';
     const idle=g.phase!=='lobby'&&g.phase!=='ended'&&!g.introLocked?this.crewAnimation.idleAge(t.id,g.elapsed):null;
@@ -454,16 +455,14 @@ export class Renderer {
     ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=this.palette.grassLight;ctx.lineWidth=3;
     this.atmosphere();this.targetAid();
     for(const f of g.fires) {
+      if(f.x+f.radius<this.offsetX||f.x-f.radius>this.offsetX+this.viewWidth)continue;
       for(let i=-Math.floor(f.radius/11);i<=Math.floor(f.radius/11);i++) {
-        const x=f.x+i*11,y=g.ground(x,(f.y??0)-20)-1;if(y>=this.worldHeight-5) continue;
-        ctx.fillStyle=i%2===0?'#e89754bd':'#f5c376bb';ctx.beginPath();ctx.moveTo(x-5,y);ctx.quadraticCurveTo(x-8,y-10,x+Math.sin(this.time*6+i)*6,y-20-Math.sin(this.time*5+i)*7);ctx.quadraticCurveTo(x+8,y-8,x+5,y);ctx.fill();
-        paintBattleSprite(ctx,'flame',this.time*.6+i*.09,x-8,y-30,16,30,.5,true);
+        const x=f.x+i*11,y=g.ground(x,(f.y??0)-20)-1;if(y>=this.worldHeight-5)continue;
+        paintGroundFlame(ctx,x,y,this.time,i+f.x,this.reducedMotion);
       }
     }
-    for(const gas of g.gases) if(this.visibleAt(gas.x)) {
-      ctx.save();ctx.fillStyle='#a7bc7660';for(let i=0;i<6;i++) {ctx.beginPath();ctx.ellipse(gas.x+Math.sin(i*3+this.time)*gas.radius*.6,gas.y-15+Math.cos(i+this.time)*12,23,15,0,0,7);ctx.fill();}
-      paintBattleSprite(ctx,'gas',this.time*.3,gas.x-gas.radius,gas.y-43,gas.radius*2,54,.48,true);ctx.restore();
-    }
+    for(const gas of g.gases) if(this.visibleAt(gas.x)&&gas.x+gas.radius>=this.offsetX&&gas.x-gas.radius<=this.offsetX+this.viewWidth)
+      paintGasCloud(ctx,gas.x,gas.y,gas.radius,this.time,this.reducedMotion);
     const shotArtScale=tankArtScale(g.gameVersion);
     for(const mine of g.mines) if((precisionPolish(g.gameVersion)?g.tanks[mine.owner]?.team===g.tanks[g.viewer].team:mine.owner===g.viewer||g.snow)&&this.visibleAt(mine.x)) {ctx.fillStyle=weaponById(mine.weapon).color;ctx.beginPath();ctx.ellipse(mine.x,mine.y,9*shotArtScale,4*shotArtScale,0,0,7);ctx.fill();ctx.fillStyle='#eeb58a';ctx.fillRect(mine.x-2*shotArtScale,mine.y-5*shotArtScale,4*shotArtScale,2*shotArtScale);}
     if(!g.introLocked&&g.phase!=='lobby')for(const t of g.tanks)
