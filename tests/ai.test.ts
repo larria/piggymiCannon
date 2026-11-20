@@ -50,7 +50,7 @@ test('AI candidate routes respect cliffs, overhead permanent layers, fuel, freez
 test('team target selection can choose a farther reachable enemy over a nearer protected enemy',()=>{
  for(const version of ['5.1.2','5.1.3']){
   const g=aiScenario('expert',52,'valley',200,'cannon',version);g.active.x=300;g.tanks[1].x=500;g.tanks[1].y=532;g.tanks[3].x=900;
-  // The roof lip must block a low-power bank under the roof, even with finer effective power steps.
+  // The roof lip must block a low-power shot under the roof, even with finer effective power steps.
   g.land=new Terrain();for(let x=0;x<=1280;x++){g.land.column(x,x>=420&&x<=600?550:450,640,true);if(x>=420&&x<=560)g.land.column(x,350,460,true);}g.land.rebuild();g.terrain=g.land.surface;
   assert.equal(g.enemy.id,1);const shot=solveAIShot(g,g.active,['cannon-normal','cannon-special'],g.opponents(g.active));assert.equal(shot.target,3);assert.ok(shot.effective);const damage=fireSolution(g,shot);assert.equal(damage[1],0);assert.ok(damage[3]>0);
  }
