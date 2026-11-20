@@ -62,6 +62,14 @@ test('four portrait-matched crew are legible together on the iPad battlefield',a
  });
  expect(framed).toBe(true);
  await page.screenshot({path:`.workbuddy/v${version}-crew-ipad-${browserName}.png`,scale:'css',animations:'disabled'});
+ await page.evaluate(()=>{
+  const {game:g,renderer:r}=(window as any).__qa;
+  g.tanks.forEach((t:any)=>{t.team=0;t.hp=t.maxHP;});
+  g.phase='ended';g.winner=0;r.time=3.16;r.draw(0);
+  // Hold exactly this victory frame for visual inspection without the result card.
+  g.phase='aiming';r.draw=()=>{};
+ });
+ await page.screenshot({path:`.workbuddy/v${version}-victory-ipad-${browserName}.png`,scale:'css',animations:'disabled'});
 });
 
 test('every crew visibly changes pose when moving, firing, taking a hit, falling and celebrating',async({page})=>{
@@ -82,7 +90,7 @@ test('every crew visibly changes pose when moving, firing, taking a hit, falling
  });expect(checks).toEqual([6,6,6,6]);
 });
 
-test('idle routines change every pilot, tears persist after a hit and throughout a living fall, and only angry Sea Monster has flames',async({page})=>{
+test('idle routines change every pilot, tears persist after a hit and a long fall, safe short drops stay dry, healing and team reactions draw, and angry Sea Monster has flames',async({page})=>{
  await boot(page);
  const results=await page.evaluate(()=>{
   let q=(window as any).__qa;
@@ -103,10 +111,13 @@ test('idle routines change every pilot, tears persist after a hit and throughout
   g.elapsed=21.65;r.draw(0);r.ctx=ctx;const flourish=g.tanks.map(sample);r.ctx=original;
   const t=g.tanks[0];t.reaction={kind:'direct',remaining:1.4};r.draw(0);r.ctx=ctx;const hit=sample(t);r.ctx=original;
   t.reaction=null;g.elapsed=23.8;r.draw(0);r.ctx=ctx;const extended=sample(t);r.ctx=original;
-  g.elapsed=25.5;t.fallVelocity=80;r.draw(0);r.ctx=ctx;const falling=sample(t);r.ctx=original;
+  const support=g.support.bind(g);t.fallStart=t.y;let drop=26;g.support=(x:number,y:number)=>x===t.x?t.fallStart+18+drop:support(x,y);
+  g.elapsed=25.1;t.fallVelocity=80;r.draw(0);r.ctx=ctx;const shortFall=sample(t);r.ctx=original;
+  t.fallVelocity=0;g.elapsed=25.2;r.draw(0);r.ctx=ctx;const shortLanding=sample(t);r.ctx=original;
+  drop=80;g.elapsed=25.5;t.fallVelocity=80;r.draw(0);r.ctx=ctx;const falling=sample(t);r.ctx=original;
   t.fallVelocity=0;r.draw(0);r.ctx=ctx;const landing=sample(t);r.ctx=original;
-  g.elapsed=27.49;r.draw(0);r.ctx=ctx;const afterLanding=sample(t);r.ctx=original;
-  g.elapsed=27.51;r.draw(0);r.ctx=ctx;const settled=sample(t);r.ctx=original;
+  g.elapsed=26.49;r.draw(0);r.ctx=ctx;const afterLanding=sample(t);r.ctx=original;
+  g.elapsed=26.51;r.draw(0);r.ctx=ctx;const settled=sample(t);r.ctx=original;
   const sea=g.tanks[3];sea.hp=sea.maxHP*.49;r.draw(0);r.ctx=ctx;const angry=sample(sea);r.ctx=original;
   sea.vehicleId='beetle';sea.hp=sea.maxHP;
   const breathe=g.tanks.map((pilot:any,i:number)=>{
@@ -114,16 +125,33 @@ test('idle routines change every pilot, tears persist after a hit and throughout
    pilot.hp=Math.ceil(pilot.maxHP*.3);const red=times.map(at=>sample(pilot,at).hash);
    r.ctx=original;return red[0]!==red[1]&&red.every((hash,j)=>hash!==healthy[j]);
   });
-  return {idle,flourish,hit,extended,falling,landing,afterLanding,settled,angry,breathe};
+  g.support=support;g.config.friendlyFire=true;g.elapsed=30;
+  const x=g.worldWidth/2,y=g.ground(x)-18;g.tanks.forEach((pilot:any,i:number)=>Object.assign(pilot,{x:x+(i-1.5)*24,y,hp:Math.floor(pilot.maxHP*.7)}));
+  r.draw(0);const repair=g.launch(t,'cannon-normal');Object.assign(repair,{x,y,healing:true});
+  const initialHp=g.tanks.map((pilot:any)=>pilot.hp);g.restoreImpact(repair);const recovered=g.tanks.map((pilot:any,i:number)=>pilot.hp>initialHp[i]);g.elapsed=30.14;g.itemCues=[];r.draw(0);
+  g.elapsed=30.58;r.draw(0);r.ctx=ctx;const happy=g.tanks.map(pilot=>sample(pilot));r.ctx=original;
+  g.elapsed=32.6;r.draw(0);r.ctx=ctx;const normal=g.tanks.map(pilot=>sample(pilot));r.ctx=original;
+  g.config.friendlyFire=false;t.team=0;const [enemy,ally,otherEnemy]=g.tanks.slice(1);enemy.team=1;ally.team=0;otherEnemy.team=1;
+  g.damage(enemy,Math.ceil(enemy.maxHP*.25),t.id,false,'direct',undefined,{cause:'direct',weapon:'cannon-normal'});
+  g.elapsed=33;r.draw(0);r.ctx=ctx;const pose=sample(ally),shocked=sample(otherEnemy);r.ctx=original;
+  g.elapsed=35;r.draw(0);r.ctx=ctx;const normalAlly=sample(ally),normalEnemy=sample(otherEnemy);r.ctx=original;
+  return {idle,flourish,hit,extended,shortFall,shortLanding,falling,landing,afterLanding,settled,angry,breathe,
+   recovered,happy,normal,cheering:pose.hash!==normalAlly.hash&&pose.tears===normalAlly.tears,shock:shocked.hash!==normalEnemy.hash&&shocked.tears===normalEnemy.tears};
  });
  for(const [i,idle] of results.idle.entries())expect(results.flourish[i].hash).not.toBe(idle.hash);
  expect(results.hit.tears).toBeGreaterThan(results.settled.tears);
  expect(results.extended.tears).toBeGreaterThan(results.settled.tears);
+ expect(results.shortFall.tears).toBe(results.settled.tears);
+ expect(results.shortLanding.tears).toBe(results.settled.tears);
  expect(results.falling.tears).toBeGreaterThan(results.settled.tears);
  expect(results.landing.tears).toBeGreaterThan(results.settled.tears);
  expect(results.afterLanding.tears).toBeGreaterThan(results.settled.tears);
  expect(results.breathe).toEqual([true,true,true,true]);
  expect(results.angry.fire).toBeGreaterThan(results.idle[3].fire+20);
+ expect(results.recovered).toEqual([true,true,true,true]);
+ expect(results.happy.every((pose,i)=>pose.hash!==results.normal[i].hash&&pose.tears===results.normal[i].tears)).toBe(true);
+ expect(results.cheering).toBe(true);
+ expect(results.shock).toBe(true);
 });
 
 test('keyboard short taps only turn, a held key drives after turning, and touch still moves immediately',async({page})=>{

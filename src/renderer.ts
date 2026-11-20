@@ -81,13 +81,22 @@ export class Renderer {
   rasterPixelsLastUpdate=0;staticPixelsLastUpdate=0;
   private stage:PixiStage|null=null;private backgroundDirty=true;private terrainDirty=true;
   private readonly crewAnimation=new CrewAnimationClock();
+  private readonly crewLanding=(tank:Tank)=>({footY:this.game.support(tank.x,tank.y+18),bottom:this.game.worldHeight});
   private invalidated=true;private pausedStamp='';private destroyed=false;
   ready:Promise<void>;
   backend:'canvas'|'pixi'='canvas';frames=0;
   invalidate(){this.invalidated=true;}
   focusAt(x:number,y?:number){this.camera.center(y===undefined?this.offsetX+this.viewWidth/2:x,y??x);this.invalidate();}
   panBy(dx:number,dy:number){this.camera.pan(dx,dy);this.invalidate();}
-  follow(recenter=true){this.camera.follow();if(recenter){const supply=this.supplyView(),weather=this.game.weatherObservation?weatherCameraPoint(this.game.weatherObservation,this.game.active):null;this.camera.center(weather?.x??(supply?supply.x+this.viewWidth/2:this.game.active.x),weather?.y??(supply?supply.y+this.viewHeight/2:this.game.active.y),true);this.camera.manual=null;}this.invalidate();}
+  follow(recenter=true){
+    this.camera.follow();
+    if(recenter){
+      const g=this.game,supply=this.supplyView(),weather=g.weatherObservation?weatherCameraPoint(g.weatherObservation,g.active):null;
+      const point=weather??(supply?{x:supply.x+this.viewWidth/2,y:supply.y+this.viewHeight/2}:g.visible(g.active)?g.active:null);
+      if(point){this.camera.center(point.x,point.y,true);this.camera.manual=null;}
+    }
+    this.invalidate();
+  }
   get touring(){return this.camera.touring;}
   get tourPlayer(){return this.camera.tourPlayer;}
   startTour(done:()=>void){const points=this.game.tanks.map(t=>({x:t.x,y:t.y,id:t.id}));points.push({...points[this.game.current]});this.camera.startTour(points,done,matchMedia('(prefers-reduced-motion: reduce)').matches);this.invalidate();}
@@ -324,11 +333,20 @@ export class Renderer {
       for(let i=0;i<18;i++) {const y=top+((i*29+this.time*42)%Math.max(1,f.bottom-top));ctx.fillStyle='#ffc87990';ctx.beginPath();ctx.arc(f.x+Math.sin(i+this.time)*12,y,1.8,0,Math.PI*2);ctx.fill();}
       ctx.restore();
     }
-    if(g.fog&&!g.introLocked) {
-      const viewer=g.tanks[g.viewer],mist=ctx.createRadialGradient(viewer.x,viewer.y-25,80,viewer.x,viewer.y-25,460);
-      mist.addColorStop(0,'#e5eae42b');mist.addColorStop(0.5,'#e5eae4b5');mist.addColorStop(1,'#e5eae4ee');
-      ctx.fillStyle=mist;ctx.fillRect(this.offsetX,this.offsetY,this.viewWidth,this.viewHeight);
-    }
+  }
+  private drawFog() {
+    const ctx=this.ctx,g=this.game,viewer=g.tanks[g.viewer],y=viewer.y-25;
+    const mist=ctx.createRadialGradient(viewer.x,y,80,viewer.x,y,460);
+    mist.addColorStop(0,'#e5eae438');mist.addColorStop(.5,'#e5eae4a6');mist.addColorStop(1,'#e5eae4d6');
+    const pad=g.shake+1;ctx.fillStyle=mist;
+    ctx.fillRect(this.offsetX-pad,this.offsetY-pad,this.viewWidth+pad*2,this.viewHeight+pad*2);
+  }
+  private drawTanks() {
+    const g=this.game;
+    this.labelRects=[];this.portraitHits=[];
+    const tanks=g.tanks.filter(t=>g.visible(t)),portraitTop=g.introLocked?this.tourPlayer:g.current;
+    if(sourceRangeModel(g.gameVersion))tanks.sort((a,b)=>Number(a.id===portraitTop)-Number(b.id===portraitTop));
+    tanks.forEach(t=>this.tank(t));
   }
   private visibleAt(x:number) {return this.game.introLocked||!this.game.fog||Math.abs(x-this.game.tanks[this.game.viewer].x)<230;}
   private tank(t:Tank) {
@@ -354,9 +372,9 @@ export class Renderer {
     if(rage)paintRage(ctx,this.time,this.reducedMotion,false);
     if(vehicle)paintVehicle(ctx,vehicle,t.angle,this.time,firing,moving);
     const breathing=breathingPose(t.hp,this.time+t.id*.5,t.maxHP,t.vehicleId);
-    const action=falling?'cry':t.reaction?'hurt':t.parachute?'parachute':celebrating?'win':fired?'fire':moving?'move':'idle';
+    const action=falling?'fall':t.reaction?'hurt':t.parachute?'parachute':celebrating?'win':fired?'fire':moving?'move':'idle';
     const idle=g.phase!=='lobby'&&g.phase!=='ended'&&!g.introLocked?this.crewAnimation.idleAge(t.id,g.elapsed):null;
-    paintCrew(ctx,t,this.time,action,breathing,firing,this.reducedMotion,idle,cryAge,rage);
+    paintCrew(ctx,t,this.time,action,breathing,firing,this.reducedMotion,idle,cryAge,rage,this.crewAnimation.healAge(t.id,g.elapsed),g.crewCheerAge(t.id),g.crewShockAge(t.id));
     if(rage)paintRage(ctx,this.time,this.reducedMotion,true);
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
@@ -390,26 +408,35 @@ export class Renderer {
   }
   draw(dt:number) {
     const ctx=this.ctx,g=this.game;
-    const stamp=[g.land.revision,g.current,crewPortraitRevision(),battleSpriteRevision()].join(':');
+    const fog=g.fog&&!g.introLocked;
+    const stamp=[g.land.revision,g.current,fog,crewPortraitRevision(),battleSpriteRevision()].join(':');
     const cameraMoving=this.camera.animating&&(!g.paused||this.touring||!!this.camera.manual);
     // draw(0) remains the explicit still-frame API used by snapshots/review.
     if(dt!==0&&g.paused&&!cameraMoving&&!this.invalidated&&this.pausedStamp===stamp)return;
     this.invalidated=false;this.pausedStamp=g.paused?stamp:'';this.frames++;this.time+=g.paused&&!this.touring?0:dt;
     if(!this.windMotes.length) {const rng=makeRng(609);this.windMotes=Array.from({length:40},()=>({x:rng()*this.worldWidth,y:rng()*this.worldHeight,vx:g.wind*13,fall:8+rng()*11,alpha:0.52+rng()*0.24,size:1.4+rng()*1.6,phase:rng()*10}));}
     if(!g.paused) for(const mote of this.windMotes) {mote.vx+=(g.wind*13-mote.vx)*Math.min(1,dt*2);mote.x=((mote.x+mote.vx*dt*g.motionScale)%this.worldWidth+this.worldWidth)%this.worldWidth;mote.y=(mote.y+mote.fall*dt*g.motionScale)%this.worldHeight;}
-    const actor=g.active;let camera=actor.y-this.viewHeight*.5,targetX=actor.x-this.viewWidth*.5;
+    const actor=g.active,actorVisible=g.visible(actor);
+    let camera=actorVisible?actor.y-this.viewHeight*.5:this.offsetY,targetX=actorVisible?actor.x-this.viewWidth*.5:this.offsetX;
     const enteringSupply=g.phase==='supply'&&!this.supplyPhase,supply=this.supplyView();
     if(enteringSupply&&!this.camera.manual&&!this.touring)this.follow();
     const inFlight=g.phase==='flying';
     if(!inFlight||!this.flightActive)this.flightFloor=null;
     this.flightActive=inFlight;
-    const landed=inFlight?g.observation?.point:null;
+    const observed=g.observation?.target!=null?g.tanks[g.observation.target]:null;
+    // An observation can contain a tank's exact position, even if its art is hidden.
+    const publicPoint=observed&&!g.visible(observed)?null:g.observation?.point;
+    const landed=inFlight?publicPoint:null;
     if(landed&&(!this.flightFloor||landed.y>this.flightFloor.y))this.flightFloor={...landed};
     const lowest=inFlight?lowestFlightFocus(g.projectiles,this.flightFloor):null;
     if(lowest){targetX=lowest.x-this.viewWidth*.5;camera=lowest.y-this.viewHeight*.5;}
     if(supply){camera=supply.y;targetX=supply.x;}
-    if(g.phase==='resolving'&&g.observation){const falling=g.tanks.find(t=>t.hp>0&&t.fallVelocity>0),t=falling??(g.observation.target===null?null:g.tanks[g.observation.target]),point=t?(t.defeat??t):g.observation.point;if(point){targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}}
-    if(actor.parachute&&(g.phase==='flying'||g.phase==='resolving')){targetX=actor.x-this.viewWidth*.5;camera=actor.y-70*g.motionScale-this.viewHeight*.5;}
+    if(g.phase==='resolving'&&g.observation){
+      const falling=g.tanks.find(t=>t.hp>0&&t.fallVelocity>0&&g.visible(t)),t=falling??(observed&&g.visible(observed)?observed:null),point=t?(t.defeat??t):publicPoint;
+      if(point){targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}
+      else {targetX=this.offsetX;camera=this.offsetY;}
+    }
+    if(actorVisible&&actor.parachute&&(g.phase==='flying'||g.phase==='resolving')){targetX=actor.x-this.viewWidth*.5;camera=actor.y-70*g.motionScale-this.viewHeight*.5;}
     if(g.weatherObservation){const point=weatherCameraPoint(g.weatherObservation,actor);targetX=point.x-this.viewWidth*.5;camera=point.y-this.viewHeight*.5;}
     this.camera.update(g.paused&&!this.touring&&!this.camera.manual?0:dt,{x:targetX,y:camera});
     ctx.save();ctx.clearRect(0,0,this.viewWidth,this.viewHeight);
@@ -438,8 +465,9 @@ export class Renderer {
     const shotArtScale=tankArtScale(g.gameVersion);
     for(const mine of g.mines) if((precisionPolish(g.gameVersion)?g.tanks[mine.owner]?.team===g.tanks[g.viewer].team:mine.owner===g.viewer||g.snow)&&this.visibleAt(mine.x)) {ctx.fillStyle=weaponById(mine.weapon).color;ctx.beginPath();ctx.ellipse(mine.x,mine.y,9*shotArtScale,4*shotArtScale,0,0,7);ctx.fill();ctx.fillStyle='#eeb58a';ctx.fillRect(mine.x-2*shotArtScale,mine.y-5*shotArtScale,4*shotArtScale,2*shotArtScale);}
     if(!g.introLocked&&g.phase!=='lobby')for(const t of g.tanks)
-      this.crewAnimation.update(t,g.elapsed,g.movingUntil[t.id]>g.elapsed||g.phase==='flying'&&g.current===t.id||g.itemCues.some(cue=>cue.tank===t.id));
-    this.labelRects=[];this.portraitHits=[];const visibleTanks=g.tanks.filter(t=>g.visible(t)),portraitTop=g.introLocked?this.tourPlayer:g.current;if(sourceRangeModel(g.gameVersion))visibleTanks.sort((a,b)=>Number(a.id===portraitTop)-Number(b.id===portraitTop));visibleTanks.forEach(t=>this.tank(t));
+      this.crewAnimation.update(t,g.elapsed,g.movingUntil[t.id]>g.elapsed||g.phase==='flying'&&g.current===t.id||g.itemCues.some(cue=>cue.tank===t.id)||g.crewCheerAge(t.id)!==null||g.crewShockAge(t.id)!==null,
+        this.crewLanding);
+    if(!fog)this.drawTanks();
     // Visible pickups sit in front of the chassis, including drops at a player’s feet.
     for(const crate of g.crates) {
       if(!this.visibleAt(crate.x)&&!crate.falling&&!(g.phase==='supply'&&this.supplyCrates.includes(crate))) continue;
@@ -453,7 +481,7 @@ export class Renderer {
     }
     const largerProjectiles=enlargedBattleProjectiles(g.gameVersion);
     for(const p of g.projectiles) {
-      if(p.delay>0||!this.visibleAt(p.x)) continue;
+      if(p.delay>0) continue;
       if(!vectorProjectiles(g.gameVersion)&&!p.fireBoosted&&!p.transfer&&weaponHasTrail(p.weapon,g.gameVersion)&&p.trail.length>1){ctx.save();const first=p.trail[0],last=p.trail[p.trail.length-1],weapon=weaponById(p.weapon),color=weapon.color,rear=projectileRearExtent(weapon.shape??p.weapon,4-p.penetrations)*shotArtScale,angle=Math.atan2(p.vy,p.vx);ctx.translate(-Math.cos(angle)*rear,-Math.sin(angle)*rear);const fade=ctx.createLinearGradient(first.x,first.y,last.x,last.y);fade.addColorStop(0,color+'00');fade.addColorStop(1,color);ctx.strokeStyle=fade;ctx.globalAlpha=MODERN_TRAIL_ALPHA;ctx.lineWidth=MODERN_TRAIL_WIDTH*shotArtScale;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();p.trail.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.stroke();ctx.restore();}
       if(p.fireBoosted){ctx.save();p.trail.filter((_,i)=>i%6===0).forEach((q,i)=>{ctx.globalAlpha=.3+i/10;ctx.translate(q.x,q.y);ctx.fillStyle=i%2?'#e8a958':'#fae5a1';ctx.strokeStyle='#b27939';ctx.lineWidth=.6*shotArtScale;ctx.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,r=(j%2?2.6:6)*shotArtScale;const x=Math.cos(a)*r,y=Math.sin(a)*r;j?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.stroke();ctx.translate(-q.x,-q.y);});ctx.restore();}
       ctx.save();ctx.translate(p.x,p.y);
@@ -466,7 +494,7 @@ export class Renderer {
       const weapon=weaponById(p.weapon),shape=p.healing?'medical':p.transfer?'transfer':weapon.shape??p.weapon;ctx.save();const size=projectileBattleScale(p.healing?'cannon-normal':shape,g.gameVersion);ctx.scale(size,size);projectileArt(ctx,shape,p.healing?'#8bb977':p.transfer?'#63adbd':weapon.color,this.time+p.phase,4-p.penetrations);if(p.fireBoosted)paintBoostStars(ctx,shape,this.time+p.phase,4-p.penetrations);ctx.restore();
       if(p.healing){const cross=shotArtScale*(largerProjectiles?1.24:1);ctx.save();ctx.scale(cross,cross);ctx.fillStyle='#fff8e8';ctx.fillRect(-1.5,-5,3,10);ctx.fillRect(-5,-1.5,10,3);ctx.restore();}
       if(p.homing) {ctx.strokeStyle='#bddce3';ctx.lineWidth=2*shotArtScale;ctx.beginPath();ctx.arc(0,0,11*shotArtScale,0,Math.PI*2);ctx.stroke();}ctx.restore();
-      if(p.homing&&this.visibleAt(p.lockX)) {ctx.save();ctx.strokeStyle='#d6efdfb0';ctx.lineWidth=1.5;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.lockX,p.lockY);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(p.lockX,p.lockY,15+Math.sin(p.lockAge*12)*4,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(p.lockX-23,p.lockY);ctx.lineTo(p.lockX-13,p.lockY);ctx.moveTo(p.lockX+13,p.lockY);ctx.lineTo(p.lockX+23,p.lockY);ctx.stroke();ctx.restore();}
+      if(p.homing&&(!fog||p.lockTarget!==null&&g.tanks[p.lockTarget]&&g.visible(g.tanks[p.lockTarget]))&&this.visibleAt(p.lockX)) {ctx.save();ctx.strokeStyle='#d6efdfb0';ctx.lineWidth=1.5;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.lockX,p.lockY);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(p.lockX,p.lockY,15+Math.sin(p.lockAge*12)*4,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(p.lockX-23,p.lockY);ctx.lineTo(p.lockX-13,p.lockY);ctx.moveTo(p.lockX+13,p.lockY);ctx.lineTo(p.lockX+23,p.lockY);ctx.stroke();ctx.restore();}
       if(weapon.effect==='orbital'&&p.sub) {ctx.save();ctx.strokeStyle='#c0bdf595';ctx.lineWidth=5*shotArtScale;ctx.beginPath();ctx.moveTo(p.x,-40);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.restore();}
     }
     for(const b of g.blasts) {
@@ -485,7 +513,9 @@ export class Renderer {
       ctx.globalAlpha=(1-progress)*0.9;ctx.strokeStyle='#fff0c9';ctx.lineWidth=3;ctx.beginPath();ctx.arc(b.x,b.y,b.radius*(0.2+progress*1.25),0,Math.PI*2);ctx.stroke();if(b.healing){ctx.fillStyle='#5b9150';ctx.globalAlpha=1-progress;ctx.fillRect(b.x-2,b.y-9,4,18);ctx.fillRect(b.x-9,b.y-2,18,4);}ctx.globalAlpha=1;
     }
     for(const p of g.particles) {if(!this.visibleAt(p.x)) continue;ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*g.motionScale*(0.4+p.life/p.maxLife*0.6),0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
-    for(const t of g.texts) {if(!this.visibleAt(t.x)) continue;ctx.globalAlpha=clamp(t.life,0,1);ctx.font=`bold ${18*g.layoutScale}px "PingFang SC",sans-serif`;ctx.textAlign='center';ctx.strokeStyle='#fff8e8';ctx.lineWidth=3*g.layoutScale;ctx.strokeText(t.text,t.x,t.y);ctx.fillStyle=t.color;ctx.fillText(t.text,t.x,t.y);}ctx.globalAlpha=1;
+    // Blend the terrain and flying projectiles under the same mist. Friendly portraits stay clear.
+    if(fog){this.drawFog();this.drawTanks();}
+    for(const t of g.texts) {if(!this.visibleAt(t.x)||fog&&t.tankId!==undefined&&g.tanks[t.tankId]&&!g.visible(g.tanks[t.tankId])) continue;ctx.globalAlpha=clamp(t.life,0,1);ctx.font=`bold ${18*g.layoutScale}px "PingFang SC",sans-serif`;ctx.textAlign='center';ctx.strokeStyle='#fff8e8';ctx.lineWidth=3*g.layoutScale;ctx.strokeText(t.text,t.x,t.y);ctx.fillStyle=t.color;ctx.fillText(t.text,t.x,t.y);}ctx.globalAlpha=1;
     ctx.restore();
   }
 }

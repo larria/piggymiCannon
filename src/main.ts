@@ -212,23 +212,12 @@ function adjustDisplayedAim(angle:number,direction?:number){
  else if(direction===undefined)game.prepareAim(angle,t.id);else game.prepareAim(angle,t.id,direction);
 }
 function displayTank(){return game.dashboardTank;}
-// These two items leave inventory immediately, but their original slot shows the queued shot.
-const queuedShotSlots=new WeakMap<Game,{tank:number;turn:number;slots:Partial<Record<'boost'|'double',number>>}>();
-function useHumanItem(id:ItemId,slot:number){
-  if(!game.useItem(id,false,slot))return false;
-  if(id==='boost'||id==='double'){
-    const tank=game.active,old=queuedShotSlots.get(game);
-    const slots=old?.tank===tank.id&&old.turn===tank.turnsTaken?old.slots:{};
-    slots[id]=slot;queuedShotSlots.set(game,{tank:tank.id,turn:tank.turnsTaken,slots});
-  }
-  return true;
-}
+function useHumanItem(id:ItemId,slot:number){return game.useItem(id,false,slot);}
 function pendingShotItem(tank:Tank,slot:number,id:ItemId|null):ItemId|null{
-  if(playback||tank.id!==game.current||tank.controller!=='human'||tank.hp<=0||game.phase!=='aiming')return null;
-  if(id&&game.itemArmed(slot))return id;
-  const queued=queuedShotSlots.get(game);
-  if(!queued||queued.tank!==tank.id||queued.turn!==tank.turnsTaken)return null;
-  return queued.slots.boost===slot&&tank.boost?'boost':queued.slots.double===slot&&tank.doubleShot?'double':null;
+  if(playback||tank.controller!=='human'||tank.hp<=0||game.phase==='lobby'||game.phase==='ended')return null;
+  if(id&&game.itemArmed(slot,tank))return id;
+  const queued=tank.queuedShot;
+  return queued?.boost===slot&&tank.boost?'boost':queued?.double===slot&&tank.doubleShot?'double':null;
 }
 const pendingChip=(id:ItemId)=>`<i class="queued-item-chip" aria-hidden="true">${itemIcon(id)}</i>`;
 
@@ -238,7 +227,7 @@ function renderInventory() {
   const weapons=vehicle?[weaponById(vehicle.normal),weaponById(vehicle.special),...(tank.ammo.homing>0?[weaponById('homing')]:[])]:WEAPONS;
   $('#inventory-grid').innerHTML=activeTab==='weapons'?weapons.map(w=>`<button class="inventory-tile ${selected===w.id?'selected':''} ${tank.ammo[w.id]<=0?'depleted':''}" data-weapon="${w.id}" data-help-name="${w.name}" data-help-description="${weaponHint(w.id)}" aria-label="${w.name}，${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]+' 发':'无限弹药'}" aria-pressed="${selected===w.id}"><span class="weapon-icon" style="--weapon-color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span class="tile-name">${w.name}</span><span class="ammo-count">${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]:'∞'}</span>${selected===w.id?`<span class="selection-tick">${icon('check')}</span>`:''}</button>`).join(''):
     game.backpack(tank).map((id,slot)=>{
-      const pending=pendingShotItem(tank,slot,id),queued=pending?ITEMS.find(i=>i.id===pending)!:null,armed=!!pending&&tank.id===game.current&&game.itemArmed(slot);
+      const pending=pendingShotItem(tank,slot,id),queued=pending?ITEMS.find(i=>i.id===pending)!:null,armed=!!pending&&game.itemArmed(slot,tank);
       if(!id&&queued)return `<button class="inventory-tile item-tile pending-shot-item" disabled aria-label="道具槽 ${slot+1}，${queued.name}待发"><span class="weapon-icon">${itemIcon(queued.id)}</span><span class="tile-name">${queued.name}</span><span class="item-hint">已使用 · 等待发射</span></button>`;
       if(!id)return `<button class="inventory-tile item-tile empty-item" disabled aria-label="道具槽 ${slot+1}，空槽"><span class="weapon-icon">${icon('plus')}</span><span class="tile-name">空槽</span><span class="item-hint">可拾取任意道具</span></button>`;
       const i=ITEMS.find(i=>i.id===id)!,reason=game.itemUnavailable(id,false,slot);
@@ -284,7 +273,7 @@ function updateUI() {
     const pending=pendingItems[slot],queued=pending?ITEMS.find(i=>i.id===pending)!:null;
     if(!id&&queued)return `<button class="pending-shot-item" data-item-slot="${slot}" disabled data-help-name="${queued.name}" data-help-description="已使用 · 等待发射" aria-label="道具槽 ${slot+1}，${queued.name}待发">${itemIcon(queued.id)}<span>待发</span></button>`;
     if(!id)return `<button class="empty-item" data-item-slot="${slot}" disabled data-help-name="空槽" data-help-description="可拾取任意道具，重复道具各占一个槽位" aria-label="道具槽 ${slot+1}，空槽">${icon('plus')}<span>空槽</span></button>`;
-    const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id,false,slot),armed=instrumentActive&&game.itemArmed(slot);
+    const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id,false,slot),armed=game.itemArmed(slot,t);
     return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''} ${armed&&pending===id?'pending-shot-item':pending?'has-queued-shot':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+slot}${reason?' · '+reason:''}" aria-label="道具槽 ${slot+1}，快捷使用${item.name}">${itemIcon(id)}<span>${item.name}</span>${pending&&!armed?pendingChip(pending):''}</button>`;
   }).join('');}
   $('.wait-readout').dataset.helpDescription=!(game.delayEnabled)?'含 AI 的对局按存活槽位轮转，DELAY 排序关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
@@ -349,7 +338,7 @@ function updateUI() {
   $('#fuel-value').textContent=String(Math.floor(t.fuel));$('#move-note').textContent=t.immobile?'紫冻水 · 暂时不能移动':t.frozen?'冰冻中 · 移动耗油加倍':t.vehicleId?`本回合最多移动 ${Math.round(t.moveDistance)}m`:'长按移动 · 每回合补充 18';
   if(t.immobile>0){$<HTMLButtonElement>('#move-left').disabled=true;$<HTMLButtonElement>('#move-right').disabled=true;}
   $<HTMLButtonElement>('#fire-button').disabled=!human||t.fallVelocity>0;
-  $('#fire-note').textContent=game.weatherObservation?'火线变化 · 正在展示战场':game.phase==='supply'?'空投阶段不消耗回合时间':lobby?'先进入战场':game.phase==='flying'||game.phase==='resolving'?'欣赏这条抛物线':game.introLocked?'开场巡游 · 正在展示炮手位置':game.paused?'游戏已暂停':game.phase==='ended'?'下一局见':game.phase==='handoff'?'交给下一位队长':!human?'等待对手行动':game.restoring?'恢复弹已装填 · 基础恢复40%':game.teleporting?'转移弹已装填 · 蓄力发射':t.doubleShot?'双发装填已就绪':t.boost?'强化炮弹已就绪':`${weaponById(game.selected).name}已就绪`;
+  $('#fire-note').textContent=game.weatherObservation?'火线变化 · 正在展示战场':game.phase==='supply'?'空投阶段不消耗回合时间':lobby?'先进入战场':game.phase==='flying'||game.phase==='resolving'?'欣赏这条抛物线':game.introLocked?'开场巡游 · 正在展示炮手位置':game.paused?'游戏已暂停':game.phase==='ended'?'下一局见':game.phase==='handoff'?'交给下一位队长':!human?'等待对手行动':game.restoring?'恢复弹已装填 · 正中最高恢复60%':game.teleporting?'转移弹已装填 · 蓄力发射':t.doubleShot?'双发装填已就绪':t.boost?'强化炮弹已就绪':`${weaponById(game.selected).name}已就绪`;
   $<HTMLButtonElement>('#pause-button').disabled=lobby||game.phase==='ended'||game.phase==='handoff';
   $('#pause-button').innerHTML=icon(game.paused?'play':'pause');$('#pause-button').setAttribute('aria-label',game.paused?'继续游戏':'暂停游戏');
   const signature=`${activeTab}|${t.vehicleId}|${shownWeapon}|${t.id}|${game.teleporting}|${game.restoring}|${t.itemUsed}|${t.tactics}|${ITEMS.map(i=>game.itemUnavailable(i.id)).join(',')}|${JSON.stringify(t.ammo)}|${JSON.stringify(t.items)}|${quick.join(',')}|${pendingItems.join(',')}`;
@@ -688,7 +677,7 @@ const endFieldTouch=(e:PointerEvent)=>{fieldTouchIds.delete(e.pointerId);fieldMu
 for(const name of ['pointerup','pointercancel'])document.addEventListener(name,endFieldTouch as EventListener,true);
 const resetFieldTouches=()=>{fieldTouchIds.clear();fieldMultiTouch=false;};
 window.addEventListener('blur',resetFieldTouches);document.addEventListener('visibilitychange',()=>{if(document.hidden)resetFieldTouches();});
-function focusPlayer(id:number){const t=game.tanks[id];if(!t)return;if(renderer.touring)renderer.finishTour(false);renderer.focusAt(t.defeat?.x??t.x,t.defeat?.y??t.y);updateUI();}
+function focusPlayer(id:number){const t=game.tanks[id];if(!t||!game.visible(t))return;if(renderer.touring)renderer.finishTour(false);renderer.focusAt(t.defeat?.x??t.x,t.defeat?.y??t.y);updateUI();}
 function fieldPoint(p:{x:number;y:number}){const rect=battlefield.getBoundingClientRect();return {x:(p.x-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y:(p.y-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY};}
 let fieldPortrait:number|null=null;
 installMapGestures(battlefield,{

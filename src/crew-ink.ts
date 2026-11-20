@@ -29,6 +29,10 @@ export function profileEyes(c:CanvasRenderingContext2D,x:number,y:number,r:numbe
 export function steadyMouth(c:CanvasRenderingContext2D,x:number,y:number){
  stroke(c,'#78443a',1.45,p=>{p.moveTo(x-4,y);p.quadraticCurveTo(x-.25,y+1.7,x+4.6,y+.2);});
 }
+export function shockMouth(c:CanvasRenderingContext2D,x:number,y:number){
+ oval(c,x,y+1,3.8,4.2,'#633832','#914c43',.9);
+ oval(c,x-.3,y+2.8,1.9,1.15,'#ce8170');
+}
 export function pantMouth(c:CanvasRenderingContext2D,x:number,y:number,air:number){
  const h=1.4+air*2.1;
  oval(c,x,y,3.7+air*.8,h,'#693a35','#844738',.85);
