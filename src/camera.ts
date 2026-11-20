@@ -50,4 +50,5 @@ export class BattleCamera {
  * are not airborne; select without viewport filtering to avoid losing it. */
 export function lowestProjectile<T extends {x:number;y:number;delay:number}>(rounds:readonly T[]):T|null{let lowest:T|null=null;for(const p of rounds)if(p.delay<=0&&(!lowest||p.y>lowest.y))lowest=p;return lowest;}
 
-export function lowestFlightFocus<T extends {x:number;y:number;delay:number}>(rounds:readonly T[],landed:{x:number;y:number}|null){const lowest=lowestProjectile(rounds);return landed&&(!lowest||landed.y>=lowest.y)?landed:lowest;}
+/** An impact is only a fallback during a gap before a delayed shot goes airborne. */
+export function lowestFlightFocus<T extends {x:number;y:number;delay:number}>(rounds:readonly T[],landed:{x:number;y:number}|null){return lowestProjectile(rounds)??landed;}

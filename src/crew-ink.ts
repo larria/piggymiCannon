@@ -11,12 +11,28 @@ export function oval(c:CanvasRenderingContext2D,x:number,y:number,rx:number,ry:n
 export function stroke(c:CanvasRenderingContext2D,color:string,width:number,draw:(c:CanvasRenderingContext2D)=>void){
  c.beginPath();draw(c);c.strokeStyle=color;c.lineWidth=width;c.stroke();
 }
-export function eyes(c:CanvasRenderingContext2D,x:number,y:number,r:number,iris:string,look:number,closed:boolean,lashes=false){
+export function eyes(c:CanvasRenderingContext2D,x:number,y:number,r:number,iris:string,look:number,closed:boolean){
  if(closed){stroke(c,'#593b34',1.6,p=>{p.moveTo(x-r,y+1);p.quadraticCurveTo(x,y-4,x+r,y+1);});return;}
  oval(c,x,y,r,r*1.2,'#fff4e3','#8b5a46',.95);
  oval(c,x+look*r*.34,y+.55,r*.68,r*.88,iris);oval(c,x+look*r*.34+.28,y+.85,r*.45,r*.59,'#332a2b');
  oval(c,x+look*r*.34-r*.18,y-r*.38,r*.25,r*.29,'#fff8ea');
- if(lashes)stroke(c,'#69452a',.9,p=>{const side=x<0?-1:1;p.moveTo(x+side*r*.58,y-r*.92);p.lineTo(x+side*r*.86,y-r*1.35);p.moveTo(x+side*r*.85,y-r*.64);p.lineTo(x+side*r*1.2,y-r*.98);});
+
+}
+/** A narrow far eye and a fuller near eye keep the gaze in three-quarter view. */
+export function profileEyes(c:CanvasRenderingContext2D,x:number,y:number,r:number,iris:string,look:number,closed:boolean,serious:boolean,far=false,lashes=false,stunned=false){
+ c.save();c.translate(x,y);c.scale(far?.66:1,serious?.83:1);
+ if(stunned){stroke(c,'#6b4338',1.35,p=>{p.moveTo(-r*.63,-r*.6);p.lineTo(r*.63,r*.6);p.moveTo(r*.63,-r*.6);p.lineTo(-r*.63,r*.6);});}
+ else eyes(c,0,0,r,iris,look,closed);
+ if(lashes&&!closed)stroke(c,'#69452a',1,p=>{const side=far?1:-1;p.moveTo(side*r*.62,-r*.85);p.lineTo(side*r*1.04,-r*1.21);p.moveTo(side*r*.88,-r*.54);p.lineTo(side*r*1.27,-r*.77);});
+ c.restore();
+}
+export function steadyMouth(c:CanvasRenderingContext2D,x:number,y:number){
+ stroke(c,'#78443a',1.45,p=>{p.moveTo(x-4,y);p.quadraticCurveTo(x-.25,y+1.7,x+4.6,y+.2);});
+}
+export function pantMouth(c:CanvasRenderingContext2D,x:number,y:number,air:number){
+ const h=1.4+air*2.1;
+ oval(c,x,y,3.7+air*.8,h,'#693a35','#844738',.85);
+ if(air>.15)oval(c,x-.55,y+h*.41,2.1,h*.28,'#cc786a');
 }
 export function goggles(c:CanvasRenderingContext2D,x:number,y:number,tilt=0,scale=1){
  c.save();c.translate(x,y);c.rotate(tilt);c.scale(scale,scale);

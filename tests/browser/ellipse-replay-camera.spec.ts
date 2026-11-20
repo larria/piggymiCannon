@@ -21,8 +21,29 @@ test('iPad Pixi: centred high hit and low graze dig by actual ellipse height',as
  expect(report.terrain[0].x).toBe(450);expect(report.terrain[0].y).toBe(398);expect(report.terrain[1].y).toBe(450);expect(report.terrain[0].removed).toBeLessThan(report.terrain[1].removed);expect(report.terrain[0].radius).toBeCloseTo(99.9);expect(report.terrain[0].depth).toBeCloseTo(66.6);expect(report.backend).toBe('pixi');expect(await page.locator('#game-overlay').isVisible()).toBe(false);
  await page.screenshot({path:`QA/v${version}-ellipse-height-${browserName}-1194.png`,scale:'css'});writeFileSync(`QA/v${version}-ellipse-height-${browserName}.json`,JSON.stringify(report,null,2));
 });
-test('lowest multi round is followed outside the previous viewport, then landing hold ignores higher stragglers; manual focus works',async({page,browserName})=>{
+test('after the lowest Meteor round hits an obstacle, the camera immediately targets the next airborne round',async({page})=>{
  await boot(page,true,'factory','multi','bowl');
- const report=await page.evaluate(()=>{const q=(window as any).__qa,g=q.game;q.recorder.detach();g.paused=false;g.update=()=>{};g.phase='flying';g.observation={kind:'ground',target:null,point:null};g.projectiles=[{...g.launch(g.active,'multi-normal'),x:1750,y:620,delay:0},{...g.launch(g.active,'multi-normal'),x:100,y:-200,delay:0},{...g.launch(g.active,'multi-normal'),x:600,y:800,delay:1}];q.renderer.follow();for(let i=0;i<180;i++)q.renderer.draw(.016);const airborne={x:q.renderer.offsetX,y:q.renderer.offsetY,width:q.renderer.viewWidth,height:q.renderer.viewHeight};g.observation.point={x:1750,y:620};g.projectiles.shift();for(let i=0;i<180;i++)q.renderer.draw(.016);const landed={x:q.renderer.offsetX,y:q.renderer.offsetY,width:q.renderer.viewWidth,height:q.renderer.viewHeight};q.renderer.focusAt(400,450);for(let i=0;i<180;i++)q.renderer.draw(.016);const manual={x:q.renderer.offsetX,y:q.renderer.offsetY,width:q.renderer.viewWidth,height:q.renderer.viewHeight};q.renderer.follow();for(let i=0;i<180;i++)q.renderer.draw(.016);return {airborne,landed,manual,recovered:{x:q.renderer.offsetX,y:q.renderer.offsetY,width:q.renderer.viewWidth,height:q.renderer.viewHeight}};});
- expect(report.airborne.x+report.airborne.width).toBeGreaterThan(1750);expect(report.airborne.y).toBeGreaterThan(0);expect(report.landed.x).toBeCloseTo(report.airborne.x,0);expect(report.landed.y).toBeCloseTo(report.airborne.y,0);expect(report.manual.x).toBeLessThan(report.landed.x);expect(report.recovered.x).toBeCloseTo(report.landed.x,0);writeFileSync(`QA/v${version}-salvo-camera-${browserName}.json`,JSON.stringify(report,null,2));await page.evaluate(()=>{const q=(window as any).__qa,g=q.game;g.projectiles.unshift({...g.launch(g.active,'multi-normal'),x:1750,y:620,delay:0});q.renderer.draw(0);});await page.screenshot({path:`QA/v${version}-salvo-camera-${browserName}-1194.png`,scale:'css'});
+ const report=await page.evaluate(()=>{
+  const {game:g,renderer:r,recorder}=(window as any).__qa;recorder.detach();
+  const update=g.update.bind(g);g.update=()=>{};g.phase='flying';g.observation={kind:'ground',target:null,point:null};
+  g.land.mask.fill(0);g.land.protectedMask.fill(0);
+  for(let x=1630;x<=1790;x++)g.land.column(x,620,642,true);
+  for(let x=760;x<=1080;x++)g.land.column(x,250,270,true);g.land.rebuild();
+  for(const t of g.tanks){t.x=820+t.id*80;t.y=232;t.fallVelocity=0;}
+  const p=(v:any)=>Object.assign(g.launch(g.active,'multi-normal'),v);
+  const low=p({x:1710,y:604,vx:0,vy:720,delay:0}),next=p({x:300,y:-150,vx:50,vy:30,delay:0}),high=p({x:1200,y:-270,vx:-45,vy:20,delay:0});
+  g.projectiles=[low,high,next];
+  const original=r.camera.update.bind(r.camera);r.camera.update=(dt:number,target:{x:number;y:number})=>{r.qaTarget=target;original(dt,target);};
+  const frame=(dt=0)=>{r.draw(dt);return {autoX:r.qaTarget.x+r.viewWidth/2,autoY:r.qaTarget.y+r.viewHeight/2,x:r.offsetX,y:r.offsetY};};
+  r.follow();r.camera.center(low.x,low.y,false);r.camera.follow();const before=frame();
+  update(.045);const alive=g.projectiles.map((shot:any)=>shot===next?'next':shot===high?'high':'low'),impact=g.observation.point;
+  const after=frame(.016),expected={x:next.x,y:next.y};
+  r.camera.center(1200,300,false);const manual=frame(.2);r.camera.follow();const recovered=frame(.2);
+  r.camera.update=original;
+  return {before,after,expected,alive,impact,manual,recovered};
+ });
+ expect(report.before.autoX).toBe(1710);expect(report.before.autoY).toBe(604);
+ expect(report.alive).toEqual(['high','next']);expect(report.impact.x).toBeCloseTo(1710,0);
+ expect(report.after.autoX).toBeCloseTo(report.expected.x,6);expect(report.after.autoY).toBeCloseTo(report.expected.y,6);
+ expect(report.after.x).toBeLessThan(report.before.x);expect(report.manual.x).toBeGreaterThan(report.recovered.x);
 });

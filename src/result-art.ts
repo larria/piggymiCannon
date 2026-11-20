@@ -6,7 +6,7 @@ export function defeatedPig(c:CanvasRenderingContext2D,t:Tank,time:number,_slope
   if(t.hp>0||t.outOfBounds||!pose)return false;
   c.save();c.translate(pose.x,pose.y);c.rotate(pose.slope);c.scale(pose.direction,1);
   if(scale!==1){c.translate(0,18);c.scale(scale,scale);c.translate(0,-18);}
-  paintCrew(c,t,time,'lose',false,0,reducedMotion);c.restore();return true;
+  paintCrew(c,t,time,'lose',undefined,0,reducedMotion);c.restore();return true;
 }
 export function victoryConfetti(c:CanvasRenderingContext2D,t:Tank,time:number){
   c.save();c.translate(t.x,t.y);const colors=['#e89978','#bacb82','#e1bd69','#93c3d0'];

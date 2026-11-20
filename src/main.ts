@@ -1,3 +1,4 @@
+import {KeyboardMove,isMoveKey} from './keyboard-move';
 import {PowerAssistance} from './power-assistance';
 import {defeatPerspective} from './combat-preferences';
 import {UpdateProgress} from './update-progress';
@@ -93,6 +94,11 @@ let installPrompt:(Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:s
 let swRegistration:ServiceWorkerRegistration|undefined;
 let checkingVersion=false;
 const keys=new Set<string>();
+const keyboardMove=new KeyboardMove();
+let keyboardGame:Game|null=null,keyboardTurn=-1,keyboardTank=-1;
+function syncKeyboardMove(){
+  if(game!==keyboardGame||game.turn!==keyboardTurn||game.current!==keyboardTank){keyboardMove.reset();keyboardGame=game;keyboardTurn=game.turn;keyboardTank=game.current;}
+}
 const playedSeeds=new Set<number>();
 
 $('#app').innerHTML=`
@@ -417,14 +423,14 @@ function newMatch(next:Config,start=true) {
   audio.resetEffects();
   audio.setSelectionMusic(false);
   audio.pause(false);
-  config={...next,snow:undefined,fog:undefined,fireLine:undefined,seed:freshMatchSeed(Date.now(),playedSeeds),competition:newCompetition()};rankSettlement=[];game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);refreshImpactProfiler();statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();persistSettings();
+  config={...next,snow:undefined,fog:undefined,fireLine:undefined,seed:freshMatchSeed(Date.now(),playedSeeds),competition:newCompetition()};rankSettlement=[];game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);refreshImpactProfiler();statsRecorded=false;lastPhase='';lastInventory='';moveHeld=0;keys.clear();keyboardMove.reset();persistSettings();
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}if(forfeited)toast('退出对局，己方判负。');
 }
 function togglePause() {
   if(playback){playback.paused=!playback.paused;setReplayAudioPaused(playback.paused);refreshReplayControls();return;}
   if(game.phase==='lobby'||game.phase==='ended'||game.phase==='handoff') return;
   if(renderer.touring)renderer.finishTour();
-  cancelCharge();game.paused=!game.paused;moveHeld=0;keys.clear();audio.pause(game.paused);updateOverlay();updateUI();
+  cancelCharge();game.paused=!game.paused;moveHeld=0;keys.clear();keyboardMove.reset();audio.pause(game.paused);updateOverlay();updateUI();
 }
 
 function profileClick(event:Event){const equip=(event.target as HTMLElement).closest<HTMLElement>('[data-equip-achievement]');if(equip){const crew=equip.dataset.profileCrew as keyof typeof CREW;if(!CREW[crew])return;const id=equip.dataset.equipAchievement!;try{progression=equipAchievement(progression,crew,progression.profiles[crew].equippedAchievement===id?null:id);try{localStorage.setItem(PROGRESSION_KEY,JSON.stringify(progression));progressionUnsaved=false;}catch{progressionUnsaved=true;toast('本机存储不可用，称号仅在本次打开期间保留。');}$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);lastHud='';renderer.invalidate();updateUI();}catch(error){toast((error as Error).message);}return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-profile]');if(!button)return;const crew=button.dataset.profile as keyof typeof CREW;if(!CREW[crew])return;$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);}
@@ -432,7 +438,7 @@ function showDialog(type:string) {
   if(playback&&type==='setup'){toast('请先退出录像，再调整对局。');return;}
   if(renderer.touring)renderer.finishTour();
   const dialog=$<HTMLDialogElement>('#dialog');
-  if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;moveHeld=0;keys.clear();}
+  if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;moveHeld=0;keys.clear();keyboardMove.reset();}
   dialogKeepsMusic=!(playback?.paused??dialogPaused);audio.pause(true,dialogKeepsMusic);
   dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');content.removeEventListener('click',profileClick);
   dialog.classList.toggle('settings-dialog',type==='settings');
@@ -513,7 +519,7 @@ function renderReplayList(content:HTMLElement){
 }
 function startReplay(player:ReplayPlayer){
   if(playback)leaveReplay();
-  cancelCharge();moveHeld=0;keys.clear();audio.resetEffects();audio.unlock();
+  cancelCharge();moveHeld=0;keys.clear();keyboardMove.reset();audio.resetEffects();audio.unlock();
   replayReturn={game,config,recorder,statsRecorded,immersive};playback=player;game=player.game;config={...game.config};recorder=null;
   renderer.setGame(game);refreshImpactProfiler();startReplayTour();setImmersive(true);lastPhase='';lastInventory='';audio.pause(false);void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));refreshReplayControls();updateUI();
   if(player.recording.gameVersion!==APP_VERSION)toast(`录像来自 v${player.recording.gameVersion}，播放结束时会校验结果。`);
@@ -525,7 +531,7 @@ function startReplayTour(){
 function leaveReplay(){
   if(!replayReturn)return;
   const previousMatch=replayReturn;playback=null;replayReturn=null;game=previousMatch.game;config=previousMatch.config;recorder=previousMatch.recorder;statsRecorded=previousMatch.statsRecorded;
-  renderer.setGame(game);refreshImpactProfiler();moveHeld=0;keys.clear();audio.resetEffects();audio.pause(game.paused);setImmersive(previousMatch.immersive);lastPhase='';lastInventory='';refreshReplayControls();updateUI();
+  renderer.setGame(game);refreshImpactProfiler();moveHeld=0;keys.clear();keyboardMove.reset();audio.resetEffects();audio.pause(game.paused);setImmersive(previousMatch.immersive);lastPhase='';lastInventory='';refreshReplayControls();updateUI();
 }
 function refreshReplayControls(){
   const panel=$('#replay-controls');panel.classList.toggle('hidden',!playback);if(!playback)return;
@@ -657,7 +663,7 @@ aimPad.addEventListener('contextmenu',e=>e.preventDefault());
 
 function bindMove(id:string,direction:number) {
   const button=$<HTMLButtonElement>(id);
-  button.addEventListener('pointerdown',e=>{if(!canControlBattle()) return;e.preventDefault();moveHeld=direction;button.setPointerCapture(e.pointerId);game.move(direction,1/30);});
+  button.addEventListener('pointerdown',e=>{if(!canControlBattle()) return;e.preventDefault();keyboardMove.reset();moveHeld=direction;button.setPointerCapture(e.pointerId);game.move(direction,1/30);});
   const release=()=>moveHeld=0;
   button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
 }
@@ -715,20 +721,25 @@ document.addEventListener('keydown',e=>{
   if(key==='c'&&e.ctrlKey){e.preventDefault();renderer.follow();return;}
   if(key==='f5'&&renderer.touring){e.preventDefault();renderer.finishTour();updateUI();return;}
   if(!canControlBattle()){if(canAdjustAngle()&&['w','s','arrowup','arrowdown'].includes(key)){e.preventDefault();angleKeyOwner=displayTank().id;keys.add(key);}return;}
+  if(isMoveKey(key)){e.preventDefault();syncKeyboardMove();if(!e.repeat&&!moveHeld&&game.active.fallVelocity<=0)keyboardMove.press(key,performance.now(),direction=>game.face(direction));return;}
   if(['w','s','arrowup','arrowdown'].includes(key))angleKeyOwner=displayTank().id;
   if((key==='f3'||key==='f4')&&game.active.vehicleId){e.preventDefault();const v=vehicleById(game.active.vehicleId);if(game.selectWeapon(key==='f3'?v.normal:v.special)) {audio.play('click');updateUI();}return;}
   if(key==='f5'){e.preventDefault();cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();return;}
   if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const slot=Number(key.slice(1))-9,id=game.backpack()[slot];if(id&&useHumanItem(id,slot))updateUI();else toast(id?game.itemUnavailable(id,false,slot)??'当前不能使用':'这个道具槽是空的');return;}
-  if(['arrowleft','arrowright','arrowup','arrowdown'].includes(key)){e.preventDefault();keys.add(key);}
-  if(['a','d','w','s','q','e',' '].includes(key)) {e.preventDefault();keys.add(key);}
+  if(['arrowup','arrowdown'].includes(key)){e.preventDefault();keys.add(key);}
+  if(['w','s','q','e',' '].includes(key)) {e.preventDefault();keys.add(key);}
   if(key===' '&&!e.repeat) startCharge(null);
 });
-document.addEventListener('keyup',e=>{blockedAngleKeys.delete(e.key.toLowerCase());keys.delete(e.key.toLowerCase());if(e.key===' '&&charge?.pointer===null){e.preventDefault();finishCharge();}});
-window.addEventListener('blur',()=>{keys.clear();moveHeld=0;cancelCharge();});
+document.addEventListener('keyup',e=>{
+  const key=e.key.toLowerCase();blockedAngleKeys.delete(key);keys.delete(key);
+  if(isMoveKey(key)){syncKeyboardMove();if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open&&!moveHeld)keyboardMove.release(key,performance.now(),direction=>game.face(direction));else keyboardMove.reset();}
+  if(e.key===' '&&charge?.pointer===null){e.preventDefault();finishCharge();}
+});
+window.addEventListener('blur',()=>{keys.clear();keyboardMove.reset();moveHeld=0;cancelCharge();});
 let backgroundGame:Game|null=null,backgroundWasPaused=false;
 document.addEventListener('visibilitychange',()=>{
   if(playback){audio.setPageHidden(document.hidden);if(!document.hidden){setReplayAudioPaused(playback.paused);renderer.invalidate();updateUI();}previous=performance.now();return;}
-  if(document.hidden){keys.clear();moveHeld=0;cancelCharge();if(backgroundGame!==game){backgroundGame=game;backgroundWasPaused=game.paused;}game.paused=true;audio.setPageHidden(true);}
+  if(document.hidden){keys.clear();keyboardMove.reset();moveHeld=0;cancelCharge();if(backgroundGame!==game){backgroundGame=game;backgroundWasPaused=game.paused;}game.paused=true;audio.setPageHidden(true);}
   else {if(backgroundGame===game)game.paused=backgroundWasPaused;backgroundGame=null;previous=performance.now();audio.setPageHidden(false);audio.pause(game.paused,dialogKeepsMusic&&$<HTMLDialogElement>('#dialog').open);renderer.invalidate();updateUI();}
 });
 window.addEventListener('resize',()=>renderer.resize());
@@ -763,10 +774,12 @@ function frame(now:number) {
   const dt=Math.max(0,Math.min((now-previous)/1000,0.05));previous=now;
   if(document.hidden||document.getElementById('opening-loading')){powerAssistance.clear();requestAnimationFrame(frame);return;}
   impactProfiler?.beginFrame(now);angleNudges.update(now);
-  if(angleKeyOwner!==null&&angleKeyOwner!==displayTank().id){for(const key of ['w','s','arrowup','arrowdown'])if(keys.has(key))blockedAngleKeys.add(key);keys.clear();moveHeld=0;angleKeyOwner=null;}if(padDrag!==null&&(padGame!==game||padOwner!==displayTank().id))endPad();
+  if(angleKeyOwner!==null&&angleKeyOwner!==displayTank().id){for(const key of ['w','s','arrowup','arrowdown'])if(keys.has(key))blockedAngleKeys.add(key);keys.clear();keyboardMove.reset();moveHeld=0;angleKeyOwner=null;}if(padDrag!==null&&(padGame!==game||padOwner!==displayTank().id))endPad();
+  syncKeyboardMove();
+  if(!canControlBattle()||$<HTMLDialogElement>('#dialog').open)keyboardMove.reset();
   if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open) {
     if(charge&&charge.tank===game.current) {const seconds=(now-charge.startedAt)/1000;if(seconds>=CHARGE_DELAY_SECONDS&&!charge.audible){charge.audible=true;audio.startCharge();recorder?.cue('charge-start');}game.setAim(game.active.angle,heldChargePower(seconds));if(charge.audible)audio.updateCharge(game.active.power);if(game.active.power>=100)finishCharge(true);}
-    const direction=moveHeld||(keys.has('a')||keys.has('arrowleft')?-1:keys.has('d')||keys.has('arrowright')?1:0);if(direction) game.move(direction,dt);
+    if(canControlBattle()){if(moveHeld)game.move(moveHeld,dt);else keyboardMove.step(now,dt,(direction,seconds)=>game.move(direction,seconds));}else keyboardMove.reset();
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
   }else if(canAdjustAngle()&&angleKeyOwner===displayTank().id){const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0);if(angle)adjustDisplayedAim(displayTank().angle+angle*35*dt);}
@@ -795,7 +808,7 @@ function frame(now:number) {
   }
   if(playback)for(const cue of playback.drainCues()){if(cue.kind==='charge-start')audio.startCharge();if(cue.kind==='charge-stop')audio.stopCharge();if(cue.kind==='charge-power')audio.updateCharge(cue.power!);}
   if(victorySound){if(victorySound.game!==game)victorySound=null;else if(now>=victorySound.at&&!game.paused&&!playback?.paused){audio.play('win');victorySound=null;}}
-  powerAssistance.update(game,displayTank(),!playback&&!$<HTMLDialogElement>('#dialog').open&&canControlBattle()&&!renderer.touring,!!moveHeld||padDrag!==null||angleRangePointer!==null||angleNudges.holding||['a','d','arrowleft','arrowright','w','s','arrowup','arrowdown'].some(k=>keys.has(k)),now,!!charge);
+  powerAssistance.update(game,displayTank(),!playback&&!$<HTMLDialogElement>('#dialog').open&&canControlBattle()&&!renderer.touring,!!moveHeld||padDrag!==null||angleRangePointer!==null||angleNudges.holding||keyboardMove.active||['w','s','arrowup','arrowdown'].some(k=>keys.has(k)),now,!!charge);
   updateChargePreparation(now);
   if(charge||playback?.charging)updateChargeVisual(game.active.power);
   if(now-lastUI>80&&(!game.paused||renderer.touring||playback)) {updateUI();lastUI=now;}

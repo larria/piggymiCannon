@@ -26,6 +26,8 @@ import {defeatedPig,victoryConfetti} from './result-art';
 import {vehicleById} from './vehicles';
 import {projectileArt,paintVehicle} from './vehicle-art';
 import {paintCrew} from './crew-art';
+import {CrewAnimationClock,isCrewFalling} from './crew-animation';
+import {paintRage} from './rage-art';
 import {teamFlag} from './crew';
 import {crewPortrait,crewPortraitRevision} from './crew-portraits';
 import {paintItemCue} from './item-feedback';
@@ -78,6 +80,7 @@ export class Renderer {
   private coastGrainBounds=new Map<number,{top:number;bottom:number}>();
   rasterPixelsLastUpdate=0;staticPixelsLastUpdate=0;
   private stage:PixiStage|null=null;private backgroundDirty=true;private terrainDirty=true;
+  private readonly crewAnimation=new CrewAnimationClock();
   private invalidated=true;private pausedStamp='';private destroyed=false;
   ready:Promise<void>;
   backend:'canvas'|'pixi'='canvas';frames=0;
@@ -108,7 +111,7 @@ export class Renderer {
     }catch{stage?.destroy();layer.remove();this.backend='canvas';this.invalidate();}
   }
   destroy(){if(this.destroyed)return;this.destroyed=true;this.stage?.destroy();this.stage=null;}
-  setGame(game:Game) {this.flightFloor=null;this.flightActive=false;this.camera.reset();this.zoom=BATTLE_ZOOM;this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.resize();this.invalidate();}
+  setGame(game:Game) {this.crewAnimation.reset();this.flightFloor=null;this.flightActive=false;this.camera.reset();this.zoom=BATTLE_ZOOM;this.supplyCrates=[];this.supplyPhase=false;this.game=game;this.palette=PALETTES[game.config.map];this.terrainRevision=-1;this.staticRevision=-1;this.windMotes=[];this.resize();this.invalidate();}
   zoomBy(factor:number,u=.5,v=.5){
     if(!Number.isFinite(factor)||factor<=0)return;
     const zoom=boundedBattleZoom(this.zoom*factor,this.baseViewWidth,this.worldWidth);
@@ -342,14 +345,19 @@ export class Renderer {
     ctx.fillStyle='#34413028';ctx.beginPath();ctx.ellipse(0,17,33,7,0,0,Math.PI*2);ctx.fill();
     if(t.shield>0) {ctx.fillStyle='#b4e4e515';ctx.strokeStyle='#c5eef0a0';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-9,40,42,0,0,Math.PI*2);ctx.fill();ctx.stroke();}
     if(t.poisoned){ctx.fillStyle='#91af6c24';ctx.beginPath();ctx.ellipse(0,-17,36,34,0,0,7);ctx.fill();ctx.strokeStyle='#9bbd7980';ctx.lineWidth=1.5;for(let i=0;i<6;i++){const p=(this.time*.8+i/6)%1;ctx.beginPath();ctx.arc(Math.sin(i*5.1)*28,-3-p*43,2+p*2,0,7);ctx.stroke();}}
-    const celebrating=g.phase==='ended'&&g.winner===t.team;
+    const falling=isCrewFalling(t),cryAge=this.crewAnimation.cryAge(t.id,g.elapsed);
+    const celebrating=g.phase==='ended'&&g.winner===t.team&&!falling&&cryAge===null;
     const moving=g.movingUntil[t.id]>g.elapsed;
     const fired=g.projectiles.some(p=>p.owner===t.id&&p.age/g.motionScale<.5);
     const firing=fired?Math.max(0,1-(g.projectiles.find(p=>p.owner===t.id)?.age??0)/g.motionScale*2):0;
+    const rage=isRaging(t)&&!celebrating;
+    if(rage)paintRage(ctx,this.time,this.reducedMotion,false);
     if(vehicle)paintVehicle(ctx,vehicle,t.angle,this.time,firing,moving);
     const breathing=breathingPose(t.hp,this.time+t.id*.5,t.maxHP,t.vehicleId);
-    paintCrew(ctx,t,this.time,celebrating?'win':t.fallVelocity>0?'fall':t.reaction?'hurt':fired?'fire':moving?'move':'idle',breathing.active,firing,this.reducedMotion);
-    if(isRaging(t)&&!celebrating){ctx.strokeStyle='#d88b50';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-31,-39);ctx.lineTo(-27,-33);ctx.lineTo(-30,-27);ctx.stroke();}
+    const action=falling?'cry':t.reaction?'hurt':t.parachute?'parachute':celebrating?'win':fired?'fire':moving?'move':'idle';
+    const idle=g.phase!=='lobby'&&g.phase!=='ended'&&!g.introLocked?this.crewAnimation.idleAge(t.id,g.elapsed):null;
+    paintCrew(ctx,t,this.time,action,breathing,firing,this.reducedMotion,idle,cryAge,rage);
+    if(rage)paintRage(ctx,this.time,this.reducedMotion,true);
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
     for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132)*g.motionScale;const x=clamp(t.x,this.offsetX+48*g.motionScale,this.offsetX+this.viewWidth-48*g.motionScale),y=Math.max(this.offsetY+38*g.motionScale,top);ctx.save();ctx.translate(x,y);ctx.scale(g.motionScale,g.motionScale);paintItemCue(ctx,cue,0,0,teamFlag(t.team).color,this.reducedMotion);ctx.restore();}
@@ -368,7 +376,8 @@ export class Renderer {
     ctx.save();ctx.beginPath();ctx.arc(0,-85,19,0,Math.PI*2);ctx.clip();if(portrait)ctx.drawImage(portrait,-20,-105,40,40);ctx.restore();
     ctx.strokeStyle=teamFlag(t.team).color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-85,20,0,Math.PI*2);ctx.stroke();
     paintMedal(ctx,this.medalFor?.(t)??g.medal(t),14,-92,24);
-    ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,-59,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,-59,46*t.hp/t.maxHP,3,1.5);ctx.fill();
+    const healthY=t.crew==='fox'?-62:-59;
+    ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,healthY,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,healthY,46*t.hp/t.maxHP,3,1.5);ctx.fill();
     if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,44,-95,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.textAlign='center';ctx.fillText('中毒',61,-83);}
     ctx.restore();
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}
@@ -428,6 +437,8 @@ export class Renderer {
     }
     const shotArtScale=tankArtScale(g.gameVersion);
     for(const mine of g.mines) if((precisionPolish(g.gameVersion)?g.tanks[mine.owner]?.team===g.tanks[g.viewer].team:mine.owner===g.viewer||g.snow)&&this.visibleAt(mine.x)) {ctx.fillStyle=weaponById(mine.weapon).color;ctx.beginPath();ctx.ellipse(mine.x,mine.y,9*shotArtScale,4*shotArtScale,0,0,7);ctx.fill();ctx.fillStyle='#eeb58a';ctx.fillRect(mine.x-2*shotArtScale,mine.y-5*shotArtScale,4*shotArtScale,2*shotArtScale);}
+    if(!g.introLocked&&g.phase!=='lobby')for(const t of g.tanks)
+      this.crewAnimation.update(t,g.elapsed,g.movingUntil[t.id]>g.elapsed||g.phase==='flying'&&g.current===t.id||g.itemCues.some(cue=>cue.tank===t.id));
     this.labelRects=[];this.portraitHits=[];const visibleTanks=g.tanks.filter(t=>g.visible(t)),portraitTop=g.introLocked?this.tourPlayer:g.current;if(sourceRangeModel(g.gameVersion))visibleTanks.sort((a,b)=>Number(a.id===portraitTop)-Number(b.id===portraitTop));visibleTanks.forEach(t=>this.tank(t));
     // Visible pickups sit in front of the chassis, including drops at a player’s feet.
     for(const crate of g.crates) {
