@@ -1,11 +1,12 @@
 import {tankArtScale} from './reference-calibration';
 import {weaponById,type WeaponId} from './catalog';
+import {enlargedBattleProjectiles} from './weapon-presentation';
 import {paintVectorProjectile} from './projectile-vector';
 
 /** Render-only visibility adjustment. Never use projectile.scale (a damage factor). */
 export const projectileDrawScale=(shape:string)=>shape==='cannon-special'?1.35:shape==='shell'?1.2:['crossbow-normal','crossbow-special','sniper','ion-normal'].includes(shape)?1.12:1;
 /** Battlefield-only compensation; inventory/guide icons keep their existing sizes. */
-export const projectileBattleScale=(shape:string,version:string)=>projectileDrawScale(shape)*tankArtScale(version);
+export const projectileBattleScale=(shape:string,version:string)=>projectileDrawScale(shape)*tankArtScale(version)*(enlargedBattleProjectiles(version)&&shape!=='cannon-special'?1.24:1);
 const rearExtents=new Map<string,number>();
 /** Sample our actual vector silhouette once, so a short exhaust starts at its rear. */
 export function projectileRearExtent(shape:string,sections=4){

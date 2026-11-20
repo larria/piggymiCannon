@@ -5,7 +5,8 @@ import {teamFlag} from './crew';
 export class DashboardView {
   private terrain=document.createElement('canvas');private revision=-1;private previousGame:Game|null=null;
   private dialSignature='';private mapSignature='';dialFrames=0;mapFrames=0;
-  constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;}
+  private turnPulse:HTMLElement|null;
+  constructor(private dial:HTMLCanvasElement,private map:HTMLCanvasElement){dial.width=260;dial.height=260;map.width=300;map.height=168;this.terrain.width=300;this.terrain.height=168;this.turnPulse=map.parentElement?.querySelector('.minimap-turn-pulse')??null;}
   invalidate(){this.dialSignature='';this.mapSignature='';}
   draw(game:Game,t:Tank,offset:number,viewHeight:number,offsetX=0,viewWidth=WORLD_W){
     const signature=[t.angle,t.direction,t.minAngle,t.maxAngle,game.tankSlope(t)].join('|');
@@ -22,7 +23,8 @@ export class DashboardView {
     const p=polar(t.angle,50);c.strokeStyle='#718c5a';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(p.x,p.y);c.stroke();c.fillStyle='#e8a26a';c.beginPath();c.arc(p.x,p.y,3,0,7);c.fill();c.restore();
     c.fillStyle='#8da273';c.beginPath();c.arc(65,65,5,0,7);c.fill();c.fillStyle='#597347';c.font='600 19px "Manrope",sans-serif';c.textAlign='center';c.restore();
     }
-    const mapSignature=[game.land.revision,game.current,game.viewer,game.introLocked,game.fog,game.snow,game.fireLine?.x,Math.round(offset*1024),Math.round(offsetX*1024),viewWidth,viewHeight,this.map.clientWidth,this.map.clientHeight,...game.tanks.flatMap(t=>[t.x,t.y,t.hp,t.team,t.outOfBounds]),...game.crates.flatMap(c=>[c.x,c.y,c.falling,c.type])].join('|');
+    const pulsing=!game.introLocked&&(game.phase==='aiming'||game.phase==='flying')&&!game.weatherObservation;
+    const mapSignature=[game.land.revision,game.current,game.viewer,game.introLocked,game.fog,game.snow,game.fireLine?.x,pulsing,game.paused,Math.round(offset*1024),Math.round(offsetX*1024),viewWidth,viewHeight,this.map.clientWidth,this.map.clientHeight,...game.tanks.flatMap(t=>[t.x,t.y,t.hp,t.team,t.outOfBounds]),...game.crates.flatMap(c=>[c.x,c.y,c.falling,c.type])].join('|');
     if(this.previousGame===game&&this.mapSignature===mapSignature)return;
     this.mapSignature=mapSignature;this.mapFrames++;
     const m=this.map.getContext('2d')!,base=this.terrain.getContext('2d')!;
@@ -36,6 +38,11 @@ export class DashboardView {
       const x=tank.x/game.worldWidth*300,y=tank.y/game.worldHeight*168;
       const radius=tank.id===game.current?7:6;
       m.fillStyle=tank.hp>0?teamFlag(tank.team).color:'#8c9188';m.beginPath();m.ellipse(x,y,radius,radius*markerAspect,0,0,Math.PI*2);m.fill();
+    }
+    if(this.turnPulse){
+      const tank=pulsing?markers.find(t=>t.id===game.current&&t.hp>0):null;
+      this.turnPulse.hidden=!tank;
+      if(tank){const style=this.turnPulse.style;style.left=`${tank.x/game.worldWidth*100}%`;style.top=`${tank.y/game.worldHeight*100}%`;style.width=`${14*this.map.clientWidth/300}px`;style.setProperty('--flag-ink',teamFlag(tank.team).color);style.animationPlayState=game.paused?'paused':'running';}
     }
     for(const crate of game.crates)if(!game.fog||Math.abs(crate.x-game.tanks[game.viewer].x)<230){m.fillStyle='#e6ba75';m.fillRect(crate.x/game.worldWidth*300-2,crate.y/game.worldHeight*168-2,5,5);}
   }

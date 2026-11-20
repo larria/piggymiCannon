@@ -20,7 +20,7 @@ import './web-select.css';
 import {ImpactProfiler} from './impact-profiler';
 import {snapshotText} from './battle-trace';
 import {legacyMapBgmFile} from './map-music';
-import { Game, clamp, type Config } from './engine';
+import { Game, clamp, type Config,type Tank } from './engine';
 import { Renderer } from './renderer';
 import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,portraitDiagnostics} from './crew-portraits';
 import { AudioManager } from './audio';
@@ -109,7 +109,7 @@ $('#app').innerHTML=`
           <div class="scoreboard"></div>
           <div class="battle-stage">
             <canvas id="battlefield" width="1280" height="600" aria-label="可破坏的炮术战场；使用下方面板或键盘调整角度、力度和移动；滚轮、触摸板或双指缩放，拖动转移视野。"></canvas>
-            <div id="minimap-panel" class="minimap-panel"><div class="minimap-header"><button id="minimap-toggle" aria-label="折叠小地图" aria-expanded="true"><span>小地图</span>${icon('chevron')}</button><button id="minimap-follow" aria-label="恢复战场镜头跟随">跟随</button></div><canvas id="minimap" aria-label="小地图，点击定位视野"></canvas><div id="wind-gauge" class="wind-gauge" role="meter" aria-label="风向与风力" aria-valuemin="-11" aria-valuemax="11" aria-valuenow="0"><span class="wind-area" aria-hidden="true"></span><span class="wind-center" aria-hidden="true"></span><span class="wind-end" aria-hidden="true" hidden></span></div></div><div class="stage-top"><span class="map-chip">${icon('mountain')}<span id="map-label">青苔峡谷</span><span class="map-code" id="map-code">01</span></span><button id="inventory-toggle" class="stage-button stage-extra inventory-toggle" aria-label="展开军火库" aria-expanded="false">${icon('shell')}<span>军火库</span></button><button id="fullscreen-button" class="stage-button stage-extra" title="全屏作战" aria-label="全屏作战">${icon('fullscreen')}</button><button id="layout-button" class="stage-button stage-extra" title="切换标准布局" aria-label="切换标准布局">${icon('shrink')}</button><button id="pause-button" class="stage-button" title="暂停 · Esc" aria-label="暂停游戏">${icon('pause')}</button></div>
+            <div id="minimap-panel" class="minimap-panel"><div class="minimap-header"><button id="minimap-toggle" aria-label="折叠小地图" aria-expanded="true"><span>小地图</span>${icon('chevron')}</button><button id="minimap-follow" aria-label="恢复战场镜头跟随">跟随</button></div><div class="minimap-field"><canvas id="minimap" aria-label="小地图，点击定位视野"></canvas><i class="minimap-turn-pulse" aria-hidden="true" hidden></i></div><div id="wind-gauge" class="wind-gauge" role="meter" aria-label="风向与风力" aria-valuemin="-11" aria-valuemax="11" aria-valuenow="0"><span class="wind-area" aria-hidden="true"></span><span class="wind-center" aria-hidden="true"></span><span class="wind-end" aria-hidden="true" hidden></span></div></div><div class="stage-top"><span class="map-chip">${icon('mountain')}<span id="map-label">青苔峡谷</span><span class="map-code" id="map-code">01</span></span><button id="inventory-toggle" class="stage-button stage-extra inventory-toggle" aria-label="展开军火库" aria-expanded="false">${icon('shell')}<span>军火库</span></button><button id="fullscreen-button" class="stage-button stage-extra" title="全屏作战" aria-label="全屏作战">${icon('fullscreen')}</button><button id="layout-button" class="stage-button stage-extra" title="切换标准布局" aria-label="切换标准布局">${icon('shrink')}</button><button id="pause-button" class="stage-button" title="暂停 · Esc" aria-label="暂停游戏">${icon('pause')}</button></div>
             <div id="turn-indicator" class="turn-indicator hidden"><span class="status-dot"></span><span id="turn-text">轮到你了</span><span class="turn-divider"></span><span id="round-text">第 01 回合</span></div>
             <div id="timer" class="timer hidden">${icon('clock')}<span>∞</span><small>s</small></div>
             <section id="lobby-overlay" class="lobby-welcome" aria-label="开局准备"><div class="lobby-copy"><h1>准备开战</h1><p>选择战场，安排炮手</p></div><div class="lobby-actions"><button id="start-button" class="button button-dark">进入战场 ${icon('arrow')}</button></div></section>
@@ -206,15 +206,37 @@ function adjustDisplayedAim(angle:number,direction?:number){
  else if(direction===undefined)game.prepareAim(angle,t.id);else game.prepareAim(angle,t.id,direction);
 }
 function displayTank(){return game.dashboardTank;}
+// These two items leave inventory immediately, but their original slot shows the queued shot.
+const queuedShotSlots=new WeakMap<Game,{tank:number;turn:number;slots:Partial<Record<'boost'|'double',number>>}>();
+function useHumanItem(id:ItemId,slot:number){
+  if(!game.useItem(id,false,slot))return false;
+  if(id==='boost'||id==='double'){
+    const tank=game.active,old=queuedShotSlots.get(game);
+    const slots=old?.tank===tank.id&&old.turn===tank.turnsTaken?old.slots:{};
+    slots[id]=slot;queuedShotSlots.set(game,{tank:tank.id,turn:tank.turnsTaken,slots});
+  }
+  return true;
+}
+function pendingShotItem(tank:Tank,slot:number,id:ItemId|null):ItemId|null{
+  if(playback||tank.id!==game.current||tank.controller!=='human'||tank.hp<=0||game.phase!=='aiming')return null;
+  if(id&&game.itemArmed(slot))return id;
+  const queued=queuedShotSlots.get(game);
+  if(!queued||queued.tank!==tank.id||queued.turn!==tank.turnsTaken)return null;
+  return queued.slots.boost===slot&&tank.boost?'boost':queued.slots.double===slot&&tank.doubleShot?'double':null;
+}
+const pendingChip=(id:ItemId)=>`<i class="queued-item-chip" aria-hidden="true">${itemIcon(id)}</i>`;
+
 function renderInventory() {
   const tank=displayTank(),vehicle=tank.vehicleId?vehicleById(tank.vehicleId):null;
   const selected=canControlBattle()?game.selected:tank.selectedWeapon;
   const weapons=vehicle?[weaponById(vehicle.normal),weaponById(vehicle.special),...(tank.ammo.homing>0?[weaponById('homing')]:[])]:WEAPONS;
   $('#inventory-grid').innerHTML=activeTab==='weapons'?weapons.map(w=>`<button class="inventory-tile ${selected===w.id?'selected':''} ${tank.ammo[w.id]<=0?'depleted':''}" data-weapon="${w.id}" data-help-name="${w.name}" data-help-description="${weaponHint(w.id)}" aria-label="${w.name}，${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]+' 发':'无限弹药'}" aria-pressed="${selected===w.id}"><span class="weapon-icon" style="--weapon-color:${w.color}"><canvas data-shell="${w.id}" class="shell-swatch" aria-hidden="true"></canvas></span><span class="tile-name">${w.name}</span><span class="ammo-count">${Number.isFinite(tank.ammo[w.id])?tank.ammo[w.id]:'∞'}</span>${selected===w.id?`<span class="selection-tick">${icon('check')}</span>`:''}</button>`).join(''):
     game.backpack(tank).map((id,slot)=>{
+      const pending=pendingShotItem(tank,slot,id),queued=pending?ITEMS.find(i=>i.id===pending)!:null,armed=!!pending&&tank.id===game.current&&game.itemArmed(slot);
+      if(!id&&queued)return `<button class="inventory-tile item-tile pending-shot-item" disabled aria-label="道具槽 ${slot+1}，${queued.name}待发"><span class="weapon-icon">${itemIcon(queued.id)}</span><span class="tile-name">${queued.name}</span><span class="item-hint">已使用 · 等待发射</span></button>`;
       if(!id)return `<button class="inventory-tile item-tile empty-item" disabled aria-label="道具槽 ${slot+1}，空槽"><span class="weapon-icon">${icon('plus')}</span><span class="tile-name">空槽</span><span class="item-hint">可拾取任意道具</span></button>`;
       const i=ITEMS.find(i=>i.id===id)!,reason=game.itemUnavailable(id,false,slot);
-      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${(tank.id===game.current&&game.itemArmed(slot))?'selected':''}" data-item="${id}" data-item-slot="${slot}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="道具槽 ${slot+1}，使用${i.name}${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${itemIcon(id)}</span><span class="tile-name">${i.name}</span><span class="item-hint">${reason||'使用后留空 · 可拾取重复道具'}</span><span class="item-cost">${(tank.id===game.current&&game.itemArmed(slot))?'已装填 · 再点取消':'同回合可联动'}</span></button>`;
+      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${armed?'selected pending-shot-item':pending?'has-queued-shot':''}" data-item="${id}" data-item-slot="${slot}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="道具槽 ${slot+1}，使用${i.name}${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${itemIcon(id)}</span><span class="tile-name">${i.name}</span><span class="item-hint">${reason||'使用后留空 · 可拾取重复道具'}</span><span class="item-cost">${armed?'已装填 · 再点取消':'同回合可联动'}</span>${pending&&!armed?pendingChip(pending):''}</button>`;
     }).join('');
   $('#inventory-grid').classList.toggle('items-grid',activeTab==='items');
   $('#inventory-grid').setAttribute('aria-label',activeTab==='weapons'?'武器清单':'道具清单');
@@ -251,11 +273,13 @@ function updateUI() {
   $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=game.delayEnabled?String(t.delayCommitted?t.lastDelay:game.delayFor(t,instrumentSpecial?undefined:shownWeapon)+(instrumentSpecial?200:0)):'—';
   $('#previous-power').hidden=t.lastPower===null||lobby||game.phase==='ended';$('#previous-power').style.left=t.lastPower===null?'0%':`${t.lastPower}%`;
   const marker=$('#power-marker');marker.hidden=t.powerMarker==null||lobby;marker.style.left=`${t.powerMarker??0}%`;marker.setAttribute('aria-label',`本局力度记号 ${t.powerMarker??0}%`);marker.dataset.power=String(t.powerMarker??'');
-  const quick=game.backpack(t);const quickSignature=quick.map((id,slot)=>`${id}:${id?game.itemUnavailable(id,false,slot):'empty'}`).join('|')+'|'+(instrumentActive&&game.teleporting)+'|'+(instrumentActive&&game.restoring)+'|'+quick.map((_,slot)=>instrumentActive&&game.itemArmed(slot)).join(',')+'|'+t.id;
+  const quick=game.backpack(t),pendingItems=quick.map((id,slot)=>pendingShotItem(t,slot,id));const quickSignature=quick.map((id,slot)=>`${id}:${id?game.itemUnavailable(id,false,slot):'empty'}`).join('|')+'|'+(instrumentActive&&game.teleporting)+'|'+(instrumentActive&&game.restoring)+'|'+pendingItems.join(',')+'|'+t.id;
   if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,slot)=>{
+    const pending=pendingItems[slot],queued=pending?ITEMS.find(i=>i.id===pending)!:null;
+    if(!id&&queued)return `<button class="pending-shot-item" data-item-slot="${slot}" disabled data-help-name="${queued.name}" data-help-description="已使用 · 等待发射" aria-label="道具槽 ${slot+1}，${queued.name}待发">${itemIcon(queued.id)}<span>待发</span></button>`;
     if(!id)return `<button class="empty-item" data-item-slot="${slot}" disabled data-help-name="空槽" data-help-description="可拾取任意道具，重复道具各占一个槽位" aria-label="道具槽 ${slot+1}，空槽">${icon('plus')}<span>空槽</span></button>`;
     const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id,false,slot),armed=instrumentActive&&game.itemArmed(slot);
-    return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+slot}${reason?' · '+reason:''}" aria-label="道具槽 ${slot+1}，快捷使用${item.name}">${itemIcon(id)}<span>${item.name}</span></button>`;
+    return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''} ${armed&&pending===id?'pending-shot-item':pending?'has-queued-shot':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+slot}${reason?' · '+reason:''}" aria-label="道具槽 ${slot+1}，快捷使用${item.name}">${itemIcon(id)}<span>${item.name}</span>${pending&&!armed?pendingChip(pending):''}</button>`;
   }).join('');}
   $('.wait-readout').dataset.helpDescription=!(game.delayEnabled)?'含 AI 的对局按存活槽位轮转，DELAY 排序关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
   $('#pwa-update').classList.toggle('hidden',!pendingUpdate||(!lobby&&game.phase!=='ended'));
@@ -322,7 +346,7 @@ function updateUI() {
   $('#fire-note').textContent=game.weatherObservation?'火线变化 · 正在展示战场':game.phase==='supply'?'空投阶段不消耗回合时间':lobby?'先进入战场':game.phase==='flying'||game.phase==='resolving'?'欣赏这条抛物线':game.introLocked?'开场巡游 · 正在展示炮手位置':game.paused?'游戏已暂停':game.phase==='ended'?'下一局见':game.phase==='handoff'?'交给下一位队长':!human?'等待对手行动':game.restoring?'恢复弹已装填 · 基础恢复40%':game.teleporting?'转移弹已装填 · 蓄力发射':t.doubleShot?'双发装填已就绪':t.boost?'强化炮弹已就绪':`${weaponById(game.selected).name}已就绪`;
   $<HTMLButtonElement>('#pause-button').disabled=lobby||game.phase==='ended'||game.phase==='handoff';
   $('#pause-button').innerHTML=icon(game.paused?'play':'pause');$('#pause-button').setAttribute('aria-label',game.paused?'继续游戏':'暂停游戏');
-  const signature=`${activeTab}|${t.vehicleId}|${shownWeapon}|${t.id}|${game.teleporting}|${game.restoring}|${t.itemUsed}|${t.tactics}|${ITEMS.map(i=>game.itemUnavailable(i.id)).join(',')}|${JSON.stringify(t.ammo)}|${JSON.stringify(t.items)}`;
+  const signature=`${activeTab}|${t.vehicleId}|${shownWeapon}|${t.id}|${game.teleporting}|${game.restoring}|${t.itemUsed}|${t.tactics}|${ITEMS.map(i=>game.itemUnavailable(i.id)).join(',')}|${JSON.stringify(t.ammo)}|${JSON.stringify(t.items)}|${quick.join(',')}|${pendingItems.join(',')}`;
   if(signature!==lastInventory) {renderInventory();lastInventory=signature;}
   const phaseKey=game.phase==='ended'?(game.resultAge<3?'ending-animation':'ending-result'):`${game.phase}:${game.introLocked}:${game.paused}`;
   $('#game-overlay').classList.toggle('result-overlay',game.phase==='ended');
@@ -551,7 +575,7 @@ document.addEventListener('click',e=>{
   if(item) {
     renderDetail(item);
     if(!canControlBattle()) {toast('道具要在自己的回合使用。');return;}
-    if(game.useItem(item,false,Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot))) {toast(item==='repair'?(game.restoring?'恢复弹已装填；轻点原地治疗，蓄力可投向队友。':'已取消恢复弹装填。'):item==='teleport'?(game.teleporting?'转移弹已装填，调整角度后蓄力发射。':'已取消转移弹装填。'):`${ITEMS.find(i=>i.id===item)!.name}已使用。`);lastInventory='';updateUI();}
+    if(useHumanItem(item,Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot))) {toast(item==='repair'?(game.restoring?'恢复弹已装填；轻点原地治疗，蓄力可投向队友。':'已取消恢复弹装填。'):item==='teleport'?(game.teleporting?'转移弹已装填，调整角度后蓄力发射。':'已取消转移弹装填。'):`${ITEMS.find(i=>i.id===item)!.name}已使用。`);lastInventory='';updateUI();}
     else toast(game.itemUnavailable(item,false,Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot))||'当前不能使用这件道具。');
   }
 });
@@ -694,7 +718,7 @@ document.addEventListener('keydown',e=>{
   if(['w','s','arrowup','arrowdown'].includes(key))angleKeyOwner=displayTank().id;
   if((key==='f3'||key==='f4')&&game.active.vehicleId){e.preventDefault();const v=vehicleById(game.active.vehicleId);if(game.selectWeapon(key==='f3'?v.normal:v.special)) {audio.play('click');updateUI();}return;}
   if(key==='f5'){e.preventDefault();cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();return;}
-  if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const slot=Number(key.slice(1))-9,id=game.backpack()[slot];if(id&&game.useItem(id,false,slot))updateUI();else toast(id?game.itemUnavailable(id,false,slot)??'当前不能使用':'这个道具槽是空的');return;}
+  if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const slot=Number(key.slice(1))-9,id=game.backpack()[slot];if(id&&useHumanItem(id,slot))updateUI();else toast(id?game.itemUnavailable(id,false,slot)??'当前不能使用':'这个道具槽是空的');return;}
   if(['arrowleft','arrowright','arrowup','arrowdown'].includes(key)){e.preventDefault();keys.add(key);}
   if(['a','d','w','s','q','e',' '].includes(key)) {e.preventDefault();keys.add(key);}
   if(key===' '&&!e.repeat) startCharge(null);

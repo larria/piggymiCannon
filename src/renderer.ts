@@ -1,5 +1,6 @@
 import {sourceRangeModel} from './source-range';
-import {vectorProjectiles} from './weapon-presentation';
+import {enlargedBattleProjectiles,vectorProjectiles} from './weapon-presentation';
+import {isWaterShell,paintWaterFlight,paintWaterSplash,waterFootprint} from './water-flight';
 import {battleViewWidth} from './world-layout';
 import {portraitViewWidth} from './portrait-viewport';
 import {precisionPolish} from './match-polish';
@@ -330,7 +331,7 @@ export class Renderer {
   private tank(t:Tank) {
     const ctx=this.ctx,g=this.game,artScale=tankArtScale(g.gameVersion),badgeLift=tankBadgeLift(g.gameVersion),labelScale=g.layoutScale;
     if(t.hp<=0) {
-      defeatedPig(ctx,t,this.time,undefined,artScale);
+      defeatedPig(ctx,t,this.time,undefined,artScale,this.reducedMotion);
       return;
     }
     const vehicle=t.vehicleId?vehicleById(t.vehicleId):null;
@@ -347,7 +348,7 @@ export class Renderer {
     const firing=fired?Math.max(0,1-(g.projectiles.find(p=>p.owner===t.id)?.age??0)/g.motionScale*2):0;
     if(vehicle)paintVehicle(ctx,vehicle,t.angle,this.time,firing,moving);
     const breathing=breathingPose(t.hp,this.time+t.id*.5,t.maxHP,t.vehicleId);
-    paintCrew(ctx,t,this.time,celebrating?'win':t.reaction?'hurt':fired?'fire':moving?'move':'idle',breathing.active);
+    paintCrew(ctx,t,this.time,celebrating?'win':t.fallVelocity>0?'fall':t.reaction?'hurt':fired?'fire':moving?'move':'idle',breathing.active,firing,this.reducedMotion);
     if(isRaging(t)&&!celebrating){ctx.strokeStyle='#d88b50';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-31,-39);ctx.lineTo(-27,-33);ctx.lineTo(-30,-27);ctx.stroke();}
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
@@ -439,13 +440,20 @@ export class Renderer {
       if(crate.type==='medical') {ctx.fillStyle='#a47158';ctx.fillRect(crate.x-7,crate.y-2,14,4);ctx.fillRect(crate.x-2,crate.y-7,4,14);}
       ctx.restore();
     }
+    const largerProjectiles=enlargedBattleProjectiles(g.gameVersion);
     for(const p of g.projectiles) {
       if(p.delay>0||!this.visibleAt(p.x)) continue;
       if(!vectorProjectiles(g.gameVersion)&&!p.fireBoosted&&!p.transfer&&weaponHasTrail(p.weapon,g.gameVersion)&&p.trail.length>1){ctx.save();const first=p.trail[0],last=p.trail[p.trail.length-1],weapon=weaponById(p.weapon),color=weapon.color,rear=projectileRearExtent(weapon.shape??p.weapon,4-p.penetrations)*shotArtScale,angle=Math.atan2(p.vy,p.vx);ctx.translate(-Math.cos(angle)*rear,-Math.sin(angle)*rear);const fade=ctx.createLinearGradient(first.x,first.y,last.x,last.y);fade.addColorStop(0,color+'00');fade.addColorStop(1,color);ctx.strokeStyle=fade;ctx.globalAlpha=MODERN_TRAIL_ALPHA;ctx.lineWidth=MODERN_TRAIL_WIDTH*shotArtScale;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();p.trail.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.stroke();ctx.restore();}
       if(p.fireBoosted){ctx.save();p.trail.filter((_,i)=>i%6===0).forEach((q,i)=>{ctx.globalAlpha=.3+i/10;ctx.translate(q.x,q.y);ctx.fillStyle=i%2?'#e8a958':'#fae5a1';ctx.strokeStyle='#b27939';ctx.lineWidth=.6*shotArtScale;ctx.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,r=(j%2?2.6:6)*shotArtScale;const x=Math.cos(a)*r,y=Math.sin(a)*r;j?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.stroke();ctx.translate(-q.x,-q.y);});ctx.restore();}
-      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(p.vy,p.vx));
+      ctx.save();ctx.translate(p.x,p.y);
+      if(largerProjectiles&&isWaterShell(p.weapon)&&!p.healing&&!p.transfer){
+        const {halfWidth,height}=waterFootprint(p.weapon,g.gameVersion,p.digBoost);
+        paintWaterFlight(ctx,p.weapon,halfWidth,height,this.reducedMotion?0:this.time+p.phase,p.fireBoosted,p.vx);
+        ctx.restore();continue;
+      }
+      ctx.rotate(Math.atan2(p.vy,p.vx));
       const weapon=weaponById(p.weapon),shape=p.healing?'medical':p.transfer?'transfer':weapon.shape??p.weapon;ctx.save();const size=projectileBattleScale(p.healing?'cannon-normal':shape,g.gameVersion);ctx.scale(size,size);projectileArt(ctx,shape,p.healing?'#8bb977':p.transfer?'#63adbd':weapon.color,this.time+p.phase,4-p.penetrations);if(p.fireBoosted)paintBoostStars(ctx,shape,this.time+p.phase,4-p.penetrations);ctx.restore();
-      if(p.healing){ctx.save();ctx.scale(shotArtScale,shotArtScale);ctx.fillStyle='#fff8e8';ctx.fillRect(-1.5,-5,3,10);ctx.fillRect(-5,-1.5,10,3);ctx.restore();}
+      if(p.healing){const cross=shotArtScale*(largerProjectiles?1.24:1);ctx.save();ctx.scale(cross,cross);ctx.fillStyle='#fff8e8';ctx.fillRect(-1.5,-5,3,10);ctx.fillRect(-5,-1.5,10,3);ctx.restore();}
       if(p.homing) {ctx.strokeStyle='#bddce3';ctx.lineWidth=2*shotArtScale;ctx.beginPath();ctx.arc(0,0,11*shotArtScale,0,Math.PI*2);ctx.stroke();}ctx.restore();
       if(p.homing&&this.visibleAt(p.lockX)) {ctx.save();ctx.strokeStyle='#d6efdfb0';ctx.lineWidth=1.5;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.lockX,p.lockY);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(p.lockX,p.lockY,15+Math.sin(p.lockAge*12)*4,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(p.lockX-23,p.lockY);ctx.lineTo(p.lockX-13,p.lockY);ctx.moveTo(p.lockX+13,p.lockY);ctx.lineTo(p.lockX+23,p.lockY);ctx.stroke();ctx.restore();}
       if(weapon.effect==='orbital'&&p.sub) {ctx.save();ctx.strokeStyle='#c0bdf595';ctx.lineWidth=5*shotArtScale;ctx.beginPath();ctx.moveTo(p.x,-40);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.restore();}
@@ -453,6 +461,11 @@ export class Renderer {
     for(const b of g.blasts) {
       if(!this.visibleAt(b.x)) continue;
       const progress=1-b.life/b.maxLife;
+      if(largerProjectiles&&isWaterShell(b.weapon)){
+        const {halfWidth,height}=waterFootprint(b.weapon,g.gameVersion);
+        if(!paintBattleSprite(ctx,'water',progress,b.x-halfWidth,b.y-height,halfWidth*2,height*1.2,.83*(1-progress*.7)))paintWaterSplash(ctx,b.weapon,b.x,b.y,halfWidth,height,progress);
+        continue;
+      }
       const effect=b.weapon?weaponById(b.weapon).effect:undefined;
       const sprite=effect==='freeze'||b.weapon?.startsWith('water-')?'water':['beam','helix','orbital'].includes(effect??'')?'energy':'blast';
       if(!b.healing)paintBattleSprite(ctx,sprite,progress,b.x-b.radius*1.15,b.y-b.radius*1.15,b.radius*2.3,b.radius*2.3,.6*(1-progress*.7));
