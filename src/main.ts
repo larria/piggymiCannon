@@ -710,7 +710,7 @@ document.addEventListener('keydown',e=>{
   if(key==='c'&&e.ctrlKey){e.preventDefault();renderer.follow();return;}
   if(key==='f5'&&renderer.touring){e.preventDefault();renderer.finishTour();updateUI();return;}
   if(!canControlBattle()){if(canAdjustAngle()&&['w','s','arrowup','arrowdown'].includes(key)){e.preventDefault();angleKeyOwner=displayTank().id;keys.add(key);}return;}
-  if(isMoveKey(key)){e.preventDefault();syncKeyboardMove();if(!e.repeat&&!moveHeld&&game.active.fallVelocity<=0)keyboardMove.press(key,performance.now(),direction=>game.face(direction));return;}
+  if(isMoveKey(key)){e.preventDefault();syncKeyboardMove();if(!e.repeat&&!moveHeld&&game.active.fallVelocity<=0)keyboardMove.press(key,performance.now(),game.active.direction,direction=>game.face(direction));return;}
   if(['w','s','arrowup','arrowdown'].includes(key))angleKeyOwner=displayTank().id;
   if((key==='f3'||key==='f4')&&game.active.vehicleId){e.preventDefault();const v=vehicleById(game.active.vehicleId);if(game.selectWeapon(key==='f3'?v.normal:v.special)) {audio.play('click');updateUI();}return;}
   if(key==='f5'){e.preventDefault();cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();return;}
@@ -721,7 +721,7 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('keyup',e=>{
   const key=e.key.toLowerCase();blockedAngleKeys.delete(key);keys.delete(key);
-  if(isMoveKey(key)){syncKeyboardMove();if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open&&!moveHeld)keyboardMove.release(key,performance.now(),direction=>game.face(direction));else keyboardMove.reset();}
+  if(isMoveKey(key)){syncKeyboardMove();if(canControlBattle()&&!$<HTMLDialogElement>('#dialog').open&&!moveHeld)keyboardMove.release(key,performance.now(),game.active.direction,direction=>game.face(direction));else keyboardMove.reset();}
   if(e.key===' '&&charge?.pointer===null){e.preventDefault();finishCharge();}
 });
 window.addEventListener('blur',()=>{keys.clear();keyboardMove.reset();moveHeld=0;cancelCharge();});

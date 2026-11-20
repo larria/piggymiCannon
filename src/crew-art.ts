@@ -5,15 +5,18 @@ import {dadPose,mimiPose,paintDad,paintMimi,type CrewAction,type Expression} fro
 import {profileEyes,goggles,ink,oval,pantMouth,shockMouth,smile,steadyMouth,stroke} from './crew-ink';
 import type {CrewId} from './crew';
 
-const wardrobe={mimi:{fabric:'#777b50',shade:'#555d42',light:'#a7a475',skin:'#f9bfaa',edge:'#805443'},dad:{fabric:'#6c7055',shade:'#505745',light:'#959370',skin:'#f9bfaa',edge:'#805443'},fox:{fabric:'#6f795e',shade:'#4e5849',light:'#a4a882',skin:'#df614b',edge:'#964334'},fish:{fabric:'#8b8356',shade:'#635e44',light:'#bdb17f',skin:'#ffd06a',edge:'#ab702d'}} as const;
+const wardrobe={mimi:{fabric:'#777b50',shade:'#555d42',light:'#a7a475',skin:'#f9bfaa',edge:'#805443'},dad:{fabric:'#6c7055',shade:'#505745',light:'#959370',skin:'#f9bfaa',edge:'#805443'},fox:{fabric:'#6f795e',shade:'#4e5849',light:'#a4a882',skin:'#e14838',edge:'#953027'},fish:{fabric:'#8b8356',shade:'#635e44',light:'#bdb17f',skin:'#ffd06a',edge:'#ab702d'}} as const;
 function foxFace(c:CanvasRenderingContext2D,e:Expression){
- for(const side of [-1,1]){c.save();c.translate(side*13,-8);c.scale(side*(side===1?.91:1.06),side===1?.72:.79);c.rotate(e.ear);
-  ink(c,'M-12 2C-15-9-7-20 3-24L13-34Q14-36 15-33L22-23C28-15 26-5 20 3L12 8Z','#d7503e','#82392e',1.65);
-  ink(c,'M-7-1C-8-8 0-18 8-22L13-29L17-21C22-14 20-8 17-3L10 2Z','#ffb3a7');
-  ink(c,'M13-34Q14-36 15-33L22-23Q25-19 26-13L20-19Z','#a94033');c.restore();}
- ink(c,'M-22-4Q-18-19 1-18Q18-21 24-6L27 1 22 5 25 8Q19 19 4 20Q-13 21-23 12L-20 9-26 5Z','#dd5542','#82392e',1.65);
- ink(c,'M-22 7Q-13 10-11 14Q4 22 23 8Q18 19 3 20Q-16 20-22 7Z','#ba4135');
- ink(c,'M-22 5Q-20-1-16-4Q-13-11-5-8Q1-7 4 0Q8-12 15-11Q23-9 23 0L26 6Q20 18 3 18Q-16 19-22 5Z','#ffe4ca');
+ // Broad, outward-flared ears: the outer edge rises to a softly rounded
+ // point while the inner edge sweeps back into the forehead in one curve.
+ for(const side of [-1,1]){c.save();c.translate(side*(side===1?12:13),-8);c.scale(side*(side===1?.94:1.03),side===1?.76:.86);c.rotate(e.ear);
+  ink(c,'M-13 3C-11-10 1-25 20-29Q26-31 28-27C32-17 27-4 19 4Q13 11 4 10Z','#e83524','#862f28',1.65);
+  ink(c,'M-6 0C-2-11 8-20 20-23Q23-24 23-20C24-11 19-2 13 3Q3 7-6 0Z','#ffcf99');
+  ink(c,'M11-25Q20-29 25-28Q28-26 28-22Q26-26 22-26Z','#ff6747');
+  ink(c,'M-4 0Q3-10 13-14Q7-8 4 5Z','#efa383');c.restore();}
+ ink(c,'M-22-4Q-18-19 1-18Q18-21 24-6L27 1 22 5 25 8Q19 19 4 20Q-13 21-23 12L-20 9-26 5Z','#e93c28','#862f28',1.65);
+ ink(c,'M-22 7Q-13 10-11 14Q4 22 23 8Q18 19 3 20Q-16 20-22 7Z','#c92d23');
+ ink(c,'M-22 5Q-20-1-16-4Q-13-11-5-8Q1-7 4 0Q8-12 15-11Q23-9 23 0L26 6Q20 18 3 18Q-16 19-22 5Z','#ffdfb5');
  ink(c,'M-22-7Q-6-21 16-17L22-12Q5-16-21-4Z','#6e5343','#593d36',1);
  goggles(c,1,-17,-.12,.86);
  profileEyes(c,-6,1.3,5.7*(e.startled?1.16:1),'#445c9e',e.look,e.closed,e.serious,false,false,e.stunned);profileEyes(c,16,-.4,5.2*(e.startled?1.16:1),'#445c9e',e.look,e.closed,e.serious,true,false,e.stunned);
@@ -42,7 +45,7 @@ function tail(c:CanvasRenderingContext2D,id:CrewId,phase:number){
  if(id!=='fox'&&id!=='fish')return;
  c.save();c.translate(-16,22);c.rotate(phase*(id==='fox'?.16:.26));
  if(id==='fox'){
-  ink(c,'M7 6Q-10 9-20 0Q-30-9-22-23Q-19-14-8-11Q5-7 7 6Z','#d7533e','#82392e',1.6);
+  ink(c,'M7 6Q-10 9-20 0Q-30-9-22-23Q-19-14-8-11Q5-7 7 6Z','#e43b29','#862f28',1.6);
   ink(c,'M-22-23Q-20-16-14-14L-17-10-15-6-21-8-22-4Q-29-12-22-23Z','#ffedcf');
   ink(c,'M-20 0Q-10 4 4 2','none','#f39276',1.4);
  }else{
@@ -54,12 +57,21 @@ const faces={mimi:paintMimi,dad:paintDad,fox:foxFace,fish:fishFace};
 const limits:Record<CrewId,number>={mimi:.93,dad:.96,fox:.92,fish:.93};
 const rhythms:Record<CrewId,number>={mimi:1,dad:.68,fox:1.32,fish:1.15};
 interface CrewMotion {breath?:ReturnType<typeof breathingPose>;stunned?:boolean;rage?:boolean;cryAge?:number|null;healAge?:number|null;cheerAge?:number|null;shockAge?:number|null;recoil?:number;idleAge?:number|null;reduced?:boolean;poisoned?:boolean;frozen?:boolean}
-function hand(c:CanvasRenderingContext2D,id:CrewId,side:number,x:number,y:number){
+function hand(c:CanvasRenderingContext2D,id:CrewId,x:number,y:number){
  const {skin,edge}=wardrobe[id];
- if(id==='fish'){c.save();c.translate(x,y);c.rotate(side*.48);oval(c,0,-.65,4.5,6.7,skin,edge);ink(c,'M-2-3l2 5m1-5 1 4','none','#e09c41',.8);c.restore();}
- else {oval(c,x,y,5.4,4.75,skin,edge);stroke(c,edge,.78,p=>{p.moveTo(x-1.8,y-1.6);p.quadraticCurveTo(x+1,y+1,x+2.5,y-.2);});oval(c,x-1.5,y-1.6,1.9,.75,id==='fox'?'#f29161':'#ffe0c8');}
+ oval(c,x,y,5.4,4.75,skin,edge);stroke(c,edge,.78,p=>{p.moveTo(x-1.8,y-1.6);p.quadraticCurveTo(x+1,y+1,x+2.5,y-.2);});oval(c,x-1.5,y-1.6,1.9,.75,id==='fox'?'#f29161':'#ffe0c8');
+}
+function pectoralFin(c:CanvasRenderingContext2D,side:number,height:number,reach:number){
+ // Let the whole fin pivot at the jacket. It has no sleeve, wrist or fist.
+ const root=side===1?14:15,y=side===1?25:26,dx=reach-root,dy=height-y;
+ c.save();c.translate(side*root,y);c.scale(side,1);c.rotate(Math.atan2(dy,dx));c.scale(Math.min(18,Math.max(9,Math.hypot(dx,dy)))/15,side===1?1:.82);
+ ink(c,'M-3 1Q-1-3 4-5Q10-8 15-6Q18-4 15-1Q20 0 16 3Q17 6 13 7Q3 6-3 1Z','#eeb450','#976331',1.25);
+ ink(c,'M2 1Q9 2 14 6Q6 6 2 3Z','#d99043');
+ ink(c,'M2 0Q8-4 13-5M3 1Q9-1 15 0M3 2Q10 2 14 4','none','#ffe49b',1.1);
+ c.restore();
 }
 function arm(c:CanvasRenderingContext2D,id:CrewId,side:number,height:number,reach:number,spread:number,goggleReach=0){
+ if(id==='fish'){pectoralFin(c,side,height,reach);return;}
  const {shade,light}=wardrobe[id],wide=id==='dad'?1.22:1;
  const x=(side===1?12:-13)*wide,y=side===1?22:24,px=side*reach;
  const elbow=px+side*3,bend=Math.max(spread,goggleReach);
@@ -70,7 +82,7 @@ function arm(c:CanvasRenderingContext2D,id:CrewId,side:number,height:number,reac
    c2+(px+side*(7+12*goggleReach)-c2)*bend+offset,(height+2*(y-1))/3*(1-bend)+(y-3)*bend,px+offset,height);
  };
  stroke(c,'#524939',8.9,route(0));stroke(c,shade,7,route(0));stroke(c,light,1.05,route(side*1.8));
- hand(c,id,side,px,height);
+ hand(c,id,px,height);
 }
 function jacket(c:CanvasRenderingContext2D,id:CrewId){
  const {fabric,light,shade}=wardrobe[id],wide=id==='dad'?1.25:1;c.save();c.scale(wide,1);
@@ -158,21 +170,23 @@ export function paintCrewFigure(c:CanvasRenderingContext2D,id:CrewId,time:number
   const s=limits[id];c.scale(s,s*breathStretch);
  }
  tail(c,id,p+listen*1.35+fin*2.4);
- const rearHeight=parachute?5+p:fall?3:win?id==='dad'?-5-p*2:-13-p*3:hurt?9:lose?22:action==='move'?15+p*3:22-collar*14-fin*25-startle*10;
- const leadHeight=parachute?6-p:fall?1:win?id==='dad'?-11+p*3:-12+p*3:hurt?11:lose?25:action==='fire'?12+recoil*3:action==='move'?17-p*3:20-tap*39-collar*10-fin*15-(pant?5:0)-relief*11-salute*29-startle*13;
- const liftRear=win||fall||parachute||hurt?1:Math.max(fin,startle*.85);
- const liftLead=win||fall||parachute||hurt?1:Math.max(salute,startle*.85,fin);
+ // Victory pumps stay beside the cheeks; a teammate cheer is a single quick
+ // fist pump (or fin flick). Falling and balance poses keep their own reach.
+ const rearHeight=parachute?5+p:fall?3:win?(id==='fox'?18:13)-p*2:hurt?9:lose?22:action==='move'?15+p*3:22-collar*14-fin*25-startle*10;
+ const leadHeight=parachute?6-p:fall?1:win?(id==='dad'?13:id==='fish'?11:9)+p*3:hurt?11:lose?25:action==='fire'?12+recoil*3:action==='move'?17-p*3:20-tap*39-collar*10-fin*15-(pant?5:0)-relief*11-salute*10-startle*13;
+ const liftRear=win?.36:fall||parachute||hurt?1:Math.max(fin,startle*.85);
+ const liftLead=win?.48:fall||parachute||hurt?1:Math.max(salute*.53,startle*.85,fin);
  const gogglesTap=Math.min(1,Math.max(0,(tap-.52)/.44)),touch=Math.max(0,(gogglesTap-.6)/.4);
  const outside=id==='dad'?37:id==='fish'?34:33;
  const rearRest=24+(id==='dad'?2:0),leadRest=20+collar*2;
- const rearReach=rearRest+(outside-2-rearRest)*liftRear;
- const leadReach=leadRest+(outside-leadRest)*liftLead-4*gogglesTap;
- // The far shoulder is behind the jacket. Raised elbows arc around the jaw,
- // and the head occludes sleeves; only the deliberate goggle tap overlays it.
+ const rearReach=win?(id==='dad'?27:id==='fox'?23:25)-p*.8:rearRest+(outside-2-rearRest)*liftRear;
+ const leadReach=win?(id==='dad'?29:27)+p*.8:leadRest+(outside-leadRest)*liftLead-4*gogglesTap;
+ // The far shoulder is behind the jacket. Keep the face above the gestures;
+ // only the deliberate goggle tap overlays the head.
  arm(c,id,-1,rearHeight,rearReach,liftRear);jacket(c,id);
  arm(c,id,1,leadHeight,leadReach,liftLead,gogglesTap);
  c.save();c.translate(-listen*1.8,id==='dad'?1:0);c.rotate(-listen*.19-tap*.085+(id==='fish'?.06-fin*.13:0));faces[id](c,expr);if(!lose)reactionMarks(c,phase,action,m,healAge,cheerAge,shockAge);c.restore();
- if(touch>0){c.save();c.globalAlpha=touch;hand(c,id,1,leadReach,leadHeight);c.restore();}
+ if(touch>0){c.save();c.globalAlpha=touch;hand(c,id,leadReach,leadHeight);c.restore();}
  if(lose)reactionMarks(c,phase,action,m,healAge,cheerAge,shockAge);c.restore();
 }
 

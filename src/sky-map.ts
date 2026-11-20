@@ -1,4 +1,5 @@
 import {sourceRangeModel} from './source-range';
+import {REFERENCE_BRIDGE_THICKNESS} from './reference-calibration';
 import {Terrain,WORLD_W,TERRAIN_H} from './terrain';
 export const SKY_UPPER_THICKNESS=58,SKY_BRANCH_THICKNESS=4;
 export const SKY_BRANCH_FROM=WORLD_W*.15,SKY_BRANCH_TO=WORLD_W*.85;
@@ -23,7 +24,7 @@ export const iceValleySurface=(x:number,width:number,height:number)=>smoothConto
 export const iceValleyBranch=(x:number,width:number,height:number)=>smoothContour(x,width,height,ICE_BRANCH_POINTS);
 export const ICE_BRANCH_FROM=.30,ICE_BRANCH_TO=.58;
 export function buildIceValley(land:Terrain,version='5.0.0'){
- if(sourceRangeModel(version)){for(let x=0;x<=land.width;x++)for(const band of iceValleyBands(x,land.width,land.height))land.column(x,band.top,band.top+band.depth);}
+ if(sourceRangeModel(version)){for(let x=0;x<=land.width;x++)for(const band of iceValleyBands(x,land.width,land.height,version))land.column(x,band.top,band.top+band.depth);}
  else for(let x=0;x<=land.width;x++){const top=iceValleySurface(x,land.width,land.height);land.column(x,top,top+SKY_UPPER_THICKNESS);}
  for(let x=Math.ceil(land.width*ICE_BRANCH_FROM);x<=Math.floor(land.width*ICE_BRANCH_TO);x++){const top=iceValleyBranch(x,land.width,land.height);land.column(x,top,top+SKY_BRANCH_THICKNESS);}
  land.rebuild();
@@ -31,13 +32,24 @@ export function buildIceValley(land:Terrain,version='5.0.0'){
 
 /** Reference screenshot: left ice descends toward a tapered middle-right tip;
  * the higher right ice begins near the centre and rises to the right edge.
- * Only their horizontal spans overlap. Main thickness and lower S stay fixed. */
+ * Only their horizontal spans overlap. The latest ice thickens toward the
+ * outer edges, preserving the upper contours, tips and separate lower S. */
 export const ICE_LEFT_END=.67,ICE_RIGHT_START=.41;
+const ICE_OUTER_THICKNESS=Math.round(REFERENCE_BRIDGE_THICKNESS*.95);
 const ICE_LEFT_POINTS=[[0,.30],[.10,.31],[.25,.385],[.38,.43],[.52,.44],[.67,.485]] as const;
 const ICE_RIGHT_POINTS=[[.41,.315],[.49,.27],[.58,.28],[.73,.25],[.88,.19],[1,.15]] as const;
-export function iceValleyBands(x:number,width:number,height:number){
- const u=x/width,bands:{top:number;depth:number;side:'left'|'right'}[]=[];
- if(u<=ICE_LEFT_END){const taper=Math.min(1,(ICE_LEFT_END-u)/.04);bands.push({top:smoothContour(x,width,height,ICE_LEFT_POINTS),depth:Math.max(1,SKY_UPPER_THICKNESS*Math.sin(Math.max(0,taper)*Math.PI/2)),side:'left'});}
- if(u>=ICE_RIGHT_START){const taper=Math.min(1,(u-ICE_RIGHT_START)/.04);bands.push({top:smoothContour(x,width,height,ICE_RIGHT_POINTS),depth:Math.max(1,SKY_UPPER_THICKNESS*Math.sin(Math.max(0,taper)*Math.PI/2)),side:'right'});}
+export function thickIceEdges(version:string){
+ const v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+ return !v||+v[1]>5||+v[1]===5&&(+v[2]>1||+v[2]===1&&+v[3]>=3);
+}
+export function iceValleyBands(x:number,width:number,height:number,version='5.0.4'){
+ const u=x/width,bands:{top:number;depth:number;side:'left'|'right'}[]=[],thickened=thickIceEdges(version);
+ const depth=(fromTip:number,span:number)=>{
+  const taper=Math.min(1,Math.max(0,fromTip/.04));
+  const extra=thickened?(ICE_OUTER_THICKNESS-SKY_UPPER_THICKNESS)*(fromTip/span)**2.4:0;
+  return Math.max(1,SKY_UPPER_THICKNESS*Math.sin(taper*Math.PI/2)+extra);
+ };
+ if(u<=ICE_LEFT_END)bands.push({top:smoothContour(x,width,height,ICE_LEFT_POINTS),depth:depth(ICE_LEFT_END-u,ICE_LEFT_END),side:'left'});
+ if(u>=ICE_RIGHT_START)bands.push({top:smoothContour(x,width,height,ICE_RIGHT_POINTS),depth:depth(u-ICE_RIGHT_START,1-ICE_RIGHT_START),side:'right'});
  return bands;
 }

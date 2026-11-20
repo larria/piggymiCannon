@@ -3,7 +3,7 @@ import {boot} from './qa-app';
 import {readFileSync} from 'node:fs';
 const version=JSON.parse(readFileSync('package.json','utf8')).version;
 
-test('water shell pixels are sized by the real carve and stay upright as trajectory changes',async({page})=>{
+test('both water shells are half their former flight width and height and stay upright',async({page})=>{
  await boot(page);
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');
  const data=await page.evaluate(()=>{
@@ -18,7 +18,7 @@ test('water shell pixels are sized by the real carve and stay upright as traject
   });
  });
  for(const [i,{horizontal,descending}] of data.entries()){
-  const [width,depth]=i===0?[246,81]:[192,63];expect(descending).toEqual(horizontal);
+  const [width,depth]=i===0?[123,40.5]:[96,31.5];expect(descending).toEqual(horizontal);
   expect(Math.abs(horizontal.w-width)).toBeLessThan(5);expect(Math.abs(horizontal.h-depth)).toBeLessThan(8);expect(Math.abs(horizontal.tip)).toBeLessThan(4);
  }
 });
@@ -159,7 +159,7 @@ test('keyboard short taps only turn, a held key drives after turning, and touch 
  await page.evaluate(()=>{
   const {game:g,recorder}=(window as any).__qa;recorder.detach();g.update=()=>{};
   const t=g.active;Object.assign(t,{x:g.worldWidth/2,y:g.ground(g.worldWidth/2)-18,direction:1,fallVelocity:0});
-  g.qaMoved=[];const move=g.move.bind(g);g.move=(direction:number,dt:number)=>{g.qaMoved.push({direction,dt});return move(direction,dt);};
+  g.qaMoved=[];const move=g.move.bind(g);g.move=(direction:number,dt:number)=>{g.qaMoved.push({direction,dt,at:performance.now()});return move(direction,dt);};
   (document.activeElement as HTMLElement).blur();
  });
  const short=await page.evaluate(()=>{
@@ -167,11 +167,38 @@ test('keyboard short taps only turn, a held key drives after turning, and touch 
   const g=(window as any).__qa.game;return {direction:g.active.direction,calls:g.qaMoved.length,x:g.active.x};
  });
  expect(short).toMatchObject({direction:-1,calls:0});
- await page.keyboard.down('d');
+ const turnAt=await page.evaluate(()=>{
+  const g=(window as any).__qa.game,now=performance.now();
+  document.body.dispatchEvent(new KeyboardEvent('keydown',{key:'d',bubbles:true,cancelable:true}));
+  return {now,direction:g.active.direction};
+ });expect(turnAt.direction).toBe(1);
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.active.x)).toBeGreaterThan(short.x);
- await page.keyboard.up('d');
+ const firstMove=await page.evaluate(()=>{
+  const g=(window as any).__qa.game;document.body.dispatchEvent(new KeyboardEvent('keyup',{key:'d',bubbles:true}));return g.qaMoved[0].at;
+ });expect(firstMove-turnAt.now).toBeGreaterThanOrEqual(200);
+ const sameDirection=await page.evaluate(async()=>{
+  const g=(window as any).__qa.game,count=g.qaMoved.length;
+  document.body.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true}));
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  document.body.dispatchEvent(new KeyboardEvent('keyup',{key:'ArrowRight',bubbles:true}));return g.qaMoved.length>count;
+ });expect(sameDirection).toBe(true);
  const start=await page.evaluate(()=>{const g=(window as any).__qa.game;return {calls:g.qaMoved.length,x:g.active.x};});
  await page.locator('#move-left').tap();
  const touch=await page.evaluate(({calls})=>{const g=(window as any).__qa.game;return {first:g.qaMoved[calls],x:g.active.x};},start);
- expect(touch.first).toEqual({direction:-1,dt:1/30});expect(touch.x).toBeLessThan(start.x);
+ expect(touch.first).toMatchObject({direction:-1,dt:1/30});expect(touch.x).toBeLessThan(start.x);
+});
+
+test('ice valley draws both thick outer rims, the air gap and the thin branch together',async({page,browserName})=>{
+ await boot(page,true,'moon','cannon','water');
+ await expect.poll(()=>page.evaluate(()=>(window as any).__qa.renderer.backend)).toBe('pixi');
+ const ice=await page.evaluate(()=>{
+  const {game:g,renderer:r,recorder}=(window as any).__qa;recorder.detach();g.update=()=>{};g.fog=false;g.fireLine=null;
+  const w=g.worldWidth,h=g.worldHeight,x=Math.round(w*.52),upper=g.ground(x),upperBottom=g.land.bottom(x,upper),lower=g.ground(x,upperBottom);
+  r.zoomBy(.5);r.focusAt(w*.5,h*.51);r.draw(.5);r.draw(0);
+  const c=r.terrainCanvas.getContext('2d'),rgba=(x:number,y:number)=>Array.from(c.getImageData(x,y,1,1).data);
+  const left=r.offsetX+16,right=Math.min(w-16,r.offsetX+r.viewWidth-16),ground=g.ground.bind(g);
+  return {iceLeft:rgba(Math.round(left),ground(left)+237),iceRight:rgba(Math.round(right),ground(right)+237),air:rgba(x,upperBottom+10),branch:rgba(x,ground(x,g.land.bottom(x,lower))+2),gap:lower-upperBottom};
+ });
+ expect(ice.iceLeft[3]).toBe(255);expect(ice.iceRight[3]).toBe(255);expect(ice.air[3]).toBe(0);expect(ice.branch).toEqual([130,141,111,255]);expect(ice.gap).toBeGreaterThan(55);
+ await page.screenshot({path:`.workbuddy/v${version}-ice-rims-ipad-${browserName}.png`,scale:'css',animations:'disabled'});
 });

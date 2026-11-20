@@ -1,6 +1,7 @@
+import {thickIceEdges} from './sky-map';
 import {sourceRangeModel} from './source-range';
 import {enlargedBattleProjectiles,vectorProjectiles} from './weapon-presentation';
-import {isWaterShell,paintWaterFlight,paintWaterSplash,waterFootprint} from './water-flight';
+import {isWaterShell,paintWaterFlight,paintWaterSplash,waterFlightSize,waterFootprint} from './water-flight';
 import {battleViewWidth} from './world-layout';
 import {portraitViewWidth} from './portrait-viewport';
 import {precisionPolish} from './match-polish';
@@ -248,6 +249,7 @@ export class Renderer {
     const rgb=(hex:string)=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
     const soil=rgb(p.soil),light=rgb(p.soilLight),ink=rgb(p.ink),grass=rgb(p.grassLight);
     const stride=g.land.stride,mask=g.land.mask;
+    const ice=g.config.map==='moon',branchStart=ice&&thickIceEdges(g.gameVersion)?g.worldHeight*.63:720;
     const snow=[241,247,239],branchTop=[192,201,167],branchBody=[130,141,111],permanentColor=g.config.map==='factory'?[135,157,157]:[200,177,106];
     for(let y=region.top;y<=region.bottom;y++){
       const shade=clamp((y-250)/350,0,1),base=soil.map((v,i)=>light[i]*(1-shade)+v*shade);
@@ -256,7 +258,7 @@ export class Renderer {
         const offset=((y-region.top)*width+x-region.from)*4,top=y===0||!mask[index-stride];
         const edge=x===0||x===this.worldWidth||!mask[index-1]||!mask[index+1]||!mask[index+stride];
         const grain=((x*13+y*7)%31===0?7:0)+(Math.sin(x/90+y/20)>0.99?4:0);
-        const permanent=g.land.protectedMask[index],snowcap=g.config.map==='moon'&&(y<9||!mask[index-stride*9]),branch=g.config.map==='moon'&&y>720;
+        const permanent=g.land.protectedMask[index],snowcap=ice&&(y<9||!mask[index-stride*9]),branch=ice&&y>branchStart;
         const color=branch?(top?branchTop:branchBody):permanent?permanentColor:top?grass:edge?ink:snowcap?snow:base;
         const tint=color===base?grain:0;
         data.data[offset]=color[0]+tint;data.data[offset+1]=color[1]+tint;data.data[offset+2]=color[2]+tint;data.data[offset+3]=255;
@@ -486,7 +488,7 @@ export class Renderer {
       if(p.fireBoosted){ctx.save();p.trail.filter((_,i)=>i%6===0).forEach((q,i)=>{ctx.globalAlpha=.3+i/10;ctx.translate(q.x,q.y);ctx.fillStyle=i%2?'#e8a958':'#fae5a1';ctx.strokeStyle='#b27939';ctx.lineWidth=.6*shotArtScale;ctx.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,r=(j%2?2.6:6)*shotArtScale;const x=Math.cos(a)*r,y=Math.sin(a)*r;j?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.stroke();ctx.translate(-q.x,-q.y);});ctx.restore();}
       ctx.save();ctx.translate(p.x,p.y);
       if(largerProjectiles&&isWaterShell(p.weapon)&&!p.healing&&!p.transfer){
-        const {halfWidth,height}=waterFootprint(p.weapon,g.gameVersion,p.digBoost);
+        const {halfWidth,height}=waterFlightSize(p.weapon,g.gameVersion,p.digBoost);
         paintWaterFlight(ctx,p.weapon,halfWidth,height,this.reducedMotion?0:this.time+p.phase,p.fireBoosted,p.vx);
         ctx.restore();continue;
       }

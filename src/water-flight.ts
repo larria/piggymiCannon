@@ -9,6 +9,13 @@ export function waterFootprint(weapon:'water-normal'|'water-special',version:str
  const {radius,depth}=native?originalCraterAxes(native.round):excavation(weapon,false,version,digBoost);
  return {halfWidth:radius,height:depth};
 }
+/** The flying body is now half the footprint on each axis; the impact splash
+ * still illustrates the crater. Old recordings keep their original artwork. */
+export function waterFlightSize(weapon:'water-normal'|'water-special',version:string,digBoost=1){
+ const {halfWidth,height}=waterFootprint(weapon,version,digBoost),v=version.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+ const scale=!v||+v[1]>5||+v[1]===5&&(+v[2]>1||+v[2]===1&&+v[3]>=3)?.5:1;
+ return {halfWidth:halfWidth*scale,height:height*scale};
+}
 const blue={edge:'#5b9897',body:'#a1d8d5',shadow:'#559a9d',light:'#d8f0df'};
 const violet={edge:'#846aa5',body:'#d7b5eb',shadow:'#926bb4',light:'#f4e0f7'};
 /** An upright suspended splash. The tip touches the simulated contact point; it never rolls with velocity. */
