@@ -4,6 +4,7 @@ import type {Tank} from './engine';
 import {dadPose,mimiPose,paintDad,paintMimi,type CrewAction,type Expression} from './pig-art';
 import {profileEyes,goggles,ink,oval,pantMouth,shockMouth,smile,steadyMouth,stroke} from './crew-ink';
 import type {CrewId} from './crew';
+import {paintHatchClothes} from './crew-clothes';
 
 function foxFace(c:CanvasRenderingContext2D,e:Expression){
  // Keep the same ear shapes; draw them closer to the crown with a calmer tilt.
@@ -40,11 +41,12 @@ function fishFace(c:CanvasRenderingContext2D,e:Expression){
  ink(c,'M4 5Q11 1 18 5Q14 9 8 8Z','#fff0c0');
 }
 const faces={mimi:paintMimi,dad:paintDad,fox:foxFace,fish:fishFace};
-const limits:Record<CrewId,number>={mimi:.77,dad:.80,fox:.76,fish:.77};
+export const paintCrewFace=(c:CanvasRenderingContext2D,id:CrewId,e:Expression)=>faces[id](c,e);
+const limits:Record<CrewId,number>={mimi:.815,dad:.80,fox:.76,fish:.815};
 const rhythms:Record<CrewId,number>={mimi:1,dad:.68,fox:1.32,fish:1.15};
 interface CrewMotion {breath?:ReturnType<typeof breathingPose>;stunned?:boolean;rage?:boolean;cryAge?:number|null;healAge?:number|null;cheerAge?:number|null;shockAge?:number|null;recoil?:number;idleAge?:number|null;reduced?:boolean;poisoned?:boolean;frozen?:boolean;deck?:number}
 function reactionMarks(c:CanvasRenderingContext2D,t:number,action:CrewAction,m:CrewMotion,healAge:number|null,cheerAge:number|null,shockAge:number|null){
- const crying=action==='hurt'||action==='lose'||m.cryAge!=null;
+ const crying=action==='hurt'||m.cryAge!=null;
  if(crying){
   // The first bead is already at the eye. The streams begin on the hit frame.
   for(const [x,y,scale] of [[0,2,1],[17,0,.72]]){c.save();c.translate(x,y);c.scale(scale,scale);
@@ -82,7 +84,6 @@ function reactionMarks(c:CanvasRenderingContext2D,t:number,action:CrewAction,m:C
  }
 
 }
-/** Head, limbs and clothing share a root so the pilot stays attached to its seat. */
 // Above the hatch, only the celebratory gesture is visible.
 function cheerGesture(c:CanvasRenderingContext2D,id:CrewId,side:number,raise:number){
  c.save();c.translate(side*(id==='dad'?32:28),20-9*raise);c.scale(side,1);c.rotate(-.16-.26*raise);
@@ -98,15 +99,15 @@ function cheerGesture(c:CanvasRenderingContext2D,id:CrewId,side:number,raise:num
  c.restore();
 }
 
-export function paintCrewFigure(c:CanvasRenderingContext2D,id:CrewId,time:number,action:CrewAction,m:CrewMotion={}){
+export function paintCrewFigure(c:CanvasRenderingContext2D,id:CrewId,time:number,action:Exclude<CrewAction,'lose'>,m:CrewMotion={}){
  const t=m.reduced?.35:time,phase=t+(['mimi','dad','fox','fish'] as const).indexOf(id)*.35;
  const p=Math.sin(phase*(action==='move'?12:action==='win'?7:action==='hurt'?19:4)*rhythms[id]);
  const pose=id==='mimi'?mimiPose(phase,action):id==='dad'?dadPose(phase,action):{bob:action==='win'?-Math.abs(p)*(id==='fox'?8:6):action==='move'?p*1.5:p*.65,lean:action==='move'?.06:action==='hurt'?p*.085:action==='win'?p*.08:0,p};
- const recoil=action==='fire'?m.recoil??.7:0,lose=action==='lose',fall=action==='fall',hurt=action==='hurt',win=action==='win';
- const crying=hurt||m.cryAge!=null,shockAge=!crying&&!lose&&!win?m.shockAge??null:null;
+ const recoil=action==='fire'?m.recoil??.7:0,fall=action==='fall',hurt=action==='hurt',win=action==='win';
+ const crying=hurt||m.cryAge!=null,shockAge=!crying&&!win?m.shockAge??null:null;
  const startled=shockAge!==null,startle=startled&&!m.reduced?Math.sin(Math.PI*Math.min(1,shockAge/.55))**.65:0;
- const healAge=!crying&&!lose&&!win&&!startled?m.healAge??null:null;
- const cheerAge=!crying&&!lose&&!win&&!startled&&healAge===null?m.cheerAge??null:null;
+ const healAge=!crying&&!win&&!startled?m.healAge??null:null;
+ const cheerAge=!crying&&!win&&!startled&&healAge===null?m.cheerAge??null:null;
  const happy=healAge!==null||cheerAge!==null,relief=healAge!==null&&!m.reduced&&action==='idle'?Math.sin(Math.PI*Math.min(1,healAge/.65)):0;
  const salute=cheerAge!==null&&!m.reduced&&action==='idle'?Math.sin(Math.PI*Math.min(1,cheerAge/.88))**.75:0;
  const u=action==='idle'&&!m.reduced&&!happy&&!startled?m.idleAge??-1:-1;
@@ -119,28 +120,28 @@ export function paintCrewFigure(c:CanvasRenderingContext2D,id:CrewId,time:number
  const ambient=action==='idle';
  const pant=ambient&&!crying&&!happy&&!startled&&m.breath?.active?m.breath:null;
  const air=pant?(m.reduced?.59:(pant.mouth-3)/4.4):(ambient&&!crying&&!happy&&!startled&&m.poisoned?.34+.17*p:null);
- const blink=phase%4.8>4.62,serious=!lose&&!crying&&!win&&!happy&&!startled;
- const expr={look:listen?.7-listen*2.1:action==='fire'||action==='move'?.95:.72+.14*p,closed:lose||hurt||fall&&crying||win&&id==='dad'||relief>.7||!m.reduced&&action==='idle'&&!startled&&blink,upset:lose||crying,open:fall&&crying?.82:win?1:happy?.48+relief*.17+(cheerAge===null?0:.24):.2,ear:p*(fall?.2:action==='move'?.14:.045)+(listen?Math.sin(u*12)*listen*.25:fin*.19)-recoil*.1,serious,cry:crying,pant:air,stunned:!!m.stunned,startled,rage:!!m.rage&&!crying&&!happy&&!startled};
+ const blink=phase%4.8>4.62,serious=!crying&&!win&&!happy&&!startled;
+ const expr={look:listen?.7-listen*2.1:action==='fire'||action==='move'?.95:.72+.14*p,closed:hurt||fall&&crying||win&&id==='dad'||relief>.7||!m.reduced&&action==='idle'&&!startled&&blink,upset:crying,open:fall&&crying?.82:win?1:happy?.48+relief*.17+(cheerAge===null?0:.24):.2,ear:p*(fall?.2:action==='move'?.14:.045)+(listen?Math.sin(u*12)*listen*.25:fin*.19)-recoil*.1,serious,cry:crying,pant:air,stunned:!!m.stunned,startled,rage:!!m.rage&&!crying&&!happy&&!startled};
  c.save();c.lineJoin='round';c.lineCap='round';
- if(lose){c.translate(0,2);c.rotate(Math.PI/2-.10);c.scale(.7,.7);}
- else {
-  const tremble=m.frozen&&!m.reduced&&ambient?Math.sin(phase*42)*.75:0;
-  const breathBob=pant&&!m.reduced?pant.bob*.72:0,breathStretch=pant&&!m.reduced?pant.scale:1;
-  c.translate(-16-recoil*2-startle*2+(m.poisoned?p:0)+tremble,(m.deck??-32)+(fall?-1:pose.bob)+recoil*2-nod*2-fin*2-breathBob-relief*4-salute*5+startle*2);
-  c.rotate(pose.lean-recoil*.17-salute*.095-startle*.15+(fall?p*.1:0)-nod*.04+(pant&&!m.reduced?pant.lean*.65:0));
-  const s=limits[id];c.scale(s,s*breathStretch);
- }
+ const tremble=m.frozen&&!m.reduced&&ambient?Math.sin(phase*42)*.75:0;
+ const breathBob=pant&&!m.reduced?pant.bob*.72:0,breathStretch=pant&&!m.reduced?pant.scale:1;
+ const x=-16-recoil*2-startle*2+(m.poisoned?p:0)+tremble,deck=m.deck??-32,s=limits[id];
+ c.save();c.translate(x+startle,deck+Math.min(1.4,(recoil*2-startle+breathBob)*.45));c.scale(s,s);
+ paintHatchClothes(c,id);c.restore();
+ c.translate(x,deck+(fall?-1:pose.bob)+recoil*2-nod*2-fin*2-breathBob-relief*4-salute*5+startle*2);
+ c.rotate(pose.lean-recoil*.17-salute*.095-startle*.15+(fall?p*.1:0)-nod*.04+(pant&&!m.reduced?pant.lean*.65:0));
+ c.scale(s,s*breathStretch);
  if(win||cheerAge!==null){
   const lift=win?(m.reduced?.7:.63+.3*p):m.reduced?.72:salute;
   if(win||lift>.16){cheerGesture(c,id,-1,lift*.78);cheerGesture(c,id,1,lift);}
  }
  c.save();c.translate(-listen*1.8,id==='dad'?1:0);
  c.rotate(-listen*.19-tap*.085+nod*.105+(id==='fish'?.06-fin*.13:0));
- faces[id](c,expr);if(!lose)reactionMarks(c,phase,action,m,healAge,cheerAge,shockAge);c.restore();
- if(lose)reactionMarks(c,phase,action,m,healAge,cheerAge,shockAge);c.restore();
+ paintCrewFace(c,id,expr);reactionMarks(c,phase,action,m,healAge,cheerAge,shockAge);c.restore();
+ c.restore();
 }
 
-export function paintCrew(c:CanvasRenderingContext2D,t:Tank,time:number,state:CrewAction,breath?:ReturnType<typeof breathingPose>,recoil=0,reduced=false,idleAge:number|null=null,cryAge:number|null=null,rage=false,healAge:number|null=null,cheerAge:number|null=null,shockAge:number|null=null){
+export function paintCrew(c:CanvasRenderingContext2D,t:Tank,time:number,state:Exclude<CrewAction,'lose'>,breath?:ReturnType<typeof breathingPose>,recoil=0,reduced=false,idleAge:number|null=null,cryAge:number|null=null,rage=false,healAge:number|null=null,cheerAge:number|null=null,shockAge:number|null=null){
  const reactionAge=t.reaction?reactionSeconds(t.reaction.kind)-t.reaction.remaining:time;
- paintCrewFigure(c,t.crew,state==='hurt'?Math.max(0,reactionAge):time,state,{breath,cryAge,healAge,cheerAge,shockAge,recoil,reduced,idleAge,rage,stunned:state==='hurt'&&t.reaction?.kind==='fall',poisoned:!!t.poisoned,deck:t.vehicleId==='sea'?-40:t.vehicleId==='water'?-28:-32,frozen:!!(t.immobile||t.frozen)});
+ paintCrewFigure(c,t.crew,state==='hurt'?Math.max(0,reactionAge):time,state,{breath,cryAge,healAge,cheerAge,shockAge,recoil,reduced,idleAge,rage,stunned:state==='hurt'&&t.reaction?.kind==='fall',poisoned:!!t.poisoned,deck:t.vehicleId==='sea'?-38:t.vehicleId==='water'?-28:-32,frozen:!!(t.immobile||t.frozen)});
 }

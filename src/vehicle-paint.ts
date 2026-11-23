@@ -5,7 +5,7 @@ export const INK='#373e39';
 export type Finish={top:number;bottom:number;colors:readonly string[]};
 export type Part={d:string;fill:string|Finish;stroke:string;width:number};
 export type BodyFit={scaleX:number;scaleY:number;lift:number};
-export type TankArt={body:Part[];aim:Part[];rage?:Part[];bodyFit?:BodyFit};
+export type TankArt={body:Part[];aim:Part[];rage?:Part[]};
 export const sheen=(top:number,bottom:number,...colors:string[]):Finish=>({top,bottom,colors});
 export const shape=(d:string,fill:Part['fill'],stroke=INK,width=1.7):Part=>({d,fill,stroke,width});
 export const paint=(d:string,fill:Part['fill']):Part=>shape(d,fill,'none',0);
@@ -28,19 +28,30 @@ export function tread(x:number,y:number,length:number,r:number,trim:string,hub:s
 }
 
 
+// A bronze throwing cup on a timber axle cart, with forged rims and a stone cradle.
 const bowl:TankArt={body:[
- ...tread(-32,3,61,7,'#877d60','#69756e'),
- shape('M-30 4q-4-5 1-10l8-3H23l10 7-2 10H-28Z',sheen(-10,9,'#f6cf71','#d49b41','#986839')),
- shape('M-26 1c-13 0-17-7-14-23 2-11 7-17 17-16l5 13Z',sheen(-38,2,'#ffdc72','#d7a54c','#a4753c')),
- shape('M-28 1c-8-4-7-27 0-36q6-8 16-3l8 7-1 11-8 10-6 14Z',sheen(-40,3,'#a4c7d4','#6e9eb5','#436477')),
- shape('M-25-35q2-8-7-11 9-1 13 9M-19-38q1-9-6-12 9 0 11 10','#8fb1bd','#4b7585',1.15),
- paint('M-24-17q5-12 17-13l8 6-5 11-12 7-6 6-4-4Z','#f2e0a9'),
- shape('M-27-29q7-5 14 0l-2 4-9 1Z','#506b78'),
- shape('M-13 0q3-12 15-14l19 2 7 7-4 9H-6Z',sheen(-14,4,'#ffcd67','#d29b39','#9a6d3a')),
- shape('M5-14h13l5 4-4 3H5Z',steel,INK,1.25),seam('M8-11h10m-7 2h8','#586c70',1),
- seam('M-25 5h18m6-1h26','#fbe1a1'),
- ...studs([[-25,1],[-12,2],[25,2]])
- ],aim:[shape('M-18 0q8-3 17-3h25l4 3-4 3H-9Z',brass,INK,1.25),shape('M23-3q4-7 10-6 3 3 1 7l-4 5-7 1Z',sheen(-9,4,'#f4dea5','#b4824e','#805b42'),INK,1.3),seam('M24-2q5-1 7-5','#fcf1bd',1.1)]};
+ shape('M-39 0l8-9 50 2 17 6v7l-7 4-24 1-24-1-14-3Z',sheen(-9,12,'#bc8250','#99613c','#593d31'),'#523c32'),
+ shape('M-36-10l-4-4 5-5 12-3 2 5-8 8Z',sheen(-23,-7,'#cab9a1','#8d7d68','#68584b'),'#514942',1.3),
+ shape('M-34-12l3-20 8-7 15 1 7 7-2 16-7 6Z',sheen(-40,-9,'#b9c1b8','#8b9187','#555a53'),'#3f4943'),
+ shape('M-31-28l6-8 12-1 6 4-8 2-3 4Z','#d2d5c5','#6b7166',1.2),
+ seam('M-31-21l8-2m-7 5 9-1m9-11-2 11','#bfc0aa'),
+ shape('M-19-9l8-10 14 2 9 13 8 3v8H-23Z',sheen(-18,8,'#cf9a62','#9c623a','#6d432e'),'#573b31'),
+ shape('M-4-18h9v21h-9Z',sheen(-18,4,'#c3b399','#9b8b72','#61584b'),'#53463b',1.3),
+ shape('M-8 5h22l-4 11H-7Z',sheen(4,16,'#9e5f39','#77452d','#59392a'),'#50392b'),
+ seam('M-4 8h12m-11 4h10','#d09157',1.2),
+ ...[-23,23].flatMap(x=>[
+  disc(x,5.1,15.4,12.4,sheen(-7,19,'#aeb6ac','#747e75','#4c5652'),'#3c4641',1.7),
+  disc(x,5.5,11.6,9.1,sheen(-4,15,'#b2aa94','#8f8c79','#666d61'),'#575e55',1.2),
+  seam(`M${x-11} 3q3-6 10-6m3 0 3 .6`,'#d4cbb1',1.35),
+  disc(x,5,3.35,2.9,'#c6b894','#54594d',1.1),disc(x,5,1.25,1.15,'#776d5d','none')]),
+ ...studs([[-29,-11],[2,-8],[2,1],[12,3]],'#ddc5a1','#6b5543')
+ ],aim:[
+ shape('M-19-3h43l5 3-5 4h-43Z',sheen(-4,5,'#d5a176','#a16c45','#664635'),'#573d32',1.4),
+ shape('M-6-6h5V6h-5Z',sheen(-7,7,'#c2b49b','#8e816d','#64594b'),'#594d3f',1.05),
+ shape('M18-6q5-3 11-2l12 2v6q-4 8-11 9Q20 8 18 1Z',sheen(-8,9,'#d8a17a','#b27249','#884c34'),'#5a3b30',1.55),
+ shape('M18-6q11-4 23 0-3 5-12 5-7 0-11-5Z',sheen(-9,-1,'#6a4939','#8c5b40','#a66d49'),'#5c4034',.95),
+ seam('M21-5q8-3 16-1m-15 9q3 3 9 4','#eab38d',1.15)
+ ]};
 
 const crossbow:TankArt={body:[
  shape('M-32 1l5-9 54 2 8 8-8 8h-53Z',sheen(-9,11,'#e3ac66','#b17c48','#855831'),'#63492f'),
@@ -187,8 +198,7 @@ const ion:TankArt={body:[
 const seaFar=sheen(-6,15,'#9083b9','#625988','#42476e');
 const seaNear=sheen(-6,19,'#ceafe9','#9473c7','#674e99','#4f487a');
 const seaSole=sheen(8,19,'#a0a4cc','#6275a1','#445a7d');
-// Match the hover tanks’ footprint without shifting the cannon pivot.
-const sea:TankArt={bodyFit:{scaleX:.87,scaleY:.85,lift:1.2},body:[
+const sea:TankArt={body:[
  // Four shadowed arms behind the shell; the four lighter, bent arms read in front.
  shape('M-23-6q-16 0-21 12l2 8 7-2q4-10 15-12Z',seaFar,'#3e405d',1.5),
  shape('M-9-9q-10 0-12 13l2 11 7-2 3-12 6-5Z',seaFar,'#3e405d',1.5),
@@ -227,3 +237,15 @@ const dragon:TankArt={body:[
  seam('M-5-6h22m-20 13h18','#e4e6dc',1.1),...studs([[-7,-4],[-7,4]],'#d8ded6')]};
 
 export const TANK_ART={bowl,crossbow,cannon,beetle,duke,mine,missile,multi,laser,water,ion,sea,dragon} satisfies Record<VehicleId,TankArt>;
+
+// Per-silhouette optical correction. Scale around the contact plane; the turret
+// and its muzzle keep their original axis in both the battle and roster art.
+const profile:Record<VehicleId,readonly [number,number]>={
+ bowl:[.99,.87],crossbow:[1.06,.95],cannon:[1.05,1.13],beetle:[1.01,.91],
+ duke:[1.01,1.06],mine:[.96,.83],missile:[1.07,.97],multi:[1.05,1.08],
+ laser:[.98,.87],water:[1,1.04],ion:[.963,1],sea:[.87,.89],dragon:[.93,.75],
+};
+export function vehicleBodyFit(id:VehicleId):BodyFit{
+ const [scaleX,scaleY]=profile[id];
+ return {scaleX,scaleY,lift:18*(1-scaleY)};
+}
