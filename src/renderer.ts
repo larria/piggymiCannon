@@ -377,27 +377,27 @@ export class Renderer {
     const falling=isCrewFalling(t),cryAge=this.crewAnimation.cryAge(t.id,g.elapsed);
     const celebrating=g.phase==='ended'&&g.winner===t.team&&!falling&&cryAge===null;
     const moving=g.movingUntil[t.id]>g.elapsed;
-    const fired=g.projectiles.some(p=>p.owner===t.id&&p.age/g.motionScale<.5);
-    const firing=fired?Math.max(0,1-(g.projectiles.find(p=>p.owner===t.id)?.age??0)/g.motionScale*2):0;
-    const rage=isRaging(t)&&!celebrating;
+    let firing=0;for(const p of g.projectiles)if(p.owner===t.id&&p.delay<=0)firing=Math.max(firing,1-p.age/g.motionScale*2);
+    const fired=firing>0;
+    const enraged=isRaging(t),rage=enraged&&!celebrating;
     if(rage)paintRage(ctx,this.time,this.reducedMotion,false);
     if(vehicle)paintVehicle(ctx,vehicle,t.angle,this.time,firing,moving,rage,this.reducedMotion);
+    if(rage)paintRage(ctx,this.time,this.reducedMotion,true);
     const breathing=breathingPose(t.hp,this.time+t.id*.5,t.maxHP,t.vehicleId);
     const action=falling?'fall':t.reaction?'hurt':t.parachute?'parachute':celebrating?'win':fired?'fire':moving?'move':'idle';
     const idle=g.phase!=='lobby'&&g.phase!=='ended'&&!g.introLocked?this.crewAnimation.idleAge(t.id,g.elapsed):null;
     paintCrew(ctx,t,this.time,action,breathing,firing,this.reducedMotion,idle,cryAge,rage,this.crewAnimation.healAge(t.id,g.elapsed),g.crewCheerAge(t.id),g.crewShockAge(t.id));
-    if(rage)paintRage(ctx,this.time,this.reducedMotion,true);
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
     for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132)*g.motionScale;const x=clamp(t.x,this.offsetX+48*g.motionScale,this.offsetX+this.viewWidth-48*g.motionScale),y=Math.max(this.offsetY+38*g.motionScale,top);ctx.save();ctx.translate(x,y);ctx.scale(g.motionScale,g.motionScale);paintItemCue(ctx,cue,0,0,teamFlag(t.team).color,this.reducedMotion);ctx.restore();}
     // The portrait stays upright; its frame carries the team colour.
     const celebrateOffset=(celebrating?-26:0)-badgeLift;
-    const label=placeTankPortrait(t.id,t.x,t.y-85+celebrateOffset,labelScale,!!t.poisoned,this.labelRects,{left:this.offsetX+6,right:this.offsetX+this.viewWidth-6},g.gameVersion);
+    const label=placeTankPortrait(t.id,t.x,t.y-97+celebrateOffset,labelScale,!!t.poisoned,this.labelRects,{left:this.offsetX+6,right:this.offsetX+this.viewWidth-6},g.gameVersion);
     const labelShift=label.x-t.x;this.labelRects.push(label.rect);
     this.portraitHits.push({x:label.x,y:label.y,id:t.id});
     ctx.save();ctx.translate(t.x,t.y);
     if(Math.abs(labelShift)>8*labelScale){ctx.strokeStyle=teamFlag(t.team).color+'70';ctx.lineWidth=labelScale;ctx.beginPath();ctx.moveTo(0,-48*artScale);ctx.lineTo(labelShift,label.y-t.y+31*labelScale);ctx.stroke();}
-    ctx.save();ctx.translate(labelShift,celebrateOffset);ctx.translate(0,-85);ctx.scale(labelScale,labelScale);ctx.translate(0,85);
+    ctx.save();ctx.translate(labelShift,celebrateOffset-12);ctx.translate(0,-85);ctx.scale(labelScale,labelScale);ctx.translate(0,85);
     const active=(g.introLocked?this.tourPlayer===t.id:g.current===t.id)&&!['lobby','ended','resolving'].includes(g.phase);
     if(active)paintTurnMarker(ctx,0,-126,teamFlag(t.team).color,this.time,this.reducedMotion);
     ctx.fillStyle='#fff8e8';ctx.beginPath();ctx.arc(0,-85,21,0,Math.PI*2);ctx.fill();
@@ -405,8 +405,12 @@ export class Renderer {
     ctx.save();ctx.beginPath();ctx.arc(0,-85,19,0,Math.PI*2);ctx.clip();if(portrait)ctx.drawImage(portrait,-20,-105,40,40);ctx.restore();
     ctx.strokeStyle=teamFlag(t.team).color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-85,20,0,Math.PI*2);ctx.stroke();
     paintMedal(ctx,this.medalFor?.(t)??g.medal(t),14,-92,24);
-    const healthY=t.crew==='fox'?-62:-59;
-    ctx.fillStyle='#f8f3e5b0';rr(ctx,-23,healthY,46,3,1.5);ctx.fill();ctx.fillStyle=teamFlag(t.team).color;rr(ctx,-23,healthY,46*t.hp/t.maxHP,3,1.5);ctx.fill();
+    const healthY=t.crew==='fox'?-63:-60;
+    ctx.fillStyle='#fff';rr(ctx,-23,healthY,46,5,1.4);ctx.fill();
+    const hpWidth=46*clamp(t.hp/t.maxHP,0,1);
+    ctx.fillStyle=breathing.active||enraged?'#db4f49':'#66aa53';
+    if(hpWidth>0){rr(ctx,-23,healthY,hpWidth,5,Math.min(1.1,hpWidth/2));ctx.fill();}
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.4;rr(ctx,-23,healthY,46,5,1.4);ctx.stroke();
     if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,44,-95,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.textAlign='center';ctx.fillText('中毒',61,-83);}
     ctx.restore();
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}

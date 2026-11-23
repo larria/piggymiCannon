@@ -5,13 +5,13 @@ export function dadPose(time:number,state:CrewAction){const p=Math.sin(time*(sta
 export interface Expression {look:number;closed:boolean;upset:boolean;open:number;ear:number;serious:boolean;cry:boolean;pant:number|null;stunned:boolean;rage:boolean;startled:boolean}
 const outline='#794f40';
 function mimiCap(c:CanvasRenderingContext2D){
- ink(c,'M-22 3Q-25-12-17-21Q-11-31 3-29Q21-29 24-12Q27 0 21 9L17 7 19-8Q7-18-16-7L-17 7Z','#6f744a','#534535');
- ink(c,'M-21-6Q-20-22-7-26Q9-31 19-19Q8-24-5-19Q-13-16-21-6Z','#a09b66');
- ink(c,'M-22 0Q-20-15 0-17Q18-19 24-8L23-4Q14-13 0-12Q-15-10-22 3Z','#8c8053','#514a36');
- ink(c,'M-19-3Q-9-14 6-14Q16-14 22-7','none','#c2a87c',1.15);
- ink(c,'M-21-1l4 1-1 12-4 2-2-2ZM21-2l3 1-1 10-3 3-2-1Z','#786049','#503f34',1);
- ink(c,'M-23 4l5-1-1 4-4 1Z','#cfaa6c','#836044',.65);
- goggles(c,1,-21,.15,.93);
+ ink(c,'M-22 3Q-25-10-17-21Q-11-29 1-29Q19-29 23-16Q27-4 22 8L17 7 18-7Q3-16-17-7L-17 7Z','#6f744a','#534535');
+ ink(c,'M-21-7Q-20-21-8-25Q4-30 16-24Q5-24-6-20Q-15-17-21-7Z','#a09b66');
+ ink(c,'M-22 0Q-16-15 0-16Q17-17 23-7L22-3Q14-12 0-11Q-15-10-22 3Z','#8c8053','#514a36');
+ ink(c,'M-19-3Q-9-13 4-13Q16-13 21-7','none','#c2a87c',1.15);
+ ink(c,'M-21 0l4 1-1 11-4 2-2-2ZM21-2l3 1-1 10-3 3-2-1Z','#786049','#503f34',1);
+ ink(c,'M-23 5l5-1-1 4-4 1Z','#cfaa6c','#836044',.65);
+ goggles(c,0,-22,0,.91);
 }
 function pigFace(c:CanvasRenderingContext2D,e:Expression,dad:boolean){
  const peach='#f5b2a1',pale='#ffd0b6';

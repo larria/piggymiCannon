@@ -1,5 +1,5 @@
 import type {Vehicle} from './vehicles';
-import {TANK_ART,type Part} from './vehicle-paint';
+import {TANK_ART,type BodyFit,type Part} from './vehicle-paint';
 
 const SCALE=4,bounds={body:{x:-48,y:-53,w:96,h:76},aim:{x:-35,y:-26,w:81,h:52}};
 type Tile={canvas:HTMLCanvasElement;x:number;y:number;w:number;h:number};
@@ -17,12 +17,14 @@ export function vehicleIcon(v:Vehicle){
   return `url(#${key})`;
  };
  const paths=(parts:Part[])=>parts.map(p=>`<path d="${p.d}" fill="${fill(p.fill)}" stroke="${p.stroke}" stroke-width="${p.width}"/>`).join('');
- const body=paths(layer.body),aim=paths(layer.aim);
+ const aim=paths(layer.aim),fit=layer.bodyFit;
+ const body=fit?`<g transform="translate(0,${fit.lift}) scale(${fit.scaleX},${fit.scaleY})">${paths(layer.body)}</g>`:paths(layer.body);
  return `<svg viewBox="-48 -53 96 76" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-tank-art="${v.id}"><defs>${defs.join('')}</defs>${body}<g transform="translate(0,-13) rotate(-${(v.minAngle+v.maxAngle)/2})">${aim}</g></svg>`;
 }
-function bake(parts:Part[],{x,y,w,h}:Omit<Tile,'canvas'>){
+function bake(parts:Part[],{x,y,w,h}:Omit<Tile,'canvas'>,fit?:BodyFit){
  const canvas=document.createElement('canvas');canvas.width=w*SCALE;canvas.height=h*SCALE;
  const c=canvas.getContext('2d')!;c.scale(SCALE,SCALE);c.translate(-x,-y);c.lineJoin='round';c.lineCap='round';
+ if(fit){c.translate(0,fit.lift);c.scale(fit.scaleX,fit.scaleY);}
  for(const p of parts){
   const path=new Path2D(p.d);
   if(p.fill!=='none'){
@@ -36,7 +38,7 @@ function bake(parts:Part[],{x,y,w,h}:Omit<Tile,'canvas'>){
 }
 export function paintVehicle(c:CanvasRenderingContext2D,v:Vehicle,angle:number,time:number,firing:number,moving:boolean,rage=false,reduced=false){
  let geometry=paintGeometry.get(v.id);
- if(!geometry){const art=TANK_ART[v.id];geometry={body:bake(art.body,bounds.body),aim:bake(art.aim,bounds.aim),rage:art.rage?bake(art.rage,bounds.body):undefined};paintGeometry.set(v.id,geometry);}
+ if(!geometry){const art=TANK_ART[v.id];geometry={body:bake(art.body,bounds.body,art.bodyFit),aim:bake(art.aim,bounds.aim),rage:art.rage?bake(art.rage,bounds.body,art.bodyFit):undefined};paintGeometry.set(v.id,geometry);}
  const draw=({canvas,x,y,w,h}:Tile)=>c.drawImage(canvas,x,y,w,h);
  const recoil=Math.sin(firing*Math.PI);
  c.save();

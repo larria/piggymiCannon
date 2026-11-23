@@ -40,7 +40,7 @@ try{
   for(const f of manifest.files){const data=readFileSync(resolve(build,f.url));if(data.length!==f.bytes||createHash('sha256').update(data).digest('hex')!==f.sha256||precacheByURL.get(f.url)!==f.revision)throw Error('素材修复清单与发布产物／PWA键不符：'+f.url);}
   for(const url of precacheByURL.keys())if(url!=='asset-integrity.json'&&!manifest.files.some(f=>f.url===url))throw Error('素材修复清单缺少：'+url);
  }
- const forbidden=contents.filter(f=>/(^|\/)(\.workbuddy|ft2-audio|ft2-bullets|ft2-extra|ft2-mapdata)(\/|$)/.test(relative(build,f.path).split(sep).join('/')));
+ const forbidden=contents.filter(f=>/(^|\/)(\.workbuddy|ft2-audio|ft2-bullets|ft2-extra|ft2-mapdata|piggymiCannonRefer)(\/|$)/.test(relative(build,f.path).split(sep).join('/')));
  if(forbidden.length)throw new Error('来源目录或私有目录混入构建产物');
  const version=existsSync(resolve(build,'version.json'))?JSON.parse(readFileSync(resolve(build,'version.json'),'utf8')).version:'fixture';
  const result={formatVersion:1,version,limitBytes:limit,limitUnit:'MB (1,000,000 bytes)',distBytes,allocatedDistBytes,precacheBytes:uniquePrecacheBytes,manifestBytesIncludingDuplicates:precacheBytes,distFiles:contents.length,precacheEntries:entries.length,uniquePrecacheEntries:seen.size,uniquePrecacheBytes,duplicateExactEntries,sourceDirectoriesIncluded:false,passed:distBytes<=limit&&allocatedDistBytes<=limit&&precacheBytes<=limit};

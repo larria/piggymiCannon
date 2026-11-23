@@ -18,9 +18,11 @@ import {repairGameAssets,assetRepairDiagnostics,retryBrokenMaterialImages,retryM
 import {retryBattleSprites} from './battle-sprites';
 import './style.css';
 import './web-select.css';
+import './daily-theme.css';
+import {installDailyTheme} from './daily-theme';
 import {ImpactProfiler} from './impact-profiler';
 import {snapshotText} from './battle-trace';
-import {legacyMapBgmFile} from './map-music';
+import {legacyMapBgmFile,type PreviousMapBgm} from './map-music';
 import { Game, clamp, type Config,type Tank } from './engine';
 import { Renderer } from './renderer';
 import {installCrewPortraits,repairCrewPortraits,retryUnavailableCrewPortraits,portraitDiagnostics} from './crew-portraits';
@@ -59,6 +61,9 @@ const angleLabel=(angle:number)=>{const half=Math.round(angle*2)/2;return Math.a
 const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
 const safeRead=(key:string)=>{try{return JSON.parse(localStorage.getItem(key)||'null');}catch{return null;}};
 const save=(key:string,value:unknown)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private browsing can disable storage. */}};
+installDailyTheme();
+const LAST_MAP_BGM='piggy-last-map-bgm-v1';
+let previousBgm:PreviousMapBgm|null=safeRead(LAST_MAP_BGM);
 let progression=(()=>{try{return readProgression(localStorage);}catch{return freshProgression();}})();
 let rankSettlement:Settlement[]=[];
 let progressionUnsaved=false;
@@ -400,7 +405,9 @@ function begin() {
   audio.unlock();audio.pause(false);game.start();recorder?.detach();recorder=new ReplayRecorder(game);const openingGame=game;
   const lucky=game.tanks.filter(t=>t.vehicleId==='dragon'&&config.slots[t.slot].vehicle==='random');
   game.setIntroLocked(true);renderer.startTour(()=>{if(game===openingGame){game.setIntroLocked(false);renderer.follow();lastPhase='';updateUI();if(lucky.length)toast(`惊喜！${lucky.map(t=>t.name).join('、')}抽中了隐藏款暴龙。`);}});
-  playedSeeds.add(game.config.seed>>>0);audio.setScene(game.config.map,game.matchBgm?.file??legacyMapBgmFile(game.config.map,game.gameVersion));void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));
+  playedSeeds.add(game.config.seed>>>0);
+  if(game.matchBgm){previousBgm={map:game.config.map,number:game.matchBgm.number};save(LAST_MAP_BGM,previousBgm);}
+  audio.setScene(game.config.map,game.matchBgm?.file??legacyMapBgmFile(game.config.map,game.gameVersion));void audio.preloadForMatch(game.tanks.map(t=>t.vehicleId));
   if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();
 }
 function newMatch(next:Config,start=true) {
@@ -411,7 +418,7 @@ function newMatch(next:Config,start=true) {
   audio.resetEffects();
   audio.setSelectionMusic(false);
   audio.pause(false);
-  config={...next,snow:undefined,fog:undefined,fireLine:undefined,seed:freshMatchSeed(Date.now(),playedSeeds),competition:newCompetition()};rankSettlement=[];game=new Game(config,APP_VERSION);config={...game.config};renderer.setGame(game);refreshImpactProfiler();statsRecorded=false;lastPhase='';lastInventory='';keys.clear();keyboardMove.reset();persistSettings();
+  config={...next,snow:undefined,fog:undefined,fireLine:undefined,seed:freshMatchSeed(Date.now(),playedSeeds),competition:newCompetition()};rankSettlement=[];game=new Game(config,APP_VERSION,undefined,previousBgm);config={...game.config};renderer.setGame(game);refreshImpactProfiler();statsRecorded=false;lastPhase='';lastInventory='';keys.clear();keyboardMove.reset();persistSettings();
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}if(forfeited)toast('退出对局，己方判负。');
 }
 function togglePause() {

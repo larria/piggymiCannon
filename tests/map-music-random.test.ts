@@ -4,3 +4,15 @@ test('random map resolves first; selection event and readable/current snapshots 
 test('new seeds can select every candidate, including temple0; valley borrows fairyland music but remains an original map',()=>{assert.deepEqual(mapBgmCandidates('temple'),[10,0]);assert.deepEqual(mapBgmCandidates('valley'),[2,4,10,12]);const pick=chooseMapBgm('valley',52);assert.equal(pick.mapNumber,null);assert.equal(pick.musicRuleMapNumber,6);assert.equal(pick.map,'valley');const seen=new Set(Array.from({length:300},(_,i)=>chooseMapBgm('sky',i).number));assert.deepEqual([...seen].sort((a,b)=>a-b),[4,8,9]);assert.equal(legacyMapBgmFile('moon','4.0.5'),'bgm-stage-00009.mp3');assert.equal(legacyMapBgmFile('valley','4.0.5'),'bgm-stage-00000.mp3');});
 test('snapshot and replay keep the chosen song, while old recordings with no music metadata preserve their state shape',()=>{for(const legacyLocal of [false,true]){const g=new Game({map:'coast',seed:52},'4.0.6');g.start();if(legacyLocal){g.matchBgm=null;delete (g as any).trace.initial.bgm;}const r=new ReplayRecorder(g);g.setAim(35,25);g.fire();for(let n=0;n<90;n++)g.update(.01);const p=new ReplayPlayer(r.export());for(let n=0;n<1500&&!p.done;n++)p.advance(.05);assert.equal(p.verified,true);assert.deepEqual(p.game.matchBgm,g.matchBgm);r.detach();}const value=chooseMapBgm('sky',1);assert.throws(()=>restoreMapBgm({...value,file:'../../file'},'sky'));assert.throws(()=>restoreMapBgm(value,'coast'));});
 test('a previously saved local valley recording retains its singleton original music after the borrowed-rule change',()=>{const old={...chooseMapBgm('valley',52),number:0,name:'Milyang Fortress',file:'bgm-stage-00000.mp3',candidates:[0],musicRuleMapNumber:null};assert.deepEqual(restoreMapBgm(old,'valley'),old);});
+test('back-to-back maps skip the prior track without changing random map draws, simulation RNG or replay music',()=>{
+ for(let seed=1;seed<=50;seed++){
+  const base=new Game({seed,mapChoice:'random'},'5.1.6'),previous=base.matchBgm!;
+  const next=new Game({seed,mapChoice:'random'},'5.1.6',undefined,previous);
+  const allowed=mapBgmCandidates(next.config.map);
+  assert.equal(next.config.map,base.config.map);assert.deepEqual(next.battleSnapshot().rng,base.battleSnapshot().rng);
+  assert.ok(allowed.includes(next.matchBgm!.number));assert.equal(next.matchBgm!.number===previous.number,allowed.length===1);
+  assert.deepEqual(Game.fromBattleSnapshot(next.battleSnapshot()).matchBgm,next.matchBgm);
+  const differentMap=MAPS.find(m=>m.id!==next.config.map)!.id;
+  assert.deepEqual(chooseMapBgm(next.config.map,seed,{map:differentMap,number:previous.number}),previous);
+ }
+});

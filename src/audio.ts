@@ -15,6 +15,8 @@ export class AudioManager {
   private loading=new Map<string,Promise<void>>();
   private sources=new Set<AudioBufferSourceNode>();
   private lastSamples=new Map<string,number>();
+  private nextPierceSound=0;
+  private scheduledFallbacks=new Set<AudioScheduledSourceNode>();
   private movementSample:AudioBufferSourceNode|null=null;private movingVehicle:VehicleId|null=null;
   private context:AudioContext|null=null;
   private master:GainNode|null=null;
@@ -46,7 +48,7 @@ export class AudioManager {
   }
   private sceneFile=BGM_TRACKS.lobby;
   setScene(scene:AudioScene,selectedFile?:string){const file=selectedFile&&RUNTIME_BGM_FILES.has(selectedFile)?selectedFile:BGM_TRACKS[scene];if(this.scene===scene&&this.sceneFile===file)return;this.scene=scene;this.sceneFile=file;this.music.pause();this.music.src=asset(file);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused)this.start();}
-  resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources])source.stop();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();}
+  resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources,...this.scheduledFallbacks])source.stop();this.scheduledFallbacks.clear();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();this.nextPierceSound=0;}
   async retryAssets(vehicles:(VehicleId|null)[],restored:string[]=[],skipFiles:string[]=[]){
     const clips=restored.filter(url=>url.startsWith('audio/')).map(url=>url.slice(6));for(const name of clips){await this.loading.get(name);this.buffers.delete(name);this.lastSamples.delete(name);}
     for(const clip of [this.music,this.selectionMusic])if(clip.error||clips.some(name=>clip.src.endsWith('/'+name))){const position=clip.currentTime;clip.addEventListener('loadedmetadata',()=>{if(Number.isFinite(clip.duration))clip.currentTime=Math.min(position,clip.duration);},{once:true});clip.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused&&!this.pageHidden){if(clip===this.music&&!this.selectionActive||clip===this.selectionMusic&&this.selectionActive)void clip.play().catch(()=>{});}}
@@ -59,12 +61,12 @@ export class AudioManager {
       catch{/* Keep synthesized fallback; retry after reconnect. */}finally{clearTimeout(timer);clearTimeout(decodeTimer);}
     })().finally(()=>this.loading.delete(name));this.loading.set(name,task);return task;
   }
-  private sample(name:string,x?:number,viewerX=0,loop=false):AudioBufferSourceNode|null {
+  private sample(name:string,x?:number,viewerX=0,loop=false,at?:number):AudioBufferSourceNode|null {
     const buffer=this.buffers.get(name);if(!buffer){void this.loadClip(name);return null;}
-    const {c,output}=this.graph();if(!loop&&c.currentTime-(this.lastSamples.get(name)??-10)<.075)return null;
+    const {c,output}=this.graph();if(at===undefined&&!loop&&c.currentTime-(this.lastSamples.get(name)??-10)<.075)return null;
     this.lastSamples.set(name,c.currentTime);if(this.sources.size>=20)[...this.sources][0].stop();
     const source=c.createBufferSource(),gain=c.createGain(),pan=c.createStereoPanner();source.buffer=buffer;source.loop=loop;gain.gain.value=loop?.22:.75;pan.pan.value=x===undefined?0:Math.max(-1,Math.min(1,(x-viewerX)/600));source.connect(gain);gain.connect(pan);pan.connect(output);this.sources.add(source);
-    source.onended=()=>{this.sources.delete(source);if(this.movementSample===source)this.movementSample=null;source.disconnect();gain.disconnect();pan.disconnect();};source.start();return source;
+    source.onended=()=>{this.sources.delete(source);if(this.movementSample===source)this.movementSample=null;source.disconnect();gain.disconnect();pan.disconnect();};source.start(at);return source;
   }
   private graph() {
     if(!this.context) {
@@ -146,17 +148,23 @@ export class AudioManager {
     }
     try {
       const name=type==='shot'||type==='explosion'?weaponSoundClip(type,weapon):type==='death'&&friendlyDeath?'sfx-death-friendly.mp3':`sfx-${type==='aim'?'select':type}.mp3`;
-      const loaded=this.buffers.has(name),sample=this.sample(name,sourceX,viewerX);
+      // Each Flyfire section is a real impact. Fast (or batched) impacts need
+      // distinct audio onsets, even when all four share one position.
+      let at:number|undefined;
+      if(type==='explosion'&&weapon==='missile-normal'){
+        at=Math.max(this.graph().c.currentTime,this.nextPierceSound);this.nextPierceSound=at+.105;
+      }
+      const loaded=this.buffers.has(name),sample=this.sample(name,sourceX,viewerX,false,at);
       // Keep the established lock chirp alongside Homming; fallback synthesis covers first-use loading.
       if(type!=='lock'&&(sample||loaded))return;
       if(['turn','wind','firewall','supply','warning'].includes(type))return;
-      const graph=this.graph(),c=graph.c,now=c.currentTime;let output:AudioNode=graph.output;
+      const graph=this.graph(),c=graph.c,now=at??c.currentTime;let output:AudioNode=graph.output;
       if(sourceX!==undefined) {const pan=c.createStereoPanner();pan.pan.value=Math.max(-1,Math.min(1,(sourceX-viewerX)/600));pan.connect(output);output=pan;}
       const tone=(start:number,end:number,duration:number,level:number,wave:OscillatorType='sine')=>{
         const oscillator=c.createOscillator(),gain=c.createGain();oscillator.type=wave;
         oscillator.frequency.setValueAtTime(start,now);oscillator.frequency.exponentialRampToValueAtTime(end,now+duration);
         gain.gain.setValueAtTime(level,now);gain.gain.exponentialRampToValueAtTime(0.001,now+duration);
-        oscillator.connect(gain);gain.connect(output);oscillator.start();oscillator.stop(now+duration+0.02);oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};
+        oscillator.connect(gain);gain.connect(output);oscillator.start(now);oscillator.stop(now+duration+0.02);if(at!==undefined)this.scheduledFallbacks.add(oscillator);oscillator.onended=()=>{this.scheduledFallbacks.delete(oscillator);oscillator.disconnect();gain.disconnect();};
       };
       const noise=(duration:number,level:number,cutoff:number)=>{
         const buffer=c.createBuffer(1,Math.floor(c.sampleRate*duration),c.sampleRate),data=buffer.getChannelData(0);
@@ -164,7 +172,7 @@ export class AudioManager {
         const source=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();source.buffer=buffer;
         filter.type='lowpass';filter.frequency.setValueAtTime(cutoff,now);filter.frequency.exponentialRampToValueAtTime(180,now+duration);
         gain.gain.setValueAtTime(level,now);gain.gain.exponentialRampToValueAtTime(0.001,now+duration);
-        source.connect(filter);filter.connect(gain);gain.connect(output);source.start();source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
+        source.connect(filter);filter.connect(gain);gain.connect(output);source.start(now);if(at!==undefined)this.scheduledFallbacks.add(source);source.onended=()=>{this.scheduledFallbacks.delete(source);source.disconnect();filter.disconnect();gain.disconnect();};
       };
       if(type==='aim') {tone(740,600,.055,.09,'triangle');return;}
       if(type==='death'){tone(220,110,.35,.15,'sine');return;}

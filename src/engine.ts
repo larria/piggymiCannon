@@ -8,7 +8,7 @@ import {modernAssistance} from './combat-preferences';
 import {sourceRangeModel,sourceRange,launchGravityMultiplier} from './source-range';
 import {groundOrbital,vectorProjectiles} from './weapon-presentation';
 import {backgroundMarkers} from './background-markers';
-import {chooseMapBgm,restoreMapBgm,randomMapMusic,type MatchBgm} from './map-music';
+import {chooseMapBgm,restoreMapBgm,randomMapMusic,type MatchBgm,type PreviousMapBgm} from './map-music';
 import {originalBallistics,originalWeapon,originalCrater,originalCraterAxes,ORIGINAL_TANKS,sourceMaximum,sourceDistance,sourceDamage} from './original-ballistics';
 import {planAIRestoration} from './ai-restoration';
 import {abandonmentWinner} from './exit-rules';
@@ -22,7 +22,7 @@ import {buildCoastMap} from './coast-map';
 import {buildSkyCity} from './sky-city';
 import {buildIceValley,addSkyBranch,SKY_UPPER_THICKNESS} from './sky-map';
 import {OBSERVATION_SECONDS,OBSERVATION_PRIORITY,type ObservationKind,type ShotObservation} from './shot-observation';
-import {salvoProfile,DOUBLE_SHOT_INTERVAL} from './salvo';
+import {salvoProfile,salvoLaunchSeconds,staggeredMultiSpecial,DOUBLE_SHOT_INTERVAL} from './salvo';
 import {permanentPiercingContact,PIERCING_SECTIONS,PIERCING_INTERVAL,piercingDamageScale,piercingDigScale} from './piercing';
 import {impactDamageScale,preciseContact,fullDamageArea,FULL_BLAST_DISTANCE} from './impact-damage';
 import {ERA_DAMAGE_VERSION} from './era-damage';
@@ -157,7 +157,7 @@ export class Game {
 
   private readonly fasterFalls:boolean;
   private readonly scaledSupplyCadence:boolean;
-  constructor(config:Partial<Config>={},readonly gameVersion='development',size:WorldSize=worldSize(gameVersion)) {
+  constructor(config:Partial<Config>={},readonly gameVersion='development',size:WorldSize=worldSize(gameVersion),previousBgm?:PreviousMapBgm|null) {
     this.fullHeightFireLine=fullHeightFireLine(gameVersion);
     this.fasterFalls=fastFallMotion(gameVersion);
     this.scaledSupplyCadence=isScaledSupplyCadence(gameVersion);
@@ -173,7 +173,7 @@ export class Game {
       this.recordBattle('map-selection',`随机地图抽中${MAPS.find(m=>m.id===this.config.map)!.name}`,{choice:'random',actual:this.config.map,available:mapsForVersion(this.gameVersion).map(m=>m.id)});
     }else if(this.config.mapChoice&&MAPS.some(m=>m.id===this.config.mapChoice))this.config.map=this.config.mapChoice;
     if(randomMapMusic(this.gameVersion)){
-      this.matchBgm=chooseMapBgm(this.config.map,this.config.seed);
+      this.matchBgm=chooseMapBgm(this.config.map,this.config.seed,previousBgm);
       this.recordBattle('bgm-selection',`本局配乐抽中 ${this.matchBgm.name}（${this.matchBgm.number}）`,{...this.matchBgm});
     }
     const weather=rollWeather(this.rng);this.fog=this.config.fog??(!modernWeather(this.gameVersion)&&weather.fog);
@@ -185,7 +185,7 @@ export class Game {
     this.tanks=participants.map((seat,i)=>this.createTank(i,(262+i*390)*this.layoutScale,seat,seat.index));
     this.movingUntil=participants.map(()=>0);this.roundPending=this.tanks.map(t=>t.id);
     this.placeStartingTanks();
-    if(playerSupplyTiming(gameVersion)){this.nextSupplyAction=SUPPLY_INTERVAL_ACTIONS;this.progress={id:this.config.competition?.id??`local-${this.config.seed}`,map:this.config.map,competitors:this.tanks.map(t=>{const points=t.controller==='human'?this.config.competition?.points[t.crew]??0:0;return {id:t.id,crew:t.crew,team:t.team,controller:t.controller,difficulty:t.difficulty,points,tier:t.controller==='ai'?aiRank(t.difficulty):rankIndex(points),vehicle:t.vehicleId,metrics:emptyCombat()};})};}
+    if(playerSupplyTiming(gameVersion)){this.nextSupplyAction=SUPPLY_INTERVAL_ACTIONS;this.progress={id:this.config.competition?.id??`local-${this.config.seed}`,map:this.config.map,competitors:this.tanks.map(t=>{const points=t.controller==='human'?this.config.competition?.points[t.crew]??0:0;return {id:t.id,crew:t.crew,team:t.team,controller:t.controller,difficulty:t.difficulty,points,tier:t.controller==='ai'?aiRank(t.difficulty):rankIndex(points,this.gameVersion),vehicle:t.vehicleId,metrics:emptyCombat()};})};}
     this.heardX=this.tanks.map(t=>Math.round(t.x/90)*90);
     if(this.active.vehicleId) this.selected=vehicleById(this.active.vehicleId).normal;
     this.targetX=this.tanks[1].x;
@@ -257,7 +257,7 @@ export class Game {
     const participant=t?.controller==='human'?this.progress?.competitors.find(c=>c.id===t.id&&c.controller==='human'):null;
     if(participant&&amount>0)participant.metrics[key]+=amount;
   }
-  medal(t:Tank){return t.controller==='ai'?aiRank(t.difficulty):this.progress?.competitors.find(c=>c.id===t.id)?.tier??rankIndex(this.config.competition?.points[t.crew]??0);}
+  medal(t:Tank){return t.controller==='ai'?aiRank(t.difficulty):this.progress?.competitors.find(c=>c.id===t.id)?.tier??rankIndex(this.config.competition?.points[t.crew]??0,this.gameVersion);}
   get active() { return this.tanks[this.current]; }
   get enemy() { return this.opponents(this.active).sort((a,b)=>Math.abs(a.x-this.active.x)-Math.abs(b.x-this.active.x))[0]??this.tanks.find(t=>t.team!==this.active.team)!; }
   opponents(t:Tank){return this.tanks.filter(e=>e.team!==t.team&&e.hp>0);}
@@ -662,7 +662,7 @@ export class Game {
     t.lastDelay=this.delayFor(t,transfer||healing?undefined:id);t.delayCommitted=true;
     if(healing){const p={...this.launch(t,'cannon-normal'),healing:true,boost:t.boost?1.5:1,fireBoosted:t.boost,rage:false,digBoost:1,boostSources:{fire:t.boost?'item' as const:null,rage:1,snow:1}};if(t.power<=this.minimumShotPower)Object.assign(p,{x:t.x,y:t.y-45,vx:0,vy:0});this.projectiles=[p];}
     else if(transfer)this.projectiles=[{...this.launch(t,'shell'),transfer:true,scale:1,boost:1,fireBoosted:false,rage:false,digBoost:1}];
-    else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>(()=>{const profile=salvoProfile(t.vehicleId,id,i,spec.shots!,this.gameVersion),p=this.launch(t,id,t.angle+profile.angle);p.vx*=profile.vx;p.vy*=profile.vy;p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;p.phase=i*Math.PI*2/spec.shots!;return p;})());
+    else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>(()=>{const profile=salvoProfile(t.vehicleId,id,i,spec.shots!,this.gameVersion),p=this.launch(t,id,t.angle+profile.angle);p.vx*=profile.vx;p.vy*=profile.vy;p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;p.phase=i*Math.PI*2/spec.shots!;p.delay=salvoLaunchSeconds(id,i,this.gameVersion)*FLIGHT_SPEED;return p;})());
     else if(id==='triple') this.projectiles=[-5,0,5].map(d=>this.launch(t,id,t.angle+d));
     else if(id==='airstrike') this.projectiles=[-38,0,38].map(d=>({...this.launch(t,id),x:clamp(this.targetX+d,20,this.worldWidth-20),y:-40-Math.abs(d),vx:0,vy:190}));
     else this.projectiles=[this.launch(t,id)];
@@ -674,7 +674,7 @@ export class Game {
       this.volleyTargets.set(volley,{x:impact.x,y:impact.y,target:null});
       this.projectiles.forEach(p=>p.volley=volley);
     }
-    if(t.doubleShot) this.projectiles.push(...this.projectiles.map((p,i)=>({...p,trail:[],delay:DOUBLE_SHOT_INTERVAL*FLIGHT_SPEED,echo:i===0,...(transfer&&modernWeather(this.gameVersion)?{awaitTransfer:true}:{})})));
+    if(t.doubleShot) this.projectiles.push(...this.projectiles.map((p,i)=>({...p,trail:[],delay:p.delay+DOUBLE_SHOT_INTERVAL*FLIGHT_SPEED,echo:i===0,...(transfer&&modernWeather(this.gameVersion)?{awaitTransfer:true}:{})})));
     this.recordBattle('fire-action',`${t.name}发射${healing?'恢复弹':transfer?'转移弹':spec.name}，${this.projectiles.length}枚；相对${t.angle.toFixed(2)}°／绝对${this.aim(t).absolute.toFixed(2)}°，力度${t.power.toFixed(2)}，等待${t.lastDelay}`,{owner:t.id,weapon:healing?'cannon-normal':transfer?'shell':id,selectedWeapon:id,transfer,healing,relative:t.angle,absolute:this.aim(t).absolute,power:t.power,direction:t.direction,position:{x:t.x,y:t.y},slope:this.tankSlope(t),projectileCount:this.projectiles.length,doubleShot:t.doubleShot,doubleShotIntervalSeconds:t.doubleShot?DOUBLE_SHOT_INTERVAL:0,delay:t.lastDelay,ammo:t.ammo[id],rules:this.traceRules()});
     this.projectiles.forEach(p=>this.traceProjectile(p));
     t.boost=false;t.doubleShot=false;if(t.queuedShot)delete t.queuedShot;this.heardX[t.id]=Math.round(t.x/90)*90;
@@ -731,7 +731,7 @@ export class Game {
     if(p.transfer&&modernBackpack(this.gameVersion)&&this.tanks[p.owner].hp<=0){this.recordBattle('projectile-end','转移者已出局，清除剩余转移弹',{projectile:p.traceId,owner:p.owner});return true;}
     if(p.awaitTransfer&&modernBackpack(this.gameVersion)&&this.tanks[p.owner].parachute)return false;
     if(p.awaitTransfer&&this.projectiles.some(other=>other!==p&&other.transfer&&!other.awaitTransfer))return false;
-    if(p.delay>0) {p.delay-=dt/this.motionScale;if(p.delay<=0){if(p.awaitTransfer){const fresh=this.launch(this.tanks[p.owner],'shell');Object.assign(p,fresh,{transfer:true,awaitTransfer:false,echo:true,delay:0,boost:1,fireBoosted:false,rage:false,digBoost:1});this.recordBattle('transfer-relaunch','双发第二枚转移弹从新落点发射',{projectile:p.traceId,owner:p.owner,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:this.tanks[p.owner].angle,absolute:this.aim(this.tanks[p.owner]).absolute,power:this.tanks[p.owner].power,wind:this.wind});}this.recordBattle('projectile-echo',`第${p.traceId??'?'}弹延迟装填完成`,{projectile:p.traceId,weapon:p.weapon,owner:p.owner});if(p.echo)this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon,!!p.transfer);}return false;}
+    if(p.delay>0) {p.delay-=dt/this.motionScale;if(p.delay<=0){if(p.awaitTransfer){const fresh=this.launch(this.tanks[p.owner],'shell');Object.assign(p,fresh,{transfer:true,awaitTransfer:false,echo:true,delay:0,boost:1,fireBoosted:false,rage:false,digBoost:1});this.recordBattle('transfer-relaunch','双发第二枚转移弹从新落点发射',{projectile:p.traceId,owner:p.owner,x:p.x,y:p.y,vx:p.vx,vy:p.vy,relative:this.tanks[p.owner].angle,absolute:this.aim(this.tanks[p.owner]).absolute,power:this.tanks[p.owner].power,wind:this.wind});}const salvo=!p.echo&&staggeredMultiSpecial(p.weapon,this.gameVersion);this.recordBattle(salvo?'salvo-launch':'projectile-echo',`第${p.traceId??'?'}弹延迟${salvo?'出膛':'装填完成'}`,{projectile:p.traceId,weapon:p.weapon,owner:p.owner});if(p.echo)this.emit('shot','双发装填追加了一轮齐射。',undefined,this.tanks[p.owner].x,p.weapon,!!p.transfer);}return false;}
     p.age+=dt;
     p.hitCooldown=Math.max(0,p.hitCooldown-dt/(p.pierceContact?this.motionScale:1));
     if(impactPolish(this.gameVersion)&&p.pierceContact&&p.weapon==='missile-normal'){
