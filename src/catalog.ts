@@ -43,7 +43,7 @@ export const MAPS: { id:MapId; name:string; sub:string; color:string;description
   { id:'moon', name:'冰封溪谷', sub:'交错双冰带 · 独立S形细枝', color:'#91aab6',description:'左侧冰带向右下延伸，右侧较高冰带向右上抬升，中段交错留出空隙；下方独立的S形细枝可接住掉落的炮手。冰带越靠战场两侧越厚；下层细枝仅4像素，冰带和细枝均可破坏。' },
   { id:'sky', name:'天空之城', sub:'连绵雪丘 · 厚云台', color:'#aac4ce',description:'连绵的厚雪地与云台贯穿战场，中央雪丘更高，需要持续轰击才能挖穿；没有冰封溪谷的下层S枝。沿用暖纸色画风，自绘平台厚度与细节。' },
   { id:'factory', name:'钢铁工厂', sub:'永久 Z 形底板 · 钢梁',color:'#8f9998',description:'用户确认底层是永久Z形连续斜面，圆滑折点可移位调角；上层90像素钢梁，按统一Round小红豆连续两发可穿；中层钢梁仍可破。坠落伤害可开关且默认关闭。参照游侠攻略“不会被打掉下去”，坐标与坡面为本作重绘。' },
-  { id:'temple', name:'神圣殿堂', sub:'小蘑菇永久节点 · 易碎薄轨',color:'#bba883',description:'用户确认永久蘑菇节点缩至原尺寸约1/3：圆顶伞盖、窄柄／小基座，可微移调角。非节点薄轨保持4像素且易碎，上层殿堂可破。参照游侠攻略，五节点坐标／弧度为本作重绘，不宣称逐像素复刻。' },
+  { id:'temple', name:'神圣殿堂', sub:'缓浪木轨 · 永久伞盖',color:'#bba883',description:'木轨缓缓起伏，可以打穿；底层五处金色伞盖不可破坏，能接住掉落的坦克。' },
   { id:'egypt', name:'古老埃及', sub:'金字塔高地 · 主题重绘',color:'#c4a274',description:'月光 2003 年赛事记录确认古老埃及场景名；未取得原版地形细节。金字塔、方尖碑和薄桥是本作战术主题重绘，不能称为原图复原。' },
 ];
 export const mapsForVersion=(version:string)=>referenceCalibration(version)?MAPS:MAPS.filter(m=>m.id!=='sky');

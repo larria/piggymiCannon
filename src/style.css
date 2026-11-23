@@ -574,3 +574,15 @@ dialog,.arsenal{scrollbar-gutter:stable}
 .minimap-header{z-index:1}.minimap-panel.collapsed .minimap-field,.minimap-turn-pulse[hidden]{display:none}
 @keyframes minimap-turn-beacon{0%,100%{opacity:.24;transform:translate(-50%,-50%) scale(.88)}50%{opacity:.86;transform:translate(-50%,-50%) scale(1.18)}}
 @media(prefers-reduced-motion:reduce){.pending-shot-item::after,.queued-item-chip,.minimap-turn-pulse{animation:none}.minimap-turn-pulse{background:transparent}}
+
+/* Installed iPad: the lobby sits below the status bar. In battle the shell
+ * uses the full window. Do not count the WebKit bottom inset twice or
+ * turn it into extra dashboard height. */
+@media (any-pointer:coarse) and (orientation:landscape) and (min-width:960px) and (min-height:600px) {
+ .ios-standalone{--tablet-safe-top:max(24px,env(safe-area-inset-top));--tablet-safe-bottom:env(safe-area-inset-bottom)}
+ .ios-standalone body:not(.combat-mode){padding-top:var(--tablet-safe-top);padding-bottom:var(--tablet-safe-bottom)}
+ .ios-standalone .combat-mode .main-shell{position:fixed;inset:0 0 auto;height:100%;height:max(100%,100lvh);padding-top:var(--tablet-safe-top);padding-bottom:0}
+ .combat-mode .compact-dashboard{grid-template-columns:210px minmax(0,1fr) 156px}
+ .combat-mode .compact-dashboard .angle-instrument{width:114px;height:114px}
+ .combat-mode .compact-dashboard #angle-limits{left:44px;width:114px!important;bottom:-4px}
+}

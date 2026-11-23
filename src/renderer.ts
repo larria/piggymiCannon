@@ -35,6 +35,7 @@ import {crewPortrait,crewPortraitRevision} from './crew-portraits';
 import {paintItemCue} from './item-feedback';
 import {paintTransferParachute} from './transfer-parachute';
 import {classicBackdrop,classicDetails} from './classic-map-art';
+import {waveTemple} from './classic-maps';
 
 interface Palette {sky:string;horizon:string;sun:string;mountains:string[];soil:string;soilLight:string;grass:string;grassLight:string;water:string;ink:string}
 const PALETTES:Record<string,Palette>={
@@ -282,7 +283,8 @@ export class Renderer {
     // These decorations depend on one distant occupancy test.
     const layout=this.game.layoutScale;
     if(this.game.config.map==='egypt'&&dirty.from<=960*layout&&dirty.to>=960*layout&&dirty.top<=518*layout&&dirty.bottom>=518*layout)region.bottom=Math.max(region.bottom,620*layout);
-    if(this.game.config.map==='temple'&&dirty.from<=960*layout&&dirty.to>=960*layout&&dirty.top<=(layout>1?this.worldHeight*.46:555)&&dirty.bottom>=(layout>1?this.worldHeight*.46:555)){region.from=Math.min(region.from,layout>1?this.worldWidth*.47:856);region.to=Math.max(region.to,layout>1?this.worldWidth*.53:1092);region.bottom=Math.max(region.bottom,layout>1?this.worldHeight*.46+36:580);}
+    const altar=layout>1?this.worldHeight*.46:555,altarSwell=waveTemple(this.game.gameVersion)?22:0;
+    if(this.game.config.map==='temple'&&dirty.from<=960*layout&&dirty.to>=960*layout&&dirty.top<=altar+altarSwell&&dirty.bottom>=altar-altarSwell){region.from=Math.min(region.from,layout>1?this.worldWidth*.47:825);region.to=Math.max(region.to,layout>1?this.worldWidth*.53:1095);region.top=Math.min(region.top,altar-altarSwell);region.bottom=Math.max(region.bottom,altar+altarSwell+36);}
     const old=this.ctx,c=this.staticTerrain,r=this.terrainRatio;if(full){c.width=(this.worldWidth+64)*r;c.height=this.worldHeight*r;}
     this.ctx=c.getContext('2d')!;this.ctx.setTransform(1,0,0,1,0,0);this.ctx.save();const left=Math.floor((region.from+32)*r),top=Math.floor(region.top*r),right=Math.ceil((region.to+33)*r),bottom=Math.ceil((region.bottom+1)*r);this.ctx.beginPath();this.ctx.rect(left,top,right-left,bottom-top);this.ctx.clip();this.ctx.clearRect(left,top,right-left,bottom-top);this.ctx.setTransform(r,0,0,r,32*r,0);
     try{this.paintTerrainDecoration(region);classicDetails(this.ctx,this.game);}finally{this.ctx.restore();this.ctx=old;}
@@ -330,10 +332,16 @@ export class Renderer {
       ctx.restore();
     }
     if(g.fireLine||g.weatherObservation) {
-      const f=g.weatherObservation?.line??g.fireLine!,visual=fireLineVisual(g.weatherObservation),top=f.bottom-(f.bottom-f.top)*visual.reveal;ctx.save();ctx.globalAlpha=visual.alpha;ctx.strokeStyle='#ee955383';ctx.lineWidth=7;
-      ctx.beginPath();for(let y=top;y<f.bottom;y+=7) {const x=f.x+Math.sin(y/22+this.time*5)*4;if(y===top) ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
+      const f=g.weatherObservation?.line??g.fireLine!,visual=fireLineVisual(g.weatherObservation);
+      const full=g.fullHeightFireLine,front=f.bottom-(f.bottom-f.top)*visual.reveal;
+      const begin=full?Math.max(this.offsetY-14,visual.reveal===1?-Infinity:front):front;
+      const end=full?Math.min(this.offsetY+this.viewHeight+14,visual.reveal===1?Infinity:f.bottom):f.bottom;
+      if(begin>=end||visual.alpha<=0)return;
+      ctx.save();ctx.globalAlpha=visual.alpha;ctx.strokeStyle='#ee955383';ctx.lineWidth=7;
+      ctx.beginPath();for(let y=begin;y<=end+7;y+=7){const x=f.x+Math.sin(y/22+this.time*5)*4;if(y===begin)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
       ctx.strokeStyle='#ffe4a0c0';ctx.lineWidth=2;ctx.stroke();
-      for(let i=0;i<18;i++) {const y=top+((i*29+this.time*42)%Math.max(1,f.bottom-top));ctx.fillStyle='#ffc87990';ctx.beginPath();ctx.arc(f.x+Math.sin(i+this.time)*12,y,1.8,0,Math.PI*2);ctx.fill();}
+      const spacing=full?48:29,first=full?Math.floor(begin/spacing):0,last=full?Math.ceil(end/spacing):18;
+      for(let i=first;i<last;i++){const y=full?i*spacing+((this.time*42)%spacing):begin+((i*spacing+this.time*42)%Math.max(1,end-begin));if(y<begin||y>end)continue;ctx.fillStyle='#ffc87990';ctx.beginPath();ctx.arc(f.x+Math.sin(i+this.time)*12,y,1.8,0,Math.PI*2);ctx.fill();}
       ctx.restore();
     }
   }
@@ -496,7 +504,13 @@ export class Renderer {
       if(p.healing){const cross=shotArtScale*(largerProjectiles?1.24:1);ctx.save();ctx.scale(cross,cross);ctx.fillStyle='#fff8e8';ctx.fillRect(-1.5,-5,3,10);ctx.fillRect(-5,-1.5,10,3);ctx.restore();}
       if(p.homing) {ctx.strokeStyle='#bddce3';ctx.lineWidth=2*shotArtScale;ctx.beginPath();ctx.arc(0,0,11*shotArtScale,0,Math.PI*2);ctx.stroke();}ctx.restore();
       if(p.homing&&(!fog||p.lockTarget!==null&&g.tanks[p.lockTarget]&&g.visible(g.tanks[p.lockTarget]))&&this.visibleAt(p.lockX)) {ctx.save();ctx.strokeStyle='#d6efdfb0';ctx.lineWidth=1.5;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.lockX,p.lockY);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(p.lockX,p.lockY,15+Math.sin(p.lockAge*12)*4,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(p.lockX-23,p.lockY);ctx.lineTo(p.lockX-13,p.lockY);ctx.moveTo(p.lockX+13,p.lockY);ctx.lineTo(p.lockX+23,p.lockY);ctx.stroke();ctx.restore();}
-      if(weapon.effect==='orbital'&&p.sub) {ctx.save();ctx.strokeStyle='#c0bdf595';ctx.lineWidth=5*shotArtScale;ctx.beginPath();ctx.moveTo(p.x,-40);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.restore();}
+      if(weapon.effect==='orbital'&&p.sub) {
+        const heated=g.fullHeightFireLine&&p.fireBoosted;
+        ctx.save();ctx.beginPath();ctx.moveTo(p.x,g.fullHeightFireLine?Math.min(-50,this.offsetY-12):-40);ctx.lineTo(p.x,p.y);
+        ctx.strokeStyle=heated?'#bf312770':'#c0bdf595';ctx.lineWidth=(heated?18:5)*shotArtScale;ctx.stroke();
+        if(heated){ctx.strokeStyle='#e44834';ctx.lineWidth=10*shotArtScale;ctx.stroke();ctx.strokeStyle='#ffe3b9';ctx.lineWidth=3*shotArtScale;ctx.stroke();}
+        ctx.restore();
+      }
     }
     for(const b of g.blasts) {
       if(!this.visibleAt(b.x)) continue;

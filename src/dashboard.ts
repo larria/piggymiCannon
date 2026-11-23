@@ -30,7 +30,7 @@ export class DashboardView {
     const m=this.map.getContext('2d')!,base=this.terrain.getContext('2d')!;
     if(this.previousGame!==game||this.revision!==game.land.revision){paintMapOverview(base,game,300,168);this.previousGame=game;this.revision=game.land.revision;}
     m.clearRect(0,0,300,168);m.save();m.globalAlpha=.56;m.drawImage(this.terrain,0,0);m.restore();m.strokeStyle='#f9f2d7b0';m.lineWidth=2;m.strokeRect(offsetX/game.worldWidth*300+2,offset/game.worldHeight*168,viewWidth/game.worldWidth*300-4,viewHeight/game.worldHeight*168);
-    if(game.fireLine){m.strokeStyle='#f5ae70';m.beginPath();m.moveTo(game.fireLine.x/game.worldWidth*300,15);m.lineTo(game.fireLine.x/game.worldWidth*300,145);m.stroke();}
+    if(game.fireLine){m.strokeStyle='#f5ae70';m.beginPath();m.moveTo(game.fireLine.x/game.worldWidth*300,game.fullHeightFireLine?0:15);m.lineTo(game.fireLine.x/game.worldWidth*300,game.fullHeightFireLine?168:145);m.stroke();}
     const markers=game.tanks.filter(tank=>!tank.outOfBounds&&tank.x>=0&&tank.x<=game.worldWidth&&tank.y>=0&&tank.y<=game.worldHeight&&game.visible(tank));
     // The terrain overview is deliberately shallow; markers stay circular in CSS pixels.
     const markerAspect=this.map.clientHeight?this.map.clientWidth/300/(this.map.clientHeight/168):1;

@@ -34,7 +34,7 @@ import {isRaging,redHealthLimit} from './health';
 import {pointHitsTank,tankSegmentContact} from './tank-hitbox';
 import {resolveVehicle,vehicleById,type VehicleId,type VehicleChoice} from './vehicles';
 import { Terrain, WORLD_W, WORLD_H, BOTTOM_Y, TERRAIN_H } from './terrain';
-import {rollWeather,modernWeather,rollBattleWeather,weatherDuration,nextWeatherRound,WEATHER_CLEAR_ROUNDS,rollSnow,fireLinePlacement,WEATHER_OBSERVATION_SECONDS,type WeatherObservation} from './weather';
+import {rollWeather,modernWeather,makeFireLine,crossedFireLine,fullHeightFireLine,rollBattleWeather,weatherDuration,nextWeatherRound,WEATHER_CLEAR_ROUNDS,rollSnow,fireLinePlacement,WEATHER_OBSERVATION_SECONDS,type WeatherObservation} from './weather';
 import {buildClassicMap} from './classic-maps';
 
 import {defaultSlots,slotProblem,teamFlag,CREW,type Slot,type CrewId} from './crew';
@@ -135,6 +135,7 @@ export class Game {
   private armedItemSlot:number|null=null;
   targetX=1000; teleporting=false; aiTime=0; resolveTime=0;resolveHazardTime=0;
   weatherObservation:WeatherObservation|null=null;private weatherNextRound=2;private weatherCooldownUntil=0;private weatherSnow=false;
+  readonly fullHeightFireLine:boolean;
   fog=false;fogTurnsRemaining=0;fireLineTurnsRemaining=0;fireLine:{x:number;top:number;bottom:number}|null=null;
   movingUntil=[0,0];
   resultAge=0;
@@ -157,6 +158,7 @@ export class Game {
   private readonly fasterFalls:boolean;
   private readonly scaledSupplyCadence:boolean;
   constructor(config:Partial<Config>={},readonly gameVersion='development',size:WorldSize=worldSize(gameVersion)) {
+    this.fullHeightFireLine=fullHeightFireLine(gameVersion);
     this.fasterFalls=fastFallMotion(gameVersion);
     this.scaledSupplyCadence=isScaledSupplyCadence(gameVersion);
     this.land=new Terrain(size.width,size.height);this.terrain=this.land.surface;
@@ -176,7 +178,7 @@ export class Game {
     }
     const weather=rollWeather(this.rng);this.fog=this.config.fog??(!modernWeather(this.gameVersion)&&weather.fog);
     this.fogTurnsRemaining=this.fog?2:0;
-    if((this.config.fireLine??(!modernWeather(this.gameVersion)&&weather.fireLine))&&(!modernWeather(this.gameVersion)||!this.fog)) this.fireLine={x:this.worldWidth*(.35+this.rng()*.3),top:50,bottom:this.worldHeight-50};
+    if((this.config.fireLine??(!modernWeather(this.gameVersion)&&weather.fireLine))&&(!modernWeather(this.gameVersion)||!this.fog)) this.fireLine=makeFireLine(this.worldWidth*(.35+this.rng()*.3),this.worldHeight,this.gameVersion);
     this.fireLineTurnsRemaining=this.fireLine?2:0;
     this.generateTerrain();
     const participants=this.config.slots.map((slot,index)=>({...slot,index})).filter(s=>s.enabled);
@@ -794,10 +796,12 @@ export class Game {
       const speed=Math.max(1,Math.hypot(p.vx,p.vy)),offset=Math.sin(p.age*17+p.phase)*18*Math.min(1,p.age*5);
       p.weaveX=-p.vy/speed*offset;p.weaveY=p.vx/speed*offset;p.x+=p.weaveX;p.y+=p.weaveY;
     }
-    if(!p.transfer&&this.fireLine&&!p.fireBoosted&&(oldX-this.fireLine.x)*(p.x-this.fireLine.x)<=0&&p.y>=this.fireLine.top&&p.y<=this.fireLine.bottom) {
+    const line=this.fireLine;
+    const crossed=line&&!p.transfer&&crossedFireLine(line,oldX,p.x,p.y,this.fullHeightFireLine);
+    if(crossed&&!p.fireBoosted) {
       p.boost*=1.5;p.fireBoosted=true;p.trail=[];p.boostSources={...(p.boostSources??{rage:1,snow:1}),fire:'line'};this.burst(p.x,p.y,10,'#f5a956');
     }
-    if(!p.transfer&&!p.traceCrossed&&this.fireLine&&(oldX-this.fireLine.x)*(p.x-this.fireLine.x)<=0&&p.y>=this.fireLine.top&&p.y<=this.fireLine.bottom){p.traceCrossed=true;p.traceFireLine={...this.fireLine,time:this.elapsed,xImpact:p.x,yImpact:p.y};this.recordBattle('fire-line',`第${p.traceId??'?'}弹穿越火线；${p.boostSources?.fire==='item'?'道具已强化，不重复乘1.5':'火线强化×1.5'}，总boost=${p.boost}`,{projectile:p.traceId,fireBoosted:p.fireBoosted,boost:p.boost,sources:p.boostSources,line:this.fireLine});}
+    if(crossed&&!p.traceCrossed){p.traceCrossed=true;p.traceFireLine={...line,time:this.elapsed,xImpact:p.x,yImpact:p.y};this.recordBattle('fire-line',`第${p.traceId??'?'}弹穿越火线；${p.boostSources?.fire==='item'?'道具已强化，不重复乘1.5':'火线强化×1.5'}，总boost=${p.boost}`,{projectile:p.traceId,fireBoosted:p.fireBoosted,boost:p.boost,sources:p.boostSources,line:this.fireLine});}
     if(p.fireBoosted){p.trail.push({x:p.x,y:p.y});if(p.trail.length>40)p.trail.shift();}
     else if(!p.transfer&&!vectorProjectiles(this.gameVersion)&&weaponHasTrail(p.weapon,this.gameVersion)){
       p.trail.push({x:p.x,y:p.y});while(p.trail.length>MODERN_TRAIL_POINTS)p.trail.shift();
@@ -1201,6 +1205,8 @@ export class Game {
     if(this.pendingSupply&&!candidates.some(t=>t.id===this.pendingSupply!.target)){
       this.recordBattle('supply-cancel','预定补给取消：对应人类炮手已出局或交给AI',{...this.pendingSupply});this.pendingSupply=null;
     }
+    // Keep a queued recipient through the blackout; evaluate a fresh landing on their next eligible turn.
+    if(this.fullHeightFireLine&&(this.fireLine||this.weatherObservation))return;
     const cooldownUntil=()=>this.lastSupplyDelivery===null?0:this.lastSupplyDelivery+supplyGapForHumans(candidates.length);
     if(!this.pendingSupply&&this.turn>=Math.max(this.nextSupplyAction,cooldownUntil())&&this.crates.length<3){
       this.nextSupplyAction=this.turn+SUPPLY_INTERVAL_ACTIONS;
@@ -1249,7 +1255,7 @@ export class Game {
     const duration=weatherDuration(this.rng);this.weatherCooldownUntil=this.roundNumber+duration+WEATHER_CLEAR_ROUNDS+1;
     if(kind==='fog'){this.fog=true;this.fogTurnsRemaining=duration;}
     else if(placement){
-      this.fireLine={x:placement.x,top:50,bottom:this.worldHeight-50};this.fireLineTurnsRemaining=duration;
+      this.fireLine=makeFireLine(placement.x,this.worldHeight,this.gameVersion);this.fireLineTurnsRemaining=duration;
       this.weatherObservation={kind:'appear',line:{...this.fireLine},point:{x:placement.x,y:placement.y},age:0};
     }
     this.recordBattle('weather-start',`${kind==='fog'?'雾气':'火线'}随机出现，持续${duration}完整轮`,{kind,duration,round:this.roundNumber,placement,line:this.fireLine});

@@ -1,3 +1,4 @@
+import {templeCanopy,templeNodes,waveTemple} from './classic-maps';
 import {thickIceEdges} from './sky-map';
 import type {Game} from './engine';
 import {MAPS} from './catalog';
@@ -14,5 +15,14 @@ export function paintMapOverview(c:CanvasRenderingContext2D,g:Game,width:number,
       if(kind){c.fillStyle=kind===2?'#d7bf73':kind===3?'#999879':color;c.fillRect(x/g.worldWidth*width,start/g.worldHeight*height,Math.max(1,8/g.worldWidth*width),Math.max(1.8,(y-start)/g.worldHeight*height));}
       kind=next;start=y;
     }
+  }
+  if(g.config.map==='temple'&&waveTemple(g.gameVersion)){
+    // This drawn profile still shows up when a whole canopy is only a few map pixels wide.
+    c.save();c.scale(width/g.worldWidth,height/g.worldHeight);c.fillStyle='#ad773e';
+    for(const node of templeNodes(g.layoutScale)){
+      const {radius,crown,hem,top}=templeCanopy(node,g.layoutScale);
+      c.beginPath();c.moveTo(node-radius,top(node-radius));c.quadraticCurveTo(node,2*crown-top(node-radius),node+radius,top(node+radius));c.lineTo(node+radius,hem);c.lineTo(node-radius,hem);c.closePath();c.fill();
+    }
+    c.restore();
   }
 }

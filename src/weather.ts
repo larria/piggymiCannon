@@ -1,3 +1,4 @@
+import {compareVersions} from './version';
 import type {MapId} from './catalog';
 // Retain the old independent opening draw for pre-3.2.7 replay tapes.
 export function rollWeather(rng:()=>number) {return {fog:Math.floor(rng()*30)===0,fireLine:Math.floor(rng()*30)===0};}
@@ -41,4 +42,14 @@ export function fireLineVisual(observation:WeatherObservation|null){
 export function weatherCameraPoint(observation:WeatherObservation,actor:{x:number;y:number}){
  const start=WEATHER_APPROACH+WEATHER_ANIMATION+WEATHER_HOLD,p=unit((observation.age-start)/WEATHER_RETURN),e=p*p*(3-2*p);
  return {x:observation.point.x+(actor.x-observation.point.x)*e,y:observation.point.y+(actor.y-observation.point.y)*e};
+}
+
+export type FireLine=WeatherObservation['line'];
+export const fullHeightFireLine=(version:string)=>/^v?\d+\.\d+\.\d+$/.test(version)&&compareVersions(version,'5.1.5')>=0;
+export function makeFireLine(x:number,height:number,version:string):FireLine {
+ // Finite animation endpoints only. Collision with the new line has no Y limit.
+ return fullHeightFireLine(version)?{x,top:-height,bottom:height*1.5}:{x,top:50,bottom:height-50};
+}
+export function crossedFireLine(line:FireLine,oldX:number,x:number,y:number,unbounded:boolean) {
+ return (oldX-line.x)*(x-line.x)<=0&&(unbounded?x!==oldX:y>=line.top&&y<=line.bottom);
 }

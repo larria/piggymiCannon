@@ -1,0 +1,110 @@
+{
+  "before": {
+    "header": {
+      "top": 31,
+      "bottom": 87,
+      "width": 1194,
+      "height": 56,
+      "left": 0,
+      "right": 1194
+    },
+    "battle": {
+      "top": 87,
+      "bottom": 647,
+      "width": 1194,
+      "height": 560,
+      "left": 0,
+      "right": 1194
+    },
+    "deck": {
+      "top": 647,
+      "bottom": 786,
+      "width": 1194,
+      "height": 139,
+      "left": 0,
+      "right": 1194
+    },
+    "dial": {
+      "top": 670,
+      "bottom": 764,
+      "width": 94,
+      "height": 94,
+      "left": 56,
+      "right": 150
+    },
+    "nudge": {
+      "top": 671,
+      "bottom": 715,
+      "width": 44,
+      "height": 44,
+      "left": 156,
+      "right": 200
+    },
+    "fire": {
+      "top": 671,
+      "bottom": 763,
+      "width": 60,
+      "height": 92,
+      "left": 1122,
+      "right": 1182
+    }
+  },
+  "after": {
+    "header": {
+      "top": 31,
+      "bottom": 87,
+      "width": 1194,
+      "height": 56,
+      "left": 0,
+      "right": 1194
+    },
+    "battle": {
+      "top": 87,
+      "bottom": 695,
+      "width": 1194,
+      "height": 608,
+      "left": 0,
+      "right": 1194
+    },
+    "deck": {
+      "top": 695,
+      "bottom": 834,
+      "width": 1194,
+      "height": 139,
+      "left": 0,
+      "right": 1194
+    },
+    "dial": {
+      "top": 708,
+      "bottom": 822,
+      "width": 114,
+      "height": 114,
+      "left": 56,
+      "right": 170
+    },
+    "nudge": {
+      "top": 719,
+      "bottom": 763,
+      "width": 44,
+      "height": 44,
+      "left": 178,
+      "right": 222
+    },
+    "fire": {
+      "top": 719,
+      "bottom": 811,
+      "width": 60,
+      "height": 92,
+      "left": 1122,
+      "right": 1182
+    }
+  },
+  "height": 834,
+  "capHints": [
+    17,
+    18,
+    18,
+    16,
+    16
+  ]
+}

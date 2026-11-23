@@ -34,10 +34,39 @@ export const templeNode=(node:number,layout=1)=>{
  return {radius:(center?104:edge?96:72)*scale,rise:(center?32:28)*scale,stem:stem*scale,rim:7*scale,stemStart:6*scale,baseWidth:(stem+3)*scale,baseTop:rail+(566-oldRail)*scale,bottom:rail+(574-oldRail)*scale};
 };
 export function templeCap(x:number,node:number,scale=1){const {radius,rise}=templeNode(node,scale),u=(x-node)/radius;return templeRail(x,scale)-rise*Math.max(0,1-u*u)**2;}
+export const waveTemple=(version:string)=>/^v?\d+\.\d+\.\d+$/.test(version)&&compareVersions(version,'5.1.5')>=0;
+// Long swells in game space; each platform keeps its original thickness and footprint.
+const templeSwell=(x:number,width:number,phase:number)=>10*Math.sin(x/width*Math.PI*4+phase)+4*Math.sin(x/width*Math.PI*6+.65+phase);
+export const templePlatformY=(x:number,width:number,level:number,base:number)=>base+templeSwell(x,width,level*Math.PI*3+(level===.75?.5:0));
+export const templeWaveRail=(x:number,scale:number)=>templePlatformY(x,1920*scale,.86,templeRail(x,scale));
+export const TEMPLE_CANOPY={radius:32,rise:23,rim:2,stem:4,stemDepth:1};
+export function templeCanopy(node:number,scale:number){
+ const {radius,rise,rim,stem,stemDepth}=TEMPLE_CANOPY;
+ const crown=Math.ceil(templeWaveRail(node,scale))+4,hem=crown+rise+rim;
+ return {radius,crown,hem,stem,bottom:hem+stemDepth,top:(x:number)=>crown+rise*((x-node)/radius)**2};
+}
+function buildWaveTemple(land:Terrain,scale:number){
+ const {width,height}=land;
+ const platforms=scale>1?[[.24,.76,.28,13.5],[.01,.08,.52,13.5],[.92,.99,.52,13.5],[.47,.53,.46,66],[.32,.68,.64,12],[.22,.33,.75,12],[.69,.80,.75,12]]:
+ [[75/1920,667.5/1920,502.5/960,13.5],[1252.5/1920,1845/1920,502.5/960,13.5],[600/1920,802.5/1920,630/960,12],[1117.5/1920,1320/1920,630/960,12],[825/1920,1095/1920,547.5/960,66]];
+ for(const [a,b,level,thickness] of platforms)for(let x=Math.ceil(a*width);x<=Math.floor(b*width);x++){
+   const y=templePlatformY(x,width,level,level*height);land.column(x,y,y+thickness);
+ }
+ for(let x=Math.ceil(60*scale);x<=Math.floor(1860*scale);x++){
+   const y=Math.ceil(templeWaveRail(x,scale));land.column(x,y,y+4);
+ }
+ for(const node of templeNodes(scale)){
+   const cap=templeCanopy(node,scale);
+   for(let x=node-cap.radius;x<=node+cap.radius;x++)land.column(x,cap.top(x),cap.hem,true);
+   for(let x=node-cap.stem;x<=node+cap.stem;x++)land.column(x,cap.hem,cap.bottom,true);
+ }
+ land.rebuild();
+}
 /** Self-drawn 3.1 layouts; protected ramps/caps and thin rails keep their game-unit sizes. */
 export function buildClassicMap(land:Terrain,map:MapId,version='4.0.4'){
   const scale=layoutScale(land.width),width=land.width,height=land.height;
   if(!['factory','temple','egypt'].includes(map))return false;
+  if(map==='temple'&&waveTemple(version)){buildWaveTemple(land,scale);return true;}
   const beam=(from:number,to:number,y:number|((x:number)=>number),thickness:number,permanent=false)=>{
     for(let x=Math.ceil(from*1.5*scale);x<=Math.floor(to*1.5*scale);x++){const top=(typeof y==='number'?y:y(x/(1.5*scale)))*1.5*scale;land.column(x,top,top+thickness,permanent);}
   };

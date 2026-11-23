@@ -1,3 +1,4 @@
+import {crossedFireLine} from './weather';
 import {originalBallistics} from './original-ballistics';
 import {restoreRadius,restoreFraction} from './item-combos';
 import type {Game,Tank} from './engine';import {SHOT_WIND_GAIN} from './engine';import {pointHitsTank} from './tank-hitbox';import {impactDamageScale} from './impact-damage';
@@ -10,7 +11,7 @@ function evaluate(g:Game,t:Tank,target:Tank,angle:number,power:number,direction:
  let hit:number|undefined,landed=false;const dt=1/240;
  for(let i=0;i<8/dt;i++){
   const oldX=p.x,oldY=p.y;p.age+=dt;p.vx+=g.wind*SHOT_WIND_GAIN*dt;p.vy+=g.gravity*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
-  if(g.fireLine&&!boosted&&(oldX-g.fireLine.x)*(p.x-g.fireLine.x)<=0&&p.y>=g.fireLine.top&&p.y<=g.fireLine.bottom)boosted=true;
+  if(g.fireLine&&!boosted&&crossedFireLine(g.fireLine,oldX,p.x,p.y,g.fullHeightFireLine))boosted=true;
   if(p.x< -50||p.x>g.worldWidth+50||p.y>g.worldHeight+70)return null;
   if(modernGeometry){const c=g.firstImpact(p,oldX,oldY,p.x,p.y,bodies);if(c){p.x=c.x;p.y=c.y;hit=c.tank?.id;landed=true;break;}}
   else if(p.age>=.09)hit=bodies.find(b=>g.projectileCollisionAllowed(b.tank,t.id)&&g.canRestore(b.tank,t.id)&&Math.abs(b.tank.x-p.x)<50&&Math.abs(b.tank.y-p.y)<62&&pointHitsTank(b.tank,p.x,p.y,b.slope,g.gameVersion))?.tank.id;
