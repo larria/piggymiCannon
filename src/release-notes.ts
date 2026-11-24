@@ -1,7 +1,6 @@
 export const RELEASE_NOTES=[
- '十三台战车的车身比例重新校正，保持各自轮廓、炮口方向和碰撞体积。大腕改回木架、双轮和铜投石碗的古典造型。',
- '四位炮手在舱口露出衣领和少量肩部，咪猪头和小黄鱼的战场形象略微加大。',
- '四位炮手都有完整的倒地图形；咪猪头和阿狸哭泣时交替用小拳头捶地，小黄鱼以尾鳍和鱼鳍表现。',
+ '拉开仪表盘上左右移动键与跳过键的距离，保留原有触区，减少误触。',
+ '倒地炮手换回布质军装。阿狸和小黄鱼增加甩尾动作，小黄鱼只保留一个鱼身。',
 ];
 export function readRelease(value:any):{version:string;notes:string[]}|null{
  if(typeof value?.version!=='string'||!/^v?\d+\.\d+\.\d+$/.test(value.version))return null;

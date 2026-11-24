@@ -57,6 +57,36 @@ test('Mimi and Fox visibly lift their fists, with no pounding while falling or w
  }
 });
 
+test('Fox and Fish move their own tail tips while defeated, and hold still with reduced motion',async({page})=>{
+ await page.addScriptTag({content:await vectorReview});
+ const poses=await page.evaluate(()=>{
+  const {paintDefeatedCrew}=(window as any).review;
+  const c=document.createElement('canvas');c.width=360;c.height=240;
+  const ctx=c.getContext('2d')!;
+  function tailHeight(id:'fox'|'fish',t:number,reduced:boolean){
+   ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,360,240);
+   ctx.setTransform(3,0,0,3,180,120);paintDefeatedCrew(ctx,id,t,reduced,false);
+   const area=id==='fox'?{x:16,w:60,rgb:[254,224,176]}:{x:110,w:60,rgb:[239,175,80]};
+   const {data}=ctx.getImageData(area.x,40,area.w,158);let count=0,ySum=0;
+   for(let i=0;i<data.length;i+=4){
+    const [r,g,b]=area.rgb;
+    if(data[i]===r&&data[i+1]===g&&data[i+2]===b&&data[i+3]>250){count++;ySum+=Math.floor(i/4/area.w);}
+   }
+   return count?ySum/count:null;
+  }
+  return (['fox','fish'] as const).map(id=>{
+   const rate=id==='fox'?10:13;
+   const raised=Math.PI/2/rate,lowered=3*Math.PI/2/rate;
+   return {id,active:[tailHeight(id,raised,false),tailHeight(id,lowered,false)],still:[tailHeight(id,raised,true),tailHeight(id,lowered,true)]};
+  });
+ });
+ for(const {id,active,still} of poses){
+  expect([...active,...still],id).not.toContain(null);
+  expect(active[1]!-active[0]!,id).toBeGreaterThan(12);
+  expect(still[0],id).toBe(still[1]);
+ }
+});
+
 test('11-inch iPad renders dressed pilots and all four land defeat figures in the battlefield',async({page,browserName})=>{
  await boot(page,false);
  await page.evaluate(()=>{
@@ -69,12 +99,12 @@ test('11-inch iPad renders dressed pilots and all four land defeat figures in th
   r.zoomBy(1.65);r.camera.center(x,y-55,false);r.invalidate();r.draw(0);
  });
  await expect(page.locator('#battlefield')).toHaveAttribute('data-render-backend','pixi');
- await page.screenshot({path:`.workbuddy/v5.1.7/pilots-${browserName}.png`,scale:'css'});
+ await page.screenshot({path:`.workbuddy/v5.1.8/pilots-${browserName}.png`,scale:'css'});
  await page.evaluate(()=>{
   const {game:g,renderer:r}=(window as any).__qa;
   for(const t of g.tanks)g.damage(t,99999,t.id^1);
   g.texts=[];r.time=.15;r.windMotes.length=0;r.invalidate();r.draw(0);
  });
  expect(await page.evaluate(()=>(window as any).__qa.game.tanks.every((t:any)=>t.hp===0&&t.defeat&&!t.outOfBounds))).toBe(true);
- await page.screenshot({path:`.workbuddy/v5.1.7/defeated-${browserName}.png`,scale:'css'});
+ await page.screenshot({path:`.workbuddy/v5.1.8/defeated-${browserName}.png`,scale:'css'});
 });

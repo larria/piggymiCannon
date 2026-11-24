@@ -23,11 +23,11 @@ function foxFace(c:CanvasRenderingContext2D,e:Expression){
  oval(c,-15,9,4.5,2.1,'#f7b19f');oval(c,19,7,4.1,2.1,'#f7b19f');
  oval(c,10,6,4.15,2.5,'#482f33');oval(c,9,5,1.65,.75,'#9e8184');if(e.startled)shockMouth(c,10,12);else if(e.pant!==null)pantMouth(c,10,12,e.pant);else if(e.serious)steadyMouth(c,10,11.5);else smile(c,10,11,e.open,e.upset);
 }
-function fishFace(c:CanvasRenderingContext2D,e:Expression){
+function fishFace(c:CanvasRenderingContext2D,e:Expression,tailAngle=e.ear){
  c.save();c.translate(0,-13);c.rotate(e.ear*.8);
  ink(c,'M-13 5Q-17-5-11-14Q-6-16-2-9Q1-17 5-16Q10-12 10-6Q17-11 20-6L17 6Z','#f8bf55','#a66d30');
  ink(c,'M-10-10l4 8M4-13l1 9M16-6l-3 5','none','#ffe093',1.45);c.restore();
- c.save();c.translate(-17,1);c.rotate(e.ear);
+ c.save();c.translate(-17,1);c.rotate(tailAngle);
  ink(c,'M1-5Q-17-15-20-6Q-21 0-16 3Q-21 8-14 12Q-8 14 1 7Z','#efaf50','#a66d30');
  ink(c,'M-15-6l11 5m-13 5 13-1m-9 6 9-4','none','#ffe093',1.1);c.restore();
  ink(c,'M-20-3Q-18-18 3-17Q20-18 25-4Q31 8 19 16Q7 23-9 17Q-24 12-20-3Z','#ffce64','#9e6d32',1.65);
@@ -40,8 +40,10 @@ function fishFace(c:CanvasRenderingContext2D,e:Expression){
  if(e.startled)shockMouth(c,12,11);else if(e.pant!==null)pantMouth(c,12,11,e.pant);else if(e.serious)steadyMouth(c,12,10);else smile(c,12,10,e.open,e.upset);
  ink(c,'M4 5Q11 1 18 5Q14 9 8 8Z','#fff0c0');
 }
-const faces={mimi:paintMimi,dad:paintDad,fox:foxFace,fish:fishFace};
-export const paintCrewFace=(c:CanvasRenderingContext2D,id:CrewId,e:Expression)=>faces[id](c,e);
+const faces={mimi:paintMimi,dad:paintDad,fox:foxFace};
+export function paintCrewFace(c:CanvasRenderingContext2D,id:CrewId,e:Expression,tailAngle?:number){
+ if(id==='fish')fishFace(c,e,tailAngle);else faces[id](c,e);
+}
 const limits:Record<CrewId,number>={mimi:.815,dad:.80,fox:.76,fish:.815};
 const rhythms:Record<CrewId,number>={mimi:1,dad:.68,fox:1.32,fish:1.15};
 interface CrewMotion {breath?:ReturnType<typeof breathingPose>;stunned?:boolean;rage?:boolean;cryAge?:number|null;healAge?:number|null;cheerAge?:number|null;shockAge?:number|null;recoil?:number;idleAge?:number|null;reduced?:boolean;poisoned?:boolean;frozen?:boolean;deck?:number}

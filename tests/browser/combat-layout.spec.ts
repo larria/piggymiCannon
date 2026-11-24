@@ -22,6 +22,13 @@ async function inspect(page:any,label:string){
   expect(b.w,id).toBeGreaterThanOrEqual(minimumWidth);expect(b.h,id).toBeGreaterThanOrEqual(minimumHeight);expect(b.x,id).toBeGreaterThanOrEqual(0);expect(b.right,id).toBeLessThanOrEqual(data.viewport.w);expect(b.bottom,id).toBeLessThanOrEqual(data.viewport.h);
  }
  const {buttons}=data;
+ const skip=buttons['skip-button'];
+ for(const id of ['move-left','move-right']){
+  const move=buttons[id];
+  const horizontal=Math.max(0,skip.x-move.right,move.x-skip.right);
+  const vertical=Math.max(0,skip.y-move.bottom,move.y-skip.bottom);
+  expect(Math.hypot(horizontal,vertical),`${id} is clear of skip`).toBeGreaterThanOrEqual(landscape?14:16);
+ }
  expect(buttons['aim-pad'].w).toBe(buttons['aim-pad'].h);
  expect(buttons['angle-up'].x).toBeGreaterThanOrEqual(buttons['aim-pad'].right);
  expect(buttons['angle-down'].y).toBeGreaterThanOrEqual(buttons['angle-up'].bottom);

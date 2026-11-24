@@ -90,7 +90,7 @@ dialog.projectile-dialog{width:min(960px,calc(100vw - 48px));max-width:960px}.pr
 .compact-dashboard .meter-label .icon{width:15px;height:15px}.compact-dashboard .meter-track{height:11px;border-radius:4px}
 .compact-dashboard .force-meter{height:32px;margin:6px 0}.compact-dashboard .force-meter .meter-track{height:32px}
 .compact-dashboard .meter-track>span:first-child{top:1px;bottom:1px}.compact-dashboard .meter-value{width:40px;font-size:10px}.compact-dashboard .meter-value b{font-size:12px}
-.compact-dashboard .dash-actions,.combat-mode .compact-dashboard .dash-actions{display:grid;grid-template-columns:44px 44px 60px;grid-template-rows:44px 44px;gap:4px;padding:0;grid-column:auto;align-items:stretch}
+.compact-dashboard .dash-actions,.combat-mode .compact-dashboard .dash-actions{display:grid;grid-template-columns:44px 44px 60px;grid-template-rows:44px 44px;gap:16px 4px;padding:0;grid-column:auto;align-items:stretch}
 .compact-dashboard .dash-actions .move-buttons,.compact-dashboard .dash-utility{display:contents}
 .compact-dashboard .move-buttons button{width:44px;height:44px;min-height:44px;padding:0;border-radius:8px}.compact-dashboard .move-buttons .icon{width:20px;height:20px}
 .compact-dashboard #move-left{grid-column:1;grid-row:1}.compact-dashboard #move-right{grid-column:2;grid-row:1}
@@ -318,7 +318,7 @@ dialog,.arsenal{scrollbar-gutter:stable}
 /* Landscape phones: one compact control row, three stacked meters, and an
  * uninterrupted dial at the left. These smaller keys are landscape-only. */
 @media(any-pointer:coarse) and (orientation:landscape) and (max-width:950px) and (max-height:500px){
- .combat-mode .compact-dashboard{--landscape-key:36px;grid-template-columns:calc(118px + var(--landscape-key)) minmax(0,1fr) calc(56px + 4 * var(--landscape-key));grid-template-rows:36px 10px 20px 10px;padding:4px 6px;gap:2px 6px;border:0}
+ .combat-mode .compact-dashboard{--landscape-key:36px;--landscape-action-gap:12px;--landscape-actions:calc(56px + 4 * var(--landscape-key) + var(--landscape-action-gap));grid-template-columns:calc(118px + var(--landscape-key)) minmax(0,1fr) var(--landscape-actions);grid-template-rows:36px 10px 20px 10px;padding:4px 6px;gap:2px 6px;border:0}
  .combat-mode .compact-dashboard .dash-center{display:contents}
  .combat-mode .compact-dashboard .dash-angle{grid-column:1;grid-row:1/5;align-self:stretch;height:82px;display:block;padding-left:0}
  .combat-mode .compact-dashboard .angle-instrument{display:block;position:absolute;left:0;top:0;width:82px;height:82px}
@@ -342,10 +342,10 @@ dialog,.arsenal{scrollbar-gutter:stable}
  .combat-mode .compact-dashboard .switch-icon .shell-swatch{flex:none;width:40px;height:auto;aspect-ratio:10/7}
  .combat-mode .compact-dashboard .quick-items{flex-wrap:nowrap;margin-left:auto;gap:2px}
  .combat-mode .compact-dashboard .quick-items button .item-icon{width:26px;height:26px}
- .combat-mode .compact-dashboard .dash-actions{grid-column:3;grid-row:1;grid-template-columns:repeat(4,var(--landscape-key)) 48px;grid-template-rows:36px;gap:2px;justify-self:stretch;align-self:stretch}
+ .combat-mode .compact-dashboard .dash-actions{grid-column:3;grid-row:1;grid-template-columns:repeat(2,var(--landscape-key)) calc(var(--landscape-key) + var(--landscape-action-gap)) var(--landscape-key) 48px;grid-template-rows:36px;gap:2px;justify-self:stretch;align-self:stretch}
  .combat-mode .compact-dashboard #move-left{grid-column:1;grid-row:1}
  .combat-mode .compact-dashboard #move-right{grid-column:2;grid-row:1}
- .combat-mode .compact-dashboard #skip-button{grid-column:3;grid-row:1}
+ .combat-mode .compact-dashboard #skip-button{grid-column:3;grid-row:1;justify-self:end}
  .combat-mode .compact-dashboard #exit-match{grid-column:4;grid-row:1}
  .combat-mode .compact-dashboard .move-buttons button,.combat-mode .compact-dashboard .angle-nudge,.combat-mode .compact-dashboard .dash-utility button{width:var(--landscape-key);min-width:var(--landscape-key);height:36px;min-height:36px;padding:0;border:0;border-radius:6px;box-shadow:none}
  .combat-mode .compact-dashboard .dash-actions button>.icon{width:24px;height:24px}
@@ -384,14 +384,14 @@ dialog,.arsenal{scrollbar-gutter:stable}
  .combat-mode .minimap-panel.collapsed{width:92px}
 }
 @media(any-pointer:coarse) and (orientation:landscape) and (max-width:759px) and (max-height:500px){
- .combat-mode .compact-dashboard{--landscape-key:34px;grid-template-columns:calc(116px + var(--landscape-key)) minmax(0,1fr) calc(56px + 4 * var(--landscape-key))}
+ .combat-mode .compact-dashboard{--landscape-key:34px;grid-template-columns:calc(116px + var(--landscape-key)) minmax(0,1fr) var(--landscape-actions)}
  .combat-mode .compact-dashboard .angle-instrument{left:0;top:1px;width:80px;height:80px}
  .combat-mode .compact-dashboard .dash-toolbar #weapon-switcher>button{width:var(--landscape-key);min-width:var(--landscape-key);max-width:var(--landscape-key)}
  .combat-mode .compact-dashboard .dash-toolbar #weapon-switcher .switch-icon{width:34px;height:23.8px}
  .combat-mode .compact-dashboard .switch-icon .shell-swatch{width:34px}
 }
 @media(any-pointer:coarse) and (orientation:landscape) and (max-width:639px) and (max-height:500px){
- .combat-mode .compact-dashboard{--landscape-key:28px;grid-template-columns:calc(100px + var(--landscape-key)) minmax(0,1fr) calc(56px + 4 * var(--landscape-key))}
+ .combat-mode .compact-dashboard{--landscape-key:28px;grid-template-columns:calc(100px + var(--landscape-key)) minmax(0,1fr) var(--landscape-actions)}
  .combat-mode .compact-dashboard .angle-instrument{left:0;top:4px;width:74px;height:74px}
  .combat-mode .compact-dashboard .angle-readout.relative,.combat-mode .compact-dashboard .angle-readout.absolute{width:26px}
  .combat-mode .compact-dashboard .angle-readout b{font-size:12px}
