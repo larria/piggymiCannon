@@ -2,8 +2,8 @@ export interface PortraitRect {left:number;right:number;top:number;bottom:number
 /** Keep the portrait at chassis height; nearby medals need horizontal clearance,
  * rather than a whole extra row above the tank for a few overlapping pixels. */
 import {sourceRangeModel} from './source-range';
-export function placeTankPortrait(tank:number,x:number,y:number,scale:number,poisoned:boolean,occupied:readonly PortraitRect[],viewport?:{left:number;right:number},version='5.0.4'){
- const left=25*scale,right=(poisoned?82:43)*scale,gap=4;
+export function placeTankPortrait(tank:number,x:number,y:number,scale:number,poisoned:boolean,occupied:readonly PortraitRect[],viewport?:{left:number;right:number},version='5.0.4',healthWidth=46){
+ const left=Math.max(25,healthWidth/2+1)*scale,right=(poisoned?82:43)*scale,gap=4;
  const box=(cx:number):PortraitRect=>({left:cx-left,right:cx+right,top:y-23*scale,bottom:y+32*scale,tank});
  const neighbours=occupied.filter(a=>y-23*scale<a.bottom+gap&&y+32*scale>a.top-gap);
  const bounded=viewport&&x>=viewport.left&&x<=viewport.right&&viewport.right-viewport.left>=left+right;

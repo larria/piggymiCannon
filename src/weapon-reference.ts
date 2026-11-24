@@ -31,5 +31,5 @@ export const WEAPON_REFERENCE:Partial<Record<WeaponId,WeaponReference>>={
  'sea-normal':reference(1,'一个大光环；半血怒气提高伤害'),
  'sea-special':reference(2,'两个交织旋转光环；半血怒气提高伤害'),
  'dragon-normal':reference(3,'三枚强力导弹，日文条目描述每枚与红豆同级','2006 Blue Forever 玩家攻略／日文条目／2020 日文回忆文章'),
- 'dragon-special':reference(9,'九枚都能独立追踪；历史资料描述无敌我识别','2006 Blue Forever 玩家攻略／日文条目／2020 日文回忆文章','追踪启动高度、索敌半径、转弯速率及每枚伤害未确证；本作按用户要求遵守自伤／友伤开关，目标死亡或不可攻击时立即清理同轮剩余黄金弹'),
+ 'dragon-special':reference(9,'九枚都能独立追踪；历史资料描述无敌我识别','2006 Blue Forever 玩家攻略／日文条目／2020 日文回忆文章','追踪启动高度、索敌半径、转弯速率及每枚伤害未确证；本作按用户要求遵守自伤／友伤开关，目标倒地或不可攻击时立即清理同轮剩余黄金弹'),
 };

@@ -50,7 +50,7 @@ test('real lethal paths name direct hits, mines, fire, gas, falls, out-of-bounds
   if(cause==='fall'){e.y=300;e.fallStart=240;e.fallVelocity=600;for(let i=0;i<80&&e.hp>0;i++)g.update(.01);}
   if(cause==='out'){e.y=960;g.update(.001);}
   if(cause==='sudden'){g.turn=39;g.nextTurn();}
-  assert.equal(e.hp,0,cause);const death=entries(g,'death').find(row=>row.data.target===1)!;assert.equal(death.data.cause,cause);assert.equal(death.data.lethal.hpBefore,1);assert.equal(death.data.lethal.hpAfter,0);assert.ok(death.data.damageEvent);assert.match(death.summary,/死亡/);
+  assert.equal(e.hp,0,cause);const death=entries(g,'death').find(row=>row.data.target===1)!;assert.equal(death.data.cause,cause);assert.equal(death.data.lethal.hpBefore,1);assert.equal(death.data.lethal.hpAfter,0);assert.ok(death.data.damageEvent);assert.match(death.summary,/倒地/);
  }
 });
 test('poison records its red-health floor and cannot become an unexplained death',()=>{
@@ -91,7 +91,7 @@ test('golden volley snapshot restores terrain, delayed rounds, live locks and ex
 test('bounded buffer retains initial configuration and the complete lethal chain after history truncation',()=>{
  const g=flat();g.tanks[1].hp=1;impact(g);for(let i=0;i<5000;i++)(g as any).recordBattle('test','压力事件'+i,{text:'测'.repeat(300)});
  const s=g.battleSnapshot();assert.ok(s.events.length<=TRACE_LIMIT);assert.ok(new TextEncoder().encode(JSON.stringify(s.events)).length<TRACE_BYTE_LIMIT+TRACE_LIMIT);assert.ok(s.truncation.dropped>0);assert.equal(s.initial.config.seed,52);assert.equal(s.critical.filter(e=>e.type==='death').length,1);assert.ok(s.critical.find(e=>e.type==='death')!.data.lethal.factors.length);
- const text=snapshotText(s),json=JSON.parse(text.split('```json\n')[1].split('\n```')[0]);assert.deepEqual(json,s);assert.match(text,/死亡/);assert.match(text,/截断/);assert.ok(new TextEncoder().encode(text).length<1_500_000);
+ const text=snapshotText(s),json=JSON.parse(text.split('```json\n')[1].split('\n```')[0]);assert.deepEqual(json,s);assert.match(text,/倒地/);assert.match(text,/截断/);assert.ok(new TextEncoder().encode(text).length<1_500_000);
  const numbers=[...text.matchAll(/^#(\d+) /gm)].map(m=>+m[1]);assert.deepEqual(numbers,[...numbers].sort((a,b)=>a-b));assert.equal(new Set(numbers).size,numbers.length);
 });
 test('terrain compression retains caves and permanent pixels and has a bounded fragmentation fallback',()=>{

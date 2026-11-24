@@ -23,17 +23,30 @@ function foxFace(c:CanvasRenderingContext2D,e:Expression){
  oval(c,-15,9,4.5,2.1,'#f7b19f');oval(c,19,7,4.1,2.1,'#f7b19f');
  oval(c,10,6,4.15,2.5,'#482f33');oval(c,9,5,1.65,.75,'#9e8184');if(e.startled)shockMouth(c,10,12);else if(e.pant!==null)pantMouth(c,10,12,e.pant);else if(e.serious)steadyMouth(c,10,11.5);else smile(c,10,11,e.open,e.upset);
 }
-function fishFace(c:CanvasRenderingContext2D,e:Expression,tailAngle=e.ear){
+interface FishDefeatPose {tailAngle:number}
+function fishFace(c:CanvasRenderingContext2D,e:Expression,defeat?:FishDefeatPose){
  c.save();c.translate(0,-13);c.rotate(e.ear*.8);
  ink(c,'M-13 5Q-17-5-11-14Q-6-16-2-9Q1-17 5-16Q10-12 10-6Q17-11 20-6L17 6Z','#f8bf55','#a66d30');
  ink(c,'M-10-10l4 8M4-13l1 9M16-6l-3 5','none','#ffe093',1.45);c.restore();
- c.save();c.translate(-17,1);c.rotate(tailAngle);
+ c.save();c.translate(defeat?-31:-17,defeat?11:1);c.rotate(defeat?.tailAngle??e.ear);
+ if(defeat)c.scale(.78,.81);
  ink(c,'M1-5Q-17-15-20-6Q-21 0-16 3Q-21 8-14 12Q-8 14 1 7Z','#efaf50','#a66d30');
  ink(c,'M-15-6l11 5m-13 5 13-1m-9 6 9-4','none','#ffe093',1.1);c.restore();
- ink(c,'M-20-3Q-18-18 3-17Q20-18 25-4Q31 8 19 16Q7 23-9 17Q-24 12-20-3Z','#ffce64','#9e6d32',1.65);
- ink(c,'M-20 4Q-17-5-7-2Q1 0 7-2Q19-6 25 2Q29 13 16 17Q5 23-9 16Q-21 14-20 4Z','#ffe5ad');
- ink(c,'M-17 11Q-6 17 9 17Q17 17 23 11Q15 22 1 20Q-13 18-17 11Z','#f4c47d');
- ink(c,'M-15-7Q-8-14 1-13M-13-11l2-1','none','#ffe495',1.5);
+ if(defeat){
+  // The cheek and belly form one contour, tapering into the moving tail.
+  ink(c,'M-32 6C-24 4-23-9-13-15C-4-20 19-18 25-4C31 8 22 18 6 18C-11 21-22 14-32 15Q-36 13-32 6Z','#ffce64','#9e6d32',1.65);
+  ink(c,'M-33 12Q-22 11-16 1Q-8-5 2-2Q10-1 17-4Q28-5 27 5C24 17 14 19 3 18Q-10 19-21 15Q-29 13-33 14Z','#ffe5ad');
+  ink(c,'M-29 13Q-16 11-7 15Q12 18 23 12Q18 19 3 18Q-16 18-29 13Z','#f4c47d');
+  ink(c,'M-28 9q3-1 4-3m-1 6q3 0 6-3m-2 6q3 0 6-3','none','#dba24b',.93);
+  c.save();c.translate(-13,10);c.rotate(.5+e.ear);
+  ink(c,'M-5-3Q1-5 7-2L9 1 6 2 7 4Q2 5-5 1Z','#eeb353','#a36e33',1);
+  ink(c,'M0-2l5 1M0 0l5 2','none','#ffe498',.8);c.restore();
+ }else{
+  ink(c,'M-20-3Q-18-18 3-17Q20-18 25-4Q31 8 19 16Q7 23-9 17Q-24 12-20-3Z','#ffce64','#9e6d32',1.65);
+  ink(c,'M-20 4Q-17-5-7-2Q1 0 7-2Q19-6 25 2Q29 13 16 17Q5 23-9 16Q-21 14-20 4Z','#ffe5ad');
+  ink(c,'M-17 11Q-6 17 9 17Q17 17 23 11Q15 22 1 20Q-13 18-17 11Z','#f4c47d');
+ }
+ ink(c,defeat?'M-10-9Q-5-13 2-13M-11-10l2-1':'M-15-7Q-8-14 1-13M-13-11l2-1','none','#ffe495',1.5);
  profileEyes(c,-4,-2,5.8*(e.startled?1.16:1),'#89532d',e.look,e.closed,e.serious,false,true,e.stunned);profileEyes(c,17,-2.5,4.8*(e.startled?1.16:1),'#89532d',e.look,e.closed,e.serious,true,true,e.stunned);
  if(e.rage)ink(c,'M-9-10L1-7M14-7L20-11','none','#795238',1.55);
  oval(c,-13,7,5,3.1,'#f3a08b');oval(c,20,6,4.4,2.9,'#f3a08b');
@@ -41,8 +54,8 @@ function fishFace(c:CanvasRenderingContext2D,e:Expression,tailAngle=e.ear){
  ink(c,'M4 5Q11 1 18 5Q14 9 8 8Z','#fff0c0');
 }
 const faces={mimi:paintMimi,dad:paintDad,fox:foxFace};
-export function paintCrewFace(c:CanvasRenderingContext2D,id:CrewId,e:Expression,tailAngle?:number){
- if(id==='fish')fishFace(c,e,tailAngle);else faces[id](c,e);
+export function paintCrewFace(c:CanvasRenderingContext2D,id:CrewId,e:Expression,fishDefeat?:FishDefeatPose){
+ if(id==='fish')fishFace(c,e,fishDefeat);else faces[id](c,e);
 }
 const limits:Record<CrewId,number>={mimi:.815,dad:.80,fox:.76,fish:.815};
 const rhythms:Record<CrewId,number>={mimi:1,dad:.68,fox:1.32,fish:1.15};
@@ -88,8 +101,9 @@ function reactionMarks(c:CanvasRenderingContext2D,t:number,action:CrewAction,m:C
 }
 // Above the hatch, only the celebratory gesture is visible.
 function cheerGesture(c:CanvasRenderingContext2D,id:CrewId,side:number,raise:number){
- c.save();c.translate(side*(id==='dad'?32:28),20-9*raise);c.scale(side,1);c.rotate(-.16-.26*raise);
+ c.save();c.translate(side*(id==='dad'?27:id==='fish'?24:25),21-6*raise);c.scale(side,1);c.rotate(-.16-.26*raise);
  if(id==='fish'){
+  c.scale(.8,.85);
   ink(c,'M-4 4Q-4-1 2-5Q7-7 9-4L8-1Q11 0 8 3Q3 7-4 4Z','#f3bd52','#9b6630',1.2);
   ink(c,'M-1 3L6-2M1 4L7 1','none','#ffe29c',.9);
  }else{

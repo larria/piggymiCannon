@@ -25,7 +25,7 @@ import {warmProjectileVectors,paintBoostStars} from './projectile-vector';
 import { breathingPose } from './feedback';
 import {isRaging} from './health';
 import {defeatedPig,victoryConfetti} from './result-art';
-import {vehicleById} from './vehicles';
+import {VEHICLES,vehicleById} from './vehicles';
 import {projectileArt,paintVehicle} from './vehicle-art';
 import {paintCrew} from './crew-art';
 import {CrewAnimationClock,isCrewFalling} from './crew-animation';
@@ -48,6 +48,12 @@ const PALETTES:Record<string,Palette>={
   egypt:{sky:'#f1e6d0',horizon:'#faedcd',sun:'#ecc079',mountains:['#e5ceaa','#d2b990','#bea575'],soil:'#b39260',soilLight:'#d3b481',grass:'#d6bd86',grassLight:'#f1d69c',water:'#9eaca7',ink:'#806641'},
 };
 const rr=(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number) => {ctx.beginPath();ctx.roundRect(x,y,w,h,r);};
+const lowestVehicleHP=Math.min(...VEHICLES.map(v=>v.hp));
+// Keep midrange tanks distinguishable while compressing the high-HP end.
+const healthBarWeight=(hp:number)=>Math.log1p(Math.max(0,hp-lowestVehicleHP)/100);
+const cannonHealthWeight=healthBarWeight(vehicleById('cannon').hp);
+const dragonHealthSpan=healthBarWeight(vehicleById('dragon').hp)-cannonHealthWeight;
+const healthBarWidth=(hp:number)=>46*(1+.2*Math.min(1,(healthBarWeight(hp)-cannonHealthWeight)/dragonHealthSpan));
 
 export class Renderer {
   private flightFloor:{x:number;y:number}|null=null;private flightActive=false;
@@ -392,7 +398,8 @@ export class Renderer {
     for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132)*g.motionScale;const x=clamp(t.x,this.offsetX+48*g.motionScale,this.offsetX+this.viewWidth-48*g.motionScale),y=Math.max(this.offsetY+38*g.motionScale,top);ctx.save();ctx.translate(x,y);ctx.scale(g.motionScale,g.motionScale);paintItemCue(ctx,cue,0,0,teamFlag(t.team).color,this.reducedMotion);ctx.restore();}
     // The portrait stays upright; its frame carries the team colour.
     const celebrateOffset=(celebrating?-26:0)-badgeLift;
-    const label=placeTankPortrait(t.id,t.x,t.y-97+celebrateOffset,labelScale,!!t.poisoned,this.labelRects,{left:this.offsetX+6,right:this.offsetX+this.viewWidth-6},g.gameVersion);
+    const barWidth=healthBarWidth(t.maxHP),barLeft=-barWidth/2;
+    const label=placeTankPortrait(t.id,t.x,t.y-97+celebrateOffset,labelScale,!!t.poisoned,this.labelRects,{left:this.offsetX+6,right:this.offsetX+this.viewWidth-6},g.gameVersion,barWidth);
     const labelShift=label.x-t.x;this.labelRects.push(label.rect);
     this.portraitHits.push({x:label.x,y:label.y,id:t.id});
     ctx.save();ctx.translate(t.x,t.y);
@@ -406,11 +413,11 @@ export class Renderer {
     ctx.strokeStyle=teamFlag(t.team).color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-85,20,0,Math.PI*2);ctx.stroke();
     paintMedal(ctx,this.medalFor?.(t)??g.medal(t),14,-92,24);
     const healthY=t.crew==='fox'?-63:-60;
-    ctx.fillStyle='#fff';rr(ctx,-23,healthY,46,5,1.4);ctx.fill();
-    const hpWidth=46*clamp(t.hp/t.maxHP,0,1);
+    ctx.fillStyle='#fff';rr(ctx,barLeft,healthY,barWidth,5,1.4);ctx.fill();
+    const hpWidth=barWidth*clamp(t.hp/t.maxHP,0,1);
     ctx.fillStyle=breathing.active||enraged?'#db4f49':'#66aa53';
-    if(hpWidth>0){rr(ctx,-23,healthY,hpWidth,5,Math.min(1.1,hpWidth/2));ctx.fill();}
-    ctx.strokeStyle='#fff';ctx.lineWidth=1.4;rr(ctx,-23,healthY,46,5,1.4);ctx.stroke();
+    if(hpWidth>0){rr(ctx,barLeft,healthY,hpWidth,5,Math.min(1.1,hpWidth/2));ctx.fill();}
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.4;rr(ctx,barLeft,healthY,barWidth,5,1.4);ctx.stroke();
     if(t.poisoned){ctx.fillStyle='#e6eddb';rr(ctx,44,-95,35,17,8);ctx.fill();ctx.fillStyle='#6c8d4c';ctx.font='600 10px sans-serif';ctx.textAlign='center';ctx.fillText('中毒',61,-83);}
     ctx.restore();
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}

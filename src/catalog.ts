@@ -33,7 +33,7 @@ export const ITEMS: { id:ItemId; name:string; description:string; count:number; 
   { id:'shield', name:'能量护盾', description:'没有护盾时增加最大生命约 27% 的护盾。消耗 2 战术点，冷却 3 回合；初始仅 1 件。', count:1, icon:'shield',cost:2,cooldown:3,unlock:1 },
   { id:'fuel', name:'燃料补给', description:'燃料不高于 45 时恢复 55。消耗 1 战术点，冷却 2 回合。', count:2, icon:'fuel',cost:1,cooldown:2,unlock:1 },
   { id:'boost', name:'威力加强', description:'下一次发射伤害 +50%，跳过或超时仍保留。每局开局携带一件，用掉不会自动恢复；任意空槽可拾取重复道具；可与双发、恢复弹联动，不能与转移弹同时使用。', count:1, icon:'bolt',cost:0,cooldown:0,unlock:1 },
-  { id:'teleport', name:'转移弹', description:'装填保留至发射，可手动卸下；命中后移至落点上方，带降落伞垂直落位，不挖土、不造成伤害且免坠落伤害。落出地图会死亡。可与双发联动，不能与恢复弹或威力加强同时使用。使用后空槽可拾取任意道具。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
+  { id:'teleport', name:'转移弹', description:'装填保留至发射，可手动卸下；命中后移至落点上方，带降落伞垂直落位，不挖土、不造成伤害且免坠落伤害。落出战场会出局。可与双发联动，不能与恢复弹或威力加强同时使用。使用后空槽可拾取任意道具。', count:1, icon:'transfer',cost:0,cooldown:0,unlock:1 },
   { id:'wind', name:'定风装置', description:'风速至少 1.5 m/s 时将本回合风力归零。消耗 2 战术点，冷却 2 回合。', count:1, icon:'wind',cost:2,cooldown:2,unlock:1 },
   {id:'double',name:'双发',description:'下一次发射追加一轮齐射，只算一次行动。发射前保留，不能重复装填。每局开局携带一件，用掉不会自动恢复；任意空槽可拾取重复道具；可与转移弹、威力加强、恢复弹联动。',count:1,icon:'triple',cost:0,cooldown:0,unlock:1},
 ];

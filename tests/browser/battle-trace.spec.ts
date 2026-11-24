@@ -9,7 +9,7 @@ for(const width of [1194,1210])test(`${width} iPad: discreet settings copy conta
  expect(layout.font).toBeLessThanOrEqual(12);expect(layout.b.y).toBeGreaterThan(0);expect(layout.closeBottom).toBeLessThanOrEqual(834);expect(layout.dialog.width).toBeLessThan(width);expect(layout.dialog.y).toBeGreaterThanOrEqual(0);
  await button.click();await expect(page.locator('#snapshot-copy-status')).toHaveText('已复制对局快照');await expect(page.locator('#snapshot-copy-status')).toHaveCSS('opacity','1');const snapshot=await copied(page);
  expect(snapshot.formatVersion).toBe(1);expect(snapshot.initial.slots).toHaveLength(4);expect(snapshot.initial.config.seed).toBeGreaterThan(0);expect(snapshot.events.some((e:any)=>e.type==='death')).toBe(true);expect(snapshot.critical.some((e:any)=>e.type==='death'&&e.data.lethal.weapon==='cannon-normal')).toBe(true);
- const payload=await page.evaluate(()=>(window as any).__copiedBattle);expect(payload).toContain('死亡');expect(payload).toContain('基础');expect(new TextEncoder().encode(payload).length).toBeLessThan(1_500_000);
+ const payload=await page.evaluate(()=>(window as any).__copiedBattle);expect(payload).toContain('倒地');expect(payload).toContain('基础');expect(new TextEncoder().encode(payload).length).toBeLessThan(1_500_000);
  expect(await page.evaluate(()=>Object.keys(localStorage).some(k=>/snapshot|battle-trace/.test(k)))).toBe(false);
  await page.screenshot({path:`QA/v2.2.2-copy-${browserName==='webkit'?'webkit-':''}${width}.png`});await page.locator('#close-dialog').click();await expect(page.locator('#copy-battle-snapshot')).not.toBeVisible();
 });

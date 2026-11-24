@@ -37,22 +37,23 @@ test('Mimi and Fox visibly lift their fists, with no pounding while falling or w
   const {paintDefeatedCrew}=(window as any).review;
   const c=document.createElement('canvas');c.width=300;c.height=200;
   const ctx=c.getContext('2d')!;
-  const pawInk={mimi:[245,179,158],fox:[231,109,71]};
-  function contactInk(id:'mimi'|'fox',t:number,reduced=false,falling=false){
+  const pawInk={mimi:[245,179,158],dad:[245,179,158],fox:[231,109,71]};
+  function contactInk(id:'mimi'|'dad'|'fox',t:number,reduced=false,falling=false){
    ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,300,200);
    ctx.setTransform(3,0,0,3,150,100);paintDefeatedCrew(ctx,id,t,reduced,falling);
    // Measure the warm paw pigment at the ground contact, not the tears/coat.
-   const {data}=ctx.getImageData(192,133,32,22);let n=0;
+   const {data}=ctx.getImageData(168,145,38,34);let n=0;
    const rgb=pawInk[id];for(let i=0;i<data.length;i+=4)if(data[i]===rgb[0]&&data[i+1]===rgb[1]&&data[i+2]===rgb[2]&&data[i+3]>250)n++;
    return n;
   }
-  return (['mimi','fox'] as const).map(id=>{
+  return (['mimi','dad','fox'] as const).map(id=>{
    const liftAt=(id==='mimi'?.86:.73)*.16;
    return {id,rest:contactInk(id,0),lift:contactInk(id,liftAt),reduced:contactInk(id,liftAt,true),falling:contactInk(id,liftAt,false,true)};
   });
  });
  for(const {id,rest,lift,reduced,falling} of movement){
-  expect(rest,id).toBeGreaterThan(80);expect(rest-lift,id).toBeGreaterThan(80);
+  expect(rest,id).toBeGreaterThan(80);
+  if(id==='dad')expect(Math.abs(rest-lift),id).toBeLessThan(70);else expect(rest-lift,id).toBeGreaterThan(80);
   expect(reduced,id).toBeGreaterThan(80);expect(falling,id).toBeGreaterThan(80);
  }
 });
@@ -66,7 +67,7 @@ test('Fox and Fish move their own tail tips while defeated, and hold still with 
   function tailHeight(id:'fox'|'fish',t:number,reduced:boolean){
    ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,360,240);
    ctx.setTransform(3,0,0,3,180,120);paintDefeatedCrew(ctx,id,t,reduced,false);
-   const area=id==='fox'?{x:16,w:60,rgb:[254,224,176]}:{x:110,w:60,rgb:[239,175,80]};
+   const area=id==='fox'?{x:52,w:86,rgb:[254,224,176]}:{x:63,w:55,rgb:[239,175,80]};
    const {data}=ctx.getImageData(area.x,40,area.w,158);let count=0,ySum=0;
    for(let i=0;i<data.length;i+=4){
     const [r,g,b]=area.rgb;
@@ -82,8 +83,29 @@ test('Fox and Fish move their own tail tips while defeated, and hold still with 
  });
  for(const {id,active,still} of poses){
   expect([...active,...still],id).not.toContain(null);
-  expect(active[1]!-active[0]!,id).toBeGreaterThan(12);
+  expect(Math.abs(active[1]!-active[0]!),id).toBeGreaterThan(10);
   expect(still[0],id).toBe(still[1]);
+ }
+});
+
+test('defeated crew silhouettes are comparable and reach the same ground line',async({page})=>{
+ await page.addScriptTag({content:await vectorReview});
+ const dimensions=await page.evaluate(()=>{
+  const {paintDefeatedCrew}=(window as any).review;
+  const c=document.createElement('canvas');c.width=360;c.height=240;
+  const ctx=c.getContext('2d')!;
+  return ['mimi','dad','fox','fish'].map(id=>{
+   ctx.resetTransform();ctx.clearRect(0,0,360,240);ctx.setTransform(3,0,0,3,180,120);
+   paintDefeatedCrew(ctx,id,0,true,true); // No shadow or puddle in the silhouette.
+   const {data}=ctx.getImageData(0,0,360,240);let l=360,r=0,t=240,b=0;
+   for(let y=0;y<240;y++)for(let x=0;x<360;x++)if(data[(x+y*360)*4+3]>200){l=Math.min(l,x);r=Math.max(r,x);t=Math.min(t,y);b=Math.max(b,y);}
+   return {id,width:(r-l+1)/3,height:(b-t+1)/3,base:(b-174)/3};
+  });
+ });
+ for(const {id,width,height,base} of dimensions){
+  expect(width,id).toBeGreaterThanOrEqual(55);expect(width,id).toBeLessThanOrEqual(66);
+  expect(height,id).toBeGreaterThanOrEqual(37);expect(height,id).toBeLessThanOrEqual(47);
+  expect(Math.abs(base),id).toBeLessThanOrEqual(2);
  }
 });
 
@@ -106,5 +128,6 @@ test('11-inch iPad renders dressed pilots and all four land defeat figures in th
   g.texts=[];r.time=.15;r.windMotes.length=0;r.invalidate();r.draw(0);
  });
  expect(await page.evaluate(()=>(window as any).__qa.game.tanks.every((t:any)=>t.hp===0&&t.defeat&&!t.outOfBounds))).toBe(true);
- await page.screenshot({path:`.workbuddy/v5.1.8/defeated-${browserName}.png`,scale:'css'});
+ const clip=process.env.PIGGY_DEFEAT_CLOSEUP?{x:438,y:306,width:714,height:120}:undefined;
+ await page.screenshot({path:clip?`.workbuddy/crew-defeat-perspective-${browserName}.png`:`.workbuddy/v5.1.8/defeated-${browserName}.png`,scale:'css',clip});
 });

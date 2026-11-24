@@ -720,7 +720,7 @@ export class Game {
     // finishes normally; delayed double-shot copies belong to this same group.
     this.projectiles=this.projectiles.filter(p=>{
       if(p.volley!==volley)return true;
-      this.recordBattle('projectile-end',`第${p.traceId??'?'}枚黄金导弹消散：目标死亡／不可攻击`,{projectile:p.traceId,volley,lockTarget:p.lockTarget,sharedTarget:this.volleyTargets.get(volley)?.target,x:p.x,y:p.y});
+      this.recordBattle('projectile-end',`第${p.traceId??'?'}枚黄金导弹消散：目标已倒地／不可攻击`,{projectile:p.traceId,volley,lockTarget:p.lockTarget,sharedTarget:this.volleyTargets.get(volley)?.target,x:p.x,y:p.y});
       p.trail=[];p.lockTarget=null;p.homing=false;p.lockAge=0;p.lockX=0;p.lockY=0;
       return false;
     });
@@ -1021,7 +1021,7 @@ export class Game {
     const detail={...context,base:context.base??amount,factors:context.factors??[],requested:amount,actual,hpBefore,hpAfter:t.hp,shieldBefore,shieldAfter:t.shield,absorbed,ignoreShield,owner,target:t.id,sourceName:source,targetName:t.name,weaponName:weapon,relation:t.id===owner?'self':this.tanks[owner]?.team===t.team?'ally':'enemy',rules:this.traceRules(),reaction,highDamage:high,position:{x:t.x,y:t.y},stateBefore:{poisoned:t.poisoned,frozen:t.frozen,immobile:t.immobile,rage:isRaging({...t,hp:hpBefore})}};
     const summary=`${high?'⚠ 高伤害 ':''}${source}→${t.name}，${weapon}／${cause}：基础${detail.base}${detail.factors.map(f=>` ×${f.value.toFixed(4)}[${f.source}]`).join('')}，计算${amount}，护盾吸收${absorbed}，实际扣血${actual}，HP ${hpBefore}→${t.hp}`;
     const damageEvent=this.recordBattle('damage',summary,detail,t.hp<=0);
-    if(t.hp<=0){const fallOrigin=this.fallOrigins.get(t.id) as any,trigger=fallOrigin?.source;const chain=['fall','out'].includes(context.cause)?`；触发：${fallOrigin?.cause??'失去地形支撑'}${trigger?`，${this.tanks[trigger.owner]?.name??trigger.owner}的${weaponById(trigger.weapon).name}挖土#${fallOrigin.event}`:''}`:'';this.recordBattle('death',`‼ ${t.name}死亡：${cause}，${source}／${weapon}；致死伤害#${damageEvent}，HP ${hpBefore}→0${chain}`,{target:t.id,cause:context.cause,damageEvent,lethal:detail,fallOrigin,defeat:t.defeat,outOfBounds:t.outOfBounds},true);}
+    if(t.hp<=0){const fallOrigin=this.fallOrigins.get(t.id) as any,trigger=fallOrigin?.source;const chain=['fall','out'].includes(context.cause)?`；触发：${fallOrigin?.cause??'失去地形支撑'}${trigger?`，${this.tanks[trigger.owner]?.name??trigger.owner}的${weaponById(trigger.weapon).name}挖土#${fallOrigin.event}`:''}`:'';this.recordBattle('death',`‼ ${t.name}倒地：${cause}，${source}／${weapon}；最后一击 #${damageEvent}，HP ${hpBefore}→0${chain}`,{target:t.id,cause:context.cause,damageEvent,lethal:detail,fallOrigin,defeat:t.defeat,outOfBounds:t.outOfBounds},true);}
     if(t.hp<=redHealthLimit(t))t.poisoned=false;
     if(amount>0) t.reaction={kind:actual>0?reaction:'graze',remaining:reaction==='direct'?1.4:reaction==='fall'?1.2:0.7};
     if(owner!==t.id&&actual>0) this.tanks[owner].damage+=actual;
@@ -1079,11 +1079,11 @@ export class Game {
     t.x=t.defeat.x;t.y=t.defeat.y;
     const ground=this.support(t.x,t.y+18)-18;
     if(t.y<ground-.5||t.fallVelocity>0){
-      if(!t.fallVelocity){t.fallVelocity=1;t.fallStart=t.y;this.recordBattle('corpse-fall',`${t.name}的哭泣尸体失去支撑，开始下落`,{target:t.id,from:{x:t.x,y:t.y}});}
+      if(!t.fallVelocity){t.fallVelocity=1;t.fallStart=t.y;this.recordBattle('corpse-fall',`${t.name}倒地后的身体失去支撑，开始下落`,{target:t.id,from:{x:t.x,y:t.y}});}
       t.fallVelocity=bodyFallSpeed(t.fallVelocity,dt,this.gravity,this.fasterFalls);t.y+=t.fallVelocity*dt*this.fallMotionScale;t.defeat.y=t.y;t.defeat.slope=0;
-      if(ground<this.worldHeight-18&&t.y>=ground){t.y=ground;t.defeat.y=ground;t.fallVelocity=0;t.defeat.slope=this.tankSlope(t);this.recordBattle('corpse-landing',`${t.name}的哭泣尸体落到下层`,{target:t.id,position:{x:t.x,y:t.y}});}
+      if(ground<this.worldHeight-18&&t.y>=ground){t.y=ground;t.defeat.y=ground;t.fallVelocity=0;t.defeat.slope=this.tankSlope(t);this.recordBattle('corpse-landing',`${t.name}倒地后的身体落到下层`,{target:t.id,position:{x:t.x,y:t.y}});}
     }
-    if(t.y+18>=this.worldHeight){t.outOfBounds=true;t.defeat=null;t.fallVelocity=0;this.recordBattle('corpse-out',`${t.name}的哭泣尸体掉出了地图`,{target:t.id,position:{x:t.x,y:t.y}});}
+    if(t.y+18>=this.worldHeight){t.outOfBounds=true;t.defeat=null;t.fallVelocity=0;this.recordBattle('corpse-out',`${t.name}倒地后的身体掉出了地图`,{target:t.id,position:{x:t.x,y:t.y}});}
   }
   private collectCrates() {
     this.crates=this.crates.filter(c=>{
