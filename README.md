@@ -1,8 +1,8 @@
-# 咪猪头的疯狂坦克 · v5.1.9
+# 咪猪头的疯狂坦克 · v6.0.0
 
-四位炮手会为治疗微笑、为队友的重击喝彩，也会在队友遇险时错愕。这版更新四位炮手的倒地姿势，小黄鱼倒地时以完整鱼身和贴地甩尾表现。[版本验收](QA/v5.1.9-validation.md)
+同一 Wi‑Fi 下可扫码加入好友创建的房间。单机、同屏热座与本地录像继续可用。
 
-以四位原创炮手为主角的回合制炮术 PWA，使用四个固定槽位自由安排上场、队旗、人类或 AI，支持两队合作对抗及三队／四队混战。TypeScript、Vite、PixiJS 保留场景与 Canvas 连续动画实现，不需要账号或后端。
+以四位原创炮手为主角的回合制炮术 PWA，使用四个固定槽位自由安排上场、队旗、人类或 AI，支持两队合作对抗及三队／四队混战。TypeScript、Vite、PixiJS 实现战场与连续动画。单机和热座支持离线；局域网对战由房主电脑提供服务，无需账号。
 
 [在线开战](https://larria.github.io/piggymiCannon/)
 
@@ -11,16 +11,26 @@
 ```sh
 npm install
 npm run dev           # http://localhost:4175
+npm run lan           # 构建并启动局域网服务（默认 4178）
 npm test              # 战斗机制、坦克与完整对局回归
 npm run test:ai       # 近距／走位、960次射击与36场完整AI对战统计
 npm run build:pages   # 类型检查，构建 /piggymiCannon/ 子路径
 npm run check:size    # 检查 dist 与 PWA 预缓存均不超过 90MB；构建时自动执行
 npm run preview:pages # http://localhost:4177/piggymiCannon/
 npm run test:browser  # Chrome，11 英寸 iPad Pro 横屏、触控与离线回归
+npm run test:lan      # build 后检验房间权限、地形同步及双浏览器联机
 npm run deploy        # 自动构建，再用 gh-pages 发布 dist/
 ```
 
 源码使用 `main`，GitHub Pages 使用 `gh-pages` 根目录和 `.nojekyll`。普通静态托管可使用 `npm run build` 和 `npm run preview`（4176）。
+
+## 局域网对战
+
+1. 房主在电脑的项目目录运行 `npm install`、`npm run lan`。macOS 会尝试打开房主页；也可手动打开终端第一条链接。终端里的房主链接仅供本机使用。
+2. 在「开始对局 → 局域网」等待朋友加入。对方用同一 Wi‑Fi 下的手机、平板或电脑，扫描带咪猪头头像的二维码或打开复制出的邀请链接，点「加入房间」。
+3. 房主选择地图、队伍、坦克和剩余席位的 AI，点击「开始联机对局」。每台设备控制自己的炮手。有玩家掉线时游戏等候最多 60 秒；可在原设备重新打开页面恢复席位。没有本地段位和成就结算，仍可保存、导出录像。
+
+房主电脑需保持服务运行；访客网络隔离或电脑防火墙可能阻断同网访问。如果有多块网卡，可用 `PIGGY_LAN_IP=<电脑局域网 IPv4> npm run lan` 指定邀请地址；端口被占用时可设置 `PIGGY_LAN_PORT`。GitHub Pages/PWA 静态版仍可单机和热座，也可从「局域网」粘贴邀请进入房间；创建房间需运行本机服务。
 
 ## 游戏用语
 

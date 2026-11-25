@@ -86,13 +86,17 @@ test('PWA installs its worker and reloads with icons and audio while offline',as
   expect(assets).toEqual([true,true,true,true,true,true]);
   await context.setOffline(false);
 });
-test('four starting item slots still enforce one item per own action',async({page})=>{
+test('four starting item slots allow a restoration combo while holding boost for a later turn',async({page})=>{
  await start(page);await page.locator('#inventory-toggle').click();await page.locator('#items-tab').click();
- await expect(page.locator('.arsenal [data-item]')).toHaveCount(4);await expect(page.locator('.arsenal [data-item="repair"]')).toBeDisabled();
- for(const id of ['double','teleport','boost'])await expect(page.locator(`.arsenal [data-item="${id}"]`)).toBeEnabled();
- await page.locator('.arsenal [data-item="double"]').click();await expect(page.locator('#status-0')).toContainText('双发');
- for(const id of ['double','teleport','boost','repair'])await expect(page.locator(`.arsenal [data-item="${id}"]`)).toBeDisabled();
- await expect(page.locator('.weapon-detail')).toContainText('每回合最多一件');
+ const items=page.locator('.arsenal');
+ await expect(items.locator('[data-item]')).toHaveCount(4);
+ for(const id of ['double','teleport','boost','repair'])await expect(items.locator(`[data-item="${id}"]`)).toBeEnabled();
+ await items.locator('[data-item="double"]').click();await expect(page.locator('#status-0')).toContainText('双发');
+ await expect(items.locator('.pending-shot-item')).toHaveCount(1);
+ await expect(items.locator('[data-item="boost"]')).toBeDisabled();
+ await items.locator('[data-item="repair"]').click();
+ await expect(page.locator('#fire-note')).toContainText('恢复弹已装填');
+ await expect(items.locator('[data-item="teleport"]')).toBeDisabled();
 });
 test('clickable version checks fetch the live version and keep the battle running',async({page})=>{
   await start(page);

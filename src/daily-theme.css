@@ -28,7 +28,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,
  background:var(--theme-paper);border-color:var(--theme-border);color:var(--theme-ink);
 }
 .site-header,.lobby-welcome h1,.dialog-shell :is(h2,h3),.opening-card h1{color:var(--theme-ink)}
-:is(.brand-type small,.nav-link,.local-badge,.icon-button,.eyebrow,.lobby-welcome p,.lobby-hint,.caption-main,
+:is(.brand-type small,.nav-link,.local-badge,.icon-button,.eyebrow,.lobby-welcome p,.lobby-hint,
 .battle-caption button,.page-footer,.page-footer .version-button,.page-footer .footer-pig,.lobby-actions .replay-library-button){
  color:var(--theme-muted);
 }
@@ -124,7 +124,8 @@ select,.slot-row select{background:var(--theme-paper);border-color:var(--theme-b
 .material-progress-track{background:var(--theme-wash);border-color:var(--theme-border)}
 .material-progress :is(.material-progress-heading,.material-progress-status,.material-progress-value),
 .opening-card :is(.opening-brand,.opening-rally,.opening-note,.opening-note small){color:var(--theme-muted)}
-.toast{background:var(--theme-action);color:var(--theme-on-action)}
+.toast,.battle-live-message{background:var(--theme-action);color:var(--theme-on-action)}
+.battle-live-message .caption-dot{background:currentColor;opacity:.75}
 
 .combat-mode .compact-dashboard{
  background:color-mix(in srgb,var(--theme-paper) 86%,var(--actor-paper,var(--theme-wash)));color:var(--theme-ink);

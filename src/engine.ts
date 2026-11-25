@@ -130,6 +130,8 @@ export class Game {
   texts:FloatingText[]=[]; fires:FireZone[]=[]; crates:Crate[]=[];
   events:GameEvent[]=[]; log:string[]=[];
   dashboardHuman:number|null=null;
+  /** Device camera and fog perspective; never part of a replay or simulation. */
+  localViewer:number|null=null;
   introLocked=false;observation:ShotObservation|null=null;paused=false; winner:number|null=null; shake=0; elapsed=0;
   supplyObservation:SupplyObservation|null=null;
   restoring=false;private firstSupplyChecked=false;private nextSupplyAction=8;private lastSupplyDelivery:number|null=null;
@@ -298,7 +300,7 @@ export class Game {
   get canMarkPower(){return backgroundMarkers(this.gameVersion)?!this.paused&&!this.introLocked&&!['lobby','ended'].includes(this.phase)&&this.dashboardTank.controller==='human'&&(this.humanTurn||this.dashboardHuman!==null):this.humanTurn;}
   get humanTurn() { return this.phase==='aiming' && !this.paused && !this.introLocked && !this.weatherObservation && this.active.hp>0 && this.active.controller==='human'; }
   get round() { return this.roundNumber; }
-  get viewer() {return this.active.controller==='human'||this.tanks.every(t=>t.controller==='ai')?this.current:this.tanks.find(t=>t.controller==='human'&&t.hp>0&&t.team===this.active.team)?.id??this.tanks.find(t=>t.controller==='human'&&t.hp>0)?.id??this.current;}
+  get viewer() {return this.localViewer??(this.active.controller==='human'||this.tanks.every(t=>t.controller==='ai')?this.current:this.tanks.find(t=>t.controller==='human'&&t.hp>0&&t.team===this.active.team)?.id??this.tanks.find(t=>t.controller==='human'&&t.hp>0)?.id??this.current);}
   get delayEnabled(){return this.tanks.every(t=>t.controller==='human');}
   ground(x:number,fromY=0) { return this.land.below(x,fromY); }
   support(x:number,footY:number) {

@@ -1,8 +1,7 @@
 export const RELEASE_NOTES=[
- '按钮、设置、指南、随机上阵图标和战场仪表统一跟随每日主题。',
- '主页、加载页和弹窗保持白底，队旗与战场状态仍用原色。',
- '咪猪头的右侧坦克帽带收窄并贴住脸颊，侧脸姿势保持原样。',
- 'AI 只给血量低于 40% 的自己或队友选用恢复弹；恢复弹按难度有时会瞄偏，并尽量擦中。',
+ '新增局域网对战：同一 Wi-Fi 下扫码或打开邀请链接加入，最多四人。单机和热座仍可照常开局。',
+ '有人掉线时暂停，保留席位 60 秒。局域网对局可保存录像，不影响本机段位和成就。',
+ '「战场已就位」卡片跟随每日主题，保持白字清晰。',
 ];
 export function readRelease(value:any):{version:string;notes:string[]}|null{
  if(typeof value?.version!=='string'||!/^v?\d+\.\d+\.\d+$/.test(value.version))return null;

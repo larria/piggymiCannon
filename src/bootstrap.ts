@@ -28,9 +28,9 @@ async function poll(){
 }
 void import('./main').then(async app=>{
  await app.homeReady;appReady=true;
- if(import.meta.env.DEV||!('serviceWorker' in navigator)||!globalThis.caches){clearTimeout(bypass);finish();return;}
+ if(document.documentElement.hasAttribute('data-lan-server')||import.meta.env.DEV||!('serviceWorker' in navigator)||!globalThis.caches){clearTimeout(bypass);finish();return;}
  if(performance.now()-started>=8000)enter.hidden=false;
  if(failed){enter.hidden=false;showProgress(meter,lastFraction,'演习场已准备好','离线素材暂未就绪，可以先进入游戏。');}
 }).catch(()=>{failed=true;clearTimeout(timer);clearTimeout(bypass);manifestAbort.abort();retry.hidden=false;showProgress(meter,null,'演习场暂未准备好','请联网重试，已保存的对局不会丢失。');});
-void poll();
+if(!document.documentElement.hasAttribute('data-lan-server'))void poll();
 // Without module support / after a failed entry request, the HTML retains a retry button.

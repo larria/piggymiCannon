@@ -19,6 +19,10 @@ import {retryBattleSprites} from './battle-sprites';
 import './style.css';
 import './web-select.css';
 import './daily-theme.css';
+import './lan.css';
+import {LanClient,lanServed,hostKey,guestCode,resumeGuest,resumeHosting} from './lan-client';
+import {renderLanSetup,copyInvite} from './lan-setup';
+import type {BattleSnapshot} from './battle-trace';
 import {installDailyTheme} from './daily-theme';
 import {ImpactProfiler} from './impact-profiler';
 import {snapshotText} from './battle-trace';
@@ -67,7 +71,7 @@ let previousBgm:PreviousMapBgm|null=safeRead(LAST_MAP_BGM);
 let progression=(()=>{try{return readProgression(localStorage);}catch{return freshProgression();}})();
 let rankSettlement:Settlement[]=[];
 let progressionUnsaved=false;
-function newCompetition():Competition{return {id:crypto.randomUUID(),titles:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.equippedAchievement])),points:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.points]))};}
+function newCompetition():Competition{return {id:crypto.randomUUID?.()??Array.from(crypto.getRandomValues(new Uint32Array(4)),n=>n.toString(16).padStart(8,'0')).join(''),titles:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.equippedAchievement])),points:Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.points]))};}
 const saved=safeRead('piggy-settings');
 let config:Config={slots:defaultSlots(),map:'valley',timer:DEFAULT_TURN_TIMER,seed:Date.now(),...(saved?.config||{})};
 config={slots:saved?.slotVersion===1?normalizeSlots(saved?.config?.slots,config.allowDragon):defaultSlots(),map:MAPS.some(m=>m.id===config.map)?config.map:'valley',mapChoice:config.mapChoice==='random'||MAPS.some(m=>m.id===config.mapChoice)?config.mapChoice:undefined,timer:storedTurnTimer(config.timer,saved?.timerPreferenceVersion),seed:Date.now(),snow:undefined,fog:undefined,fireLine:undefined,selfDamage:config.selfDamage,friendlyFire:config.friendlyFire,fallDamage:!!config.fallDamage,powerAssist:!!config.powerAssist,tankBlocking:!!config.tankBlocking,allowDragon:config.allowDragon};
@@ -77,10 +81,14 @@ let game=new Game(config,APP_VERSION);config={...game.config};
 let recorder:ReplayRecorder|null=null,playback:ReplayPlayer|null=null;
 let impactProfiler:ImpactProfiler|null=null;
 let replayReturn:{game:Game;config:Config;recorder:ReplayRecorder|null;statsRecorded:boolean;immersive:boolean}|null=null;
-const canControlBattle=()=>game.humanTurn&&!playback;
+let lan:LanClient|null=null, networkBattle=false;
+let lanMode=false, lanHostPending=false,lanDraft:Config|null=null;
+let setupController:ReturnType<typeof mountSetup>|null=null;
+let localBattle:{game:Game;config:Config;recorder:ReplayRecorder|null;statsRecorded:boolean;settlement:Settlement[];immersive:boolean}|null=null;
+const canControlBattle=()=>game.humanTurn&&!playback&&(!networkBattle||!!lan?.canPlay&&!$<HTMLDialogElement>('#dialog').open);
 let angleKeyOwner:number|null=null;const blockedAngleKeys=new Set<string>();
-const canAdjustAngle=()=>!playback&&!$<HTMLDialogElement>('#dialog').open&&(canControlBattle()||!charge&&game.canPrepareAim);
-const canMarkPower=()=>game.canMarkPower&&!playback&&!charge&&!$<HTMLDialogElement>('#dialog').open;
+const canAdjustAngle=()=>!playback&&!$<HTMLDialogElement>('#dialog').open&&(canControlBattle()||!networkBattle&&!charge&&game.canPrepareAim);
+const canMarkPower=()=>(networkBattle?canControlBattle():game.canMarkPower)&&!playback&&!charge&&!$<HTMLDialogElement>('#dialog').open;
 const audio=new AudioManager();
 audio.setSoundEnabled(saved?.soundEnabled??saved?.sound??true);audio.setMusicEnabled(saved?.musicEnabled??saved?.sound??true);audio.setVolume(saved?.audioVersion===2?clamp(Number(saved.volume)||0,0,1):Math.max(0.65,clamp(Number(saved?.volume)||0.65,0,1)));
 let stats:{games:number;wins:number;damage:number;shots:number}=safeRead('piggy-stats')||{games:0,wins:0,damage:0,shots:0};
@@ -123,7 +131,7 @@ $('#app').innerHTML=`
             <div id="turn-indicator" class="turn-indicator hidden"><span class="status-dot"></span><span id="turn-text">轮到你了</span><span class="turn-divider"></span><span id="round-text">第 01 回合</span></div>
             <div id="timer" class="timer hidden">${icon('clock')}<span>∞</span><small>s</small></div>
             <section id="lobby-overlay" class="lobby-welcome" aria-label="开局准备"><div class="lobby-copy"><h1>准备开战</h1><p>选择战场，安排炮手</p></div><div class="lobby-actions"><button id="start-button" class="button button-dark">进入战场 ${icon('arrow')}</button></div></section>
-<div id="game-overlay" class="game-overlay hidden"></div>
+<div id="game-overlay" class="game-overlay hidden"></div><p id="lan-link-status" class="lan-link-status" role="status" hidden></p>
             <div class="stage-bottom"><span id="field-note">丘陵地形 · 可破坏环境</span><span>${icon('sun')}<span id="gravity-note">重力 1.0 g</span><button id="stage-version-button" class="version-button" aria-label="点击版本号检查更新">v${APP_VERSION} · 检查更新</button></span></div>
           </div>
           <div class="battle-caption"><div class="caption-main"><span class="caption-dot"></span><span id="battle-message">山谷已就位。准备好，就开一局。</span></div><button id="log-button" aria-label="查看战斗记录">战斗记录 ${icon('chevron')}</button></div>
@@ -194,14 +202,17 @@ function paintMapChoices(){
 }
 
 function colorNames(message:string){let text=message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');for(const t of [...game.tanks].sort((a,b)=>b.name.length-a.name.length))text=text.replaceAll(t.name,nameMarkup(t.name,t.team));return text;}
-function persistSettings() {save('piggy-settings',{config:replayReturn?.config??config,soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,volume:audio.volume,balanceVersion:2,audioVersion:2,slotVersion:1,timerPreferenceVersion:TIMER_PREFERENCE_VERSION});}
+function persistSettings() {save('piggy-settings',{config:localBattle?.config??replayReturn?.config??config,soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,volume:audio.volume,balanceVersion:2,audioVersion:2,slotVersion:1,timerPreferenceVersion:TIMER_PREFERENCE_VERSION});}
 function updateSound() {const b=$('#sound-button');b.innerHTML=icon(audio.soundEnabled||audio.musicEnabled?'sound':'mute');b.setAttribute('aria-label','声音设置');b.title='分别设置音效与背景音乐';}
 function snapshotFeedback(message:string){
   toast(message);const status=document.querySelector<HTMLElement>('#snapshot-copy-status');
   if(status){status.textContent=message;status.classList.add('visible');window.clearTimeout(snapshotStatusTimer);snapshotStatusTimer=window.setTimeout(()=>status.classList.remove('visible'),2700);}
 }
 async function copyBattleSnapshot(){
-  const profile=impactProfiler?.report(),snapshot=game.battleSnapshot();
+  const profile=impactProfiler?.report();
+  let snapshot:BattleSnapshot;
+  try{snapshot=networkBattle?await lan!.document('snapshot') as BattleSnapshot:game.battleSnapshot();}
+  catch(error){snapshotFeedback((error as Error).message);return;}
   const playbackInfo=playback?{appVersion:APP_VERSION,recordingVersion:playback.recording.gameVersion,recordingSeed:playback.recording.initial.initial.config.seed,positionSeconds:playback.time,durationSeconds:playback.recording.duration,paused:playback.paused}:null;
   const portraits=portraitDiagnostics();
   const exported=Object.assign({},snapshot,{portraitResources:portraits,assetResources:assetRepairDiagnostics()},profile?{impactPerformance:profile}:{},playbackInfo?{playbackInfo}:{});
@@ -209,7 +220,11 @@ async function copyBattleSnapshot(){
   payload=payload.replace('以下 JSON 与上述摘要',`头像资源：${portraits.originals}/4 原图，${portraits.usable}/4 可用；加载与备用来源见 JSON 的 portraitResources。\n\n以下 JSON 与上述摘要`);
   if(playbackInfo)payload=payload.replace('以下 JSON 与上述摘要',`当前为录像回放：原局 v${playbackInfo.recordingVersion}，播放器 v${APP_VERSION}，已播放 ${playbackInfo.positionSeconds.toFixed(2)}/${playbackInfo.durationSeconds.toFixed(2)}秒，原局种子 ${playbackInfo.recordingSeed}。\n\n以下 JSON 与上述摘要`);
   if(profile){const max=Math.max(0,...profile.records.map(r=>r.ms.total));payload=payload.replace('以下 JSON 与上述摘要',`弹着性能（测试版）：${profile.records.length}帧，主线程峰值 ${max.toFixed(2)}ms；详细分段、像素与纹理字节见JSON的impactPerformance。\n\n以下 JSON 与上述摘要`);}
-  try {if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');await navigator.clipboard.writeText(payload);snapshotFeedback('已复制对局快照');}
+  try {
+    if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(payload);
+    else {const field=document.createElement('textarea');field.value=payload;field.className='lan-clipboard';($<HTMLDialogElement>('#dialog').open?$('#dialog-content'):document.body).append(field);field.select();try{if(!document.execCommand('copy'))throw Error();}finally{field.remove();}}
+    snapshotFeedback('已复制对局快照');
+  }
   catch {snapshotFeedback('剪贴板不可用或未获授权，请允许剪贴板访问后重试。');}
 }
 function toast(message:string) {const el=$('#toast');el.innerHTML=colorNames(message);el.classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>el.classList.remove('visible'),2700);}
@@ -218,7 +233,7 @@ function adjustDisplayedAim(angle:number,direction?:number){
  if(canControlBattle()){if(direction!==undefined)game.face(direction);game.setAim(angle,t.power);}
  else if(direction===undefined)game.prepareAim(angle,t.id);else game.prepareAim(angle,t.id,direction);
 }
-function displayTank(){return game.dashboardTank;}
+function displayTank(){return networkBattle?lan?.tank??game.dashboardTank:game.dashboardTank;}
 function useHumanItem(id:ItemId,slot:number){return game.useItem(id,false,slot);}
 function pendingShotItem(tank:Tank,slot:number,id:ItemId|null):ItemId|null{
   if(playback||tank.controller!=='human'||tank.hp<=0||game.phase==='lobby'||game.phase==='ended')return null;
@@ -290,7 +305,7 @@ function updateUI() {
   $('#move-right').setAttribute('aria-label','向右移动，长按持续行驶并转向右侧');
   $('#move-left .icon').style.transform='';
   $('#move-right .icon').style.transform='';
-  $('#mode-label').textContent='自定义战场';
+  $('#mode-label').textContent=networkBattle?'局域网对战':'自定义战场';
   $('#difficulty-label').textContent=`${game.tanks.length} 名炮手 · ${new Set(game.tanks.map(t=>t.team)).size} 面队旗`;
   const hudSignature=game.tanks.map(t=>`${t.id}:${t.crew}:${t.vehicleId}:${t.controller}:${t.difficulty}:${t.team}:${displayMedal(t)}:${displayTitle(t)}`).join('|');
   if(hudSignature!==lastHud){
@@ -322,6 +337,12 @@ function updateUI() {
   $('#turn-text').innerHTML=colorNames(game.phase==='supply'?'补给正在空降 · 计时暂停':game.phase==='flying'?'炮弹飞行中':game.phase==='resolving'?'观察战场…':game.active.controller==='ai'?`${game.active.name}正在瞄准…`:`${game.active.name}，到你了` );
   if(renderer.touring){$('#turn-text').innerHTML=colorNames(`开场巡游 · ${game.tanks[renderer.tourPlayer??0]?.name??''}`);}
   else if(playback&&game.phase==='aiming')$('#turn-text').innerHTML=colorNames(`录像 · ${game.active.name}瞄准`);
+  const linkStatus=$('#lan-link-status'),linkNotice=networkBattle&&(lan?.room?.hold||lan?.status!=='ready')?(lan?.status==='ready'?'已暂停 · 正在等其他炮手重连':'连接中断 · 正在尝试重连'):'';
+  linkStatus.hidden=!linkNotice;if(linkStatus.textContent!==linkNotice)linkStatus.textContent=linkNotice;
+  if(networkBattle&&!renderer.touring){
+    if(lan?.room?.hold||lan?.status!=='ready')$('#turn-text').textContent='正在等炮手重新连线';
+    else if(game.phase==='aiming'&&!human&&game.active.controller==='human')$('#turn-text').innerHTML=colorNames(`${game.active.name}正在瞄准…`);
+  }
   $('#turn-indicator').style.setProperty('--flag-ink',teamFlag(game.active.team).color);$('#turn-indicator').style.setProperty('--flag-paper',teamFlag(game.active.team).paper);
   $('#round-text').textContent=game.turn>=40?'决胜时刻':`第 ${String(game.round).padStart(2,'0')} 轮`;
   $('#timer span').textContent=String(Math.ceil(Math.max(0,game.clock))).padStart(2,'0');$('#timer').classList.toggle('urgent',game.clock<10);
@@ -331,7 +352,7 @@ function updateUI() {
   angle.min=String(t.minAngle);angle.max=String(t.maxAngle);angle.value=String(t.angle);power.value=String(t.power);
   angle.style.setProperty('--range-fill',`${(t.angle-t.minAngle)/(t.maxAngle-t.minAngle)*100}%`);power.style.setProperty('--range-fill',`${(t.power-MIN_POWER)/(100-MIN_POWER)*100}%`);
   angle.disabled=!canAdjustAngle();power.disabled=!human;
-  $('.control-deck').classList.toggle('inactive',!human);$('.control-deck').classList.toggle('can-prepare-aim',!human&&canAdjustAngle());$<HTMLButtonElement>('#power-meter').disabled=!game.canMarkPower||!!playback||$<HTMLDialogElement>('#dialog').open;
+  $('.control-deck').classList.toggle('inactive',!human);$('.control-deck').classList.toggle('can-prepare-aim',!human&&canAdjustAngle());$<HTMLButtonElement>('#power-meter').disabled=!canMarkPower();
   $('#power-meter .meter-help').textContent=human?'轻点记号 · 按住蓄力':canAdjustAngle()?'可记力度 · 预设角度':'轻点记号 · 等待行动';skipButton.disabled=!human&&!renderer.touring;
   const skipLabel=renderer.touring?'跳过开场巡游':'长按 1 秒跳过回合';
   skipButton.setAttribute('aria-label',skipLabel);skipButton.title=skipLabel+' · F5';skipButton.dataset.helpDescription=skipLabel;
@@ -339,7 +360,7 @@ function updateUI() {
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
   updateChargeVisual(powerDisplay(t.power,t.lastPower,game.minimumShotPower,!!charge||!!playback?.waiting||!!playback?.charging,matchPolish(game.gameVersion)));
   updateChargePreparation(performance.now());
-  document.querySelectorAll<HTMLButtonElement>('.quick-items [data-item]').forEach(button=>button.disabled=!!playback||!!game.itemUnavailable(button.dataset.item as ItemId,false,Number(button.dataset.itemSlot)));
+  document.querySelectorAll<HTMLButtonElement>('.quick-items [data-item]').forEach(button=>button.disabled=!human||!!game.itemUnavailable(button.dataset.item as ItemId,false,Number(button.dataset.itemSlot)));
 
   $('#fire-title').textContent=charge&&!charge.audible||playback?.waiting?'准备蓄力':charge||playback?.charging?'蓄力中':'开火';
   $('#fire-subtitle').textContent=charge?'松手或蓄满发射':'按住 / SPACE';
@@ -347,7 +368,7 @@ function updateUI() {
   if(t.immobile>0){$<HTMLButtonElement>('#move-left').disabled=true;$<HTMLButtonElement>('#move-right').disabled=true;}
   $<HTMLButtonElement>('#fire-button').disabled=!human||t.fallVelocity>0;
   $('#fire-note').textContent=game.weatherObservation?'火线变化 · 正在展示战场':game.phase==='supply'?'空投阶段不消耗回合时间':lobby?'先进入战场':game.phase==='flying'||game.phase==='resolving'?'欣赏这条抛物线':game.introLocked?'开场巡游 · 正在展示炮手位置':game.paused?'游戏已暂停':game.phase==='ended'?'下一局见':game.phase==='handoff'?'交给下一位队长':!human?'等待对手行动':game.restoring?'恢复弹已装填 · 正中最高恢复60%':game.teleporting?'转移弹已装填 · 蓄力发射':t.doubleShot?'双发装填已就绪':t.boost?'强化炮弹已就绪':`${weaponById(game.selected).name}已就绪`;
-  $<HTMLButtonElement>('#pause-button').disabled=lobby||game.phase==='ended'||game.phase==='handoff';
+  $<HTMLButtonElement>('#pause-button').disabled=networkBattle||lobby||game.phase==='ended'||game.phase==='handoff';
   $('#pause-button').innerHTML=icon(game.paused?'play':'pause');$('#pause-button').setAttribute('aria-label',game.paused?'继续游戏':'暂停游戏');
   const signature=`${activeTab}|${t.vehicleId}|${shownWeapon}|${t.id}|${game.teleporting}|${game.restoring}|${t.itemUsed}|${t.tactics}|${ITEMS.map(i=>game.itemUnavailable(i.id)).join(',')}|${JSON.stringify(t.ammo)}|${JSON.stringify(t.items)}|${quick.join(',')}|${pendingItems.join(',')}`;
   if(signature!==lastInventory) {renderInventory();lastInventory=signature;}
@@ -379,11 +400,11 @@ function updateOverlay() {
   } else if(game.phase==='ended') {
     recordStats();
     if(game.resultAge<3){el.classList.add('hidden');el.innerHTML='';return;}
-    el.classList.remove('hidden');el.innerHTML=battleResultMarkup(game,rankSettlement,import.meta.env.BASE_URL,Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.equippedAchievement])));
+    el.classList.remove('hidden');el.innerHTML=battleResultMarkup(game,rankSettlement,import.meta.env.BASE_URL,Object.fromEntries(Object.entries(progression.profiles).map(([id,p])=>[id,p.equippedAchievement])),networkBattle?(lan?.slot===0?'host':'guest'):undefined);
   } else {el.classList.add('hidden');el.innerHTML='';}
 }
 function recordStats() {
-  if(playback)return;
+  if(playback||networkBattle)return;
   if(statsRecorded) return;statsRecorded=true;
   if(game.progress){
     // Read once at settlement to avoid overwriting a different tab's completed match.
@@ -429,20 +450,94 @@ function newMatch(next:Config,start=true) {
 function togglePause() {
   clearSkipHold();
   if(playback){playback.paused=!playback.paused;setReplayAudioPaused(playback.paused);refreshReplayControls();return;}
-  if(game.phase==='lobby'||game.phase==='ended'||game.phase==='handoff') return;
+  if(networkBattle||game.phase==='lobby'||game.phase==='ended'||game.phase==='handoff') return;
   if(renderer.touring)renderer.finishTour();
   cancelCharge();game.paused=!game.paused;keys.clear();keyboardMove.reset();audio.pause(game.paused);updateOverlay();updateUI();
+}
+
+function refreshLanSetup(){
+  const panel=document.querySelector<HTMLElement>('#lan-room');if(!panel)return;
+  const guest=!!guestCode(),owner=!guest&&!!hostKey();
+  panel.hidden=!lanMode;
+  $('#setup-form').hidden=lanMode&&(!owner||!lan?.room);
+  $('.setup-modes').hidden=guest;
+  document.querySelectorAll<HTMLElement>('[data-match-mode]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.matchMode==='lan')===lanMode)));
+  setupController?.setLanSeats(lanMode&&owner?lan?.room?.seats??[]:null,!!lan?.room&&lan.room.seats.length>=2&&lan.room.seats.every(s=>s.online)&&lan.status==='ready');
+  if(!lanMode)return;
+  renderLanSetup(panel,import.meta.env.BASE_URL,lan,{host:owner,guest,join:()=>connectLan(false),reopen:()=>connectLan(true),leave:leaveLan,copy:async()=>{
+    const input=panel.querySelector<HTMLInputElement>('#lan-invite-url'),label=panel.querySelector<HTMLElement>('[data-copy-invite] span');
+    if(!input||!label)return;
+    label.textContent=await copyInvite(input)?'已复制':'请手动复制';
+    window.setTimeout(()=>{label.textContent='复制链接';},2200);
+  }});
+}
+function beginGuestInvite(){lanMode=true;showDialog('setup');}
+function connectLan(owner:boolean){
+  if(lan?.status==='connecting'||lan?.status==='reconnecting')return;
+  audio.unlock();
+  if(lan?.status==='ready'){if(owner)lan.create();return;}
+  lan?.dispose();
+  lanHostPending=owner;
+  const client=new LanClient(APP_VERSION,owner?hostKey():null,owner?null:guestCode(),{
+    room:()=>{
+      if(lan!==client)return;
+      if(lanHostPending&&client.status==='ready'){lanHostPending=false;client.create();}
+      if(networkBattle&&!client.game&&client.room?.state!=='battle'&&client.status==='ready'){restoreLocalBattle();showDialog('setup');}
+      if(client.status!=='ready'||client.room?.hold){clearSkipHold();keys.clear();keyboardMove.reset();}
+      refreshLanSetup();updateUI();
+    },
+    match:(g,reconnected)=>{
+      if(lan!==client)return;
+      if(!networkBattle){
+        if(playback)leaveReplay();
+        if($<HTMLDialogElement>('#dialog').open)closeDialog();
+        localBattle={game,config,recorder,statsRecorded,settlement:rankSettlement,immersive};
+      }
+      clearSkipHold();cancelCharge();keys.clear();keyboardMove.reset();
+      networkBattle=true;game=g;config={...g.config};recorder=null;rankSettlement=[];
+      renderer.setGame(g);refreshImpactProfiler();
+      audio.resetEffects();audio.pause(false);audio.setSelectionMusic(false);void audio.preloadForMatch(g.tanks.map(t=>t.vehicleId));
+      setImmersive(true);lastPhase='';lastInventory='';
+      document.body.classList.add('lan-battle');$('#battle-message').textContent='局域网对战 · 你是'+(client.tank?.name??'本机炮手');
+      if(!reconnected&&g.introLocked)renderer.startTour(()=>renderer.follow());
+      else renderer.follow();
+      updateUI();
+    },
+    error:message=>{
+      if(lan!==client)return;
+      const note=document.querySelector<HTMLElement>('.lan-room-detail');
+      if(note&&$<HTMLDialogElement>('#dialog').open)note.textContent=message;else toast(message);
+      if(client.status==='closed'&&networkBattle){restoreLocalBattle();showDialog('setup');const status=document.querySelector<HTMLElement>('.lan-room-detail');if(status)status.textContent=message;}
+    },
+  });
+  lan=client;client.connect();
+}
+function restoreLocalBattle(){
+  if(!localBattle)return;
+  if($<HTMLDialogElement>('#dialog').open)closeDialog();
+  clearSkipHold();cancelCharge();keys.clear();keyboardMove.reset();
+  const before=localBattle;localBattle=null;networkBattle=false;
+  ({game,config,recorder,statsRecorded}=before);rankSettlement=before.settlement;
+  renderer.setGame(game);refreshImpactProfiler();audio.resetEffects();audio.pause(game.paused);
+  setImmersive(before.immersive);document.body.classList.remove('lan-battle');lastPhase='';lastInventory='';updateUI();
+}
+function leaveLan(){
+  const wasGuest=!!guestCode();lan?.leave();lan=null;lanDraft=null;lanHostPending=false;lanMode=false;
+  if(wasGuest)history.replaceState(history.state,'',location.pathname+location.search);
+  if($<HTMLDialogElement>('#dialog').open)closeDialog();
+  restoreLocalBattle();
 }
 
 function profileClick(event:Event){const equip=(event.target as HTMLElement).closest<HTMLElement>('[data-equip-achievement]');if(equip){const crew=equip.dataset.profileCrew as keyof typeof CREW;if(!CREW[crew])return;const id=equip.dataset.equipAchievement!;try{progression=equipAchievement(progression,crew,progression.profiles[crew].equippedAchievement===id?null:id);try{localStorage.setItem(PROGRESSION_KEY,JSON.stringify(progression));progressionUnsaved=false;}catch{progressionUnsaved=true;toast('本机存储不可用，称号仅在本次打开期间保留。');}$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);lastHud='';renderer.invalidate();updateUI();}catch(error){toast((error as Error).message);}return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-profile]');if(!button)return;const crew=button.dataset.profile as keyof typeof CREW;if(!CREW[crew])return;$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);}
 function showDialog(type:string) {
   clearSkipHold();
+  if(networkBattle&&(type==='setup'||type==='replays')){toast('请先离开对局，再返回演习场。');return;}
   if(playback&&type==='setup'){toast('请先退出录像，再调整对局。');return;}
   if(renderer.touring)renderer.finishTour();
   const dialog=$<HTMLDialogElement>('#dialog');
-  if(!dialog.open) {cancelCharge();dialogPaused=game.paused;game.paused=true;keys.clear();keyboardMove.reset();}
-  dialogKeepsMusic=!(playback?.paused??dialogPaused);audio.pause(true,dialogKeepsMusic);
-  dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content');content.removeEventListener('click',profileClick);
+  if(!dialog.open) {cancelCharge();dialogPaused=game.paused;if(!networkBattle)game.paused=true;keys.clear();keyboardMove.reset();}
+  dialogKeepsMusic=!(playback?.paused??dialogPaused);if(!networkBattle)audio.pause(true,dialogKeepsMusic);
+  dialog.classList.toggle('setup-dialog',type==='setup');dialog.classList.toggle('projectile-dialog',type==='projectiles'||type==='vehicles');const content=$('#dialog-content'),closeButton=$('#close-dialog');if(content.contains(closeButton))content.before(closeButton);content.removeEventListener('click',profileClick);
   dialog.classList.toggle('settings-dialog',type==='settings');
   if(type.startsWith('portrait:')) {
     const id=Number(type.split(':')[1]),crew=game.tanks[id].crew,name=game.tanks[id].name,team=game.tanks[id].team;
@@ -459,11 +554,25 @@ function showDialog(type:string) {
   } else if(type==='setup') {
     audio.setSelectionMusic(true);
     content.innerHTML=setupMarkup(config,import.meta.env.BASE_URL);
-    mountSetup(content,{...config,competition:newCompetition()},import.meta.env.BASE_URL,toast,next=>{closeDialog();newMatch(next);},{soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,change:(key,value)=>{if(key==='soundEnabled')audio.setSoundEnabled(value);else if(key==='musicEnabled')audio.setMusicEnabled(value);else{config[key]=value;game.setBattleRule(key,value);}updateSound();persistSettings();}});paintMapChoices();
+    $('.setup-header').append(closeButton);
+    setupController=mountSetup(content,{...config,competition:newCompetition()},import.meta.env.BASE_URL,toast,next=>{
+      if(lanMode){lanDraft=next;audio.unlock();if(!lan?.start(next))toast('连接尚未就绪，请稍后重试。');return;}
+      closeDialog();newMatch(next);
+    },{soundEnabled:audio.soundEnabled,musicEnabled:audio.musicEnabled,change:(key,value)=>{
+      if(key==='soundEnabled')audio.setSoundEnabled(value);else if(key==='musicEnabled')audio.setMusicEnabled(value);else if(!lanMode){config[key]=value;game.setBattleRule(key,value);}
+      updateSound();persistSettings();
+    }},lanDraft);
+    content.querySelectorAll<HTMLButtonElement>('[data-match-mode]').forEach(button=>button.addEventListener('click',()=>{
+      lanMode=button.dataset.matchMode==='lan';
+      if(!lanMode&&lan){lan.leave();lan=null;lanDraft=null;lanHostPending=false;}
+      refreshLanSetup();
+      if(lanMode&&hostKey()&&!lan?.room)connectLan(true);
+    }));
+    refreshLanSetup();paintMapChoices();
   } else if(type==='update'){
     const release=preparedRelease,notes=release?.notes.length?release.notes:release?.version===APP_VERSION?RELEASE_NOTES:['更新文件已准备好。'];
     content.innerHTML=`<span class="eyebrow">新的炮火已就绪</span><h2>更新游戏${release?` · v${replayEscape(release.version)}`:''}</h2><ul class="update-notes">${notes.map(note=>`<li>${replayEscape(note)}</li>`).join('')}</ul><button id="confirm-game-update" class="button button-dark dialog-primary" data-action="confirm-game-update">安装更新 ${icon('refresh')}</button><button class="text-button" data-action="close">稍后再更新</button>`;
-  } else if(type==='exit') {content.innerHTML=`<span class="eyebrow">暂别这一场炮火</span><h2>回演习场歇一歇？</h2><p class="dialog-intro">${!playback&&abandonmentWinner(game)!==null?'已进入第二完整回合，对方为AI队伍；退出将按己方败局结算积分。':'当前对局会结束，坦克选择与设置会保留。'}</p><button class="button button-dark dialog-primary" data-action="leave-match">回到演习场</button><button class="text-button" data-action="close">继续这场对局</button>`;
+  } else if(type==='exit') {content.innerHTML=`<span class="eyebrow">暂别这一场炮火</span><h2>回演习场歇一歇？</h2><p class="dialog-intro">${networkBattle?(lan?.slot===0?'离开会关闭房间。':'离开将退出房间；进行中的对局会结束。'):!playback&&abandonmentWinner(game)!==null?'已进入第二完整回合，对方为AI队伍；退出将按己方败局结算积分。':'当前对局会结束，坦克选择与设置会保留。'}</p><button class="button button-dark dialog-primary" data-action="leave-match">回到演习场</button><button class="text-button" data-action="close">继续这场对局</button>`;
   } else if(type==='install') {
     content.innerHTML=`<span class="eyebrow">把战场装进口袋</span><h2>安装到 iPad。</h2><p class="dialog-intro">首次打开并完成离线缓存后，就能从主屏幕直接进入游戏，离线也可以开战。</p><div class="install-art"><img src="${import.meta.env.BASE_URL}icons/icon-192.png" alt="咪猪头坦克图标"/><strong>咪猪头的疯狂坦克</strong></div><ol class="install-steps"><li>用 Safari 打开游戏。</li><li>点击分享按钮，选择「添加到主屏幕」。</li><li>点「添加」，再从主屏幕打开。横过 iPad，就可以开始了。</li></ol><button class="button button-dark dialog-primary" data-action="close">知道啦 ${icon('check')}</button>`;
   } else if(type==='vehicles') {
@@ -496,18 +605,18 @@ function showDialog(type:string) {
   if(!dialog.open) dialog.showModal();paintProjectilePreviews(dialog);
   if(type==='log'||type==='settings'){
     const controls=content.querySelector('.snapshot-controls')??content.querySelector('.dialog-primary');
-    const button=document.createElement('button');button.type='button';button.className='snapshot-copy';button.textContent='保存本局录像';button.dataset.action='save-replay';button.disabled=!recorder||!!playback;
+    const button=document.createElement('button');button.type='button';button.className='snapshot-copy';button.textContent='保存本局录像';button.dataset.action='save-replay';button.disabled=(!networkBattle&&!recorder)||!!playback;
     if(controls?.classList.contains('snapshot-controls'))controls.append(button);else controls?.before(button);
   }
-  if(playback)content.querySelectorAll<HTMLButtonElement>('[data-setting]').forEach(button=>button.disabled=true);
+  if(playback||networkBattle)content.querySelectorAll<HTMLButtonElement>('[data-setting]').forEach(button=>button.disabled=true);
 }
-function closeDialog() {const dialog=$<HTMLDialogElement>('#dialog');dialog.close();dialogKeepsMusic=false;audio.setSelectionMusic(false);game.paused=dialogPaused;setReplayAudioPaused(playback?.paused??game.paused);updateOverlay();updateUI();}
+function closeDialog() {const dialog=$<HTMLDialogElement>('#dialog');dialog.close();dialogKeepsMusic=false;audio.setSelectionMusic(false);if(!networkBattle)game.paused=dialogPaused;setReplayAudioPaused(playback?.paused??game.paused);updateOverlay();updateUI();}
 function setReplayAudioPaused(paused:boolean){audio.pause(paused,dialogKeepsMusic&&$<HTMLDialogElement>('#dialog').open);if(!paused&&playback?.charging){audio.startCharge();audio.updateCharge(game.active.power);}}
 const replayTime=(seconds:number)=>`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`;
 const replayEscape=(value:unknown)=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-function saveCurrentReplay(){
-  if(!recorder||playback){toast('先开一局，才能保存本局录像。');return;}
-  try{saveReplay(localStorage,recorder.export());toast('已保存本局录像，可在主界面播放。');}catch(error){toast((error as Error).message);}
+async function saveCurrentReplay(){
+  if((!networkBattle&&!recorder)||playback){toast('先开一局，才能保存本局录像。');return;}
+  try{saveReplay(localStorage,networkBattle?await lan!.document('replay') as BattleReplay:recorder!.export());snapshotFeedback('已保存本局录像，可在主界面播放。');}catch(error){toast((error as Error).message);}
 }
 function renderReplayList(content:HTMLElement){
   let clips:BattleReplay[]=[];let error='';try{clips=readReplays(localStorage);}catch(e){error=(e as Error).message;}
@@ -565,9 +674,11 @@ document.addEventListener('click',e=>{
   const dialogButton=target.closest<HTMLElement>('[data-dialog]');if(dialogButton) {showDialog(dialogButton.dataset.dialog!);return;}
   const action=target.closest<HTMLElement>('[data-action]')?.dataset.action;
   if(action==='close') closeDialog();
-  if(action==='leave-match'){closeDialog();if(playback)leaveReplay();else newMatch(config,false);}
+  if(action==='leave-match'){closeDialog();if(playback)leaveReplay();else if(networkBattle)leaveLan();else newMatch(config,false);}
   if(action==='confirm-game-update'){void installPreparedUpdate();return;}
-  if(action==='save-replay')saveCurrentReplay();
+  if(action==='save-replay')void saveCurrentReplay();
+  if(action==='lan-return')lan?.returnToRoom();
+  if(action==='lan-leave')leaveLan();
   if(action==='resume') togglePause();
   if(action==='handoff') {game.acceptHandoff();audio.unlock();lastPhase='';updateUI();}
   if(action==='rematch') newMatch(config);
@@ -655,7 +766,12 @@ function startCharge(pointer:number|null,event?:PointerEvent,startedAt=performan
 function cancelCharge() {
   powerMarkGesture?.reset();
   audio.stopCharge();
-  if(charge) {recorder?.cue('charge-stop');game.tanks[charge.tank].power=charge.previousPower;charge=null;}
+  if(charge) {
+    recorder?.cue('charge-stop');
+    if(!networkBattle)game.tanks[charge.tank].power=charge.previousPower;
+    else if(lan?.canPlay&&charge.tank===game.current)game.setAim(game.active.angle,charge.previousPower);
+    charge=null;
+  }
   updateChargePreparation(performance.now());
 }
 function finishCharge(maximum=false,event?:PointerEvent) {
@@ -718,7 +834,7 @@ function releaseMove(input:string){
 function aimOnField(e:Pick<PointerEvent,'clientX'|'clientY'>) {
   if(!canControlBattle()) return;
   const rect=$('#battlefield').getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width*renderer.viewWidth+renderer.offsetX,y=(e.clientY-rect.top)/rect.height*renderer.viewHeight+renderer.offsetY;
-  if(!game.teleporting&&game.selected==='airstrike') game.targetX=clamp(x,20,game.worldWidth-20);
+  if(!game.teleporting&&game.selected==='airstrike'){if(networkBattle)lan?.aimTarget(x);else game.targetX=clamp(x,20,game.worldWidth-20);}
   else {
     const t=game.active,slope=game.tankSlope(t),dx=x-t.x-Math.sin(slope)*13,dy=y-t.y+Math.cos(slope)*13;
     const aim=relativeAimForVector(dx,dy,slope,t.direction);game.face(aim.direction);game.setAim(aim.relative,t.power);
@@ -785,6 +901,7 @@ document.addEventListener('keyup',e=>{
 window.addEventListener('blur',()=>{clearSkipHold();keys.clear();keyboardMove.reset();cancelCharge();});
 let backgroundGame:Game|null=null,backgroundWasPaused=false;
 document.addEventListener('visibilitychange',()=>{
+  if(networkBattle){if(document.hidden){clearSkipHold();keys.clear();keyboardMove.reset();cancelCharge();lan?.flush();}else{previous=performance.now();renderer.invalidate();updateUI();}audio.setPageHidden(document.hidden);return;}
   if(playback){audio.setPageHidden(document.hidden);if(!document.hidden){setReplayAudioPaused(playback.paused);renderer.invalidate();updateUI();}previous=performance.now();return;}
   if(document.hidden){clearSkipHold();keys.clear();keyboardMove.reset();cancelCharge();if(backgroundGame!==game){backgroundGame=game;backgroundWasPaused=game.paused;}game.paused=true;audio.setPageHidden(true);}
   else {if(backgroundGame===game)game.paused=backgroundWasPaused;backgroundGame=null;previous=performance.now();audio.setPageHidden(false);audio.pause(game.paused,dialogKeepsMusic&&$<HTMLDialogElement>('#dialog').open);renderer.invalidate();updateUI();}
@@ -815,7 +932,7 @@ function updateChargeVisual(power:number){
 }
 const powerAssistance=new PowerAssistance($<HTMLCanvasElement>('#power-assistance'));
 let victorySound:{game:Game;at:number}|null=null,lastDefeatSound=-Infinity;
-let previous=performance.now(),lastUI=0;
+let previous=performance.now(),lastUI=0,lastLanFlush=0;
 function refreshImpactProfiler(){impactProfiler?.detach();impactProfiler=import.meta.env.DEV&&new URLSearchParams(location.search).get('impact-profile')==='1'?new ImpactProfiler(game,renderer,audio):null;}
 function frame(now:number) {
   const dt=Math.max(0,Math.min((now-previous)/1000,0.05));previous=now;
@@ -830,7 +947,8 @@ function frame(now:number) {
     const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),power=(keys.has('e')?1:0)-(keys.has('q')?1:0);
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
   }else if(canAdjustAngle()&&angleKeyOwner===displayTank().id){const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0);if(angle)adjustDisplayedAim(displayTank().angle+angle*35*dt);}
-  if(!renderer.touring){if(playback){if(!$<HTMLDialogElement>('#dialog').open){try{playback.advance(dt);}catch(error){playback.paused=true;toast(`录像播放失败：${(error as Error).message}`);}}}else if(impactProfiler)impactProfiler.measure('simulation',()=>game.update(dt));else game.update(dt);}
+  if(!renderer.touring){if(playback){if(!$<HTMLDialogElement>('#dialog').open){try{playback.advance(dt);}catch(error){playback.paused=true;toast(`录像播放失败：${(error as Error).message}`);}}}else if(!networkBattle){if(impactProfiler)impactProfiler.measure('simulation',()=>game.update(dt));else game.update(dt);}}
+  if(networkBattle&&now-lastLanFlush>=1000/40){lastLanFlush=now;lan?.flush();}
   updateSkipHold(now);
   const edge=edgePan.tick(dt);if(!skipHold&&(edge.x||edge.y))renderer.panBy(edge.x*game.motionScale,edge.y*game.motionScale);
   if(impactProfiler)impactProfiler.measure('scene',()=>renderer.draw(playback?.paused?0:dt*(playback?.speed??1)));else renderer.draw(playback?.paused?0:dt*(playback?.speed??1));dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight,renderer.offsetX,renderer.viewWidth);
@@ -881,7 +999,7 @@ const reloadUpdatedClient=()=>{if(applyingUpdate&&!updateReloadRequested){
   location.reload();
 }};
 async function loadPreparedRelease(){try{const response=await fetch(`${import.meta.env.BASE_URL}version.json?notes=${Date.now()}`,{cache:'no-store',signal:AbortSignal.timeout(8000)});if(response.ok)preparedRelease=readRelease(await response.json());}catch{/* A prepared worker can still be installed offline. */}}
-const updateSW=registerSW({
+const updateSW=lanServed()?async(_reload?:boolean)=>{}:registerSW({
   immediate:true,
   // The requested worker's activated state below owns reload, even on a fresh page.
   onNeedReload:()=>{},
@@ -944,3 +1062,14 @@ $('#stage-version-button').addEventListener('click',checkForUpdate);
 
 /** Opening waits for usable renderer/fonts/portrait fallbacks, never for audio autoplay. */
 export const homeReady=Promise.allSettled([renderer.ready,document.fonts.ready,retryUnavailableCrewPortraits()]).then(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>resolve())));
+
+if(guestCode()||resumeHosting())void homeReady.then(()=>{
+  const open=()=>{
+    const code=guestCode();lanMode=true;
+    if(code){beginGuestInvite();if(resumeGuest(code))connectLan(false);}
+    else if(resumeHosting()){showDialog('setup');connectLan(true);}
+  };
+  const opening=document.getElementById('opening-loading');
+  if(opening){const observer=new MutationObserver(()=>{if(!opening.isConnected){observer.disconnect();open();}});observer.observe(document.body,{childList:true,subtree:true});}
+  else open();
+});
