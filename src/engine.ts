@@ -10,7 +10,7 @@ import {groundOrbital,vectorProjectiles} from './weapon-presentation';
 import {backgroundMarkers} from './background-markers';
 import {chooseMapBgm,restoreMapBgm,randomMapMusic,type MatchBgm,type PreviousMapBgm} from './map-music';
 import {originalBallistics,originalWeapon,originalCrater,originalCraterAxes,ORIGINAL_TANKS,sourceMaximum,sourceDistance,sourceDamage} from './original-ballistics';
-import {planAIRestoration} from './ai-restoration';
+import {gradedAIRestoration,needsAIRestoration,planAIRestoration} from './ai-restoration';
 import {abandonmentWinner} from './exit-rules';
 import {ellipseExcavation,precisionPolish,impactPolish,matchPolish,startingAngle} from './match-polish';
 import {playerSupplyTiming,rankIndex,aiRank,emptyCombat,type Competition,type MatchProgress,type CombatMetrics} from './progression';
@@ -657,7 +657,10 @@ export class Game {
         }
       }
     }
-    if(ai&&healing&&precisionPolish(this.gameVersion)&&this.aiDecision&&this.aiDecision.target!==t.id&&(!this.tanks[this.aiDecision.target]||this.tanks[this.aiDecision.target].hp<=0)){this.planAI();return false;}
+    if(ai&&healing&&precisionPolish(this.gameVersion)&&this.aiDecision){
+      const receiver=this.tanks[this.aiDecision.target];
+      if(gradedAIRestoration(this.gameVersion)?!needsAIRestoration(receiver,t):this.aiDecision.target!==t.id&&(!receiver||receiver.hp<=0)){this.planAI();return false;}
+    }
     if(ai&&transfer&&this.aiDecision?.protectiveTransfer&&!predictAITransfer(this,t)){
       this.useItem('teleport',true);this.aiDecision={target:t.id,fromX:t.x,goalX:t.x,weapon:id,intentionalMiss:false,skip:true,skipAt:this.elapsed+3};
       this.recordBattle('ai-transfer-cancel','实际发射姿态已没有安全的转移落位，保留转移弹',{target:t.id});return false;
@@ -1312,7 +1315,8 @@ export class Game {
     // A transfer left unfired needs a new safety check before the AI commits to it again.
     const carriedTransfer=this.teleporting&&persistentShotItems(this.gameVersion)?this.armedItemSlot:null;
     if(carriedTransfer!==null)this.setArmedAmmo(null);
-    const restorePlan=precisionPolish(this.gameVersion)&&(this.restoring||level>=2&&!this.itemUnavailable('repair',true))?planAIRestoration(this,t):null;
+    const gradedRestore=gradedAIRestoration(this.gameVersion);
+    const restorePlan=precisionPolish(this.gameVersion)&&(this.restoring||(gradedRestore||level>=2)&&!this.itemUnavailable('repair',true))?planAIRestoration(this,t,this.rng):null;
     if(level===3&&!restorePlan){
       let transfer=planAIProtectiveTransfer(this,t);
       // Check escape BEFORE arming offensive items that cannot combine with a
@@ -1328,8 +1332,9 @@ export class Game {
         this.recordBattle('ai-support-transfer','当前位置连续炮击后缺少承接，使用转移弹前往更稳固的平台',{target:t.id,plan:{...transfer,landing:{x:transfer.landing.x,y:transfer.landing.y}}});return;
       }
     }
+    if(gradedRestore&&restorePlan&&!this.restoring)this.useItem('repair',true);
     if(level>=2&&(!precisionPolish(this.gameVersion)||!this.restoring)) {
-      const candidates:ItemId[]=[...((precisionPolish(this.gameVersion)?!!restorePlan:t.hp<=t.maxHP*.7)?['repair' as ItemId]:[]),...(this.rng()>0.6?['boost' as ItemId]:[]),...(this.rng()>.8?['double' as ItemId]:[])];
+      const candidates:ItemId[]=[...(!gradedRestore&&(precisionPolish(this.gameVersion)?!!restorePlan:t.hp<=t.maxHP*.7)?['repair' as ItemId]:[]),...(this.rng()>0.6?['boost' as ItemId]:[]),...(this.rng()>.8?['double' as ItemId]:[])];
       const item=candidates.find(id=>!this.itemUnavailable(id,true));if(item) this.useItem(item,true);
     }
     if(this.restoring&&modernWeather(this.gameVersion)){
@@ -1337,8 +1342,8 @@ export class Game {
       else{
         t.power=restorePlan?.power??10;t.angle=restorePlan?.angle??t.minAngle;if(restorePlan)t.direction=restorePlan.direction;
         if(precisionPolish(this.gameVersion)){this.aiMoveGoal=null;this.aiPending=null;this.movingUntil[t.id]=this.elapsed;}
-        this.aiDecision={target:restorePlan?.target??t.id,fromX:t.x,goalX:t.x,weapon:'cannon-normal',intentionalMiss:false};
-        if(restorePlan)this.recordBattle('ai-restore-plan',`${t.name}${restorePlan.self?'最小力度原地恢复':'向'+this.tanks[restorePlan.target].name+'投送恢复弹'}，预计恢复${restorePlan.gain}`,{plan:restorePlan});return;
+        this.aiDecision={target:restorePlan?.target??t.id,fromX:t.x,goalX:t.x,weapon:'cannon-normal',intentionalMiss:restorePlan?.inaccurate??false};
+        if(restorePlan)this.recordBattle('ai-restore-plan',`${t.name}${restorePlan.self?(restorePlan.inaccurate?'近距离自疗':'最小力度原地恢复'):'向'+this.tanks[restorePlan.target].name+'投送恢复弹'}，预计恢复${restorePlan.gain}`,{plan:restorePlan});return;
       }
     }
     t.direction=enemyX>t.x?1:-1;

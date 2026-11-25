@@ -19,7 +19,7 @@ test('all palette inks maintain WCAG AA contrast on paper, raised surfaces and c
  for(const theme of THEMES){
   const row=css.match(new RegExp(`\\[data-daily-theme=${theme}\\]\\{([^}]+)`))![1];
   const tokens=Object.fromEntries([...row.matchAll(/--theme-(\w+):(#[0-9a-f]{6})/g)].map(([,k,v])=>[k,v]));
-  for(const text of [tokens.ink,tokens.muted])for(const surface of [tokens.base,tokens.paper,tokens.wash])check(theme,text,surface);
-  for(const fill of [tokens.action,tokens.hover])check(theme,'#fffdf6',fill);
+  for(const text of [tokens.ink,tokens.muted])for(const surface of ['#ffffff',tokens.wash])check(theme,text,surface);
+  for(const fill of [tokens.action,tokens.hover])check(theme,'#ffffff',fill);
  }
 });

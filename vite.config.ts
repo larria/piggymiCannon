@@ -39,8 +39,8 @@ export default defineConfig(({mode}) => ({
       display: 'standalone',
       display_override: ['fullscreen', 'standalone'],
       orientation: 'landscape',
-      theme_color: '#edf0e5',
-      background_color: '#f4f2eb',
+      theme_color: '#ffffff',
+      background_color: '#ffffff',
       icons: [
         {src:'icons/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},
         {src:'icons/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},
