@@ -1,3 +1,4 @@
+import {holdSkip} from './hold-skip';
 import {test,expect} from '@playwright/test';
 import {boot} from './qa-app';
 test('music and effects switches operate and persist independently in both directions',async({page})=>{
@@ -82,18 +83,18 @@ test('a real arrow applies poison and each victim action visibly ticks to the re
     const state=await page.evaluate(()=>{const g=(window as any).__qa.game;return {current:g.current,phase:g.phase};});
     if(state.current===1&&state.phase==='aiming')return;
     if(state.phase!=='aiming'){await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});continue;}
-    await page.locator('#skip-button').click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
+    await holdSkip(page);await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
    }
    throw new Error('Victim did not receive an action');
   };
   for(const [i,hp]of [656,472,288,276].entries()){
-   await readyVictim();await page.locator('#skip-button').click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
+   await readyVictim();await holdSkip(page);await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
    const effect=await page.evaluate(()=>{const g=(window as any).__qa.game;return {hp:g.tanks[1].hp,poisoned:g.tanks[1].poisoned,texts:g.texts.map((t:any)=>t.text),log:g.log};});
    expect(effect.hp).toBe(hp);expect(effect.poisoned).toBe(hp>276);
    expect(effect.texts).toContain(`毒伤 −${i===3?12:184}`);expect(effect.log.some((s:string)=>s.includes(`生命 ${hp}/920`))).toBe(true);
    await capture(hp,`tick-${i+1}`);
   }
-  await expect(page.locator('#hp-bar-1')).toHaveClass(/critical/);await readyVictim();await page.locator('#skip-button').click();
+  await expect(page.locator('#hp-bar-1')).toHaveClass(/critical/);await readyVictim();await holdSkip(page);
   await expect(page.locator('#hp-1')).toHaveText('276 / 920');
   await capture(276,'stopped');
  }

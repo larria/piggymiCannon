@@ -134,7 +134,7 @@ $('#app').innerHTML=`
             <div class="meter-row energy-meter"><span class="meter-label">${icon('fuel')}能量</span><div class="meter-track"><span id="energy-fill"></span></div><span id="energy-value" class="meter-value">920 / 920</span></div>
             <div class="meter-row force-meter"><span class="meter-label">${icon('bolt')}力度</span><button id="power-meter" class="meter-track power-meter-button" aria-label="轻点标记力度，按住200毫秒开始蓄力，松开发射"><canvas id="power-assistance" aria-hidden="true" hidden></canvas><span id="power-memory-fill" hidden></span><span id="charge-fill"></span><i id="previous-power" class="previous-power"></i><i id="power-marker" class="power-marker" hidden><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M2 2h14l-7 9Z"/><path d="M9 4v3"/></svg></i><span class="meter-help">轻点记号 · 按住蓄力</span></button><span class="meter-value"><b id="power-value">68</b>%</span><input id="power" class="sr-only" type="range" min="1" max="100" value="68"/></div>
             <div class="meter-row mobility-meter"><span class="meter-label">${icon('transfer')}移动力</span><div class="meter-track"><span id="mobility-fill"></span></div><span class="meter-value"><b id="fuel-value">100</b>%</span><div class="move-buttons"><button id="move-left" aria-label="后退">${icon('move-left')}<span>后退</span><kbd>A</kbd></button><button id="move-right" aria-label="前进"><kbd>D</kbd><span>前进</span>${icon('move-right')}</button></div></div><div class="dashboard-note"><span id="move-note">本回合可移动</span><span id="meter-hint">白线为上次力度 · ↑↓ 调角度</span></div>
-          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="短按最小力度发射，按住200毫秒准备，填满后横条蓄力，松手或蓄满发射">${icon('fire-control')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button id="skip-button" title="跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
+          </div><div class="dash-actions fire-section"><button id="fire-button" class="fire-button" disabled aria-label="短按最小力度发射，按住200毫秒准备，填满后横条蓄力，松手或蓄满发射">${icon('fire-control')}<span id="fire-title">开火</span><small id="fire-subtitle">按住 / 松手</small></button><span id="fire-note">进入战场后开炮</span><div class="dash-utility"><button type="button" id="skip-button" title="长按 1 秒跳过回合 · F5">跳过</button><button id="exit-match">退出</button></div></div>
         </section>
         <div class="keyboard-hints"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>W</kbd><kbd>S</kbd> 角度</span><span><kbd>SPACE</kbd> 蓄力 · 满力自动发射</span><span class="touch-help">拖动角度盘瞄准 · 长按力度条 · 蓄满自动开火</span><span class="hint-last">每一发，都有一点可能。</span></div>
       </section>
@@ -161,7 +161,10 @@ $('#pause-button').insertAdjacentHTML('beforebegin',`<button class="stage-button
 $('.dashboard').classList.add('compact-dashboard');
 const logButton=$('#log-button');logButton.classList.add('stage-button');logButton.innerHTML=icon('book');logButton.title='战斗记录';$('#pause-button').before(logButton);
 const message=$('.caption-main');message.classList.add('battle-live-message');$('.battle-stage').append(message);$('.battle-caption').remove();
-$('#skip-button').innerHTML=icon('skip-control');$('#skip-button').setAttribute('aria-label','跳过回合');
+const skipButton=$<HTMLButtonElement>('#skip-button');
+skipButton.innerHTML=icon('skip-control');skipButton.dataset.helpName='跳过回合';
+const SKIP_HOLD_MS=1000;
+let skipHold:{game:Game;turn:number;tank:number;input:number|string;startedAt:number}|null=null;
 $('#exit-match').innerHTML=icon('exit');$('#exit-match').setAttribute('aria-label','退出对局');
 $('#exit-match').title='结束当前对局，回到演习场';
 $('#inventory-toggle').dataset.helpDescription='查看当前坦克的武器、战术道具和炮弹图鉴';
@@ -329,8 +332,9 @@ function updateUI() {
   angle.style.setProperty('--range-fill',`${(t.angle-t.minAngle)/(t.maxAngle-t.minAngle)*100}%`);power.style.setProperty('--range-fill',`${(t.power-MIN_POWER)/(100-MIN_POWER)*100}%`);
   angle.disabled=!canAdjustAngle();power.disabled=!human;
   $('.control-deck').classList.toggle('inactive',!human);$('.control-deck').classList.toggle('can-prepare-aim',!human&&canAdjustAngle());$<HTMLButtonElement>('#power-meter').disabled=!game.canMarkPower||!!playback||$<HTMLDialogElement>('#dialog').open;
-  $('#power-meter .meter-help').textContent=human?'轻点记号 · 按住蓄力':canAdjustAngle()?'可记力度 · 预设角度':'轻点记号 · 等待行动';$<HTMLButtonElement>('#skip-button').disabled=!human&&!renderer.touring;
-  $('#skip-button').setAttribute('aria-label',renderer.touring?'跳过开场巡游':'跳过回合');
+  $('#power-meter .meter-help').textContent=human?'轻点记号 · 按住蓄力':canAdjustAngle()?'可记力度 · 预设角度':'轻点记号 · 等待行动';skipButton.disabled=!human&&!renderer.touring;
+  const skipLabel=renderer.touring?'跳过开场巡游':'长按 1 秒跳过回合';
+  skipButton.setAttribute('aria-label',skipLabel);skipButton.title=skipLabel+' · F5';skipButton.dataset.helpDescription=skipLabel;
   document.querySelectorAll<HTMLButtonElement>('.step-button, .move-buttons button, .angle-nudge, #face-button, #aim-pad').forEach(b=>b.disabled=b.matches('.angle-nudge,#face-button,#aim-pad')||b.dataset.adjust?.startsWith('angle:')?!canAdjustAngle():!human);if(!canAdjustAngle())angleNudges.cancel();
   $('#face-button span').textContent=t.direction===1?'朝右':'朝左';
   updateChargeVisual(powerDisplay(t.power,t.lastPower,game.minimumShotPower,!!charge||!!playback?.waiting||!!playback?.charging,matchPolish(game.gameVersion)));
@@ -411,6 +415,7 @@ function begin() {
   if(game.fog||game.snow)audio.play('wind');if(game.fireLine)audio.play('firewall');setImmersive(true);lastPhase='';updateUI();
 }
 function newMatch(next:Config,start=true) {
+  clearSkipHold();
   const forfeited=!playback&&game.forfeitHumanSide();if(forfeited)recordStats();
   if(playback)leaveReplay();
   recorder?.detach();recorder=null;
@@ -422,6 +427,7 @@ function newMatch(next:Config,start=true) {
   $('#battle-message').textContent='新的风，新的可能。';if(start) begin();else {setImmersive(false);updateUI();}if(forfeited)toast('退出对局，己方判负。');
 }
 function togglePause() {
+  clearSkipHold();
   if(playback){playback.paused=!playback.paused;setReplayAudioPaused(playback.paused);refreshReplayControls();return;}
   if(game.phase==='lobby'||game.phase==='ended'||game.phase==='handoff') return;
   if(renderer.touring)renderer.finishTour();
@@ -430,6 +436,7 @@ function togglePause() {
 
 function profileClick(event:Event){const equip=(event.target as HTMLElement).closest<HTMLElement>('[data-equip-achievement]');if(equip){const crew=equip.dataset.profileCrew as keyof typeof CREW;if(!CREW[crew])return;const id=equip.dataset.equipAchievement!;try{progression=equipAchievement(progression,crew,progression.profiles[crew].equippedAchievement===id?null:id);try{localStorage.setItem(PROGRESSION_KEY,JSON.stringify(progression));progressionUnsaved=false;}catch{progressionUnsaved=true;toast('本机存储不可用，称号仅在本次打开期间保留。');}$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);lastHud='';renderer.invalidate();updateUI();}catch(error){toast((error as Error).message);}return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-profile]');if(!button)return;const crew=button.dataset.profile as keyof typeof CREW;if(!CREW[crew])return;$('#dialog-content').innerHTML=progressionMarkup(progression,crew,import.meta.env.BASE_URL);}
 function showDialog(type:string) {
+  clearSkipHold();
   if(playback&&type==='setup'){toast('请先退出录像，再调整对局。');return;}
   if(renderer.touring)renderer.finishTour();
   const dialog=$<HTMLDialogElement>('#dialog');
@@ -576,15 +583,51 @@ document.addEventListener('click',e=>{
   if(item) {
     renderDetail(item);
     if(!canControlBattle()) {toast('道具要在自己的回合使用。');return;}
-    if(useHumanItem(item,Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot))) {toast(item==='repair'?(game.restoring?'恢复弹已装填；轻点原地治疗，蓄力可投向队友。':'已取消恢复弹装填。'):item==='teleport'?(game.teleporting?'转移弹已装填，调整角度后蓄力发射。':'已取消转移弹装填。'):`${ITEMS.find(i=>i.id===item)!.name}已使用。`);lastInventory='';updateUI();}
-    else toast(game.itemUnavailable(item,false,Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot))||'当前不能使用这件道具。');
+    const slot=Number(target.closest<HTMLElement>('[data-item]')!.dataset.itemSlot);
+    if(useHumanItem(item,slot)){lastInventory='';updateUI();}
+    else toast(game.itemUnavailable(item,false,slot)||'当前不能使用这件道具。');
   }
 });
 $('#start-button').addEventListener('click',()=>showDialog('setup'));
 $('#new-game').addEventListener('click',()=>showDialog('setup'));
 $('#sound-button').addEventListener('click',()=>showDialog('settings'));
 $('#pause-button').addEventListener('click',togglePause);
-$('#skip-button').addEventListener('click',()=>{cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();});
+function clearSkipHold(){
+  if(!skipHold)return;
+  skipHold=null;renderer.skipProgress=null;renderer.invalidate();skipButton.classList.remove('holding');
+}
+function canHoldSkip(){return canControlBattle()&&!renderer.touring&&!document.hidden&&!$<HTMLDialogElement>('#dialog').open;}
+function startSkipHold(input:number|string){
+  if(skipHold||!canHoldSkip())return false;
+  cancelCharge();audio.unlock();
+  skipHold={game,turn:game.turn,tank:game.current,input,startedAt:performance.now()};
+  renderer.skipProgress=0;renderer.ensureSkipIndicatorVisible();skipButton.classList.add('holding');return true;
+}
+function updateSkipHold(now:number){
+  if(!skipHold)return;
+  if(skipHold.game!==game||skipHold.turn!==game.turn||skipHold.tank!==game.current||!canHoldSkip()){clearSkipHold();return;}
+  const progress=clamp((now-skipHold.startedAt)/SKIP_HOLD_MS,0,1);
+  if(progress<1){renderer.skipProgress=progress;return;}
+  clearSkipHold();game.skipTurn();updateUI();
+}
+skipButton.addEventListener('click',()=>{if(renderer.touring){renderer.finishTour();updateUI();}});
+skipButton.addEventListener('pointerdown',e=>{
+  if(e.button!==0||!e.isPrimary||!startSkipHold(e.pointerId))return;
+  e.preventDefault();try{skipButton.setPointerCapture(e.pointerId);}catch{/* Document listeners also handle release. */}
+});
+document.addEventListener('pointermove',e=>{
+  if(skipHold?.input!==e.pointerId)return;
+  const b=skipButton.getBoundingClientRect(),slop=e.pointerType==='touch'?9:0;
+  if(e.clientX<b.left-slop||e.clientX>b.right+slop||e.clientY<b.top-slop||e.clientY>b.bottom+slop)clearSkipHold();
+},true);
+for(const event of ['pointerup','pointercancel','lostpointercapture'] as const)document.addEventListener(event,e=>{
+  if(skipHold?.input===e.pointerId){if(event==='pointerup')updateSkipHold(e.timeStamp);clearSkipHold();}
+},true);
+skipButton.addEventListener('keydown',e=>{
+  if(renderer.touring||!['Enter',' '].includes(e.key))return;
+  e.preventDefault();e.stopPropagation();if(!e.repeat)startSkipHold(e.key);
+});
+skipButton.addEventListener('blur',()=>{if(skipHold?.input==='Enter'||skipHold?.input===' ')clearSkipHold();});
 $('#exit-match').addEventListener('click',()=>showDialog('exit'));
 function toggleMinimap(){const collapsed=$('#minimap-panel').classList.toggle('collapsed');$('#minimap-toggle').setAttribute('aria-expanded',String(!collapsed));$('#minimap-toggle').setAttribute('aria-label',collapsed?'展开小地图':'折叠小地图');}
 $('#minimap-toggle').addEventListener('click',toggleMinimap);
@@ -605,7 +648,7 @@ $('#angle').addEventListener('input',e=>{adjustDisplayedAim(Number((e.target as 
 $('#power').addEventListener('input',e=>{game.setAim(game.active.angle,Number((e.target as HTMLInputElement).value));updateUI();});
 $('#face-button').addEventListener('click',()=>{const t=displayTank();adjustDisplayedAim(t.angle,-t.direction);updateUI();});
 function startCharge(pointer:number|null,event?:PointerEvent,startedAt=performance.now()) {
-  if(!canControlBattle()||game.active.fallVelocity>0||charge) return false;
+  if(!canControlBattle()||game.active.fallVelocity>0||charge||skipHold) return false;
   setDrawer(false);charge={pointer,startedAt,previousPower:game.active.power,tank:game.current,touch:event?.pointerType==='touch',audible:false,pointerStartedAt:event?.timeStamp};
   audio.unlock();recorder?.cue('charge-wait');game.setAim(game.active.angle,MIN_POWER);updateUI();updateChargePreparation(performance.now());return true;
 }
@@ -723,27 +766,27 @@ document.addEventListener('keydown',e=>{
   if(key==='escape') {togglePause();return;}
   if(key==='tab'&&game.phase!=='lobby'){e.preventDefault();toggleMinimap();audio.play('click');return;}
   if(key==='c'&&e.ctrlKey){e.preventDefault();renderer.follow();return;}
-  if(key==='f5'&&renderer.touring){e.preventDefault();renderer.finishTour();updateUI();return;}
+  if(key==='f5'&&game.phase!=='lobby'&&game.phase!=='ended'){e.preventDefault();if(e.repeat)return;if(renderer.touring){renderer.finishTour();updateUI();}else startSkipHold(key);return;}
   if(!canControlBattle()){if(canAdjustAngle()&&['w','s','arrowup','arrowdown'].includes(key)){e.preventDefault();angleKeyOwner=displayTank().id;keys.add(key);}return;}
   if(isMoveKey(key)){e.preventDefault();syncKeyboardMove();if(!e.repeat&&game.active.fallVelocity<=0)keyboardMove.press(key,performance.now(),game.active.direction,direction=>game.face(direction));return;}
   if(['w','s','arrowup','arrowdown'].includes(key))angleKeyOwner=displayTank().id;
   if((key==='f3'||key==='f4')&&game.active.vehicleId){e.preventDefault();const v=vehicleById(game.active.vehicleId);if(game.selectWeapon(key==='f3'?v.normal:v.special)) {audio.play('click');updateUI();}return;}
-  if(key==='f5'){e.preventDefault();cancelCharge();if(renderer.touring)renderer.finishTour();else game.skipTurn();updateUI();return;}
   if(['f9','f10','f11','f12'].includes(key)){e.preventDefault();const slot=Number(key.slice(1))-9,id=game.backpack()[slot];if(id&&useHumanItem(id,slot))updateUI();else toast(id?game.itemUnavailable(id,false,slot)??'当前不能使用':'这个道具槽是空的');return;}
   if(['arrowup','arrowdown'].includes(key)){e.preventDefault();keys.add(key);}
   if(['w','s','q','e',' '].includes(key)) {e.preventDefault();keys.add(key);}
   if(key===' '&&!e.repeat) startCharge(null);
 });
 document.addEventListener('keyup',e=>{
-  const key=e.key.toLowerCase();blockedAngleKeys.delete(key);keys.delete(key);
+  const key=e.key.toLowerCase();if(skipHold?.input===key||skipHold?.input===e.key){e.preventDefault();updateSkipHold(e.timeStamp);clearSkipHold();}
+  blockedAngleKeys.delete(key);keys.delete(key);
   if(isMoveKey(key))releaseMove(key);
   if(e.key===' '&&charge?.pointer===null){e.preventDefault();finishCharge();}
 });
-window.addEventListener('blur',()=>{keys.clear();keyboardMove.reset();cancelCharge();});
+window.addEventListener('blur',()=>{clearSkipHold();keys.clear();keyboardMove.reset();cancelCharge();});
 let backgroundGame:Game|null=null,backgroundWasPaused=false;
 document.addEventListener('visibilitychange',()=>{
   if(playback){audio.setPageHidden(document.hidden);if(!document.hidden){setReplayAudioPaused(playback.paused);renderer.invalidate();updateUI();}previous=performance.now();return;}
-  if(document.hidden){keys.clear();keyboardMove.reset();cancelCharge();if(backgroundGame!==game){backgroundGame=game;backgroundWasPaused=game.paused;}game.paused=true;audio.setPageHidden(true);}
+  if(document.hidden){clearSkipHold();keys.clear();keyboardMove.reset();cancelCharge();if(backgroundGame!==game){backgroundGame=game;backgroundWasPaused=game.paused;}game.paused=true;audio.setPageHidden(true);}
   else {if(backgroundGame===game)game.paused=backgroundWasPaused;backgroundGame=null;previous=performance.now();audio.setPageHidden(false);audio.pause(game.paused,dialogKeepsMusic&&$<HTMLDialogElement>('#dialog').open);renderer.invalidate();updateUI();}
 });
 window.addEventListener('resize',()=>renderer.resize());
@@ -788,7 +831,8 @@ function frame(now:number) {
     if(angle||power) game.setAim(game.active.angle+angle*35*dt,game.active.power+power*28*dt);
   }else if(canAdjustAngle()&&angleKeyOwner===displayTank().id){const angle=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0);if(angle)adjustDisplayedAim(displayTank().angle+angle*35*dt);}
   if(!renderer.touring){if(playback){if(!$<HTMLDialogElement>('#dialog').open){try{playback.advance(dt);}catch(error){playback.paused=true;toast(`录像播放失败：${(error as Error).message}`);}}}else if(impactProfiler)impactProfiler.measure('simulation',()=>game.update(dt));else game.update(dt);}
-  const edge=edgePan.tick(dt);if(edge.x||edge.y)renderer.panBy(edge.x*game.motionScale,edge.y*game.motionScale);
+  updateSkipHold(now);
+  const edge=edgePan.tick(dt);if(!skipHold&&(edge.x||edge.y))renderer.panBy(edge.x*game.motionScale,edge.y*game.motionScale);
   if(impactProfiler)impactProfiler.measure('scene',()=>renderer.draw(playback?.paused?0:dt*(playback?.speed??1)));else renderer.draw(playback?.paused?0:dt*(playback?.speed??1));dashboard.draw(game,displayTank(),renderer.offsetY,renderer.viewHeight,renderer.offsetX,renderer.viewWidth);
   const moving=game.movingUntil.findIndex(until=>until>game.elapsed);
   audio.setScene(game.phase==='lobby'?'lobby':game.phase==='ended'?'result':game.config.map,game.phase==='lobby'||game.phase==='ended'?undefined:game.matchBgm?.file??legacyMapBgmFile(game.config.map,game.gameVersion));
@@ -797,7 +841,7 @@ function frame(now:number) {
   if(charge&&(!canControlBattle()||charge.tank!==game.current)) cancelCharge();
   for(const event of game.drainEvents()) {
     if((event.type==='turn'||event.type==='shot')&&!renderer.touring)renderer.follow(event.type==='turn');
-    if(event.type!=='explosion') $('#battle-message').innerHTML=colorNames(event.message);
+    if(event.type!=='explosion'&&event.itemUser!=='human') $('#battle-message').innerHTML=colorNames(event.message);
     if(event.type==='shot') audio.play(event.transfer?'transfer':'shot',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='explosion') audio.play('explosion',event.x,game.tanks[game.viewer].x,event.weapon);
     if(event.type==='weather'){if(!playback)toast(event.message);if(event.message.includes('火线'))audio.play('firewall');}

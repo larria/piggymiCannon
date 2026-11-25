@@ -1,3 +1,4 @@
+import {holdSkip} from './hold-skip';
 import {boot,hold} from './qa-app';
 import { test,expect } from '@playwright/test';
 import {readFileSync} from 'node:fs';
@@ -338,13 +339,13 @@ test('classic factory temple and Egypt render with compact HUD and centered mini
 
 test('weapon choice survives AI alternation and seamless hotseat handoff',async({page})=>{
  await start(page);await expect(page.locator('#waiting-value')).toHaveText('—');
- await page.locator('#weapon-special').click();await page.locator('#skip-button').click();
+ await page.locator('#weapon-special').click();await holdSkip(page);
  await expect(page.locator('#turn-text')).toHaveText('咪猪头，到你了',{timeout:25_000});
  await expect(page.locator('#weapon-special')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#fire-note')).toContainText('火石');
- await start(page,true);await page.locator('#weapon-special').click();await page.locator('#skip-button').click();
+ await start(page,true);await page.locator('#weapon-special').click();await holdSkip(page);
  await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
  for(let action=0;action<4;action++){
-  await page.locator('#skip-button').click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
+  await holdSkip(page);await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
   const handedToHuman=(await page.locator('#turn-text').textContent())!.includes('咪猪头');
   if(handedToHuman)break;
  }

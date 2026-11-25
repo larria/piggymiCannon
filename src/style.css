@@ -586,3 +586,12 @@ dialog,.arsenal{scrollbar-gutter:stable}
  .combat-mode .compact-dashboard .angle-instrument{width:114px;height:114px}
  .combat-mode .compact-dashboard #angle-limits{left:44px;width:114px!important;bottom:-4px}
 }
+
+/* A skip is deliberately held; preserve the control dimensions and native scrolling. */
+#skip-button{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#skip-button.holding{background:var(--actor-paper,#f4ead8);color:var(--actor-color,#765941);box-shadow:inset 0 0 0 1px currentColor}
+@media(any-pointer:coarse){
+  html,body,#app,dialog{-webkit-touch-callout:none}
+  body{-webkit-user-select:none;user-select:none}
+  :is(input,textarea,[contenteditable="true"]){-webkit-user-select:text;user-select:text}
+}

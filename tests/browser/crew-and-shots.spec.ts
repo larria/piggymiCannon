@@ -1,5 +1,6 @@
 import {expect,test} from '@playwright/test';
 import {boot} from './qa-app';
+import {holdSkip} from './hold-skip';
 import {readFileSync} from 'node:fs';
 const version=JSON.parse(readFileSync('package.json','utf8')).version;
 
@@ -30,6 +31,11 @@ test('queued items are visible by their original slot until firing and the minim
  const slots=page.locator('#quick-items');
  await slots.locator('[data-item="boost"]').click();
  await expect(slots.getByRole('button',{name:/威力加强待发/})).toBeDisabled();
+ await expect(slots.locator('[data-item="double"]')).toBeDisabled();
+ for(let i=0;i<4;i++){
+  await holdSkip(page);
+  if(await page.evaluate(()=>(window as any).__qa.game.current===0))break;
+ }
  await slots.locator('[data-item="double"]').click();
  await slots.locator('[data-item="repair"]').click();
  await expect(slots.locator('.pending-shot-item')).toHaveCount(3);

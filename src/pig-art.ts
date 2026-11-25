@@ -5,11 +5,11 @@ export function dadPose(time:number,state:CrewAction){const p=Math.sin(time*(sta
 export interface Expression {look:number;closed:boolean;upset:boolean;open:number;ear:number;serious:boolean;cry:boolean;pant:number|null;stunned:boolean;rage:boolean;startled:boolean}
 const outline='#794f40';
 function mimiCap(c:CanvasRenderingContext2D){
- ink(c,'M-22 3Q-25-10-17-21Q-11-29 1-29Q19-29 23-16Q27-4 22 8L17 7 18-7Q3-16-17-7L-17 7Z','#6f744a','#534535');
+ ink(c,'M-22 3Q-25-10-17-21Q-11-29 1-29Q19-29 23-16Q26-4 21 6L17 6 18-7Q3-16-17-7L-17 7Z','#6f744a','#534535');
  ink(c,'M-21-7Q-20-21-8-25Q4-30 16-24Q5-24-6-20Q-15-17-21-7Z','#a09b66');
  ink(c,'M-22 0Q-16-15 0-16Q17-17 23-7L22-3Q14-12 0-11Q-15-10-22 3Z','#8c8053','#514a36');
  ink(c,'M-19-3Q-9-13 4-13Q16-13 21-7','none','#c2a87c',1.15);
- ink(c,'M-21 0l4 1-1 11-4 2-2-2ZM21-2l3 1-1 10-3 3-2-1Z','#786049','#503f34',1);
+ ink(c,'M-21 0l4 1-1 11-4 2-2-2ZM20-2l3 1-1 7-3 3-2-1Z','#786049','#503f34',1);
  ink(c,'M-23 5l5-1-1 4-4 1Z','#cfaa6c','#836044',.65);
  goggles(c,0,-22,0,.91);
 }
@@ -26,8 +26,8 @@ function pigFace(c:CanvasRenderingContext2D,e:Expression,dad:boolean){
   ink(c,'M-5 1Q4-8 13-6Q18-4 17 1Q14 10 5 10Z',peach,outline);
   ink(c,'M2 0Q9-4 14-3Q12 4 8 6Z','#e88783');c.restore();
  }
- ink(c,dad?'M-23-3C-24-14-16-22-4-23C8-25 18-20 22-11Q29-4 25 10Q22 21 3 22Q-21 22-24 9Q-26 2-23-3Z':'M-19-3Q-19-17-2-17Q14-20 21-7Q27-1 23 10Q20 20 3 20Q-17 20-21 9Q-24 2-19-3Z',pale,outline,1.65);
- ink(c,dad?'M-24 4Q-19 15 0 17Q16 18 25 10Q22 22 1 22Q-22 22-24 4Z':'M-20 4Q-17 16 0 16Q17 16 23 8Q20 20 2 20Q-17 20-20 4Z','#efac9a');
+ ink(c,dad?'M-23-3C-24-14-16-22-4-23C8-25 18-20 22-11Q29-4 25 10Q22 21 3 22Q-21 22-24 9Q-26 2-23-3Z':'M-20-3Q-20-17-2-17Q16-20 22-8Q31-1 26 10Q22 20 3 20Q-18 20-22 9Q-25 2-20-3Z',pale,outline,1.65);
+ ink(c,dad?'M-24 4Q-19 15 0 17Q16 18 25 10Q22 22 1 22Q-22 22-24 4Z':'M-21 4Q-18 16 0 16Q18 16 26 8Q22 20 2 20Q-18 20-21 4Z','#efac9a');
  if(dad){
   ink(c,'M-15-15Q-8-22 5-20Q-4-17-9-15Q-13-14-15-15Z','#ffe4cc');
   ink(c,'M-3-22Q-1-26 3-27M2-22Q6-26 9-25','none','#885b46',1.5);

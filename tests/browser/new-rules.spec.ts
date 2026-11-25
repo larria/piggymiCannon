@@ -1,7 +1,8 @@
+import {holdSkip} from './hold-skip';
 import {test,expect} from '@playwright/test';import {boot} from './qa-app';
 test('consumed items remain empty in the next action and full-slot boxes stay on the ground',async({page})=>{
- await boot(page);await page.locator('#quick-items [data-item="double"]').click();await page.locator('#skip-button').click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
- for(let i=0;i<5;i++){await page.locator('#skip-button').click();await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});const human=(await page.locator('#turn-text').textContent())!.includes('咪猪头');if(human)break;}
+ await boot(page);await page.locator('#quick-items [data-item="double"]').click();await holdSkip(page);await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});
+ for(let i=0;i<5;i++){await holdSkip(page);await expect(page.locator('#fire-button')).toBeEnabled({timeout:20000});const human=(await page.locator('#turn-text').textContent())!.includes('咪猪头');if(human)break;}
  await expect(page.locator('#quick-items [data-item="double"] small')).toHaveText('0');await expect(page.locator('#quick-items [data-item="double"]')).toBeDisabled();
  await page.evaluate(()=>{const g=(window as any).__qa.game,t=g.active;t.hp=Math.floor(t.maxHP*.6);g.crates=[{x:t.x+28,y:t.y+4,type:'medical'}];});
  await page.waitForTimeout(150);const full=await page.evaluate(()=>{const g=(window as any).__qa.game;return {hp:g.active.hp,stock:g.active.items.repair,boxes:g.crates.length};});

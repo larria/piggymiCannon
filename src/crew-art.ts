@@ -142,10 +142,13 @@ export function paintCrewFigure(c:CanvasRenderingContext2D,id:CrewId,time:number
  const tremble=m.frozen&&!m.reduced&&ambient?Math.sin(phase*42)*.75:0;
  const breathBob=pant&&!m.reduced?pant.bob*.72:0,breathStretch=pant&&!m.reduced?pant.scale:1;
  const x=-16-recoil*2-startle*2+(m.poisoned?p:0)+tremble,deck=m.deck??-32,s=limits[id];
- c.save();c.translate(x+startle,deck+Math.min(1.4,(recoil*2-startle+breathBob)*.45));c.scale(s,s);
+ const headY=(fall?-1:pose.bob)+recoil*2-nod*2-fin*2-breathBob-relief*4-salute*5+startle*2;
+ const headLean=pose.lean-recoil*.17-salute*.095-startle*.15+(fall?p*.1:0)-nod*.04+(pant&&!m.reduced?pant.lean*.65:0);
+ // The collar follows part of the cheer so fabric stays connected to the hatch.
+ const cheering=win||cheerAge!==null,collarBob=cheering?headY*.34:Math.min(1.4,(recoil*2-startle+breathBob)*.45);
+ c.save();c.translate(x+startle,deck+collarBob);if(cheering)c.rotate(headLean*.32);c.scale(s,s);
  paintHatchClothes(c,id);c.restore();
- c.translate(x,deck+(fall?-1:pose.bob)+recoil*2-nod*2-fin*2-breathBob-relief*4-salute*5+startle*2);
- c.rotate(pose.lean-recoil*.17-salute*.095-startle*.15+(fall?p*.1:0)-nod*.04+(pant&&!m.reduced?pant.lean*.65:0));
+ c.translate(x,deck+headY);c.rotate(headLean);
  c.scale(s,s*breathStretch);
  if(win||cheerAge!==null){
   const lift=win?(m.reduced?.7:.63+.3*p):m.reduced?.72:salute;

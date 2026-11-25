@@ -1,3 +1,4 @@
+import {holdSkip} from './hold-skip';
 import {hold} from './qa-app';
 import {test,expect} from '@playwright/test';import {readFileSync} from 'node:fs';
 const version=JSON.parse(readFileSync('package.json','utf8')).version;
@@ -40,7 +41,7 @@ test('provided PNG portraits and current names stay consistent across iPad setup
   await expect(page.locator('#portrait-saying')).toContainText('小黄鱼');
   await expect(page.locator('#portrait-art img')).toHaveAttribute('data-portrait-primary','/piggymiCannon/portraits/fish.png');
   await page.locator('[data-action="close"]').click();
-  for(let i=0;i<3;i++)await page.locator('#skip-button').click();
+  for(let i=0;i<3;i++)await holdSkip(page);
   await expect(page.locator('#turn-text .crew-name')).toHaveText('小黄鱼');
   expect(await page.locator('.player-name .crew-name').evaluateAll(es=>es.every(e=>e.getBoundingClientRect().right<=e.parentElement!.getBoundingClientRect().right+1))).toBe(true);
   await page.screenshot({path:`QA/v${version}-portraits-combat-${width}.png`});

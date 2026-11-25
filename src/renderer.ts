@@ -12,7 +12,7 @@ import {paintMedal} from './medal-art';
 import type {RankIndex} from './progression';
 import {fireLineVisual,weatherCameraPoint,modernWeather} from './weather';
 import type {TerrainChange} from './terrain';
-import {paintTurnMarker} from './turn-marker';
+import {paintSkipRing,paintTurnMarker,SKIP_RING_Y,TURN_MARKER_Y} from './turn-marker';
 import {loadBattleSprites,paintBattleSprite,battleSpriteRevision} from './battle-sprites';
 import type {PixiStage} from './pixi-stage';
 import {BattleCamera,BATTLE_ZOOM,BATTLE_VIEW_WIDTH,lowestFlightFocus} from './camera';
@@ -32,7 +32,7 @@ import {CrewAnimationClock,isCrewFalling} from './crew-animation';
 import {paintRage} from './rage-art';
 import {teamFlag} from './crew';
 import {crewPortrait,crewPortraitRevision} from './crew-portraits';
-import {paintItemCue} from './item-feedback';
+import {itemCueSeconds,paintItemCue,placeItemCue,type CueBounds} from './item-feedback';
 import {paintTransferParachute} from './transfer-parachute';
 import {classicBackdrop,classicDetails} from './classic-map-art';
 import {waveTemple} from './classic-maps';
@@ -58,6 +58,8 @@ const healthBarWidth=(hp:number)=>46*(1+.2*Math.min(1,(healthBarWeight(hp)-canno
 export class Renderer {
   private flightFloor:{x:number;y:number}|null=null;private flightActive=false;
 
+  skipProgress:number|null=null;
+  private cueAnchors:{tank:Tank;x:number;y:number;markerY:number|null;ringY:number|null}[]=[];
   medalFor:((tank:Tank)=>RankIndex)|null=null;
   canvas:HTMLCanvasElement; ctx:CanvasRenderingContext2D; background:HTMLCanvasElement;terrainCanvas=document.createElement('canvas');terrainRevision=-1;
   game:Game; palette:Palette; ratio=1;time=0;viewHeight=WORLD_H;viewWidth=WORLD_W;
@@ -360,7 +362,7 @@ export class Renderer {
   }
   private drawTanks() {
     const g=this.game;
-    this.labelRects=[];this.portraitHits=[];
+    this.labelRects=[];this.portraitHits=[];this.cueAnchors.length=0;
     const tanks=g.tanks.filter(t=>g.visible(t)),portraitTop=g.introLocked?this.tourPlayer:g.current;
     if(sourceRangeModel(g.gameVersion))tanks.sort((a,b)=>Number(a.id===portraitTop)-Number(b.id===portraitTop));
     tanks.forEach(t=>this.tank(t));
@@ -395,7 +397,6 @@ export class Renderer {
     paintCrew(ctx,t,this.time,action,breathing,firing,this.reducedMotion,idle,cryAge,rage,this.crewAnimation.healAge(t.id,g.elapsed),g.crewCheerAge(t.id),g.crewShockAge(t.id));
     ctx.restore();
     if(celebrating)victoryConfetti(ctx,t,this.time);
-    for(const cue of g.itemCues)if(cue.tank===t.id){const top=Math.min(...g.tanks.filter(e=>e.hp>0&&Math.abs(e.x-t.x)<100).map(e=>e.y))-(t.parachute?195:celebrating?162:132)*g.motionScale;const x=clamp(t.x,this.offsetX+48*g.motionScale,this.offsetX+this.viewWidth-48*g.motionScale),y=Math.max(this.offsetY+38*g.motionScale,top);ctx.save();ctx.translate(x,y);ctx.scale(g.motionScale,g.motionScale);paintItemCue(ctx,cue,0,0,teamFlag(t.team).color,this.reducedMotion);ctx.restore();}
     // The portrait stays upright; its frame carries the team colour.
     const celebrateOffset=(celebrating?-26:0)-badgeLift;
     const barWidth=healthBarWidth(t.maxHP),barLeft=-barWidth/2;
@@ -406,7 +407,12 @@ export class Renderer {
     if(Math.abs(labelShift)>8*labelScale){ctx.strokeStyle=teamFlag(t.team).color+'70';ctx.lineWidth=labelScale;ctx.beginPath();ctx.moveTo(0,-48*artScale);ctx.lineTo(labelShift,label.y-t.y+31*labelScale);ctx.stroke();}
     ctx.save();ctx.translate(labelShift,celebrateOffset-12);ctx.translate(0,-85);ctx.scale(labelScale,labelScale);ctx.translate(0,85);
     const active=(g.introLocked?this.tourPlayer===t.id:g.current===t.id)&&!['lobby','ended','resolving'].includes(g.phase);
-    if(active)paintTurnMarker(ctx,0,-126,teamFlag(t.team).color,this.time,this.reducedMotion);
+    const overlayY=(y:number)=>label.y+(y+85)*labelScale;
+    const skipRing=active?this.skipProgress:null;
+    const showMarker=active&&skipRing===null&&!g.itemCues.some(cue=>cue.tank===t.id);
+    if(g.itemCues.length)this.cueAnchors.push({tank:t,x:label.x,y:label.y,markerY:showMarker?overlayY(TURN_MARKER_Y):null,ringY:skipRing!==null?overlayY(SKIP_RING_Y):null});
+    if(skipRing!==null)paintSkipRing(ctx,0,SKIP_RING_Y,teamFlag(t.team).color,skipRing);
+    else if(showMarker)paintTurnMarker(ctx,0,TURN_MARKER_Y,teamFlag(t.team).color,this.time,this.reducedMotion);
     ctx.fillStyle='#fff8e8';ctx.beginPath();ctx.arc(0,-85,21,0,Math.PI*2);ctx.fill();
     const portrait=crewPortrait(t.crew);
     ctx.save();ctx.beginPath();ctx.arc(0,-85,19,0,Math.PI*2);ctx.clip();if(portrait)ctx.drawImage(portrait,-20,-105,40,40);ctx.restore();
@@ -423,6 +429,29 @@ export class Renderer {
     if(t.frozen>0) {ctx.strokeStyle='#acd9e2';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-30,-5);ctx.lineTo(-26,-25);ctx.lineTo(-17,-13);ctx.moveTo(26,5);ctx.lineTo(31,-20);ctx.lineTo(20,-8);ctx.stroke();}
     if(t.boost) {ctx.fillStyle='#f5cc83';ctx.font='bold 17px sans-serif';ctx.fillText('↑',34,-29);}
     ctx.restore();
+  }
+  private drawItemCues(){
+    const g=this.game;if(!g.itemCues.length)return;
+    const ctx=this.ctx,labelScale=g.layoutScale,scale=g.motionScale;
+    const view={left:this.offsetX+4,right:this.offsetX+this.viewWidth-4,top:this.offsetY+4,bottom:this.offsetY+this.viewHeight-4};
+    const occupied:CueBounds[]=this.cueAnchors.map(({x,y,markerY})=>({left:x-23*labelScale,right:x+38*labelScale,top:(markerY??y)-23*labelScale,bottom:y+24*labelScale}));
+    for(const {x,ringY} of this.cueAnchors)if(ringY!==null)occupied.push({left:x-16*labelScale,right:x+16*labelScale,top:ringY-16*labelScale,bottom:ringY+16*labelScale});
+    const duration=itemCueSeconds(g.gameVersion),shown=new Set<string>();
+    // The most recent cue gets the closest free slot. Keep simultaneous items readable.
+    for(let i=g.itemCues.length-1;i>=0;i--){
+      const cue=g.itemCues[i],a=this.cueAnchors.find(a=>a.tank.id===cue.tank);
+      if(!a||a.x<view.left-4||a.x>view.right+4||a.y<view.top-80*labelScale||a.y>view.bottom+40*labelScale)continue;
+      const key=cue.tank+':'+cue.item;if(shown.has(key))continue;
+      const top=(a.markerY??a.y)-23*labelScale;
+      const ticketView=a.ringY===null?view:{...view,top:Math.max(view.top,a.ringY+16*labelScale)};
+      const point=placeItemCue(a.x,top-20*scale,scale,ticketView,occupied);if(!point)continue;
+      ctx.save();ctx.translate(point.x,point.y);ctx.scale(scale,scale);
+      paintItemCue(ctx,cue,0,0,teamFlag(a.tank.team).color,this.reducedMotion,duration);ctx.restore();shown.add(key);
+    }
+  }
+  ensureSkipIndicatorVisible(){
+    const t=this.game.active,s=this.game.layoutScale,x=t.x,y=t.y-tankBadgeLift(this.game.gameVersion)-97+(SKIP_RING_Y+85)*s;
+    if(x<this.offsetX+20*s||x>this.offsetX+this.viewWidth-20*s||y<this.offsetY+20*s||y>this.offsetY+this.viewHeight-20*s)this.focusAt(x,(y+t.y)/2);
   }
   private targetAid() {
     const g=this.game,ctx=this.ctx;
@@ -541,6 +570,7 @@ export class Renderer {
     for(const p of g.particles) {if(!this.visibleAt(p.x)) continue;ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*g.motionScale*(0.4+p.life/p.maxLife*0.6),0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
     // Blend the terrain and flying projectiles under the same mist. Friendly portraits stay clear.
     if(fog){this.drawFog();this.drawTanks();}
+    this.drawItemCues();
     for(const t of g.texts) {if(!this.visibleAt(t.x)||fog&&t.tankId!==undefined&&g.tanks[t.tankId]&&!g.visible(g.tanks[t.tankId])) continue;ctx.globalAlpha=clamp(t.life,0,1);ctx.font=`bold ${18*g.layoutScale}px "PingFang SC",sans-serif`;ctx.textAlign='center';ctx.strokeStyle='#fff8e8';ctx.lineWidth=3*g.layoutScale;ctx.strokeText(t.text,t.x,t.y);ctx.fillStyle=t.color;ctx.fillText(t.text,t.x,t.y);}ctx.globalAlpha=1;
     ctx.restore();
   }

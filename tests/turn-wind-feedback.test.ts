@@ -38,6 +38,6 @@ test('full east wind reaches no farther west than a light 20% wind, and vice ver
 });
 test('silent item visual records the actual item, expires without changing mechanics, and resets per match',()=>{
  const g=game([0,1,0,1],'human');const hp=g.active.hp;assert.equal(g.useItem('boost'),true);assert.equal(g.active.boost,true);assert.equal(g.active.hp,hp);assert.deepEqual(g.itemCues,[{tank:0,item:'boost',age:0}]);
- const replay=Game.fromBattleSnapshot(g.battleSnapshot());assert.deepEqual(replay.itemCues,g.itemCues);g.paused=true;g.update(.05);assert.equal(g.itemCues[0].age,0);g.paused=false;for(let i=0;i<23;i++)g.update(.05);assert.equal(g.itemCues.length,0);assert.equal(g.active.boost,true);assert.equal(game().itemCues.length,0);
+ const replay=Game.fromBattleSnapshot(g.battleSnapshot());assert.deepEqual(replay.itemCues,g.itemCues);g.paused=true;g.update(.05);assert.equal(g.itemCues[0].age,0);g.paused=false;for(let i=0;i<23;i++)g.update(.05);assert.equal(g.itemCues.length,1);for(let i=0;i<6;i++)g.update(.05);assert.equal(g.itemCues.length,0);assert.equal(g.active.boost,true);assert.equal(game().itemCues.length,0);
  assert.equal(crewAvatarPath('fox','/game/'),'/game/portraits/fox.png');assert.equal(crewAvatarPath('fish'), 'portraits/fish.png');
 });

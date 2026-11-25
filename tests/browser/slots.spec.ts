@@ -1,3 +1,4 @@
+import {holdSkip} from './hold-skip';
 import {test,expect} from '@playwright/test';import {boot,hold} from './qa-app';
 const prefix='QA/slots';
 const open=async(page:any)=>{await boot(page,false);await page.getByRole('button',{name:'进入战场',exact:true}).click();};
@@ -13,7 +14,7 @@ test('11-inch setup gate: default, three/four seats, flags and sound/safety cont
 });
 test('only enabled slots spawn and three/four colors apply consistently to names and handoff',async({page})=>{
  await open(page);await activate(page,4);await page.locator('[data-enable="1"]').click();await page.locator('[data-controller="2"]').selectOption('human');await page.locator('[data-controller="3"]').selectOption('human');await page.locator('[data-team="2"]').selectOption('2');await page.locator('[data-team="3"]').selectOption('3');await page.locator('#turn-timer').selectOption('0');await startSlots(page);await expect(page.locator('[data-hud]')).toHaveCount(3);await expect(page.locator('[data-slot-id="1"]')).toHaveCount(0);
- expect(await page.evaluate(()=>(window as any).__qa.game.tanks.map((t:any)=>t.slot))).toEqual([0,2,3]);await page.screenshot({path:prefix+'-three-hole-combat.png'});await page.locator('#skip-button').click();await expect(page.locator('#turn-text')).toContainText('阿狸');await expect(page.locator('#game-overlay')).toBeHidden();await page.screenshot({path:prefix+'-handoff-flag-c.png'});
+ expect(await page.evaluate(()=>(window as any).__qa.game.tanks.map((t:any)=>t.slot))).toEqual([0,2,3]);await page.screenshot({path:prefix+'-three-hole-combat.png'});await holdSkip(page);await expect(page.locator('#turn-text')).toContainText('阿狸');await expect(page.locator('#game-overlay')).toBeHidden();await page.screenshot({path:prefix+'-handoff-flag-c.png'});
  const color=await page.locator('[data-slot-id="2"] .crew-name').evaluate(e=>getComputedStyle(e).color);expect(color).toBe('rgb(56, 106, 140)');expect(await page.locator('#turn-text .crew-name').evaluate(e=>getComputedStyle(e).color)).toBe(color);
 });
 test('same flag cooperation, four-human game and four-way victory retain clear colored names',async({page})=>{

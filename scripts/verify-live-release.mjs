@@ -1,9 +1,10 @@
 import {chromium} from '@playwright/test';
 import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
-import {resolve} from 'node:path';import {createHash} from 'node:crypto';
+import {dirname,resolve} from 'node:path';import {createHash} from 'node:crypto';
 const version=process.argv[2]??JSON.parse(readFileSync('package.json')).version;
 const base=process.argv[3]??'https://larria.github.io/piggymiCannon/';
 const reportFile=process.argv[4]??`QA/v${version}-live-verification.json`;
+const reportDir=dirname(resolve(reportFile));
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const portraitSource=readFileSync('src/portrait-assets.ts','utf8');
 const portraitSpecs=JSON.parse(portraitSource.slice(portraitSource.indexOf('{'),portraitSource.lastIndexOf('}')+1));
@@ -54,12 +55,23 @@ try{
  if(snapshot.assetResources)check(snapshot.assetResources.failed.length===0&&snapshot.assetResources.checked===snapshot.assetResources.total,'离线素材全检失败');
  check(snapshot.gameVersion===version&&snapshot.initial.config.map==='temple'&&snapshot.initial.world.width===(version.split('.').map(Number).reduce((n,v)=>n*1000+v,0)>=4000006?2688:1920)&&snapshot.initial.world.height===(version.split('.').map(Number).reduce((n,v)=>n*1000+v,0)>=4000006?1344:960),'线上快照缺少实际版本／地图／新边界');
  if(polish){const tank=snapshot.current.tanks[0];check(tank.angle===(tank.minAngle+tank.maxAngle)/2,'开局射界未居中');check(tank.powerMarker===55&&tank.shots===0,'轻点未记录刻度或误发射');midpointAimVerified=true;powerMarkerVerified=true;}
- await page.locator('#close-dialog').click();await page.screenshot({path:`QA/v${version}-live-offline-1194.png`,scale:'css'});
+ await page.locator('#close-dialog').click();await page.screenshot({path:resolve(reportDir,`v${version}-live-offline-1194.png`),scale:'css'});
  const progressionAtSave=await page.evaluate(()=>localStorage.getItem('piggy-progression-v1'));
  let offlinePendingSlotsVerified=false,offlineTurnPulseVerified=false,offlineReplayVerified=false,offlineReplayExchangeVerified=false,localReplayBytes=0,healingComboVerified=false,offlineMedalUI=false,humanCounterSnapshot=false,unfinishedReplayNoScore=false;
  if(await page.locator('[data-action="save-replay"]').count()||version.split('.').map(Number).reduce((n,v)=>n*1000+v,0)>=3002002){
   const modernCombo=version.split('.').map(Number).reduce((n,v)=>n*1000+v,0)>=3002007;
-  if(modernCombo){for(const id of ['double','boost','repair'])await page.locator('#quick-items [data-item="'+id+'"]').click();if(parts[0]>5||parts[0]===5&&(parts[1]>0||parts[2]>=11)){const pending=page.locator('#quick-items .pending-shot-item'),pulse=page.locator('.minimap-turn-pulse');check(await pending.count()===3,'离线的组合道具待发提示缺失');offlinePendingSlotsVerified=true;check(await pulse.isVisible()&&await pulse.evaluate(e=>getComputedStyle(e).animationName)==='minimap-turn-beacon','离线小地图当前回合动画缺失');offlineTurnPulseVerified=true;}const r=await page.locator('#fire-button').boundingBox();await page.touchscreen.tap(r.x+r.width/2,r.y+r.height/2);await page.waitForTimeout(50);healingComboVerified=true;}else await page.locator('#fire-button').press('Enter');await page.waitForTimeout(100);await page.locator('.battle-stage [data-dialog="settings"]').click();if(healingComboVerified){await page.locator('#copy-battle-snapshot').click();const text=await page.evaluate(()=>window.__releaseSnapshot),shot=JSON.parse(text.match(/```json\n([\s\S]*?)\n```/)[1]);check(shot.current.projectiles.some(p=>p.healing&&p.fireBoosted&&p.boost===1.5),'线上双发强化恢复弹未发射');if(Number(version.split('.')[0])>=4){const metrics=shot.current.progress?.competitors.find(c=>c.id===0)?.metrics;check(metrics?.items===3&&metrics?.shots===1,'人类统计包含只读检查或遗漏真实消费／发射');humanCounterSnapshot=true;}check(shot.current.tanks[0].items.double===0&&shot.current.tanks[0].items.boost===0&&shot.current.tanks[0].items.repair===0,'线上组合道具消耗异常');}
+  if(modernCombo){
+   const crossTurn=parts[0]>5||parts[0]===5&&(parts[1]>1||parts[1]===1&&parts[2]>=10);
+   if(crossTurn){
+    await page.locator('#quick-items [data-item="double"]').click();
+    check(await page.locator('#quick-items [data-item="boost"]').isDisabled(),'同回合允许双发与强化');
+    const skip=async()=>{const button=page.locator('#skip-button');await button.hover();await page.mouse.down();try{await button.waitFor();await page.waitForFunction(()=>document.querySelector('#skip-button').classList.contains('holding'));await page.waitForFunction(()=>!document.querySelector('#skip-button').classList.contains('holding'));}finally{await page.mouse.up();}};
+    await skip();
+    const actor=page.locator('#turn-text');check((await actor.textContent()).includes('大猪头'),'长按跳过未推进回合');
+    for(let i=0;i<4&&!(await actor.textContent()).includes('咪猪头');i++)await skip();
+    check((await actor.textContent()).includes('咪猪头'),'跳过后未回到双发炮手');
+   }
+   for(const id of crossTurn?['boost','repair']:['double','boost','repair'])await page.locator('#quick-items [data-item="'+id+'"]').click();if(parts[0]>5||parts[0]===5&&(parts[1]>0||parts[2]>=11)){const pending=page.locator('#quick-items .pending-shot-item'),pulse=page.locator('.minimap-turn-pulse');check(await pending.count()===3,'离线的组合道具待发提示缺失');offlinePendingSlotsVerified=true;check(await pulse.isVisible()&&await pulse.evaluate(e=>getComputedStyle(e).animationName)==='minimap-turn-beacon','离线小地图当前回合动画缺失');offlineTurnPulseVerified=true;}const r=await page.locator('#fire-button').boundingBox();await page.touchscreen.tap(r.x+r.width/2,r.y+r.height/2);await page.waitForTimeout(50);healingComboVerified=true;}else await page.locator('#fire-button').press('Enter');await page.waitForTimeout(100);await page.locator('.battle-stage [data-dialog="settings"]').click();if(healingComboVerified){await page.locator('#copy-battle-snapshot').click();const text=await page.evaluate(()=>window.__releaseSnapshot),shot=JSON.parse(text.match(/```json\n([\s\S]*?)\n```/)[1]);check(shot.current.projectiles.some(p=>p.healing&&p.fireBoosted&&p.boost===1.5),'线上双发强化恢复弹未发射');if(Number(version.split('.')[0])>=4){const metrics=shot.current.progress?.competitors.find(c=>c.id===0)?.metrics;check(metrics?.items===3&&metrics?.shots===1,'人类统计包含只读检查或遗漏真实消费／发射');humanCounterSnapshot=true;}check(shot.current.tanks[0].items.double===0&&shot.current.tanks[0].items.boost===0&&shot.current.tanks[0].items.repair===0,'线上组合道具消耗异常');}
   await page.locator('[data-action="save-replay"]').click();
   await page.waitForFunction(()=>document.querySelector('#toast').textContent.includes('已保存本局录像'));
   localReplayBytes=await page.evaluate(()=>new TextEncoder().encode(localStorage.getItem('piggy-replays-v1')).length);
@@ -71,7 +83,7 @@ try{
   }
   await page.locator('[data-play-replay]').first().click();await page.keyboard.press('F5');
   await page.waitForFunction(()=>document.querySelector('#replay-status').textContent==='播放完毕 · 已校验',null,{timeout:15000});
-  offlineReplayVerified=true;check(await page.locator('#fire-button').isDisabled(),'录像播放仍允许开炮');await page.screenshot({path:`QA/v${version}-live-offline-replay-1194.png`,scale:'css'});
+  offlineReplayVerified=true;check(await page.locator('#fire-button').isDisabled(),'录像播放仍允许开炮');await page.screenshot({path:resolve(reportDir,`v${version}-live-offline-replay-1194.png`),scale:'css'});
  }
  if(Number(version.split('.')[0])>=4){
   check(snapshot.current.progress?.competitors.length===2&&snapshot.current.progress?.id,'离线快照缺少战前勋章／人类统计');

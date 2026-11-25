@@ -1,3 +1,4 @@
+import {holdSkip} from './hold-skip';
 import {test,expect} from '@playwright/test';import {boot} from './qa-app';import {VEHICLES} from '../../src/vehicles';import {readFileSync} from 'node:fs';
 const version=JSON.parse(readFileSync('package.json','utf8')).version;
 for(const width of [1194,1210])test(`${width} iPad portraits replace battlefield names; flags, wind, items and team handoffs stay consistent`,async({page,browserName})=>{
@@ -6,7 +7,7 @@ for(const width of [1194,1210])test(`${width} iPad portraits replace battlefield
  for(const [slot,id] of [[2,'fox'],[3,'fish']] as const){const img=page.locator(`[data-slot-id="${slot}"] img`);await expect(img).toHaveAttribute('data-portrait-primary',`/piggymiCannon/portraits/${id}.png`);await expect(img).toHaveJSProperty('naturalWidth',512);}
  await expect.poll(()=>page.evaluate(()=>{const q=(window as any).__qa,ctx=q.renderer.ctx,draw=ctx.drawImage,fill=ctx.fillText;let portraits=0;const words:string[]=[];ctx.drawImage=function(source:any,...args:any[]){if(source.width===64&&source.height===64)portraits++;return draw.apply(this,[source,...args]);};ctx.fillText=function(word:string,...args:any[]){words.push(word);return fill.apply(this,[word,...args]);};q.renderer.draw(0);ctx.drawImage=draw;ctx.fillText=fill;return portraits===4&&!q.game.tanks.some((t:any)=>words.includes(t.name));})).toBe(true);
  const before=await page.evaluate(()=>(window as any).__qa.game.wind);const sequence=[];
- for(let i=0;i<4;i++){sequence.push(await page.evaluate(()=>{const q=(window as any).__qa;return {slot:q.game.active.slot,round:q.game.round};}));await page.locator('#skip-button').click();if(i<3)expect(await page.evaluate(()=>(window as any).__qa.game.wind)).toBe(before);}
+ for(let i=0;i<4;i++){sequence.push(await page.evaluate(()=>{const q=(window as any).__qa;return {slot:q.game.active.slot,round:q.game.round};}));await holdSkip(page);if(i<3)expect(await page.evaluate(()=>(window as any).__qa.game.wind)).toBe(before);}
  expect(sequence.map(s=>s.slot)).toEqual([0,2,1,3]);expect(sequence.map(s=>s.round)).toEqual([1,1,1,1]);await expect(page.locator('#round-text')).toContainText('02');
  await expect.poll(()=>page.evaluate(()=>(window as any).__qa.game.events.length)).toBe(0);
  // No generic click/death/item sample starts for an actual item tap.
