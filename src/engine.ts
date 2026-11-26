@@ -14,7 +14,7 @@ import {gradedAIRestoration,needsAIRestoration,planAIRestoration} from './ai-res
 import {abandonmentWinner} from './exit-rules';
 import {ellipseExcavation,precisionPolish,impactPolish,matchPolish,startingAngle} from './match-polish';
 import {playerSupplyTiming,rankIndex,aiRank,emptyCombat,type Competition,type MatchProgress,type CombatMetrics} from './progression';
-import {restoreFraction,restoreRadius,persistentShotItems,type QueuedShotItems,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
+import {restoreFraction,restoreRadius,persistentShotItems,reserveShotItems,type QueuedShotItems,FIRST_SUPPLY_CHANCE,FIRST_SUPPLY_ROUND,SUPPLY_ACTION_GAP} from './item-combos';
 import {sourceHoming,homingProbe,sourceHomingVelocity,SOURCE_HOMING_RADIUS} from './source-homing';
 import {modernBackpack,backpackSlots,takeBackpackItem,putBackpackItem,SUPPLY_INTERVAL_ACTIONS} from './backpack';
 import {calibrationProfile,calibrationDisturbed,advanceCalibration,type AICalibration} from './ai-calibration';
@@ -137,6 +137,7 @@ export class Game {
   supplyObservation:SupplyObservation|null=null;
   restoring=false;private firstSupplyChecked=false;private nextSupplyAction=8;private lastSupplyDelivery:number|null=null;
   private armedItemSlot:number|null=null;
+  private readonly reserveItems:boolean;
   targetX=1000; teleporting=false; aiTime=0; private aiItemUsedAt:number|null=null; resolveTime=0;resolveHazardTime=0;
   weatherObservation:WeatherObservation|null=null;private weatherNextRound=2;private weatherCooldownUntil=0;private weatherSnow=false;
   readonly fullHeightFireLine:boolean;
@@ -162,6 +163,7 @@ export class Game {
   private readonly fasterFalls:boolean;
   private readonly scaledSupplyCadence:boolean;
   constructor(config:Partial<Config>={},readonly gameVersion='development',size:WorldSize=worldSize(gameVersion),previousBgm?:PreviousMapBgm|null) {
+    this.reserveItems=reserveShotItems(gameVersion);
     this.fullHeightFireLine=fullHeightFireLine(gameVersion);
     this.fasterFalls=fastFallMotion(gameVersion);
     this.scaledSupplyCadence=isScaledSupplyCadence(gameVersion);
@@ -523,8 +525,13 @@ export class Game {
   backpack(t=this.active):(ItemId|null)[]{return modernBackpack(this.gameVersion)?backpackSlots(t):TURN_ITEMS.map(id=>t.items[id]>0?id:null);}
   itemArmed(slot:number,t=this.active){
     const id=this.backpack(t)[slot];
+    if(this.reserveItems&&(id==='boost'||id==='double'))return t.queuedShot?.[id]===slot;
     if(t.id!==this.current)return t.queuedShot?.ammo?.slot===slot&&t.queuedShot.ammo.item===id;
     return (id==='teleport'&&this.teleporting||id==='repair'&&this.restoring)&&(!modernBackpack(this.gameVersion)||this.armedItemSlot===null||this.armedItemSlot===slot);
+  }
+  private shotItemSlot(id:ItemId,slots:(ItemId|null)[]){
+    const q=this.active.queuedShot;
+    return ((id==='boost'||id==='double')?q?.[id]:q?.ammo?.item===id?q.ammo.slot:undefined)??slots.indexOf(id);
   }
   private setArmedAmmo(item:'teleport'|'repair'|null,slot:number|null=null){
     this.teleporting=item==='teleport';this.restoring=item==='repair';this.armedItemSlot=slot;
@@ -541,6 +548,7 @@ export class Game {
     if(modernBackpack(this.gameVersion)){
       const slots=this.backpack(t);
       if(slot!==undefined&&slots[slot]!==id)return '这个槽位没有该道具';
+      if(this.reserveItems&&!ai&&this.itemArmed(slot??this.shotItemSlot(id,slots),t))return null;
       if(slot!==undefined&&this.armedItemSlot!==null&&this.armedItemSlot!==slot&&(id==='teleport'&&this.teleporting||id==='repair'&&this.restoring))return '已装填另一槽位的弹，请先取消装填';
       if(id==='teleport'&&this.restoring||id==='repair'&&this.teleporting)return '转移弹与恢复弹不能同时装填，请先取消已装填的弹';
       if(id==='teleport'&&t.boost||id==='boost'&&this.teleporting)return '转移弹与威力加强不能同时使用';
@@ -555,8 +563,9 @@ export class Game {
     if(id==='fuel'&&t.fuel>45) return '燃料需不高于 45';
     if(id==='boost'&&t.boost) return '火力已强化';
     if(id==='double'&&t.doubleShot) return '已装填双发';
-    // Consumption already records the next eligible personal turn for these zero-cooldown items.
-    if(turnItemPolish(this.gameVersion)&&(id==='boost'&&t.doubleShot&&t.itemReadyTurn.double===t.turnsTaken+1||id==='double'&&t.boost&&t.itemReadyTurn.boost===t.turnsTaken+1))return '双发与威力加强须分开回合装填';
+    const doubleThisTurn=this.reserveItems?t.queuedShot?.doubleTurn===t.turnsTaken:t.itemReadyTurn.double===t.turnsTaken+1;
+    const boostThisTurn=this.reserveItems?t.queuedShot?.boostTurn===t.turnsTaken:t.itemReadyTurn.boost===t.turnsTaken+1;
+    if(turnItemPolish(this.gameVersion)&&(id==='boost'&&t.doubleShot&&doubleThisTurn||id==='double'&&t.boost&&boostThisTurn))return '双发与威力加强须分开回合装填';
     if(id==='wind'&&Math.abs(this.wind)<3) return '当前风力太小';
     return null;
   }
@@ -568,13 +577,28 @@ export class Game {
     t.tactics-=i.cost;t.itemUsed=true;
     t.itemDelay+=200;
     t.itemReadyTurn[id]=t.turnsTaken+i.cooldown+1;if(!modernWeather(this.gameVersion))this.teleporting=false;
-    this.itemCues.push({tank:t.id,item:id,age:0});
+    if(!this.reserveItems||!TURN_ITEMS.includes(id))this.itemCues.push({tank:t.id,item:id,age:0});
     this.emit('item',`${t.name}使用了${this.itemName(id)}${i.cost?`，消耗 ${i.cost} 战术点`:''}。`,undefined,t.x,undefined,false,t.controller);
     this.recordBattle('item-use',`${t.name}使用${this.itemName(id)}；HP${t.hp}，护盾${t.shield}，道具等待+200`,{item:id,tank:this.traceTanks().find(e=>e.id===t.id)});
   }
   useItem(id:ItemId,ai=false,slot?:number) {
     if(this.itemUnavailable(id,ai,slot)) return false;
     const t=this.active;
+    if(this.reserveItems&&TURN_ITEMS.includes(id)){
+      const at=slot??this.shotItemSlot(id,this.backpack(t)),armed=this.itemArmed(at,t);
+      if(id==='repair'||id==='teleport')this.setArmedAmmo(armed?null:id,armed?null:at);
+      else if(id==='boost'||id==='double'){
+        const q=t.queuedShot??={};
+        const turn=id==='boost'?'boostTurn':'doubleTurn';
+        if(armed){delete q[id];delete q[turn];if(q.ammo===undefined&&q.double===undefined&&q.boost===undefined)delete t.queuedShot;}
+        else {q[id]=at;q[turn]=t.turnsTaken;}
+        if(id==='boost')t.boost=!armed;else t.doubleShot=!armed;
+      }
+      if(armed)this.clearItemCue(t,id);else this.activateItem(t,id);
+      const type=id==='teleport'?'teleport-arm':id==='repair'?'restore-arm':'item-arm';
+      this.recordBattle(type,`${t.name}${armed?'取消装填':'装填'}${this.itemName(id)}`,{item:id,slot:at,armed:!armed});
+      return true;
+    }
     const before={hp:t.hp,shield:t.shield,fuel:t.fuel,boost:t.boost,doubleShot:t.doubleShot,wind:this.wind};
     if(id==='teleport') {this.setArmedAmmo(this.teleporting?null:id,this.teleporting?null:slot??this.backpack(t).indexOf(id));if(this.teleporting)this.activateItem(t,id);this.recordBattle('teleport-arm',`${t.name}${this.teleporting?'装填':'取消'}转移弹`,{armed:this.teleporting});return true;}
     if(id==='repair'&&modernWeather(this.gameVersion)){this.setArmedAmmo(this.restoring?null:id,this.restoring?null:slot??this.backpack(t).indexOf(id));if(this.restoring)this.activateItem(t,id);this.recordBattle('restore-arm',`${t.name}${this.restoring?'装填':'取消'}恢复弹`,{armed:this.restoring});return true;}
@@ -593,6 +617,7 @@ export class Game {
   private activateItem(t:Tank,id:ItemId){
     this.waitAfterAIItem(t);this.itemCues.push({tank:t.id,item:id,age:0});
   }
+  private clearItemCue(t:Tank,id:ItemId){this.itemCues=this.itemCues.filter(c=>c.tank!==t.id||c.item!==id);}
   private transferTo(t:Tank,x:number,impactY:number,projectile?:number) {
     if(modernBackpack(this.gameVersion)){
       if(t.hp<=0)return false;
@@ -644,6 +669,11 @@ export class Game {
     // Historical time/attack/item costs are known. Movement uses a disclosed Web-scale conversion.
     return base+attack+t.itemDelay+Math.round(t.movedThisTurn*2+t.actionTime*10);
   }
+  pendingItemDelay(t:Tank){
+    const q=t.queuedShot;
+    if(!this.reserveItems)return t===this.active&&(this.teleporting||this.restoring)?200:0;
+    return q?200*(Number(q.ammo!==undefined)+Number(q.double!==undefined)+Number(q.boost!==undefined)):0;
+  }
   fire(ai=false) {
     if(this.paused||this.introLocked||this.weatherObservation||this.phase!=='aiming'||this.active.hp<=0||(!ai&&!this.humanTurn)||((this.active.ammo[this.selected]??0)<=0&&(!modernWeather(this.gameVersion)||!this.teleporting&&!this.restoring))||this.active.fallVelocity>0) return false;
     const t=this.active,id=this.selected,transfer=this.teleporting,healing=this.restoring;
@@ -673,6 +703,11 @@ export class Game {
     const armedSlot=modernBackpack(this.gameVersion)?this.armedItemSlot??undefined:undefined;
     if(transfer){if(this.itemUnavailable('teleport',ai,armedSlot))return false;this.consumeItem('teleport',armedSlot);}
     if(healing){if(this.itemUnavailable('repair',ai,armedSlot))return false;this.consumeItem('repair',armedSlot);}
+    const reserved=t.queuedShot;
+    if(this.reserveItems){
+      if(reserved?.double!==undefined)this.consumeItem('double',reserved.double);
+      if(reserved?.boost!==undefined)this.consumeItem('boost',reserved.boost);
+    }
     this.rememberHumanDashboard();this.observation={kind:'ground',target:null,point:null};this.phase='flying';this.setArmedAmmo(null);this.firedBy=t.id;
     if(!transfer&&!healing&&Number.isFinite(t.ammo[id])) t.ammo[id]--;
     t.shots++;this.credit(t,'shots');if(t.doubleShot&&t.boost)this.credit(t,'comboShots');
@@ -705,6 +740,7 @@ export class Game {
     t.boost=false;t.doubleShot=false;if(t.queuedShot)delete t.queuedShot;this.heardX[t.id]=Math.round(t.x/90)*90;
     this.emit('shot',`${t.name}发射了${healing?'恢复弹':transfer?'转移弹':weaponById(id).name}。`,undefined,t.x,healing?'cannon-normal':transfer?'shell':id,transfer);
     this.burst(this.muzzle(t).x,this.muzzle(t).y,12,'#f5ce89');
+    if(this.reserveItems&&(transfer||healing||reserved?.double!==undefined||reserved?.boost!==undefined))this.collectCrates();
     return true;
   }
   setIntroLocked(value:boolean){this.introLocked=value;}
@@ -1346,7 +1382,7 @@ export class Game {
       const item=candidates.find(id=>!this.itemUnavailable(id,true));if(item) this.useItem(item,true);
     }
     if(this.restoring&&modernWeather(this.gameVersion)){
-      if(precisionPolish(this.gameVersion)&&!restorePlan){this.setArmedAmmo(null);this.recordBattle('ai-restore-cancel','没有足够有效的治疗落点，保留恢复弹');}
+      if(precisionPolish(this.gameVersion)&&!restorePlan){this.setArmedAmmo(null);if(this.reserveItems)this.clearItemCue(t,'repair');this.recordBattle('ai-restore-cancel','没有足够有效的治疗落点，保留恢复弹');}
       else{
         t.power=restorePlan?.power??10;t.angle=restorePlan?.angle??t.minAngle;if(restorePlan)t.direction=restorePlan.direction;
         if(precisionPolish(this.gameVersion)){this.aiMoveGoal=null;this.aiPending=null;this.movingUntil[t.id]=this.elapsed;}

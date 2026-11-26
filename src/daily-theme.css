@@ -144,7 +144,8 @@ select,.slot-row select{background:var(--theme-paper);border-color:var(--theme-b
 }
 .combat-mode .compact-dashboard #skip-button.holding{background:var(--actor-paper);color:var(--actor-color)}
 .compact-dashboard #face-button,.control-deck.can-prepare-aim .angle-nudges{background:var(--theme-soft);border-color:var(--theme-border)}
-.meter-track{border-color:var(--theme-border);background:repeating-linear-gradient(90deg,var(--theme-soft) 0 9.7%,var(--theme-border) 9.7% 10%)}
+.meter-track{border-color:var(--theme-border);background:repeating-linear-gradient(90deg,var(--theme-soft) 0 9.7%,var(--meter-tick,var(--theme-border)) 9.7% 10%)}
+:is(.energy-meter,.force-meter) .meter-track{--meter-tick:color-mix(in srgb,var(--theme-border) 35%,var(--theme-soft))}
 .power-marker path:first-child{fill:var(--theme-wash);stroke:var(--theme-action)}
 .power-marker path:last-child{stroke:var(--theme-action)}
 .stage-button,.minimap-header button,.map-chip,.map-code,.timer:not(.urgent){color:var(--theme-action)}

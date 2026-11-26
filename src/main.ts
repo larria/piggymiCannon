@@ -243,6 +243,7 @@ function pendingShotItem(tank:Tank,slot:number,id:ItemId|null):ItemId|null{
 }
 const pendingChip=(id:ItemId)=>`<i class="queued-item-chip" aria-hidden="true">${itemIcon(id)}</i>`;
 const pendingSeal='<i class="item-ready-seal" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="m3 6 2 2 4-4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
+const armedHint='已装填 · 再点取消';
 
 function renderInventory() {
   const tank=displayTank(),vehicle=tank.vehicleId?vehicleById(tank.vehicleId):null;
@@ -254,7 +255,7 @@ function renderInventory() {
       if(!id&&queued)return `<button class="inventory-tile item-tile pending-shot-item" disabled aria-label="道具槽 ${slot+1}，${queued.name}待发"><span class="weapon-icon">${itemIcon(queued.id)}</span><span class="tile-name">${queued.name}</span><span class="item-hint">已使用 · 等待发射</span></button>`;
       if(!id)return `<button class="inventory-tile item-tile empty-item" disabled aria-label="道具槽 ${slot+1}，空槽"><span class="weapon-icon">${icon('plus')}</span><span class="tile-name">空槽</span><span class="item-hint">可拾取任意道具</span></button>`;
       const i=ITEMS.find(i=>i.id===id)!,reason=game.itemUnavailable(id,false,slot);
-      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${armed?'selected pending-shot-item':pending?'has-queued-shot':''}" data-item="${id}" data-item-slot="${slot}" ${reason?'disabled':''} title="${i.name}：${reason||i.description}" aria-label="道具槽 ${slot+1}，使用${i.name}${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${itemIcon(id)}</span><span class="tile-name">${i.name}</span><span class="item-hint">${reason||'使用后留空 · 可拾取重复道具'}</span><span class="item-cost">${armed?'已装填 · 再点取消':'同回合可联动'}</span>${pending&&!armed?pendingChip(pending):''}</button>`;
+      return `<button class="inventory-tile item-tile ${reason?'unavailable':''} ${armed?'selected pending-shot-item':pending?'has-queued-shot':''}" data-item="${id}" data-item-slot="${slot}" ${reason?'disabled':''} aria-pressed="${armed}" title="${i.name}：${reason||(armed?armedHint:i.description)}" aria-label="道具槽 ${slot+1}，${armed?'取消装填':'装填'}${i.name}${reason?'，'+reason:''}"><span class="weapon-icon" style="--weapon-color:#85927a">${itemIcon(id)}</span><span class="tile-name">${i.name}</span><span class="item-hint">${reason||'发射后留空 · 可拾取重复道具'}</span><span class="item-cost">${armed?armedHint:'可与相容道具联动'}</span>${pending?(armed?pendingSeal:pendingChip(pending)):''}</button>`;
     }).join('');
   $('#inventory-grid').classList.toggle('items-grid',activeTab==='items');
   $('#inventory-grid').setAttribute('aria-label',activeTab==='weapons'?'武器清单':'道具清单');
@@ -268,7 +269,7 @@ function renderDetail(item?:ItemId) {
     const dig=excavation(w.id,false,game.gameVersion);
     $('#weapon-detail').innerHTML=`<div class="detail-title"><span>${w.name}</span><span class="weapon-tag">${w.tag}</span></div><p>${w.description}</p><div class="weapon-metrics"><span>${w.effect==='pierce'?'首节伤害':'单枚伤害'} <strong>${weaponDamage(w.id,game.gameVersion)}${w.shots&&w.shots>1?` ×${w.shots}`:''}</strong></span><span>爆炸半径 <strong>${Math.round(weaponBlastRadius(w.id,game.gameVersion))}m</strong></span><span>挖地 <strong>${dig.radius} × ${dig.depth}m</strong></span></div><button class="shell-atlas-button" data-dialog="projectiles">认认炮弹 · 弹体图鉴 ${icon('arrow')}</button>`;
   }
-  else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四个槽位，灵活搭配</span>${icon('shield')}</div><p>开局各带一件，使用后原位留空；任意空槽可拾取道具，重复道具各占一格，满槽不拾取。可在同回合联动。</p><div class="weapon-metrics"><span>同回合可联动 · 用掉后留空</span></div>`;}
+  else {const i=ITEMS.find(i=>i.id===item);$('#weapon-detail').innerHTML=i?`<div class="detail-title"><span>${i.name}</span><span class="weapon-tag">战术道具</span></div><p>${i.description}</p>`:`<div class="detail-title"><span>四个槽位，灵活搭配</span>${icon('shield')}</div><p>点击装填，再点同一格可取消。道具发射后腾出槽位，自动拾取附近的补给；重复道具各占一格。</p>`;}
 }
 
 let lastInventory='';let lastPhase='';
@@ -288,7 +289,7 @@ function updateUI() {
   ['#weapon-normal','#weapon-special','#weapon-bonus'].forEach((selector,i)=>{$<HTMLButtonElement>(selector).disabled=!human||(t.ammo[pair[i]]??0)<=0;});
   $('#tank-pack-label').textContent=v?' / '+v.name:'';
   $('#instrument-tank').textContent=v?.name??'炮术演习';$('#angle-limits').textContent=`${t.minAngle}–${t.maxAngle}°`;
-  $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=game.delayEnabled?String(t.delayCommitted?t.lastDelay:game.delayFor(t,instrumentSpecial?undefined:shownWeapon)+(instrumentSpecial?200:0)):'—';
+  $('#energy-fill').style.width=`${t.hp/t.maxHP*100}%`;$('#energy-value').textContent=`${t.hp} / ${t.maxHP}`;$('#mobility-fill').style.width=`${t.fuel}%`;$('#waiting-value').textContent=game.delayEnabled?String(t.delayCommitted?t.lastDelay:game.delayFor(t,instrumentSpecial?undefined:shownWeapon)+game.pendingItemDelay(t)):'—';
   $('#previous-power').hidden=t.lastPower===null||lobby||game.phase==='ended';$('#previous-power').style.left=t.lastPower===null?'0%':`${t.lastPower}%`;
   const marker=$('#power-marker');marker.hidden=t.powerMarker==null||lobby;marker.style.left=`${t.powerMarker??0}%`;marker.setAttribute('aria-label',`本局力度记号 ${t.powerMarker??0}%`);marker.dataset.power=String(t.powerMarker??'');
   const quick=game.backpack(t),pendingItems=quick.map((id,slot)=>pendingShotItem(t,slot,id));const quickSignature=quick.map((id,slot)=>`${id}:${id?game.itemUnavailable(id,false,slot):'empty'}`).join('|')+'|'+(instrumentActive&&game.teleporting)+'|'+(instrumentActive&&game.restoring)+'|'+pendingItems.join(',')+'|'+t.id;
@@ -297,7 +298,8 @@ function updateUI() {
     if(!id&&queued)return `<button class="pending-shot-item" data-item-slot="${slot}" disabled data-help-name="${queued.name}" data-help-description="已使用 · 等待发射" aria-label="道具槽 ${slot+1}，${queued.name}待发">${itemIcon(queued.id)}<span>待发</span>${pendingSeal}</button>`;
     if(!id)return `<button class="empty-item" data-item-slot="${slot}" disabled data-help-name="空槽" data-help-description="可拾取任意道具，重复道具各占一个槽位" aria-label="道具槽 ${slot+1}，空槽">${icon('plus')}<span>空槽</span></button>`;
     const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id,false,slot),armed=game.itemArmed(slot,t);
-    return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''} ${armed&&pending===id?'pending-shot-item':pending?'has-queued-shot':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+slot}${reason?' · '+reason:''}" aria-label="道具槽 ${slot+1}，快捷使用${item.name}${queued?`，${queued.name}待发`:''}">${itemIcon(id)}<span>${item.name}</span>${pending?(armed?pendingSeal:pendingChip(pending)):''}</button>`;
+    const hint=reason||(armed?armedHint:'');
+    return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''} ${armed&&pending===id?'pending-shot-item':pending?'has-queued-shot':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${hint||item.description}" title="${item.name} · F${9+slot}${hint?' · '+hint:''}" aria-label="道具槽 ${slot+1}，${armed?'取消装填':'装填'}${item.name}${queued?`，${queued.name}待发`:''}">${itemIcon(id)}<span>${item.name}</span>${pending?(armed?pendingSeal:pendingChip(pending)):''}</button>`;
   }).join('');}
   $('.wait-readout').dataset.helpDescription=!(game.delayEnabled)?'含 AI 的对局按存活槽位轮转，DELAY 排序关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
   $('#pwa-update').classList.toggle('hidden',!pendingUpdate||(!lobby&&game.phase!=='ended'));

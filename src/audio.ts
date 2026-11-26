@@ -1,4 +1,5 @@
 const asset=(name:string)=>`${import.meta.env.BASE_URL}audio/${name}`;
+const buttonSoundGain=.7;
 import {weaponById,type WeaponId} from './catalog';
 import type {VehicleId} from './vehicles';
 import {BGM_TRACKS,RUNTIME_BGM_FILES,COMMON_CLIPS,vehicleClips,weaponSoundClip,type AudioScene} from './audio-catalog';
@@ -8,7 +9,7 @@ export class AudioManager {
   soundEnabled=false;musicEnabled=false;volume=0.65;unlocked=false;
   private paused=false;private musicPaused=false;
   private pageHidden=false;
-  private playingEffects=new Set<HTMLAudioElement>();
+  private playingEffects=new Map<HTMLAudioElement,number>();
   private pausedEffects=new Set<HTMLAudioElement>();
   private scene:AudioScene='lobby';
   private buffers=new Map<string,AudioBuffer>();
@@ -29,7 +30,7 @@ export class AudioManager {
   setSoundEnabled(enabled:boolean) {this.soundEnabled=enabled;if(this.master&&this.context)this.master.gain.setTargetAtTime(enabled?this.volume:0,this.context.currentTime,.02);if(!enabled)this.resetEffects();}
   private start() {if(this.selectionActive||this.pageHidden)return;void this.music.play().catch(()=>{});}
   setPageHidden(hidden:boolean){this.pageHidden=hidden;if(hidden){this.pause(true);this.selectionMusic.pause();}else if(this.selectionActive&&this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}
-  setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.selectionMusic.volume=this.volume*0.55;for(const clip of this.playingEffects)clip.volume=this.volume*.75;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
+  setVolume(value:number) {this.volume=Math.max(0,Math.min(1,value));this.music.volume=this.selectionMusic.volume=this.volume*0.55;for(const [clip,gain] of this.playingEffects)clip.volume=this.volume*gain;if(this.master&&this.context) this.master.gain.setTargetAtTime(this.soundEnabled?this.volume:0,this.context.currentTime,0.02);}
   setSelectionMusic(active:boolean){if(active===this.selectionActive)return;this.selectionActive=active;if(active){this.music.pause();this.selectionMusic.currentTime=0;if(this.musicEnabled&&this.unlocked)void this.selectionMusic.play().catch(()=>{});}else this.selectionMusic.pause();}
   /** Modals stop battle effects while keeping the current BGM timeline. */
   pause(paused:boolean,keepMusic=false) {
@@ -39,7 +40,7 @@ export class AudioManager {
     if(paused){
       this.stopCharge();this.stopMovement();this.stopTracking();
       if(this.context)void this.context.suspend().catch(()=>{});
-      for(const clip of this.playingEffects)if(!clip.paused){clip.pause();this.pausedEffects.add(clip);}
+      for(const clip of this.playingEffects.keys())if(!clip.paused){clip.pause();this.pausedEffects.add(clip);}
     }else{
       if(this.context&&this.unlocked)void this.context.resume().catch(()=>{});
       if(this.soundEnabled&&this.unlocked)for(const clip of this.pausedEffects)void clip.play().catch(()=>{});
@@ -48,7 +49,7 @@ export class AudioManager {
   }
   private sceneFile=BGM_TRACKS.lobby;
   setScene(scene:AudioScene,selectedFile?:string){const file=selectedFile&&RUNTIME_BGM_FILES.has(selectedFile)?selectedFile:BGM_TRACKS[scene];if(this.scene===scene&&this.sceneFile===file)return;this.scene=scene;this.sceneFile=file;this.music.pause();this.music.src=asset(file);this.music.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused)this.start();}
-  resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources,...this.scheduledFallbacks])source.stop();this.scheduledFallbacks.clear();for(const clip of this.playingEffects)clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();this.nextPierceSound=0;}
+  resetEffects(){this.stopCharge();this.stopMovement();this.stopTracking();for(const source of [...this.sources,...this.scheduledFallbacks])source.stop();this.scheduledFallbacks.clear();for(const clip of this.playingEffects.keys())clip.pause();this.playingEffects.clear();this.pausedEffects.clear();this.lastSamples.clear();this.nextPierceSound=0;}
   async retryAssets(vehicles:(VehicleId|null)[],restored:string[]=[],skipFiles:string[]=[]){
     const clips=restored.filter(url=>url.startsWith('audio/')).map(url=>url.slice(6));for(const name of clips){await this.loading.get(name);this.buffers.delete(name);this.lastSamples.delete(name);}
     for(const clip of [this.music,this.selectionMusic])if(clip.error||clips.some(name=>clip.src.endsWith('/'+name))){const position=clip.currentTime;clip.addEventListener('loadedmetadata',()=>{if(Number.isFinite(clip.duration))clip.currentTime=Math.min(position,clip.duration);},{once:true});clip.load();if(this.musicEnabled&&this.unlocked&&!this.musicPaused&&!this.pageHidden){if(clip===this.music&&!this.selectionActive||clip===this.selectionMusic&&this.selectionActive)void clip.play().catch(()=>{});}}
@@ -144,7 +145,7 @@ export class AudioManager {
     if(type==='item')return; // Item feedback is animation only, including preload/fallback paths.
     if(!this.soundEnabled||!this.unlocked||(this.paused&&type!=='click'&&type!=='aim'&&type!=='denied')) return;
     if(type==='denied'||type==='click'||type==='win'||(type==='aim'&&this.paused)) {
-      const audio=new Audio(asset(`sfx-${type==='aim'?'select':type}.mp3`));audio.volume=this.volume*.75;this.playingEffects.add(audio);audio.onended=()=>{this.playingEffects.delete(audio);this.pausedEffects.delete(audio);};void audio.play().catch(()=>this.playingEffects.delete(audio));return;
+      const gain=.75*(type==='denied'||type==='click'?buttonSoundGain:1),audio=new Audio(asset(`sfx-${type==='aim'?'select':type}.mp3`));audio.volume=this.volume*gain;this.playingEffects.set(audio,gain);const cleanup=()=>{this.playingEffects.delete(audio);this.pausedEffects.delete(audio);};audio.onended=cleanup;void audio.play().catch(cleanup);return;
     }
     try {
       const name=type==='shot'||type==='explosion'?weaponSoundClip(type,weapon):type==='death'&&friendlyDeath?'sfx-death-friendly.mp3':`sfx-${type==='aim'?'select':type}.mp3`;

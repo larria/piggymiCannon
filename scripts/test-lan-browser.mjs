@@ -73,9 +73,18 @@ try{
   return (await fetch(new URL('lan/snapshot',location.href),{headers:{Authorization:'Bearer '+sessionStorage.getItem(key)}})).json();
  });
  const revision=(await snapshot()).current.terrain.revision;
+ const slot=active.locator('#quick-items [data-item="double"]');
+ await slot.click();
+ await expect(slot).toHaveAttribute('aria-pressed','true');
+ const reserved=(await snapshot()).current;expect(reserved.tanks[reserved.current].itemSlots[0]).toBe('double');
+ await slot.click();
+ await expect(slot).toHaveAttribute('aria-pressed','false');
+ await slot.click();
+ await expect(slot).toHaveAttribute('aria-pressed','true');
  await active.locator('#weapon-special').click();
  await active.keyboard.down(' ');await active.waitForTimeout(500);await active.keyboard.up(' ');
  for(const page of [host,guest])await expect(page.locator('#turn-text')).toHaveText(/炮弹飞行中|观察战场/);
+ const shot=(await snapshot()).current;expect(shot.tanks[shot.current].itemSlots[0]).toBeNull();
  await expect.poll(async()=>(await snapshot()).current.terrain.revision,{timeout:15_000}).toBeGreaterThan(revision);
  const impacted=(await snapshot()).current.terrain.revision;
  // Force an actual disconnect; WebKit's offline emulation leaves open sockets intact.

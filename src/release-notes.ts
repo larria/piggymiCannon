@@ -1,8 +1,7 @@
 export const RELEASE_NOTES=[
- '咪猪头扶正了护目镜，补齐了两只小耳朵。',
- '四人开局的出生点更分散，仍有机会三人靠近、一人在远处。',
- '道具栏增加醒目的待发印记，直到发射或取消装填。',
- '甲壳虫的趴趴弹从同一炮口发射，远射落点更容易拉开。',
+ '四种道具装填后可再次点击同一格取消，发射时才消耗。',
+ '道具满槽时不会提前拾取；发射腾出空槽后，马上拾取范围内的箱子。',
+ '淡化仪表盘生命和蓄力条的刻度，按钮音效单独降低 30%。',
 ];
 export function readRelease(value:any):{version:string;notes:string[]}|null{
  if(typeof value?.version!=='string'||!/^v?\d+\.\d+\.\d+$/.test(value.version))return null;

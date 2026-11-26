@@ -3,7 +3,8 @@ import test from 'node:test';
 import {defaultSlots} from '../src/crew';
 import {Game} from '../src/engine';
 import {putBackpackItem} from '../src/backpack';
-import {ReplayRecorder,ReplayPlayer} from '../src/replay';
+import {TURN_ITEMS} from '../src/catalog';
+import {ReplayRecorder,ReplayPlayer,exportReplay,parseReplayFile} from '../src/replay';
 
 function match(version='5.1.2',timer=0){
  const g=new Game({map:'coast',seed:52,timer,fog:false,fireLine:false,slots:defaultSlots().map((s,i)=>({...s,enabled:i<2,team:i,controller:'human',vehicle:'cannon'}))},version);
@@ -53,4 +54,48 @@ test('cross-turn item carry replays exactly while 5.1.1 retains its original beh
   const player=new ReplayPlayer(recorder.export());while(!player.done)player.advance(.2);
   assert.equal(player.verified,true);assert.deepEqual(player.game.tanks,g.tanks);recorder.detach();
  }
+});
+
+test('all four 6.0.2 shot items can be cancelled and reserve the slot until successful fire',()=>{
+ for(const [slot,id] of TURN_ITEMS.entries()){
+  const g=match('6.0.2'),t=g.active;
+  const slots=g.backpack().slice(),metrics=t.battleStats!.items;
+  const nearby={x:t.x,y:t.y,type:'medical' as const},far={x:t.x+50,y:t.y,type:'boost' as const};
+  g.crates=[nearby,far];
+  assert.ok(g.useItem(id,false,slot));
+  assert.ok(g.itemArmed(slot));assert.deepEqual(g.backpack(),slots);assert.equal(t.itemDelay,0);
+  g.update(.01);assert.deepEqual(g.crates,[nearby,far]);
+  assert.ok(g.useItem(id,false,slot));
+  assert.equal(g.itemArmed(slot),false);assert.deepEqual(g.backpack(),slots);assert.equal(t.queuedShot,undefined);
+  assert.equal(g.itemCues.length,0);assert.equal(t.battleStats!.items,metrics);
+  assert.ok(g.useItem(id,false,slot));
+  t.fallVelocity=10;assert.equal(g.fire(),false);assert.deepEqual(g.backpack(),slots);
+  t.fallVelocity=0;g.setAim(35,1);assert.ok(g.fire());
+  assert.deepEqual(g.crates,[far]);assert.equal(g.backpack()[slot],'repair');assert.equal(g.itemArmed(slot),false);
+  assert.equal(t.battleStats!.items,metrics+1);assert.equal(t.itemDelay,200);
+  assert.equal(g.projectiles.length,id==='double'?2:1);
+  assert.equal(g.projectiles[0].boost,id==='boost'?1.5:1);
+  assert.equal(!!g.projectiles[0].transfer,id==='teleport');assert.equal(!!g.projectiles[0].healing,id==='repair');
+ }
+});
+
+test('6.0.2 reserves the exact duplicate slot and carries combinations across turns and replay import',()=>{
+ const g=match('6.0.2'),t=g.active;
+ // Two identical items in separate slots, including one later than the other.
+ t.items.teleport=0;t.items.double=2;g.backpack();
+ assert.ok(g.useItem('double',false,1));assert.equal(g.useItem('double',false,0),false);
+ assert.equal(g.useItem('boost',false,2),false);
+ cycle(g);
+ assert.equal(g.itemArmed(1),true);assert.ok(g.useItem('boost',false,2));
+ const r=new ReplayRecorder(g);
+ assert.ok(g.useItem('repair',false,3));assert.ok(g.useItem('repair',false,3));assert.ok(g.useItem('repair',false,3));
+ g.setAim(35,1);assert.ok(g.fire());
+ assert.deepEqual(g.backpack(),['double',null,null,null]);assert.equal(t.itemDelay,600);
+ assert.equal(g.projectiles.length,2);assert.ok(g.projectiles.every(p=>p.healing&&p.boost===1.5));
+ for(let i=0;i<32;i++)g.update(.01);
+ const recording=parseReplayFile(exportReplay(r.export()),'6.0.2');
+ const player=new ReplayPlayer(recording);while(!player.done)player.advance(.05);
+ assert.equal(player.verified,true);r.detach();
+ const old=match('6.0.1');
+ assert.ok(old.useItem('double',false,0));assert.equal(old.backpack()[0],null);
 });
