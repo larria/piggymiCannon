@@ -38,10 +38,11 @@ export function pantMouth(c:CanvasRenderingContext2D,x:number,y:number,air:numbe
  oval(c,x,y,3.7+air*.8,h,'#693a35','#844738',.85);
  if(air>.15)oval(c,x-.55,y+h*.41,2.1,h*.28,'#cc786a');
 }
-export function goggles(c:CanvasRenderingContext2D,x:number,y:number,tilt=0,scale=1){
+export function goggles(c:CanvasRenderingContext2D,x:number,y:number,tilt=0,scale=1,threeQuarter=false){
  c.save();c.translate(x,y);c.rotate(tilt);c.scale(scale,scale);
- ink(c,'M-22 -2Q0-8 22-2L21 4Q0 0-21 4Z','#604938','#473b33');
- for(const [i,angle] of [[-10,-.16],[9,.16]]){c.save();c.translate(i,0);c.rotate(angle);
+ ink(c,threeQuarter?'M-25-2Q-1-7 20-2L20 3Q-1 0-24 3Z':'M-22 -2Q0-8 22-2L21 4Q0 0-21 4Z','#604938','#473b33');
+ const lenses=threeQuarter?[[-11.54,0,1],[11.54,0,.74]]:[[-10,-.16,1],[9,.16,1]];
+ for(const [i,angle,width] of lenses){c.save();c.translate(i,0);c.rotate(angle);c.scale(width,1);
   oval(c,0,0,9.7,7.3,'#78513c','#48372e');oval(c,0,-.65,8.65,6.2,'#d8aa67','#f8d79b',.9);
   oval(c,0,-.75,6.8,4.7,'#385777','#6b604f',.9);
   ink(c,'M-6-1Q-5-5 2-5L5-3 1-3-3 0Z','#9dc1db');ink(c,'M0 3 4 0 6 0Q5 4 0 3Z','#577e9b');

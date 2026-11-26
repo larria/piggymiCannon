@@ -2,7 +2,7 @@ import {crossedFireLine} from './weather';
 import {launchGravityMultiplier,sourceRangeModel,sourceRange} from './source-range';
 import {originalBallistics,originalWeapon,ORIGINAL_TANKS,sourceMaximum,sourceDistance,sourceDamage} from './original-ballistics';
 import {precisionPolish,impactPolish} from './match-polish';
-import {salvoProfile} from './salvo';
+import {salvoImpulse,salvoProfile} from './salvo';
 import {PIERCING_DAMAGE,permanentPiercingContact} from './piercing';
 import {impactDamageScale,preciseContact} from './impact-damage';
 import {damageAffinity,applyDamageAffinity} from './source-attributes';
@@ -31,11 +31,12 @@ function world(game:Game,shooter:Tank,targets:Tank[],offset=0,miss=false,targetI
 // Read-only flight model. Same integration order, wind, gravity, collision grace,
 // homing turn rate and helix offset as live projectiles. It never changes RNG,
 // terrain, HP, ammo, weather, particles or the live volley-lock map.
-export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0,verticalScale=speedScale){
+export function traceAIShot(w:World,angle:number,power:number,weapon:WeaponId,dt=1/180,phase=0,speedScale=1,aimOffsetX=0,aimOffsetY=0,verticalScale=speedScale,salvoIndex=1){
  const {game:g,shooter:t,slope}=w,modernGeometry=originalBallistics(g.gameVersion),spec=weaponById(weapon),v=aimGeometry(angle,slope,t.direction);
  const speed=launchSpeed(weapon,Math.max(g.minimumShotPower,power),weapon==='sniper'?2:spec.speed??1,g.gravity*launchGravityMultiplier(weapon,weapon==='sniper'?.27:spec.gravity??1,g.gameVersion),g.gameVersion)*speedScale;
  const muzzle=muzzleGeometry(t,angle,slope,t.direction,tankArtScale(g.gameVersion));
- let x=muzzle.x,y=muzzle.y,vx=v.x*speed,vy=v.y*speed*verticalScale/speedScale;
+ const impulse=salvoImpulse(weapon,salvoIndex,g.gameVersion,t.direction,g.gravity,power);
+ let x=muzzle.x,y=muzzle.y,vx=v.x*speed+impulse.vx,vy=v.y*speed*verticalScale/speedScale+impulse.vy;
  let age=0,wx=0,wy=0,lock:Body|undefined,boost=t.boost?1.5:1,orbital=false;
  const sourceTracking=sourceHoming(g.gameVersion)&&(spec.effect==='homing'||weapon==='homing');
  let direct:Body|undefined,landed=false;
@@ -93,7 +94,7 @@ function grade(w:World,angle:number,power:number,weapon:WeaponId,dt:number):AISh
  const samples=dt===1/180&&count>1?[0,Math.floor((count-1)/2),count-1]:[Math.floor((count-1)/2)];
  const rays=samples.flatMap(i=>{
   const profile=salvoProfile(w.shooter.vehicleId,weapon,i,count,w.game.gameVersion);
-  const p=count===1?impact:traceAIShot(w,angle+profile.angle,power,weapon,dt,i*Math.PI*2/count,profile.vx,profile.aimX,profile.aimY,profile.vy);
+  const p=count===1?impact:traceAIShot(w,angle+profile.angle,power,weapon,dt,i*Math.PI*2/count,profile.vx,profile.aimX,profile.aimY,profile.vy,i);
   return p.hits.map(h=>({...h,damage:h.damage*count/samples.length}));
  });
  const combined=new Map<number,typeof rays[number]>();
@@ -210,5 +211,5 @@ export function chooseAIPosition(game:Game,tank:Tank,weapons:WeaponId[],targets:
  * the live weapon dispersion, homing and collision model without consuming RNG. */
 export function fixedAnglePredictor(game:Game,tank:Tank,weapon:WeaponId){
  const w=world(game,{...tank},game.opponents(tank)),count=weaponById(weapon).shots??(weapon==='triple'?3:1);
- return function*(power:number){for(let i=0;i<count;i++){const p=salvoProfile(tank.vehicleId,weapon,i,count,game.gameVersion);yield traceAIShot(w,tank.angle+p.angle,power,weapon,1/180,i*Math.PI*2/count,p.vx,p.aimX,p.aimY,p.vy);}};
+ return function*(power:number){for(let i=0;i<count;i++){const p=salvoProfile(tank.vehicleId,weapon,i,count,game.gameVersion);yield traceAIShot(w,tank.angle+p.angle,power,weapon,1/180,i*Math.PI*2/count,p.vx,p.aimX,p.aimY,p.vy,i);}};
 }

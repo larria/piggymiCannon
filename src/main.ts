@@ -242,6 +242,7 @@ function pendingShotItem(tank:Tank,slot:number,id:ItemId|null):ItemId|null{
   return queued?.boost===slot&&tank.boost?'boost':queued?.double===slot&&tank.doubleShot?'double':null;
 }
 const pendingChip=(id:ItemId)=>`<i class="queued-item-chip" aria-hidden="true">${itemIcon(id)}</i>`;
+const pendingSeal='<i class="item-ready-seal" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="m3 6 2 2 4-4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
 
 function renderInventory() {
   const tank=displayTank(),vehicle=tank.vehicleId?vehicleById(tank.vehicleId):null;
@@ -293,10 +294,10 @@ function updateUI() {
   const quick=game.backpack(t),pendingItems=quick.map((id,slot)=>pendingShotItem(t,slot,id));const quickSignature=quick.map((id,slot)=>`${id}:${id?game.itemUnavailable(id,false,slot):'empty'}`).join('|')+'|'+(instrumentActive&&game.teleporting)+'|'+(instrumentActive&&game.restoring)+'|'+pendingItems.join(',')+'|'+t.id;
   if($('#quick-items').dataset.signature!==quickSignature){$('#quick-items').dataset.signature=quickSignature;$('#quick-items').innerHTML=quick.map((id,slot)=>{
     const pending=pendingItems[slot],queued=pending?ITEMS.find(i=>i.id===pending)!:null;
-    if(!id&&queued)return `<button class="pending-shot-item" data-item-slot="${slot}" disabled data-help-name="${queued.name}" data-help-description="已使用 · 等待发射" aria-label="道具槽 ${slot+1}，${queued.name}待发">${itemIcon(queued.id)}<span>待发</span></button>`;
+    if(!id&&queued)return `<button class="pending-shot-item" data-item-slot="${slot}" disabled data-help-name="${queued.name}" data-help-description="已使用 · 等待发射" aria-label="道具槽 ${slot+1}，${queued.name}待发">${itemIcon(queued.id)}<span>待发</span>${pendingSeal}</button>`;
     if(!id)return `<button class="empty-item" data-item-slot="${slot}" disabled data-help-name="空槽" data-help-description="可拾取任意道具，重复道具各占一个槽位" aria-label="道具槽 ${slot+1}，空槽">${icon('plus')}<span>空槽</span></button>`;
     const item=ITEMS.find(x=>x.id===id)!,reason=game.itemUnavailable(id,false,slot),armed=game.itemArmed(slot,t);
-    return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''} ${armed&&pending===id?'pending-shot-item':pending?'has-queued-shot':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+slot}${reason?' · '+reason:''}" aria-label="道具槽 ${slot+1}，快捷使用${item.name}">${itemIcon(id)}<span>${item.name}</span>${pending&&!armed?pendingChip(pending):''}</button>`;
+    return `<button data-item="${id}" data-item-slot="${slot}" class="${armed?'selected':''} ${armed&&pending===id?'pending-shot-item':pending?'has-queued-shot':''}" aria-pressed="${armed}" ${reason?'disabled':''} data-help-name="${item.name}" data-help-description="${reason||item.description}" title="${item.name} · F${9+slot}${reason?' · '+reason:''}" aria-label="道具槽 ${slot+1}，快捷使用${item.name}${queued?`，${queued.name}待发`:''}">${itemIcon(id)}<span>${item.name}</span>${pending?(armed?pendingSeal:pendingChip(pending)):''}</button>`;
   }).join('');}
   $('.wait-readout').dataset.helpDescription=!(game.delayEnabled)?'含 AI 的对局按存活槽位轮转，DELAY 排序关闭。':'普通 +100，特殊 +200，道具 +200，耗时每秒 +10，移动也累加。低等待可连续行动。';
   $('#pwa-update').classList.toggle('hidden',!pendingUpdate||(!lobby&&game.phase!=='ended'));

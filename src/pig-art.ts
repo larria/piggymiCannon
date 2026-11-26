@@ -4,6 +4,7 @@ export function mimiPose(time:number,state:CrewAction){const p=Math.sin(time*(st
 export function dadPose(time:number,state:CrewAction){const p=Math.sin(time*(state==='win'?5:state==='move'?10:state==='hurt'?14:3.3));return {bob:state==='win'?-Math.max(0,p)*5:state==='hurt'?p*.8:state==='move'?Math.abs(p)*1.15:p*.42,lean:state==='win'?p*.05:state==='hurt'?-p*.075:state==='move'?.04:0,p};}
 export interface Expression {look:number;closed:boolean;upset:boolean;open:number;ear:number;serious:boolean;cry:boolean;pant:number|null;stunned:boolean;rage:boolean;startled:boolean}
 const outline='#794f40';
+const mimiEyes=[-5,16] as const;
 function mimiCap(c:CanvasRenderingContext2D){
  ink(c,'M-22 3Q-25-10-17-21Q-11-29 1-29Q19-29 23-16Q26-6 24 0L21-1 18-7Q3-16-17-7L-17 7Z','#6f744a','#534535');
  ink(c,'M-21-7Q-20-21-8-25Q4-30 16-24Q5-24-6-20Q-15-17-21-7Z','#a09b66');
@@ -13,16 +14,17 @@ function mimiCap(c:CanvasRenderingContext2D){
  // The helmet's far strap turns around the cheek, beyond the far eye.
  ink(c,'M22.8-5.6Q25.8-2.8 26.5 1.8Q27.3 7.2 24.3 12L22.7 12Q25.5 7.2 24.9 2Q24.6-1.4 22.1-4Z','#786049','#503f34',.8);
  ink(c,'M-23 5l5-1-1 4-4 1Z','#cfaa6c','#836044',.65);
- goggles(c,0,-22,0,.91);
+ // Keep the lenses level on the cap, centered above the two eyes.
+ goggles(c,(mimiEyes[0]+mimiEyes[1])/2,-22,0,.91,true);
 }
 function pigFace(c:CanvasRenderingContext2D,e:Expression,dad:boolean){
  const peach='#f5b2a1',pale='#ffd0b6';
  // The far features tuck behind the head; the nose and gaze lead the turn.
  c.save();if(dad)c.scale(1.15,1.06);
  if(!dad){
-  c.save();c.translate(-15,-12);c.rotate(e.ear);
-  ink(c,'M4 2Q3-13-9-16Q-19-14-14-7Q-13-2-5 4Z',peach,outline);
-  ink(c,'M0 1Q-4-11-10-12Q-14-11-11-6Q-7-2 0 1Z','#e88783');c.restore();
+  c.save();c.translate(20,-15);c.rotate(-e.ear*.65);
+  ink(c,'M-2-3Q3-10 8-8Q12-7 10-2Q8 4 3 5Z',peach,outline,1.15);
+  ink(c,'M2-3Q6-7 8-6Q9-3 5 1Z','#e88783');c.restore();
  }else{
   c.save();c.translate(16,-15);c.rotate(-e.ear*.65);
   ink(c,'M-5 1Q4-8 13-6Q18-4 17 1Q14 10 5 10Z',peach,outline);
@@ -37,10 +39,16 @@ function pigFace(c:CanvasRenderingContext2D,e:Expression,dad:boolean){
   ink(c,'M5-3Q-1-9-10-6Q-19-2-16 7Q-14 12-8 9Q-2 5 5-3Z',peach,outline);
   ink(c,'M0-3Q-8-6-12 0Q-15 5-11 6Q-6 3 0-3Z','#e88783');
   ink(c,'M-11-3Q-15 0-15 4','none','#ffc8af',1.25);c.restore();
- }else mimiCap(c);
+ }else{
+  mimiCap(c);
+  c.save();c.translate(-21,-8);c.rotate(e.ear);
+  ink(c,'M4 4Q-2 6-7 1Q-12-5-9-9Q-5-12 1-7Q5-3 4 4Z',peach,outline,1.25);
+  ink(c,'M1 2Q-4 2-7-3Q-9-7-6-7Q-2-7 1 2Z','#e88783');
+  ink(c,'M-7-8Q-9-7-8-4','none','#ffd0b6',.95);c.restore();
+ }
  const iris=dad?'#4f392c':'#785138';
- profileEyes(c,-5,-2,(dad?3.95:5.5)*(e.startled?1.15:1),iris,e.look,e.closed,e.serious,false,false,e.stunned);
- profileEyes(c,16,-3,(dad?3.55:4.75)*(e.startled?1.15:1),iris,e.look,e.closed,e.serious,true,false,e.stunned);
+ profileEyes(c,mimiEyes[0],-2,(dad?3.95:5.5)*(e.startled?1.15:1),iris,e.look,e.closed,e.serious,false,false,e.stunned);
+ profileEyes(c,mimiEyes[1],-3,(dad?3.55:4.75)*(e.startled?1.15:1),iris,e.look,e.closed,e.serious,true,false,e.stunned);
  if(!e.closed){c.save();stroke(c,dad?'#614534':'#714b3b',dad?1.55:1.2,p=>{if(e.startled)p.translate(0,-3);p.moveTo(-9,e.rage?-10:-8);p.quadraticCurveTo(-6,-9.6,-2,e.rage?-6.5:-8.1);p.moveTo(13,e.rage?-6.6:-8.7);p.quadraticCurveTo(16,-9.8,19,e.rage?-10:-8.5);});c.restore();}
  oval(c,-14,7,dad?6:5,3.1,dad?'#ec9c8d':'#ee958a');
  if(e.startled)shockMouth(c,10,13);else if(e.pant!==null)pantMouth(c,10,13,e.pant);else if(e.serious)steadyMouth(c,9,13);else smile(c,9,12,e.open,e.upset);

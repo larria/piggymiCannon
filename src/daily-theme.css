@@ -167,6 +167,6 @@ select,.slot-row select{background:var(--theme-paper);border-color:var(--theme-b
 .combat-mode .compact-dashboard .quick-items button.pending-shot-item,.arsenal .inventory-tile.pending-shot-item{
  background:var(--theme-wash);color:var(--theme-action);
 }
-.pending-shot-item::after,.queued-item-chip{border-color:var(--theme-edge)}
+.queued-item-chip{border-color:var(--theme-edge)}
 .queued-item-chip,.arsenal .item-tile .weapon-icon{background:var(--theme-soft);border-color:var(--theme-border)}
 .quick-items button .item-icon,.item-tile .weapon-icon .item-icon{color:var(--theme-action)}

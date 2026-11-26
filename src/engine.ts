@@ -22,7 +22,8 @@ import {buildCoastMap} from './coast-map';
 import {buildSkyCity} from './sky-city';
 import {buildIceValley,addSkyBranch,SKY_UPPER_THICKNESS} from './sky-map';
 import {OBSERVATION_SECONDS,OBSERVATION_PRIORITY,type ObservationKind,type ShotObservation} from './shot-observation';
-import {salvoProfile,salvoLaunchSeconds,staggeredMultiSpecial,DOUBLE_SHOT_INTERVAL} from './salvo';
+import {salvoImpulse,salvoProfile,salvoLaunchSeconds,staggeredMultiSpecial,DOUBLE_SHOT_INTERVAL} from './salvo';
+import {spreadFourStarts,spreadStartingTanks} from './starting-tanks';
 import {permanentPiercingContact,PIERCING_SECTIONS,PIERCING_INTERVAL,piercingDamageScale,piercingDigScale} from './piercing';
 import {impactDamageScale,preciseContact,fullDamageArea,FULL_BLAST_DISTANCE} from './impact-damage';
 import {ERA_DAMAGE_VERSION} from './era-damage';
@@ -413,8 +414,9 @@ export class Game {
     }
     if(!pair&&pool.length>=2){const first=pool[0],last=pool[pool.length-1];if(last-first>=120)pair=[first,last];}
     if(pair){
-      const chosen=[...pair];
+      let chosen=[...pair];
       for(let i=2;i<this.tanks.length;i++){const options=pool.filter(x=>chosen.every(at=>Math.abs(x-at)>=90));chosen.push(options[Math.floor(this.rng()*options.length)]??(i===2?430:850));}
+      if(chosen.length===4&&spreadStartingTanks(this.gameVersion))chosen=spreadFourStarts(chosen,pool,one,this.worldWidth,this.rng);
       this.tanks.forEach((t,i)=>{t.x=chosen[i];t.y=this.ground(t.x)-18;});this.tanks.forEach(t=>t.direction=this.opponents(t)[0]?.x>t.x?1:-1);
     }
   }
@@ -681,7 +683,11 @@ export class Game {
     t.lastDelay=this.delayFor(t,transfer||healing?undefined:id);t.delayCommitted=true;
     if(healing){const p={...this.launch(t,'cannon-normal'),healing:true,boost:t.boost?1.5:1,fireBoosted:t.boost,rage:false,digBoost:1,boostSources:{fire:t.boost?'item' as const:null,rage:1,snow:1}};if(t.power<=this.minimumShotPower)Object.assign(p,{x:t.x,y:t.y-45,vx:0,vy:0});this.projectiles=[p];}
     else if(transfer)this.projectiles=[{...this.launch(t,'shell'),transfer:true,scale:1,boost:1,fireBoosted:false,rage:false,digBoost:1}];
-    else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>(()=>{const profile=salvoProfile(t.vehicleId,id,i,spec.shots!,this.gameVersion),p=this.launch(t,id,t.angle+profile.angle);p.vx*=profile.vx;p.vy*=profile.vy;p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;p.phase=i*Math.PI*2/spec.shots!;p.delay=salvoLaunchSeconds(id,i,this.gameVersion)*FLIGHT_SPEED;return p;})());
+    else if(spec.shots&&spec.shots>1) this.projectiles=Array.from({length:spec.shots},(_,i)=>{
+      const profile=salvoProfile(t.vehicleId,id,i,spec.shots!,this.gameVersion),p=this.launch(t,id,t.angle+profile.angle);
+      const impulse=salvoImpulse(id,i,this.gameVersion,t.direction,this.gravity,t.power);
+      p.vx=p.vx*profile.vx+impulse.vx;p.vy=p.vy*profile.vy+impulse.vy;p.aimOffsetX=profile.aimX;p.aimOffsetY=profile.aimY;p.phase=i*Math.PI*2/spec.shots!;p.delay=salvoLaunchSeconds(id,i,this.gameVersion)*FLIGHT_SPEED;return p;
+    });
     else if(id==='triple') this.projectiles=[-5,0,5].map(d=>this.launch(t,id,t.angle+d));
     else if(id==='airstrike') this.projectiles=[-38,0,38].map(d=>({...this.launch(t,id),x:clamp(this.targetX+d,20,this.worldWidth-20),y:-40-Math.abs(d),vx:0,vy:190}));
     else this.projectiles=[this.launch(t,id)];

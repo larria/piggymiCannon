@@ -40,7 +40,7 @@ test('queued items are visible by their original slot until firing and the minim
  await slots.locator('[data-item="repair"]').click();
  await expect(slots.locator('.pending-shot-item')).toHaveCount(3);
  await expect(slots.locator('[data-item="repair"]')).toHaveAttribute('aria-pressed','true');
- const animation=await slots.locator('[data-item="repair"]').evaluate(e=>getComputedStyle(e,'::after').animationName);expect(animation).toBe('pending-shot-wash');
+ const animation=await slots.locator('[data-item="repair"]').evaluate(e=>getComputedStyle(e,'::after').animationName);expect(animation).toBe('item-ready-ink');
  await slots.locator('[data-item="repair"]').click();await expect(slots.locator('.pending-shot-item')).toHaveCount(2);
  await page.locator('#fire-button').click();await expect(slots.locator('.pending-shot-item')).toHaveCount(0);
  await page.evaluate(()=>{const q=(window as any).__qa;q.recorder.detach();q.game.projectiles=[];q.game.nextTurn();q.updateUI();});
