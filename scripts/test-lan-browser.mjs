@@ -84,14 +84,15 @@ try{
  await active.locator('#weapon-special').click();
  await active.keyboard.down(' ');await active.waitForTimeout(500);await active.keyboard.up(' ');
  for(const page of [host,guest])await expect(page.locator('#turn-text')).toHaveText(/炮弹飞行中|观察战场/);
- const shot=(await snapshot()).current;expect(shot.tanks[shot.current].itemSlots[0]).toBeNull();
+ const shot=(await snapshot()).current;expect(shot.tanks[reserved.current].itemSlots[0]).toBeNull();
  await expect.poll(async()=>(await snapshot()).current.terrain.revision,{timeout:15_000}).toBeGreaterThan(revision);
+ await expect.poll(async()=>(await snapshot()).current.phase,{timeout:15_000}).not.toBe('flying');
  const impacted=(await snapshot()).current.terrain.revision;
  // Force an actual disconnect; WebKit's offline emulation leaves open sockets intact.
  await guest.evaluate(()=>window.__lanTestSocket.close());
  await expect(host.locator('#lan-link-status')).toContainText('重连',{timeout:5000});
  await guest.reload();
- await expect(guest.locator('body')).toHaveClass(/lan-battle/);
+ await expect(guest.locator('body')).toHaveClass(/lan-battle/,{timeout:20_000});
  await expect(host.locator('#lan-link-status')).toBeHidden();
  expect((await snapshot()).current.terrain.revision).toBe(impacted);
  await guest.locator('#log-button').click();
